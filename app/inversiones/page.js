@@ -1,12 +1,19 @@
 "use client";
-import { useState } from "react";
-import {
-  Area, AreaChart, CartesianGrid, ReferenceArea, ReferenceLine,
-  ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis,
-} from "recharts";
+import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { CONTACT_EMAIL } from "@/config";
 import AdvisoryProcess from "@/components/AdvisoryProcess";
 import InvestorQuiz from "@/components/InvestorQuiz";
+
+const InversionesEvolucionChart = dynamic(
+  () => import("@/components/InversionesEvolucionChart"),
+  { ssr: false, loading: () => <div className="h-48 sm:h-72 bg-gray-800/40 rounded-xl animate-pulse" /> }
+);
+
+const InversionesMatrizChart = dynamic(
+  () => import("@/components/InversionesMatrizChart"),
+  { ssr: false, loading: () => <div className="h-80 bg-gray-800/40 rounded-xl animate-pulse" /> }
+);
 
 const ZONA_DATA = {
   update: "20 Abril 2026",
@@ -122,17 +129,6 @@ const gridStyle = {
   backgroundSize: "48px 48px",
 };
 
-function MatrixDot(props) {
-  const { cx, cy, payload } = props;
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={16} fill={payload.color} opacity={0.15} />
-      <circle cx={cx} cy={cy} r={7} fill={payload.color} opacity={0.9} />
-      <text x={cx} y={cy - 16} textAnchor="middle" fill="#6b7280" fontSize={9} fontWeight={600}>{payload.nombre}</text>
-    </g>
-  );
-}
-
 export default function InversionesPage() {
   const [activeTab, setActiveTab] = useState("zonas");
   const [calcMonto, setCalcMonto] = useState(150000);
@@ -140,7 +136,10 @@ export default function InversionesPage() {
   const [calcTipo, setCalcTipo] = useState("alquiler");
 
   const roiAnual = calcTipo === "alquiler" ? 0.065 : calcTipo === "turistico" ? 0.12 : 0.15;
-  const scoredAssets = SCORE_DATA.map((activo) => ({ ...activo, score: calcularScore(activo.factores) })).sort((a, b) => b.score - a.score);
+  const scoredAssets = useMemo(
+    () => SCORE_DATA.map((activo) => ({ ...activo, score: calcularScore(activo.factores) })).sort((a, b) => b.score - a.score),
+    []
+  );
   const bestAsset = scoredAssets[0];
 
   const downloadReportTxt = () => {
@@ -210,37 +209,7 @@ export default function InversionesPage() {
             {activeTab === "zonas" && (
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Evolución de precios (USD/m²)</h3>
-                <div className="h-48 sm:h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={ZONA_DATA.evolucionHistorica} margin={{ top: 10, right: 5, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorPrecio" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#E8325A" stopOpacity={0.35} />
-                          <stop offset="95%" stopColor="#E8325A" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                      <XAxis dataKey="anio" stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis tickFormatter={(value) => `$${value / 1000}k`} stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} domain={["dataMin - 200", "dataMax + 200"]} width={40} />
-                      <Tooltip
-                        formatter={(value, _name, props) => {
-                          const item = props.payload;
-                          return [
-                            <div key="tooltip" className="text-center">
-                              <div className="font-bold text-lg text-white">USD {value.toLocaleString()}/m²</div>
-                              {item.variacion && <div className="text-green-400 font-medium">+{item.variacion}% vs año anterior</div>}
-                              <div className="text-xs text-gray-400 mt-1">{item.contexto}</div>
-                              <div className="text-xs text-gray-500 mt-2 border-t border-gray-700 pt-2">{item.fuente}</div>
-                            </div>,
-                            "Precio",
-                          ];
-                        }}
-                        contentStyle={{ borderRadius: "12px", border: "1px solid #1f2937", background: "#111118", boxShadow: "0 4px 24px rgba(0,0,0,0.5)", padding: "12px" }}
-                      />
-                      <Area type="monotone" dataKey="precio" stroke="#E8325A" strokeWidth={3} fillOpacity={1} fill="url(#colorPrecio)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                <InversionesEvolucionChart data={ZONA_DATA.evolucionHistorica} />
                 <div className="mt-3 sm:mt-4 flex justify-between text-xs sm:text-sm text-gray-500">
                   <span>2021: $1,680</span>
                   <span className="text-green-400 font-semibold">+57.7%</span>
@@ -372,31 +341,7 @@ export default function InversionesPage() {
               <div className="absolute top-2 right-2 text-[10px] font-semibold text-amber-400 bg-gray-900/90 px-2 py-1 rounded-full border border-amber-900/50 shadow-sm pointer-events-none">Crecimiento</div>
               <div className="absolute bottom-2 left-2 text-[10px] font-semibold text-sky-400 bg-gray-900/90 px-2 py-1 rounded-full border border-sky-900/50 shadow-sm pointer-events-none">Bajo retorno</div>
               <div className="absolute bottom-2 right-2 text-[10px] font-semibold text-primary-500 bg-gray-900/90 px-2 py-1 rounded-full border border-primary-900/50 shadow-sm pointer-events-none">Evitar</div>
-              <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 24, right: 24, bottom: 28, left: 8 }}>
-                  <ReferenceArea x1={0} x2={5} y1={11} y2={22} fill="#10b981" fillOpacity={0.05} />
-                  <ReferenceArea x1={5} x2={10} y1={11} y2={22} fill="#f59e0b" fillOpacity={0.05} />
-                  <ReferenceArea x1={0} x2={5} y1={0} y2={11} fill="#0ea5e9" fillOpacity={0.04} />
-                  <ReferenceArea x1={5} x2={10} y1={0} y2={11} fill="#E8325A" fillOpacity={0.04} />
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis type="number" dataKey="riesgo" name="Riesgo" domain={[0, 10]} stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} label={{ value: 'Riesgo →', position: 'insideBottom', offset: -12, fill: '#4b5563', fontSize: 10 }} />
-                  <YAxis type="number" dataKey="retorno" name="Retorno" domain={[0, 22]} stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} width={36} />
-                  <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'rgba(255,255,255,0.08)' }} content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <div className="bg-[#1a1a2e] border border-gray-700 rounded-xl p-3 shadow-xl">
-                        <p className="text-white text-xs font-bold mb-2">{d.nombre}</p>
-                        <p className="text-gray-400 text-xs">Riesgo: <span className="text-gray-200 font-semibold">{d.riesgo}/10</span></p>
-                        <p className="text-gray-400 text-xs">Retorno est.: <span className="text-primary-500 font-semibold">~{d.retorno}% anual</span></p>
-                      </div>
-                    );
-                  }} />
-                  <ReferenceLine x={5} stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
-                  <ReferenceLine y={11} stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
-                  <Scatter data={MATRIX_DATA} shape={<MatrixDot />} />
-                </ScatterChart>
-              </ResponsiveContainer>
+              <InversionesMatrizChart data={MATRIX_DATA} />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
               {[

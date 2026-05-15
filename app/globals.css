@@ -249,3 +249,25 @@ form:hover .nav-icon-search {
 .hero-delay-2 { animation-delay: 0.30s; }
 .hero-delay-3 { animation-delay: 0.45s; }
 .hero-delay-4 { animation-delay: 0.60s; }
+
+@keyframes btn-barrio-shine {
+  0%   { transform: translateX(-150%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(500%); opacity: 0; }
+}
+
+@keyframes btn-dot-ping {
+  0%        { transform: scale(1); opacity: 0.9; }
+  70%, 100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes nav-pin-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2.5px); }
+}
+
+.nav-icon-pin {
+  animation: nav-pin-float 2.4s ease-in-out infinite;
+  transform-origin: bottom center;
+}

@@ -252,28 +252,62 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* CTA Centro de ayuda */}
+          {/* CTA Compartí tu barrio */}
           <Link
-            href="/centro-ayuda"
+            href="/experiencia-barrio"
             aria-hidden={scrolled}
             tabIndex={scrolled ? -1 : 0}
-            className="group hidden md:flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-gray-900 text-white text-[15px] font-semibold tracking-tight rounded-full transition-all shadow-sm"
+            className="group hidden md:flex items-center rounded-full relative"
             style={{
+              background: "linear-gradient(135deg, #0f172a 0%, #1a0a1e 100%)",
+              boxShadow: "0 4px 22px rgba(232,50,90,0.30), 0 1px 4px rgba(0,0,0,0.28)",
               opacity: scrolled ? 0 : 1,
               transform: scrolled ? "scale(0.85)" : "scale(1)",
               pointerEvents: scrolled ? "none" : "auto",
-              maxWidth: scrolled ? "0px" : "220px",
-              paddingLeft: scrolled ? "0px" : undefined,
-              paddingRight: scrolled ? "0px" : undefined,
+              maxWidth: scrolled ? "0px" : "260px",
+              padding: scrolled ? "10px 0px" : "10px 20px",
               overflow: "hidden",
               whiteSpace: "nowrap",
-              transition: "opacity 250ms ease, transform 250ms cubic-bezier(0.4, 0, 0.2, 1), max-width 300ms cubic-bezier(0.4, 0, 0.2, 1), padding 250ms ease, background-color 200ms ease",
+              transition: "opacity 250ms ease, transform 250ms cubic-bezier(0.4, 0, 0.2, 1), max-width 300ms cubic-bezier(0.4, 0, 0.2, 1), padding 250ms ease",
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="nav-icon-help">
-              <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4" /><line x1="12" y1="17" x2="12" y2="17.01" />
-            </svg>
-            Centro de ayuda
+            {/* Shimmer sweep */}
+            <span
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "38%",
+                height: "100%",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)",
+                animation: "btn-barrio-shine 3.4s cubic-bezier(0.4,0,0.6,1) infinite",
+                animationDelay: "1.2s",
+                pointerEvents: "none",
+                zIndex: 0,
+              }}
+            />
+            {/* Contenido */}
+            <span style={{ position: "relative", zIndex: 1, display: "inline-flex", alignItems: "center", gap: 10 }}>
+              {/* Dot con ping */}
+              <span style={{ position: "relative", display: "inline-flex", width: 8, height: 8, flexShrink: 0 }}>
+                <span style={{
+                  position: "absolute", inset: 0, borderRadius: "50%",
+                  background: "#E8325A",
+                  animation: "btn-dot-ping 1.8s ease-out infinite",
+                }} />
+                <span style={{
+                  display: "block", width: 8, height: 8,
+                  borderRadius: "50%", background: "#E8325A",
+                  position: "relative",
+                }} />
+              </span>
+              {/* Ícono pin */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="nav-icon-pin" style={{ flexShrink: 0 }}>
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+              <span style={{ color: "white", fontSize: 15, fontWeight: 600, letterSpacing: "-0.02em" }}>Compartí tu barrio</span>
+            </span>
           </Link>
 
           {/* Hamburguesa — mobile */}
@@ -293,7 +327,7 @@ export default function Navbar() {
               { href: "/", label: "Inicio" },
               { href: "/propiedades", label: "Propiedades" },
               { href: "/inversiones", label: "Inversiones" },
-              { href: "/centro-ayuda", label: "Centro de ayuda" },
+              { href: "/experiencia-barrio", label: "Compartí tu barrio" },
               { href: "/contacto", label: "Contacto" },
               { href: "/favoritos", label: "Favoritos" },
             ].map(({ href, label }) => (

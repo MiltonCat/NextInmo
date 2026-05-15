@@ -80,15 +80,19 @@ export default function RootLayout({ children }) {
             const img = new Image();
             img.src = "/iso1.png";
             img.onload = function () {
-              let angle = 0, scale = 1, growing = true, frame = 0;
-              function draw() {
+              let angle = 0, scale = 1, growing = true, frame = 0, lastTime = 0;
+              const INTERVAL = 50;
+              function draw(ts) {
+                requestAnimationFrame(draw);
+                if (document.hidden || ts - lastTime < INTERVAL) return;
+                lastTime = ts;
                 ctx.clearRect(0, 0, 64, 64);
                 ctx.save();
                 ctx.translate(32, 32);
-                if (growing) { scale += 0.004; if (scale >= 1.12) growing = false; }
-                else         { scale -= 0.004; if (scale <= 0.92) growing = true; }
+                if (growing) { scale += 0.008; if (scale >= 1.12) growing = false; }
+                else         { scale -= 0.008; if (scale <= 0.92) growing = true; }
                 frame++;
-                if (frame > 120) angle += 0.06;
+                if (frame > 60) angle += 0.12;
                 if (angle >= Math.PI * 2) { angle = 0; frame = 0; }
                 ctx.rotate(angle);
                 ctx.scale(scale, scale);
@@ -96,9 +100,8 @@ export default function RootLayout({ children }) {
                 ctx.restore();
                 const favicon = document.getElementById("favicon");
                 if (favicon) favicon.href = canvas.toDataURL("image/png");
-                requestAnimationFrame(draw);
               }
-              draw();
+              requestAnimationFrame(draw);
             };
           })();
         `}</Script>
