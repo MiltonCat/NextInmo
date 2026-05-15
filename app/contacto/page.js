@@ -3,7 +3,7 @@ import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { WA_URL, CONTACT_EMAIL, PHONE_DISPLAY, LOCATION_DISPLAY, BUSINESS_HOURS } from "@/config";
 
-const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "" };
+const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "", website: "" };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_REGEX = /^[+\d\s()-]{6,}$/;
@@ -46,6 +46,7 @@ export default function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.website) return;
     const errs = validate(formData);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
@@ -209,6 +210,17 @@ export default function ContactPage() {
               )}
 
               <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                {/* Honeypot — invisible para humanos, los bots lo completan */}
+                <div style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre completo <span className="text-red-400">*</span>
