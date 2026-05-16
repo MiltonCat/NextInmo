@@ -496,23 +496,33 @@ function PhoneAnimation() {
   const handle = { width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, margin: "10px auto 14px" };
 
   const steps = [
-    // 0 — Landing
+    // 0 — Landing con testimonios
     <div key={0} style={{ height: "100%", display: "flex", flexDirection: "column", background: "white" }}>
       <PhoneStatusBar />
       <PhoneDynamicIsland />
-      <div style={{ flex: 1, padding: "0 18px", display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 10, borderBottom: "1px solid #f3f4f6", marginBottom: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8325A" }} />
-            <div style={{ width: 48, height: 6, background: "#0f172a", borderRadius: 3 }} />
-          </div>
-          <div style={{ display: "flex", gap: 5 }}>
-            {[18, 18, 18].map((w, i) => <div key={i} style={{ width: w, height: 6, background: "#e5e7eb", borderRadius: 3 }} />)}
-          </div>
+      <div style={{ flex: 1, padding: "0 16px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ fontSize: 8, color: "#E8325A", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 7 }}>Catalán · Guía de Barrios</div>
+        <div style={{ fontSize: 17, fontWeight: 900, color: "#0f172a", lineHeight: 1.08, marginBottom: 10, letterSpacing: "-0.04em" }}>Conocé cada barrio desde adentro.</div>
+
+        {/* Testimonios con fotos */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+          {[
+            { img: 32, name: "Lucía M.", barrio: "Centro", text: "El lago a 5 minutos y todo cerca. No cambiaría nada." },
+            { img: 45, name: "Martín S.", barrio: "Chapelco", text: "La mejor inversión que hice en años." },
+          ].map((t, i) => (
+            <div key={i} style={{ background: "#f9fafb", borderRadius: 12, padding: "8px 10px", display: "flex", alignItems: "flex-start", gap: 8, animation: `phone-fade-up 0.4s ease ${0.1 + i * 0.15}s both` }}>
+              <img src={`https://i.pravatar.cc/60?img=${t.img}`} alt="" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 700, color: "#0f172a" }}>{t.name}</span>
+                  <span style={{ fontSize: 8.5, color: "#9ca3af" }}>· {t.barrio}</span>
+                </div>
+                <p style={{ fontSize: 9, color: "#6b7280", lineHeight: 1.4, margin: 0 }}>{t.text}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <div style={{ fontSize: 8.5, color: "#E8325A", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Catalán · Guía de Barrios</div>
-        <div style={{ fontSize: 19, fontWeight: 900, color: "#0f172a", lineHeight: 1.08, marginBottom: 10, letterSpacing: "-0.04em" }}>Conocé cada barrio desde adentro.</div>
-        <div style={{ fontSize: 9.5, color: "#6b7280", lineHeight: 1.65, marginBottom: 18, maxWidth: 185 }}>Tu experiencia local puede ayudar a otros a tomar mejores decisiones.</div>
+
         <div style={{ position: "relative", alignSelf: "flex-start" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#0f172a", borderRadius: 22, padding: "8px 14px", boxShadow: "0 4px 16px rgba(15,23,42,0.28)" }}>
             <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#E8325A" }} />
@@ -535,8 +545,13 @@ function PhoneAnimation() {
       <div style={{ ...drawerBase, padding: "0 0 6px" }}>
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
-          <div style={drawerHeader}>Guía de Barrios</div>
-          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
+            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <div>
+              <div style={drawerHeader}>Guía de Barrios</div>
+              <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
+            </div>
+          </div>
           <div style={{ marginBottom: 10 }}>
             <span style={lbl}>Nombre <span style={{ color: "#d1d5db", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(opcional)</span></span>
             <div style={{ ...inputBase, animation: "phone-fade-up 0.4s ease 0.1s both" }} />
@@ -563,8 +578,13 @@ function PhoneAnimation() {
       <div style={{ ...drawerBase, padding: "0 0 6px" }}>
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
-          <div style={drawerHeader}>Guía de Barrios</div>
-          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
+            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <div>
+              <div style={drawerHeader}>Guía de Barrios</div>
+              <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
+            </div>
+          </div>
           <div style={{ marginBottom: 10 }}>
             <span style={lbl}>Nombre</span>
             <div style={inputBase} />
@@ -596,8 +616,13 @@ function PhoneAnimation() {
       <div style={{ ...drawerBase, padding: "0 0 6px" }}>
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
-          <div style={drawerHeader}>Guía de Barrios</div>
-          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
+            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <div>
+              <div style={drawerHeader}>Guía de Barrios</div>
+              <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
+            </div>
+          </div>
           <div style={{ marginBottom: 10 }}>
             <span style={lbl}>Barrio</span>
             <div style={{ ...inputBase, background: "#f0f4ff", border: "1.5px solid #c7d2fe" }}>
@@ -626,8 +651,13 @@ function PhoneAnimation() {
       <div style={{ ...drawerBase, padding: "0 0 6px" }}>
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
-          <div style={drawerHeader}>Guía de Barrios</div>
-          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
+            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <div>
+              <div style={drawerHeader}>Guía de Barrios</div>
+              <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
+            </div>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
             <div style={{ height: 32, background: "#f0f4ff", border: "1px solid #e0e7ff", borderRadius: 10, display: "flex", alignItems: "center", padding: "0 10px" }}>
               <span style={{ fontSize: 10, color: "#4338ca", fontWeight: 600 }}>Centro</span>
@@ -647,22 +677,31 @@ function PhoneAnimation() {
       </div>
     </div>,
 
-    // 5 — Éxito
+    // 5 — Éxito con comunidad
     <div key={5} style={{ height: "100%", position: "relative", background: "white", display: "flex", flexDirection: "column" }}>
       <PhoneStatusBar />
       <PhoneDynamicIsland />
       <div style={{ flex: 1 }} />
       <div style={overlay} />
-      <div style={{ ...drawerBase, padding: "22px 16px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-        <div style={{ width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, marginBottom: 20 }} />
-        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, animation: "phone-success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.05s both" }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <div style={{ ...drawerBase, padding: "20px 16px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <div style={{ width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, marginBottom: 16 }} />
+
+        {/* Community avatars */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12, animation: "phone-fade-up 0.4s ease 0.05s both" }}>
+          {[32, 45, 18, 7].map((n, i) => (
+            <img key={n} src={`https://i.pravatar.cc/60?img=${n}`} alt="" style={{ width: 32, height: 32, borderRadius: "50%", border: "2.5px solid white", marginLeft: i === 0 ? 0 : -10, objectFit: "cover", boxShadow: "0 2px 6px rgba(0,0,0,0.12)" }} />
+          ))}
+          <div style={{ width: 32, height: 32, borderRadius: "50%", border: "2.5px solid white", marginLeft: -10, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8.5, color: "#6b7280", fontWeight: 700, boxShadow: "0 2px 6px rgba(0,0,0,0.08)" }}>+43</div>
+        </div>
+
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10, animation: "phone-success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <div style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", marginBottom: 8, letterSpacing: "-0.03em", animation: "phone-fade-up 0.4s ease 0.2s both" }}>¡Gracias por compartir!</div>
-        <div style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.65, maxWidth: 195, animation: "phone-fade-up 0.4s ease 0.35s both" }}>Tu experiencia va a ayudar a otros a encontrar su lugar en San Martín de los Andes.</div>
-        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 0" }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 7, letterSpacing: "-0.03em", animation: "phone-fade-up 0.4s ease 0.25s both" }}>¡Gracias por compartir!</div>
+        <div style={{ fontSize: 9.5, color: "#6b7280", lineHeight: 1.65, maxWidth: 195, animation: "phone-fade-up 0.4s ease 0.38s both" }}>Te uniste a <strong style={{ color: "#0f172a" }}>+47 vecinos</strong> que construyen la guía más real de la Patagonia.</div>
+        <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
           <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
         </div>
       </div>
@@ -670,12 +709,12 @@ function PhoneAnimation() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "55vh", padding: "40px 24px", background: "linear-gradient(155deg, #080d18 0%, #120818 100%)", position: "relative" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "55vh", padding: "40px 24px", background: "linear-gradient(155deg, #f8fafc 0%, #eef2f7 100%)", position: "relative" }}>
       {/* Ambient glow */}
-      <div style={{ position: "absolute", top: "38%", left: "50%", transform: "translate(-50%,-50%)", width: 300, height: 220, background: "radial-gradient(ellipse, rgba(232,50,90,0.09) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: "38%", left: "50%", transform: "translate(-50%,-50%)", width: 300, height: 220, background: "radial-gradient(ellipse, rgba(232,50,90,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
 
       {/* Phone frame */}
-      <div style={{ width: 260, height: 530, borderRadius: 52, background: "linear-gradient(145deg, #2d2d2f, #1c1c1e)", padding: 11, position: "relative", boxShadow: "0 60px 140px rgba(0,0,0,0.6), 0 24px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.13)" }}>
+      <div style={{ width: 260, height: 530, borderRadius: 52, background: "linear-gradient(145deg, #2d2d2f, #1c1c1e)", padding: 11, position: "relative", boxShadow: "0 40px 100px rgba(0,0,0,0.18), 0 16px 32px rgba(0,0,0,0.09), 0 0 0 1px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.13)" }}>
         <div style={{ position: "absolute", right: -3, top: 105, width: 3, height: 38, background: "#3c3c3e", borderRadius: "0 3px 3px 0" }} />
         <div style={{ position: "absolute", left: -3, top: 90, width: 3, height: 28, background: "#3c3c3e", borderRadius: "3px 0 0 3px" }} />
         <div style={{ position: "absolute", left: -3, top: 124, width: 3, height: 28, background: "#3c3c3e", borderRadius: "3px 0 0 3px" }} />
@@ -692,7 +731,7 @@ function PhoneAnimation() {
       {/* Step dots */}
       <div style={{ display: "flex", gap: 6, marginTop: 20 }}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} style={{ width: i === renderStep ? 18 : 6, height: 6, borderRadius: 3, background: i === renderStep ? "#E8325A" : "rgba(255,255,255,0.18)", transition: `all 0.4s ${EASE_SPRING}` }} />
+          <div key={i} style={{ width: i === renderStep ? 18 : 6, height: 6, borderRadius: 3, background: i === renderStep ? "#E8325A" : "rgba(15,23,42,0.15)", transition: `all 0.4s ${EASE_SPRING}` }} />
         ))}
       </div>
     </div>
