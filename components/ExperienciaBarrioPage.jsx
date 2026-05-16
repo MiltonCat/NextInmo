@@ -416,6 +416,165 @@ function EncuestaDrawer({ open, onClose }) {
   );
 }
 
+// ─── Animación Phone ──────────────────────────────────────────────────────────
+function PhoneAnimation() {
+  const [step, setStep] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [typed, setTyped] = useState("");
+  const DURATIONS = [2400, 2000, 2200, 3200, 1800, 2800];
+
+  useEffect(() => {
+    const fadeOut = setTimeout(() => setVisible(false), DURATIONS[step] - 400);
+    const advance = setTimeout(() => { setStep((s) => (s + 1) % 6); setVisible(true); }, DURATIONS[step]);
+    return () => { clearTimeout(fadeOut); clearTimeout(advance); };
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== 3) { setTyped(""); return; }
+    const text = "La tranquilidad del lago y los vecinos son increíbles...";
+    let i = 0;
+    const iv = setInterval(() => { i++; setTyped(text.slice(0, i)); if (i >= text.length) clearInterval(iv); }, 50);
+    return () => clearInterval(iv);
+  }, [step]);
+
+  const steps = [
+    // 0 — Home
+    <div key={0} style={{ padding: "24px 12px 12px", height: "100%", display: "flex", flexDirection: "column", background: "white" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div style={{ width: 56, height: 7, background: "#0f172a", borderRadius: 4 }} />
+        <div style={{ display: "flex", gap: 3 }}>
+          <div style={{ width: 14, height: 7, background: "#e5e7eb", borderRadius: 3 }} />
+          <div style={{ width: 14, height: 7, background: "#e5e7eb", borderRadius: 3 }} />
+        </div>
+      </div>
+      <div style={{ fontSize: 7, color: "#9ca3af", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>Catalán Propiedades · Guía de Barrios</div>
+      <div style={{ fontSize: 14, fontWeight: 900, color: "#111827", lineHeight: 1.15, marginBottom: 8 }}>Conocé cada barrio desde adentro.</div>
+      <div style={{ fontSize: 7.5, color: "#6b7280", lineHeight: 1.5, marginBottom: 14 }}>Tu experiencia ayuda a otros a tomar mejores decisiones.</div>
+      <div style={{ position: "relative", alignSelf: "flex-start" }}>
+        <div style={{ background: "#111827", borderRadius: 20, padding: "7px 11px", display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#E8325A" }} />
+          <span style={{ fontSize: 8, color: "white", fontWeight: 700 }}>Compartir mi experiencia</span>
+        </div>
+        <div style={{ position: "absolute", right: -10, bottom: -10, width: 20, height: 20, borderRadius: "50%", background: "rgba(232,50,90,0.15)", animation: "phone-tap 1.2s ease-out infinite", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8325A" }} />
+        </div>
+      </div>
+      <div style={{ flex: 1 }} />
+      <div style={{ display: "flex", gap: 5 }}>
+        {["#bfdbfe", "#bbf7d0", "#fde68a"].map((bg, i) => (
+          <div key={i} style={{ flex: 1, height: 55, background: bg, borderRadius: 10 }} />
+        ))}
+      </div>
+    </div>,
+
+    // 1 — Drawer abre
+    <div key={1} style={{ height: "100%", position: "relative", background: "white" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px", boxShadow: "0 -10px 40px rgba(0,0,0,0.2)" }}>
+        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
+        <div style={{ fontSize: 7, color: "#9ca3af", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>Guía de Barrios</div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 12 }}>Compartí tu experiencia</div>
+        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>NOMBRE <span style={{ color: "#d1d5db", fontWeight: 400 }}>(OPCIONAL)</span></div>
+        <div style={{ height: 22, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, marginBottom: 8 }} />
+        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>BARRIO <span style={{ color: "#f87171" }}>*</span></div>
+        <div style={{ height: 22, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8 }} />
+      </div>
+    </div>,
+
+    // 2 — Seleccionando barrio
+    <div key={2} style={{ height: "100%", position: "relative", background: "white" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px" }}>
+        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 10 }}>Compartí tu experiencia</div>
+        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 5 }}>BARRIO <span style={{ color: "#f87171" }}>*</span></div>
+        <div style={{ border: "1.5px solid #818cf8", borderRadius: 10, overflow: "hidden" }}>
+          {["Centro", "Chapelco Golf", "Las Marías", "Costanera"].map((b, i) => (
+            <div key={b} style={{ padding: "6px 10px", fontSize: 8.5, background: i === 0 ? "#eef2ff" : "white", color: i === 0 ? "#4338ca" : "#6b7280", fontWeight: i === 0 ? 700 : 400, borderBottom: i < 3 ? "1px solid #f3f4f6" : "none", display: "flex", alignItems: "center", gap: 5 }}>
+              {i === 0 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4338ca", flexShrink: 0 }} />}
+              {b}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>,
+
+    // 3 — Escribiendo
+    <div key={3} style={{ height: "100%", position: "relative", background: "white" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px" }}>
+        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 10 }}>Compartí tu experiencia</div>
+        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>BARRIO</div>
+        <div style={{ height: 20, background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 7, marginBottom: 8, padding: "0 8px", display: "flex", alignItems: "center" }}>
+          <span style={{ fontSize: 8, color: "#4338ca", fontWeight: 700 }}>Centro</span>
+        </div>
+        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>¿QUÉ ES LO MEJOR DEL BARRIO? <span style={{ color: "#f87171" }}>*</span></div>
+        <div style={{ minHeight: 52, background: "#f9fafb", border: "1.5px solid #818cf8", borderRadius: 8, padding: "6px 8px", fontSize: 7.5, color: "#111827", lineHeight: 1.5 }}>
+          {typed}<span style={{ borderRight: "1.5px solid #4338ca", animation: "phone-blink 1s step-end infinite" }}>&nbsp;</span>
+        </div>
+      </div>
+    </div>,
+
+    // 4 — Enviando
+    <div key={4} style={{ height: "100%", position: "relative", background: "white" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px" }}>
+        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 10 }}>Compartí tu experiencia</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+          <div style={{ height: 18, background: "#f3f4f6", borderRadius: 7 }} />
+          <div style={{ height: 18, background: "#f3f4f6", borderRadius: 7 }} />
+          <div style={{ height: 36, background: "#f3f4f6", borderRadius: 7 }} />
+        </div>
+        <div style={{ background: "#111827", borderRadius: 10, padding: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, boxShadow: "0 0 0 3px rgba(232,50,90,0.25)" }}>
+          <div style={{ width: 9, height: 9, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.4)", borderTopColor: "white", animation: "phone-spin 0.7s linear infinite" }} />
+          <span style={{ fontSize: 9, color: "white", fontWeight: 600 }}>Enviando...</span>
+        </div>
+      </div>
+    </div>,
+
+    // 5 — Éxito
+    <div key={5} style={{ height: "100%", position: "relative", background: "white" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "24px 14px 28px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, marginBottom: 20 }} />
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: "#111827", marginBottom: 7 }}>¡Gracias por compartir!</div>
+        <div style={{ fontSize: 8, color: "#6b7280", lineHeight: 1.6, maxWidth: 160 }}>Tu experiencia va a ayudar a otros a encontrar su lugar en San Martín de los Andes.</div>
+      </div>
+    </div>,
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "55vh", padding: "40px 0" }}>
+      {/* Phone frame */}
+      <div style={{ width: 240, height: 500, borderRadius: 46, background: "#0f172a", padding: "10px 8px", boxShadow: "0 40px 100px rgba(15,23,42,0.5), 0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.05)", position: "relative" }}>
+        <div style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", width: 66, height: 20, background: "#0f172a", borderRadius: "0 0 14px 14px", zIndex: 10 }} />
+        <div style={{ position: "absolute", right: -3, top: 90, width: 3, height: 32, background: "#1e293b", borderRadius: "0 3px 3px 0" }} />
+        <div style={{ position: "absolute", left: -3, top: 76, width: 3, height: 22, background: "#1e293b", borderRadius: "3px 0 0 3px" }} />
+        <div style={{ position: "absolute", left: -3, top: 104, width: 3, height: 22, background: "#1e293b", borderRadius: "3px 0 0 3px" }} />
+        {/* Screen */}
+        <div style={{ width: "100%", height: "100%", borderRadius: 38, overflow: "hidden", position: "relative", background: "white" }}>
+          <div style={{ position: "absolute", inset: 0, opacity: visible ? 1 : 0, transition: "opacity 0.35s ease" }}>
+            {steps[step]}
+          </div>
+        </div>
+      </div>
+      {/* Step dots */}
+      <div style={{ display: "flex", gap: 5, marginTop: 18 }}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} style={{ width: i === step ? 16 : 6, height: 6, borderRadius: 3, background: i === step ? "#E8325A" : "#cbd5e1", transition: "all 0.3s ease" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Página principal ──────────────────────────────────────────────────────────
 export default function ExperienciaBarrioPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -458,23 +617,9 @@ export default function ExperienciaBarrioPage() {
           <p className="text-gray-400 text-sm mt-5">Anónimo · Menos de 5 minutos · Sin registro</p>
         </div>
 
-        {/* Panel imagen — Lago Lácar */}
-        <div className="relative order-1 lg:order-2 min-h-[55vh] lg:min-h-0">
-          <img
-            src="/hero-lago.jpg"
-            alt="Lago Lácar, San Martín de los Andes"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: "center 42%" }}
-          />
-          {/* Badge flotante */}
-          <div className="absolute bottom-6 left-6 right-6 sm:right-auto sm:max-w-xs">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-xl">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Proyecto activo</p>
-              <p className="text-gray-900 font-semibold text-sm leading-snug">
-                Construyendo la primera Guía de Barrios de San Martín de los Andes
-              </p>
-            </div>
-          </div>
+        {/* Panel animación — Phone mockup */}
+        <div className="order-1 lg:order-2 flex items-center justify-center bg-slate-50 min-h-[55vh] lg:min-h-0">
+          <PhoneAnimation />
         </div>
 
       </section>
