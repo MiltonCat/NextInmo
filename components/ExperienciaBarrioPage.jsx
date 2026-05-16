@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CONTACT_EMAIL } from "@/config";
 
 // ─── TODO: reemplazar los youtubeId con los IDs reales de YouTube ──────────────
@@ -416,159 +416,283 @@ function EncuestaDrawer({ open, onClose }) {
   );
 }
 
-// ─── Animación Phone ──────────────────────────────────────────────────────────
+// ─── Phone Animation Premium ──────────────────────────────────────────────────
+const EASE_SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
+
+function PhoneStatusBar() {
+  return (
+    <div style={{ height: 44, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 20px 0", flexShrink: 0 }}>
+      <span style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.03em" }}>9:41</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 1.5 }}>
+          {[3, 5, 7, 9].map((h, i) => (
+            <div key={i} style={{ width: 3, height: h, background: "#0f172a", borderRadius: 1, opacity: i === 3 ? 0.28 : 1 }} />
+          ))}
+        </div>
+        <svg width="15" height="11" viewBox="0 0 18 14" fill="none">
+          <path d="M9 11l1.8-2.2a2.5 2.5 0 00-3.6 0L9 11z" fill="#0f172a"/>
+          <path d="M9 13.5l.6-.8a.85.85 0 00-1.2 0L9 13.5z" fill="#0f172a"/>
+          <path d="M9 8.5l3.8-4.6a6 6 0 00-7.6 0L9 8.5z" fill="#0f172a" opacity="0.6"/>
+          <path d="M9 5.5l6-7.3a10 10 0 00-12 0L9 5.5z" fill="#0f172a" opacity="0.28"/>
+        </svg>
+        <div style={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <div style={{ width: 22, height: 10, border: "1.5px solid #0f172a", borderRadius: 3, padding: "1.5px", display: "flex" }}>
+            <div style={{ width: "78%", background: "#0f172a", borderRadius: 1.5 }} />
+          </div>
+          <div style={{ width: 2, height: 5, background: "#0f172a", borderRadius: "0 1px 1px 0", opacity: 0.4 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PhoneDynamicIsland() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", margin: "4px 0 8px", flexShrink: 0 }}>
+      <div style={{ width: 108, height: 28, background: "#0f172a", borderRadius: 20 }} />
+    </div>
+  );
+}
+
+function PhoneHomeBar() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", padding: "6px 0 4px", flexShrink: 0 }}>
+      <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
+    </div>
+  );
+}
+
 function PhoneAnimation() {
-  const [step, setStep] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [renderStep, setRenderStep] = useState(0);
+  const [exiting, setExiting] = useState(false);
   const [typed, setTyped] = useState("");
-  const DURATIONS = [2400, 2000, 2200, 3200, 1800, 2800];
+  const DURATIONS = [3500, 3000, 2500, 4000, 2000, 3000];
 
   useEffect(() => {
-    const fadeOut = setTimeout(() => setVisible(false), DURATIONS[step] - 400);
-    const advance = setTimeout(() => { setStep((s) => (s + 1) % 6); setVisible(true); }, DURATIONS[step]);
-    return () => { clearTimeout(fadeOut); clearTimeout(advance); };
-  }, [step]);
+    const t = setTimeout(() => {
+      setExiting(true);
+      setTimeout(() => { setRenderStep((s) => (s + 1) % 6); setExiting(false); }, 450);
+    }, DURATIONS[renderStep]);
+    return () => clearTimeout(t);
+  }, [renderStep]);
 
   useEffect(() => {
-    if (step !== 3) { setTyped(""); return; }
+    if (renderStep !== 3) { setTyped(""); return; }
     const text = "La tranquilidad del lago y los vecinos son increíbles...";
     let i = 0;
-    const iv = setInterval(() => { i++; setTyped(text.slice(0, i)); if (i >= text.length) clearInterval(iv); }, 50);
-    return () => clearInterval(iv);
-  }, [step]);
+    const t = setTimeout(() => {
+      const iv = setInterval(() => { i++; setTyped(text.slice(0, i)); if (i >= text.length) clearInterval(iv); }, 55);
+      return () => clearInterval(iv);
+    }, 900);
+    return () => clearTimeout(t);
+  }, [renderStep]);
+
+  const inputBase = { width: "100%", height: 34, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 10, display: "flex", alignItems: "center", padding: "0 10px", fontSize: 10.5, color: "#374151", boxSizing: "border-box" };
+  const lbl = { fontSize: 8.5, fontWeight: 700, color: "#9ca3af", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5, display: "block" };
+  const drawerBase = { position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "22px 22px 0 0", boxShadow: "0 -8px 40px rgba(0,0,0,0.13), 0 -1px 0 rgba(0,0,0,0.04)", animation: `phone-drawer-up 0.55s ${EASE_SPRING} forwards`, zIndex: 2 };
+  const overlay = { position: "absolute", inset: 0, background: "rgba(15,23,42,0.42)", zIndex: 1 };
+  const drawerHeader = { fontSize: 8, color: "#9ca3af", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 };
+  const drawerTitle = { fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 14, letterSpacing: "-0.03em" };
+  const handle = { width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, margin: "10px auto 14px" };
 
   const steps = [
-    // 0 — Home
-    <div key={0} style={{ padding: "24px 12px 12px", height: "100%", display: "flex", flexDirection: "column", background: "white" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ width: 56, height: 7, background: "#0f172a", borderRadius: 4 }} />
-        <div style={{ display: "flex", gap: 3 }}>
-          <div style={{ width: 14, height: 7, background: "#e5e7eb", borderRadius: 3 }} />
-          <div style={{ width: 14, height: 7, background: "#e5e7eb", borderRadius: 3 }} />
+    // 0 — Landing
+    <div key={0} style={{ height: "100%", display: "flex", flexDirection: "column", background: "white" }}>
+      <PhoneStatusBar />
+      <PhoneDynamicIsland />
+      <div style={{ flex: 1, padding: "0 18px", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 10, borderBottom: "1px solid #f3f4f6", marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8325A" }} />
+            <div style={{ width: 48, height: 6, background: "#0f172a", borderRadius: 3 }} />
+          </div>
+          <div style={{ display: "flex", gap: 5 }}>
+            {[18, 18, 18].map((w, i) => <div key={i} style={{ width: w, height: 6, background: "#e5e7eb", borderRadius: 3 }} />)}
+          </div>
+        </div>
+        <div style={{ fontSize: 8.5, color: "#E8325A", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Catalán · Guía de Barrios</div>
+        <div style={{ fontSize: 19, fontWeight: 900, color: "#0f172a", lineHeight: 1.08, marginBottom: 10, letterSpacing: "-0.04em" }}>Conocé cada barrio desde adentro.</div>
+        <div style={{ fontSize: 9.5, color: "#6b7280", lineHeight: 1.65, marginBottom: 18, maxWidth: 185 }}>Tu experiencia local puede ayudar a otros a tomar mejores decisiones.</div>
+        <div style={{ position: "relative", alignSelf: "flex-start" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#0f172a", borderRadius: 22, padding: "8px 14px", boxShadow: "0 4px 16px rgba(15,23,42,0.28)" }}>
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#E8325A" }} />
+            <span style={{ fontSize: 9.5, color: "white", fontWeight: 700, letterSpacing: "-0.02em" }}>Compartir mi experiencia</span>
+          </div>
+          <div style={{ position: "absolute", right: -10, bottom: -10, width: 24, height: 24, borderRadius: "50%", background: "rgba(232,50,90,0.12)", animation: "phone-tap 1.3s ease-out infinite", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 11, height: 11, borderRadius: "50%", background: "#E8325A", opacity: 0.85 }} />
+          </div>
         </div>
       </div>
-      <div style={{ fontSize: 7, color: "#9ca3af", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>Catalán Propiedades · Guía de Barrios</div>
-      <div style={{ fontSize: 14, fontWeight: 900, color: "#111827", lineHeight: 1.15, marginBottom: 8 }}>Conocé cada barrio desde adentro.</div>
-      <div style={{ fontSize: 7.5, color: "#6b7280", lineHeight: 1.5, marginBottom: 14 }}>Tu experiencia ayuda a otros a tomar mejores decisiones.</div>
-      <div style={{ position: "relative", alignSelf: "flex-start" }}>
-        <div style={{ background: "#111827", borderRadius: 20, padding: "7px 11px", display: "inline-flex", alignItems: "center", gap: 5 }}>
-          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#E8325A" }} />
-          <span style={{ fontSize: 8, color: "white", fontWeight: 700 }}>Compartir mi experiencia</span>
-        </div>
-        <div style={{ position: "absolute", right: -10, bottom: -10, width: 20, height: 20, borderRadius: "50%", background: "rgba(232,50,90,0.15)", animation: "phone-tap 1.2s ease-out infinite", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#E8325A" }} />
-        </div>
-      </div>
-      <div style={{ flex: 1 }} />
-      <div style={{ display: "flex", gap: 5 }}>
-        {["#bfdbfe", "#bbf7d0", "#fde68a"].map((bg, i) => (
-          <div key={i} style={{ flex: 1, height: 55, background: bg, borderRadius: 10 }} />
-        ))}
-      </div>
+      <PhoneHomeBar />
     </div>,
 
     // 1 — Drawer abre
-    <div key={1} style={{ height: "100%", position: "relative", background: "white" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px", boxShadow: "0 -10px 40px rgba(0,0,0,0.2)" }}>
-        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
-        <div style={{ fontSize: 7, color: "#9ca3af", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>Guía de Barrios</div>
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 12 }}>Compartí tu experiencia</div>
-        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>NOMBRE <span style={{ color: "#d1d5db", fontWeight: 400 }}>(OPCIONAL)</span></div>
-        <div style={{ height: 22, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, marginBottom: 8 }} />
-        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>BARRIO <span style={{ color: "#f87171" }}>*</span></div>
-        <div style={{ height: 22, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8 }} />
+    <div key={1} style={{ height: "100%", position: "relative", background: "white", display: "flex", flexDirection: "column" }}>
+      <PhoneStatusBar />
+      <PhoneDynamicIsland />
+      <div style={{ flex: 1 }} />
+      <div style={overlay} />
+      <div style={{ ...drawerBase, padding: "0 0 6px" }}>
+        <div style={handle} />
+        <div style={{ padding: "0 16px" }}>
+          <div style={drawerHeader}>Guía de Barrios</div>
+          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ marginBottom: 10 }}>
+            <span style={lbl}>Nombre <span style={{ color: "#d1d5db", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(opcional)</span></span>
+            <div style={{ ...inputBase, animation: "phone-fade-up 0.4s ease 0.1s both" }} />
+          </div>
+          <div>
+            <span style={lbl}>Barrio <span style={{ color: "#E8325A" }}>*</span></span>
+            <div style={{ ...inputBase, animation: "phone-fade-up 0.4s ease 0.2s both", color: "#9ca3af" }}>
+              <span>Seleccioná un barrio…</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 2px" }}>
+          <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
+        </div>
       </div>
     </div>,
 
-    // 2 — Seleccionando barrio
-    <div key={2} style={{ height: "100%", position: "relative", background: "white" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px" }}>
-        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 10 }}>Compartí tu experiencia</div>
-        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 5 }}>BARRIO <span style={{ color: "#f87171" }}>*</span></div>
-        <div style={{ border: "1.5px solid #818cf8", borderRadius: 10, overflow: "hidden" }}>
-          {["Centro", "Chapelco Golf", "Las Marías", "Costanera"].map((b, i) => (
-            <div key={b} style={{ padding: "6px 10px", fontSize: 8.5, background: i === 0 ? "#eef2ff" : "white", color: i === 0 ? "#4338ca" : "#6b7280", fontWeight: i === 0 ? 700 : 400, borderBottom: i < 3 ? "1px solid #f3f4f6" : "none", display: "flex", alignItems: "center", gap: 5 }}>
-              {i === 0 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4338ca", flexShrink: 0 }} />}
-              {b}
+    // 2 — Barrio dropdown
+    <div key={2} style={{ height: "100%", position: "relative", background: "white", display: "flex", flexDirection: "column" }}>
+      <PhoneStatusBar />
+      <PhoneDynamicIsland />
+      <div style={{ flex: 1 }} />
+      <div style={overlay} />
+      <div style={{ ...drawerBase, padding: "0 0 6px" }}>
+        <div style={handle} />
+        <div style={{ padding: "0 16px" }}>
+          <div style={drawerHeader}>Guía de Barrios</div>
+          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ marginBottom: 10 }}>
+            <span style={lbl}>Nombre</span>
+            <div style={inputBase} />
+          </div>
+          <div>
+            <span style={lbl}>Barrio <span style={{ color: "#E8325A" }}>*</span></span>
+            <div style={{ border: "1.5px solid #818cf8", borderRadius: 10, overflow: "hidden" }}>
+              {["Centro", "Chapelco Golf", "Las Marías", "Costanera"].map((b, i) => (
+                <div key={b} style={{ padding: "7px 12px", fontSize: 10.5, background: i === 0 ? "#eef2ff" : "white", color: i === 0 ? "#4338ca" : "#6b7280", fontWeight: i === 0 ? 700 : 400, borderBottom: i < 3 ? "1px solid #f3f4f6" : "none", display: "flex", alignItems: "center", gap: 8, animation: `phone-fade-up 0.3s ease ${i * 0.07}s both` }}>
+                  {i === 0 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4338ca", flexShrink: 0 }} />}
+                  {b}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 2px" }}>
+          <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
         </div>
       </div>
     </div>,
 
     // 3 — Escribiendo
-    <div key={3} style={{ height: "100%", position: "relative", background: "white" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px" }}>
-        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 10 }}>Compartí tu experiencia</div>
-        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>BARRIO</div>
-        <div style={{ height: 20, background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 7, marginBottom: 8, padding: "0 8px", display: "flex", alignItems: "center" }}>
-          <span style={{ fontSize: 8, color: "#4338ca", fontWeight: 700 }}>Centro</span>
+    <div key={3} style={{ height: "100%", position: "relative", background: "white", display: "flex", flexDirection: "column" }}>
+      <PhoneStatusBar />
+      <PhoneDynamicIsland />
+      <div style={{ flex: 1 }} />
+      <div style={overlay} />
+      <div style={{ ...drawerBase, padding: "0 0 6px" }}>
+        <div style={handle} />
+        <div style={{ padding: "0 16px" }}>
+          <div style={drawerHeader}>Guía de Barrios</div>
+          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ marginBottom: 10 }}>
+            <span style={lbl}>Barrio</span>
+            <div style={{ ...inputBase, background: "#f0f4ff", border: "1.5px solid #c7d2fe" }}>
+              <span style={{ fontSize: 10.5, color: "#4338ca", fontWeight: 700 }}>Centro</span>
+            </div>
+          </div>
+          <div>
+            <span style={lbl}>¿Qué es lo mejor del barrio? <span style={{ color: "#E8325A" }}>*</span></span>
+            <div style={{ minHeight: 56, background: "#f9fafb", border: "1.5px solid #818cf8", borderRadius: 10, padding: "8px 10px", fontSize: 10.5, color: "#374151", lineHeight: 1.55 }}>
+              {typed}<span style={{ borderRight: "1.5px solid #4338ca", animation: "phone-blink 1s step-end infinite" }}>&nbsp;</span>
+            </div>
+          </div>
         </div>
-        <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600, marginBottom: 3 }}>¿QUÉ ES LO MEJOR DEL BARRIO? <span style={{ color: "#f87171" }}>*</span></div>
-        <div style={{ minHeight: 52, background: "#f9fafb", border: "1.5px solid #818cf8", borderRadius: 8, padding: "6px 8px", fontSize: 7.5, color: "#111827", lineHeight: 1.5 }}>
-          {typed}<span style={{ borderRight: "1.5px solid #4338ca", animation: "phone-blink 1s step-end infinite" }}>&nbsp;</span>
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 2px" }}>
+          <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
         </div>
       </div>
     </div>,
 
     // 4 — Enviando
-    <div key={4} style={{ height: "100%", position: "relative", background: "white" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "12px 14px 20px" }}>
-        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, margin: "0 auto 12px" }} />
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#111827", marginBottom: 10 }}>Compartí tu experiencia</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
-          <div style={{ height: 18, background: "#f3f4f6", borderRadius: 7 }} />
-          <div style={{ height: 18, background: "#f3f4f6", borderRadius: 7 }} />
-          <div style={{ height: 36, background: "#f3f4f6", borderRadius: 7 }} />
+    <div key={4} style={{ height: "100%", position: "relative", background: "white", display: "flex", flexDirection: "column" }}>
+      <PhoneStatusBar />
+      <PhoneDynamicIsland />
+      <div style={{ flex: 1 }} />
+      <div style={overlay} />
+      <div style={{ ...drawerBase, padding: "0 0 6px" }}>
+        <div style={handle} />
+        <div style={{ padding: "0 16px" }}>
+          <div style={drawerHeader}>Guía de Barrios</div>
+          <div style={drawerTitle}>Compartí tu experiencia</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+            <div style={{ height: 32, background: "#f0f4ff", border: "1px solid #e0e7ff", borderRadius: 10, display: "flex", alignItems: "center", padding: "0 10px" }}>
+              <span style={{ fontSize: 10, color: "#4338ca", fontWeight: 600 }}>Centro</span>
+            </div>
+            <div style={{ height: 32, background: "#f3f4f6", borderRadius: 10 }} />
+            <div style={{ height: 50, background: "#f3f4f6", borderRadius: 10 }} />
+          </div>
+          <div style={{ background: "#0f172a", borderRadius: 12, padding: "11px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, animation: "phone-press 0.4s ease forwards", boxShadow: "0 0 0 3px rgba(232,50,90,0.18)" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.3)", borderTopColor: "white", animation: "phone-spin 0.7s linear infinite" }} />
+            <span style={{ fontSize: 10.5, color: "white", fontWeight: 600, letterSpacing: "-0.02em" }}>Enviando…</span>
+          </div>
+          <p style={{ textAlign: "center", fontSize: 8.5, color: "#9ca3af", marginTop: 8 }}>Anónimo · Sin spam · Revisado antes de publicar</p>
         </div>
-        <div style={{ background: "#111827", borderRadius: 10, padding: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, boxShadow: "0 0 0 3px rgba(232,50,90,0.25)" }}>
-          <div style={{ width: 9, height: 9, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.4)", borderTopColor: "white", animation: "phone-spin 0.7s linear infinite" }} />
-          <span style={{ fontSize: 9, color: "white", fontWeight: 600 }}>Enviando...</span>
+        <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 2px" }}>
+          <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
         </div>
       </div>
     </div>,
 
     // 5 — Éxito
-    <div key={5} style={{ height: "100%", position: "relative", background: "white" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "white", borderRadius: "20px 20px 0 0", padding: "24px 14px 28px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-        <div style={{ width: 28, height: 3, background: "#e5e7eb", borderRadius: 2, marginBottom: 20 }} />
-        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <div key={5} style={{ height: "100%", position: "relative", background: "white", display: "flex", flexDirection: "column" }}>
+      <PhoneStatusBar />
+      <PhoneDynamicIsland />
+      <div style={{ flex: 1 }} />
+      <div style={overlay} />
+      <div style={{ ...drawerBase, padding: "22px 16px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <div style={{ width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, marginBottom: 20 }} />
+        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, animation: "phone-success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.05s both" }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <div style={{ fontSize: 14, fontWeight: 800, color: "#111827", marginBottom: 7 }}>¡Gracias por compartir!</div>
-        <div style={{ fontSize: 8, color: "#6b7280", lineHeight: 1.6, maxWidth: 160 }}>Tu experiencia va a ayudar a otros a encontrar su lugar en San Martín de los Andes.</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", marginBottom: 8, letterSpacing: "-0.03em", animation: "phone-fade-up 0.4s ease 0.2s both" }}>¡Gracias por compartir!</div>
+        <div style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.65, maxWidth: 195, animation: "phone-fade-up 0.4s ease 0.35s both" }}>Tu experiencia va a ayudar a otros a encontrar su lugar en San Martín de los Andes.</div>
+        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 0" }}>
+          <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
+        </div>
       </div>
     </div>,
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "55vh", padding: "40px 0" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "55vh", padding: "40px 24px", background: "linear-gradient(155deg, #080d18 0%, #120818 100%)", position: "relative" }}>
+      {/* Ambient glow */}
+      <div style={{ position: "absolute", top: "38%", left: "50%", transform: "translate(-50%,-50%)", width: 300, height: 220, background: "radial-gradient(ellipse, rgba(232,50,90,0.09) 0%, transparent 70%)", pointerEvents: "none" }} />
+
       {/* Phone frame */}
-      <div style={{ width: 240, height: 500, borderRadius: 46, background: "#0f172a", padding: "10px 8px", boxShadow: "0 40px 100px rgba(15,23,42,0.5), 0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.05)", position: "relative" }}>
-        <div style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", width: 66, height: 20, background: "#0f172a", borderRadius: "0 0 14px 14px", zIndex: 10 }} />
-        <div style={{ position: "absolute", right: -3, top: 90, width: 3, height: 32, background: "#1e293b", borderRadius: "0 3px 3px 0" }} />
-        <div style={{ position: "absolute", left: -3, top: 76, width: 3, height: 22, background: "#1e293b", borderRadius: "3px 0 0 3px" }} />
-        <div style={{ position: "absolute", left: -3, top: 104, width: 3, height: 22, background: "#1e293b", borderRadius: "3px 0 0 3px" }} />
+      <div style={{ width: 260, height: 530, borderRadius: 52, background: "linear-gradient(145deg, #2d2d2f, #1c1c1e)", padding: 11, position: "relative", boxShadow: "0 60px 140px rgba(0,0,0,0.6), 0 24px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.13)" }}>
+        <div style={{ position: "absolute", right: -3, top: 105, width: 3, height: 38, background: "#3c3c3e", borderRadius: "0 3px 3px 0" }} />
+        <div style={{ position: "absolute", left: -3, top: 90, width: 3, height: 28, background: "#3c3c3e", borderRadius: "3px 0 0 3px" }} />
+        <div style={{ position: "absolute", left: -3, top: 124, width: 3, height: 28, background: "#3c3c3e", borderRadius: "3px 0 0 3px" }} />
         {/* Screen */}
-        <div style={{ width: "100%", height: "100%", borderRadius: 38, overflow: "hidden", position: "relative", background: "white" }}>
-          <div style={{ position: "absolute", inset: 0, opacity: visible ? 1 : 0, transition: "opacity 0.35s ease" }}>
-            {steps[step]}
+        <div style={{ width: "100%", height: "100%", borderRadius: 42, overflow: "hidden", position: "relative", background: "white" }}>
+          <div key={renderStep} style={{ position: "absolute", inset: 0, animation: exiting ? "phone-step-out 0.45s ease forwards" : `phone-step-in 0.5s ${EASE_SPRING} forwards` }}>
+            {steps[renderStep]}
           </div>
         </div>
+        {/* Screen glass reflection */}
+        <div style={{ position: "absolute", top: 11, left: 11, right: 11, height: "38%", borderRadius: "42px 42px 0 0", background: "linear-gradient(180deg, rgba(255,255,255,0.032) 0%, transparent 100%)", pointerEvents: "none", zIndex: 20 }} />
       </div>
+
       {/* Step dots */}
-      <div style={{ display: "flex", gap: 5, marginTop: 18 }}>
+      <div style={{ display: "flex", gap: 6, marginTop: 20 }}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} style={{ width: i === step ? 16 : 6, height: 6, borderRadius: 3, background: i === step ? "#E8325A" : "#cbd5e1", transition: "all 0.3s ease" }} />
+          <div key={i} style={{ width: i === renderStep ? 18 : 6, height: 6, borderRadius: 3, background: i === renderStep ? "#E8325A" : "rgba(255,255,255,0.18)", transition: `all 0.4s ${EASE_SPRING}` }} />
         ))}
       </div>
     </div>
