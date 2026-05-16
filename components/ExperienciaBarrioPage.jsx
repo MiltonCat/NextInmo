@@ -463,21 +463,27 @@ function PhoneHomeBar() {
 }
 
 function PhoneAnimation() {
-  const [renderStep, setRenderStep] = useState(0);
-  const [exiting, setExiting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [prevStep, setPrevStep] = useState(null);
   const [typed, setTyped] = useState("");
   const DURATIONS = [3500, 3000, 2500, 4000, 2000, 3000];
 
   useEffect(() => {
     const t = setTimeout(() => {
-      setExiting(true);
-      setTimeout(() => { setRenderStep((s) => (s + 1) % 6); setExiting(false); }, 450);
-    }, DURATIONS[renderStep]);
+      setPrevStep(currentStep);
+      setCurrentStep((s) => (s + 1) % 6);
+    }, DURATIONS[currentStep]);
     return () => clearTimeout(t);
-  }, [renderStep]);
+  }, [currentStep]);
 
   useEffect(() => {
-    if (renderStep !== 3) { setTyped(""); return; }
+    if (prevStep === null) return;
+    const t = setTimeout(() => setPrevStep(null), 600);
+    return () => clearTimeout(t);
+  }, [prevStep]);
+
+  useEffect(() => {
+    if (currentStep !== 3) { setTyped(""); return; }
     const text = "La tranquilidad del lago y los vecinos son increíbles...";
     let i = 0;
     const t = setTimeout(() => {
@@ -485,7 +491,7 @@ function PhoneAnimation() {
       return () => clearInterval(iv);
     }, 900);
     return () => clearTimeout(t);
-  }, [renderStep]);
+  }, [currentStep]);
 
   const inputBase = { width: "100%", height: 34, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 10, display: "flex", alignItems: "center", padding: "0 10px", fontSize: 10.5, color: "#374151", boxSizing: "border-box" };
   const lbl = { fontSize: 8.5, fontWeight: 700, color: "#9ca3af", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5, display: "block" };
@@ -720,8 +726,13 @@ function PhoneAnimation() {
         <div style={{ position: "absolute", left: -3, top: 124, width: 3, height: 28, background: "#3c3c3e", borderRadius: "3px 0 0 3px" }} />
         {/* Screen */}
         <div style={{ width: "100%", height: "100%", borderRadius: 42, overflow: "hidden", position: "relative", background: "white" }}>
-          <div key={renderStep} style={{ position: "absolute", inset: 0, animation: exiting ? "phone-step-out 0.45s ease forwards" : `phone-step-in 0.5s ${EASE_SPRING} forwards` }}>
-            {steps[renderStep]}
+          {prevStep !== null && (
+            <div style={{ position: "absolute", inset: 0, animation: "phone-step-out 0.5s ease forwards", zIndex: 1 }}>
+              {steps[prevStep]}
+            </div>
+          )}
+          <div key={currentStep} style={{ position: "absolute", inset: 0, animation: `phone-step-in 0.5s ${EASE_SPRING} forwards`, zIndex: 2 }}>
+            {steps[currentStep]}
           </div>
         </div>
         {/* Screen glass reflection */}
@@ -731,7 +742,7 @@ function PhoneAnimation() {
       {/* Step dots */}
       <div style={{ display: "flex", gap: 6, marginTop: 20 }}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} style={{ width: i === renderStep ? 18 : 6, height: 6, borderRadius: 3, background: i === renderStep ? "#E8325A" : "rgba(15,23,42,0.15)", transition: `all 0.4s ${EASE_SPRING}` }} />
+          <div key={i} style={{ width: i === currentStep ? 18 : 6, height: 6, borderRadius: 3, background: i === currentStep ? "#E8325A" : "rgba(15,23,42,0.15)", transition: `all 0.4s ${EASE_SPRING}` }} />
         ))}
       </div>
     </div>
