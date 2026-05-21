@@ -3,46 +3,69 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import PropertyCard from "@/components/PropertyCard";
-import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 import { properties } from "@/data/properties";
 
 const PropertyMap = dynamic(() => import("@/components/PropertyMap"), { ssr: false });
+
+const ALIASES = {
+  depto: "departamento", deptos: "departamento",
+  dpto: "departamento",  dptos: "departamento",
+  cabana: "cabaña",      cabanas: "cabaña",
+  ph: "ph",
+  casa: "casa",          casas: "casa",
+  lote: "lote",          lotes: "lote",
+  mono: "monoambiente",  monoambiente: "monoambiente",
+};
+
+const normalize = (v) =>
+  v.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+
+const resolveAlias = (raw) => ALIASES[normalize(raw)] || normalize(raw);
 
 function PropertiesContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
-  const [filter, setFilter] = useState(searchParams.get("type") || "Todos");
+  const [filter, setFilter] = useState("Todos");
   const [priceRange, setPriceRange] = useState("Todos");
-  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("list");
   const [sortBy, setSortBy] = useState("default");
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [searchQuery, setSearchQuery] = useState("");
   const [modalidadTab, setModalidadTab] = useState(
-    pathname === "/alquileres" ? "alquiler_permanente" : (searchParams.get("modalidad") || "venta")
+    pathname === "/alquileres" ? "alquiler_permanente" : "venta"
   );
 
   useEffect(() => {
-    const typeParam = searchParams.get("type");
-    if (typeParam) setFilter(typeParam);
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, [searchParams]);
+    const params = new URLSearchParams(window.location.search);
+    setFilter(params.get("type") || "Todos");
+    setSearchQuery(params.get("search") || "");
+  }, [pathname, searchParams]);
 
   const filteredProperties = properties.filter((property) => {
     if (modalidadTab === "alquiler_permanente" && property.modalidad !== "alquiler_permanente") return false;
     if (modalidadTab === "venta" && property.modalidad === "alquiler_permanente") return false;
 
-    const searchParam = searchParams.get("search");
     const operation = searchParams.get("operation");
 
-    const searchMatch = !searchParam ||
-      property.title.toLowerCase().includes(searchParam.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchParam.toLowerCase()) ||
-      property.type.toLowerCase().includes(searchParam.toLowerCase());
+    const raw = searchQuery.trim();
+    const q   = normalize(raw);
+    const exp = resolveAlias(raw);   // alias expandido (deptos → departamento)
 
-    const typeMatch = filter === "Todos" || property.type.toLowerCase() === filter.toLowerCase();
+    const searchMatch = !q ||
+      normalize(property.title).includes(q) ||
+      normalize(property.location).includes(q) ||
+      normalize(property.type).includes(q) ||
+      normalize(property.type).includes(exp) ||
+      normalize(property.description || "").includes(q) ||
+      (property.features || []).some(f => normalize(f).includes(q));
+
+    const normFilter = normalize(filter);
+    const normType   = normalize(property.type);
+    const typeMatch = filter === "Todos" ||
+      normType === normFilter ||
+      (normFilter === "departamento" && normType === "monoambiente") ||
+      (normFilter === "cabaña" && (normType === "cabanas" || normType === "ph"));
 
     const priceMinParam = searchParams.get("priceMin");
     const priceMaxParam = searchParams.get("priceMax");
@@ -84,26 +107,9 @@ function PropertiesContent() {
     router.push(pathname);
   };
 
-  const updateSearch = (value) => {
-    setSearchQuery(value);
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set("search", value);
-    } else {
-      params.delete("search");
-    }
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  const updateSearch = (value) => setSearchQuery(value);
 
-  const activeFiltersCount = [
-    searchParams.get("search"),
-    searchParams.get("type"),
-    searchParams.get("priceMin"),
-    searchParams.get("priceMax"),
-    searchParams.get("bedrooms"),
-    searchParams.get("meters"),
-    searchParams.get("operation"),
-  ].filter(Boolean).length;
+  const hasActiveFilters = searchQuery.trim() !== "" || filter !== "Todos";
 
   return (
     <div className="min-h-screen bg-white">
@@ -141,7 +147,7 @@ function PropertiesContent() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-3xl font-bold text-gray-800">
             Nuestras Propiedades
-            {(searchQuery || activeFiltersCount > 0) && (
+            {hasActiveFilters && (
               <span className="text-lg font-normal text-gray-500 ml-2">
                 ({filteredProperties.length} resultados)
               </span>
@@ -172,10 +178,19 @@ function PropertiesContent() {
           </div>
         </div>
 
-        {(searchQuery || activeFiltersCount > 0) && (
-          <button onClick={clearFilters} className="text-sm text-rose-500 hover:text-rose-600 font-medium mb-4">
-            ← Limpiar búsqueda
-          </button>
+        {hasActiveFilters && (
+          <div className="flex items-center gap-3 mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl">
+            <span className="text-sm text-rose-700 font-medium flex-1">
+              {filteredProperties.length === 0
+                ? "Sin resultados"
+                : `${filteredProperties.length} propiedad${filteredProperties.length !== 1 ? "es" : ""}`}
+              {searchQuery && <span> para <strong>"{searchQuery}"</strong></span>}
+              {filter !== "Todos" && <span> · Tipo: <strong>{filter}</strong></span>}
+            </span>
+            <button onClick={clearFilters} className="text-xs text-rose-500 hover:text-rose-700 font-semibold whitespace-nowrap">
+              Limpiar filtros
+            </button>
+          </div>
         )}
 
         <div className="mb-6">
@@ -191,10 +206,6 @@ function PropertiesContent() {
         {viewMode === "map" ? (
           <div className="h-[500px] rounded-lg overflow-hidden border">
             <PropertyMap properties={filteredProperties} />
-          </div>
-        ) : loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} />)}
           </div>
         ) : filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -1,6 +1,10 @@
 import { properties } from "@/data/properties";
 import PropertyDetailClient from "@/components/PropertyDetailClient";
 
+export async function generateStaticParams() {
+  return properties.map((p) => ({ id: String(p.id) }));
+}
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const property = properties.find((p) => p.id === parseInt(id));

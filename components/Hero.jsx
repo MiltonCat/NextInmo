@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function Hero() {
   const [collapsed, setCollapsed] = useState(false);
@@ -51,24 +52,24 @@ export default function Hero() {
         }}
       >
         <h1 className="text-gray-900 text-2xl sm:text-4xl font-bold mb-2 drop-shadow-lg">
-          Encontrá tu lugar en la Patagonia
+          Comprá, alquilá o invertí en San Martín de los Andes
         </h1>
-        <p className="text-gray-600 text-sm sm:text-base mb-4 max-w-xl">
-          Venta, alquiler e inversiones en San Martín de los Andes · +10 años de experiencia
+        <p className="text-gray-600 text-sm sm:text-base mb-5 max-w-xl">
+          Decisiones inmobiliarias basadas en datos reales del mercado local · +10 años de experiencia
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
-          <a
+          <Link
             href="/propiedades"
             className="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm shadow-lg"
           >
             Ver propiedades
-          </a>
-          <a
+          </Link>
+          <Link
             href="/inversiones"
-            className="bg-white hover:bg-gray-50 text-gray-800 font-semibold px-6 py-3 rounded-xl transition-colors text-sm border border-gray-200"
+            className="bg-white/90 hover:bg-white text-gray-800 font-semibold px-6 py-3 rounded-xl transition-colors text-sm border border-gray-200 shadow-sm"
           >
-            Ver inversiones
-          </a>
+            Analizar inversión
+          </Link>
         </div>
       </div>
 

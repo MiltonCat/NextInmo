@@ -22,7 +22,7 @@ const STEPS = [
   {
     numero: "03",
     titulo: "Visita y evaluación",
-    descripcion: "Te acompañamos en la visita presencial o virtual. Evaluamos el inmueble con criterio técnico: estado, ubicación, potencial de valorización.",
+    descripcion: "Te acompañamos en la visita presencial o virtual. Evaluamos el inmueble con criterio técnico: estado, ubicación y potencial de valorización.",
     icono: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -46,26 +46,29 @@ export default function AdvisoryProcess() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <p className="text-rose-500 text-sm font-semibold tracking-widest uppercase mb-2">Cómo trabajamos</p>
-        <h2 className="text-3xl font-bold text-gray-800 mb-3">Proceso de asesoría</h2>
-        <p className="text-gray-500 max-w-xl mx-auto text-sm">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+          <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Cómo trabajamos</span>
+        </div>
+        <h2 className="text-3xl font-bold text-white mb-3">Así te acompañamos</h2>
+        <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
           Cuatro pasos claros desde el primer contacto hasta que tu capital empieza a trabajar.
         </p>
       </div>
 
       <div className="relative">
-        <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-gray-200" />
+        <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-gray-800" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {STEPS.map((step, index) => (
             <div key={step.numero} className="relative flex flex-col items-center text-center">
-              <div className="relative z-10 w-20 h-20 rounded-full bg-white border-2 border-rose-500 flex flex-col items-center justify-center mb-5 shadow-sm">
-                <span className="text-rose-500">{step.icono}</span>
-                <span className="text-[10px] font-bold text-gray-400 mt-0.5">{step.numero}</span>
+              <div className="relative z-10 w-20 h-20 rounded-full bg-[#1a1a28] border-2 border-primary-500/40 flex flex-col items-center justify-center mb-5 shadow-sm">
+                <span className="text-primary-400">{step.icono}</span>
+                <span className="text-[10px] font-bold text-gray-600 mt-0.5">{step.numero}</span>
               </div>
-              <h3 className="font-semibold text-gray-800 text-base mb-2">{step.titulo}</h3>
+              <h3 className="font-semibold text-gray-100 text-base mb-2">{step.titulo}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">{step.descripcion}</p>
               {index < STEPS.length - 1 && (
-                <div className="md:hidden mt-6 text-gray-300">
+                <div className="md:hidden mt-6 text-gray-700">
                   <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -79,7 +82,7 @@ export default function AdvisoryProcess() {
       <div className="mt-12 text-center">
         <a
           href="/contacto"
-          className="inline-block bg-rose-600 hover:bg-rose-500 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm shadow"
+          className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm shadow"
         >
           Empezar con la consulta inicial
         </a>

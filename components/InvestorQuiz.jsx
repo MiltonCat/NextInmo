@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { WA_NUMBER } from "@/config";
 
 const QUESTIONS = [
   {
@@ -44,30 +45,27 @@ const PERFILES = {
   conservador: {
     label: "Conservador",
     color: "rose",
-    emoji: "🛡️",
-    descripcion: "Priorizás la seguridad del capital sobre el retorno. Tolerás poca volatilidad.",
+    descripcion: "Priorizás la seguridad de tu dinero por encima del retorno. Preferís no asumir riesgos.",
     recomendacion: "Terrenos y lotes en zonas de desarrollo",
-    detalle: "Baja volatilidad, alta plusvalía a largo plazo sin gestión activa. Ideal para preservar capital en dólares.",
+    detalle: "Baja volatilidad y alta valorización a largo plazo sin necesidad de gestión activa. Ideal para preservar capital en dólares.",
     roi: "8–12% anual (valorización)",
     riesgo: "Bajo",
   },
   moderado: {
     label: "Moderado",
     color: "green",
-    emoji: "⚖️",
-    descripcion: "Buscás equilibrio entre seguridad y rendimiento. Aceptás algo de espera.",
+    descripcion: "Buscás equilibrio entre seguridad y rendimiento. Aceptás algo de espera a cambio de una renta estable.",
     recomendacion: "Departamentos para alquiler tradicional",
-    detalle: "Renta mensual estable en dólares con valorización sostenida del inmueble.",
+    detalle: "Renta mensual estable en dólares con valorización sostenida del inmueble. La opción más elegida por inversores de primera vez.",
     roi: "6–8% anual (renta)",
     riesgo: "Medio",
   },
   agresivo: {
     label: "Dinámico",
     color: "orange",
-    emoji: "🚀",
-    descripcion: "Maximizás el retorno y aceptás mayor gestión a cambio de mejor rendimiento.",
+    descripcion: "Querés maximizar el retorno y estás dispuesto a gestionar más activamente tu inversión.",
     recomendacion: "Alquiler turístico o reventa con refuncionalización",
-    detalle: "Mayor retorno potencial. Requiere gestión activa o delegarla a una administradora.",
+    detalle: "Mayor retorno potencial. Requiere gestión activa o delegar en una administradora. Alta demanda en temporadas de ski y trekking.",
     roi: "12–18% anual",
     riesgo: "Medio-alto",
   },
@@ -77,26 +75,20 @@ const colorMap = {
   rose: {
     bg: "bg-primary-500/10",
     border: "border-primary-500/30",
-    badge: "bg-primary-500/10 text-primary-400",
     btn: "bg-primary-600 hover:bg-primary-700",
     text: "text-primary-400",
-    bar: "bg-primary-500",
   },
   green: {
     bg: "bg-green-500/10",
     border: "border-green-500/30",
-    badge: "bg-green-500/10 text-green-400",
     btn: "bg-green-600 hover:bg-green-700",
     text: "text-green-400",
-    bar: "bg-green-500",
   },
   orange: {
     bg: "bg-orange-500/10",
     border: "border-orange-500/30",
-    badge: "bg-orange-500/10 text-orange-400",
     btn: "bg-orange-500 hover:bg-orange-600",
     text: "text-orange-400",
-    bar: "bg-orange-500",
   },
 };
 
@@ -138,36 +130,46 @@ export default function InvestorQuiz() {
   const colores = perfil ? colorMap[perfil.color] : null;
   const progreso = paso >= 1 && paso <= 4 ? (paso / QUESTIONS.length) * 100 : 0;
 
+  const waLink = perfil
+    ? `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola! Hice el test de perfil inversor en la web y me salió perfil ${perfil.label}. Me gustaría recibir una propuesta personalizada.`)}`
+    : "#";
+
   return (
-    <div className="mt-4 sm:mt-6 bg-[#111118] rounded-2xl p-6 sm:p-8 border border-gray-800 shadow-sm">
+    <div className="bg-[#111118] rounded-2xl p-6 sm:p-8 border border-gray-800 shadow-sm">
       <div className="max-w-xl mx-auto">
+
+        {/* Paso 0 — Intro */}
         {paso === 0 && (
           <div className="text-center">
-            <p className="text-rose-400 text-xs font-semibold tracking-widest uppercase mb-2">Fintech tool</p>
-            <h2 className="text-white text-2xl font-bold mb-3">¿Qué tipo de inversor sos?</h2>
-            <p className="text-gray-500 text-sm mb-8 max-w-sm mx-auto">
-              4 preguntas. Menos de 1 minuto. Te decimos qué tipo de inversión inmobiliaria se adapta a tu perfil.
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+              <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Test gratuito · 1 minuto</span>
+            </div>
+            <h2 className="text-white text-2xl font-bold mb-3">¿Qué tipo de propiedad te conviene?</h2>
+            <p className="text-gray-400 text-sm mb-8 max-w-sm mx-auto">
+              Respondé 4 preguntas y te decimos qué inversión inmobiliaria se adapta mejor a tu objetivo y perfil de riesgo.
             </p>
             <button
               onClick={() => setPaso(1)}
               className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm"
             >
-              Descubrir mi perfil →
+              Empezar el test gratuito →
             </button>
           </div>
         )}
 
+        {/* Pasos 1–4 — Preguntas */}
         {paso >= 1 && paso <= 4 && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <span className="text-gray-500 text-xs">{paso} de {QUESTIONS.length}</span>
+              <span className="text-gray-500 text-xs">Pregunta {paso} de {QUESTIONS.length}</span>
               <div className="flex-1 mx-4 h-1.5 bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#E8325A] rounded-full transition-all duration-500"
+                  className="h-full bg-primary-500 rounded-full transition-all duration-500"
                   style={{ width: `${progreso}%` }}
                 />
               </div>
-              <button onClick={reiniciar} className="text-gray-500 hover:text-gray-700 text-xs transition-colors">
+              <button onClick={reiniciar} className="text-gray-600 hover:text-gray-400 text-xs transition-colors">
                 Reiniciar
               </button>
             </div>
@@ -181,7 +183,7 @@ export default function InvestorQuiz() {
                   onClick={() => handleOpcion(opcion.puntaje)}
                   className={`w-full text-left px-5 py-4 rounded-xl border text-sm font-medium transition-all duration-200 ${
                     seleccion === opcion.puntaje
-                      ? "bg-[#E8325A] border-[#E8325A] text-white scale-[0.98]"
+                      ? "bg-primary-600 border-primary-500 text-white scale-[0.98]"
                       : "bg-gray-900 border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-800"
                   }`}
                 >
@@ -192,16 +194,17 @@ export default function InvestorQuiz() {
           </div>
         )}
 
+        {/* Paso 5 — Resultado */}
         {paso === 5 && perfil && (
           <div>
             <div className="text-center mb-6">
-              <div className="text-4xl mb-3">{perfil.emoji}</div>
-              <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">Tu perfil de inversión</p>
-              <h2 className="text-white text-2xl font-bold">{perfil.label}</h2>
-              <p className="text-gray-400 text-sm mt-2 max-w-sm mx-auto">{perfil.descripcion}</p>
+              <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Tu perfil de inversión</p>
+              <h2 className="text-white text-2xl font-bold mb-2">{perfil.label}</h2>
+              <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">{perfil.descripcion}</p>
             </div>
+
             <div className={`${colores.bg} ${colores.border} border rounded-xl p-5 mb-5`}>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Te recomendamos</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Lo que te recomendamos</p>
               <p className={`font-bold text-base ${colores.text} mb-2`}>{perfil.recomendacion}</p>
               <p className="text-sm text-gray-400 mb-4 leading-relaxed">{perfil.detalle}</p>
               <div className="grid grid-cols-2 gap-3">
@@ -215,22 +218,26 @@ export default function InvestorQuiz() {
                 </div>
               </div>
             </div>
+
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href={`/contacto?perfil=${perfil.label.toLowerCase()}`}
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`flex-1 text-center text-white font-semibold py-3 rounded-xl transition-colors text-sm ${colores.btn}`}
               >
-                Quiero una propuesta para mi perfil
+                Quiero que me asesoren sobre esto →
               </a>
               <button
                 onClick={reiniciar}
                 className="flex-1 text-center text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 font-medium py-3 rounded-xl transition-colors text-sm"
               >
-                Volver a hacer el test
+                Repetir el test
               </button>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

@@ -67,7 +67,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`flex flex-col min-h-screen ${plusJakarta.variable} ${dmSans.variable}`}>
         <Navbar />
-        <main className="flex-grow pt-20">
+        <main className="flex-grow pt-[120px]">
           {children}
         </main>
         <Footer />

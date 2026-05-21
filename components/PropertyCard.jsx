@@ -28,6 +28,7 @@ function PropertyCard({ property }) {
     if (!fav) {
       setCelebrating(true);
       setTimeout(() => setCelebrating(false), 700);
+      window.dispatchEvent(new CustomEvent("favorite-added"));
     }
     toggle(property.id);
   };

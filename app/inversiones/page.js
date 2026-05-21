@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { CONTACT_EMAIL } from "@/config";
+import { WA_NUMBER } from "@/config";
 import AdvisoryProcess from "@/components/AdvisoryProcess";
 import InvestorQuiz from "@/components/InvestorQuiz";
 
@@ -60,6 +60,20 @@ const ZONA_DATA = {
 };
 
 const PESOS = { Demanda: 0.35, Liquidez: 0.20, 'Revalorización': 0.30, Estabilidad: 0.15 };
+
+const scoreLabel = (score) => {
+  if (score >= 80) return { texto: "Muy favorable", color: "text-green-400 bg-green-500/10 border-green-500/30" };
+  if (score >= 70) return { texto: "Favorable", color: "text-primary-400 bg-primary-500/10 border-primary-500/30" };
+  if (score >= 60) return { texto: "Moderado", color: "text-amber-400 bg-amber-500/10 border-amber-500/30" };
+  return { texto: "Bajo potencial", color: "text-gray-400 bg-gray-500/10 border-gray-500/30" };
+};
+
+const FACTOR_SIMPLE = {
+  Demanda: '¿Cuánta gente lo quiere?',
+  Liquidez: '¿Qué tan fácil es vender?',
+  'Revalorización': '¿Cuánto subió su precio?',
+  Estabilidad: '¿Genera ingresos regulares?',
+};
 
 function calcularScore(factores) {
   return Math.round(factores.reduce((acc, f) => acc + f.valor * (PESOS[f.nombre] ?? 0), 0));
@@ -134,8 +148,29 @@ export default function InversionesPage() {
   const [calcMonto, setCalcMonto] = useState(150000);
   const [calcPlazo, setCalcPlazo] = useState(5);
   const [calcTipo, setCalcTipo] = useState("alquiler");
+  const [leadName, setLeadName] = useState("");
+  const [leadWa, setLeadWa] = useState("");
+  const [leadSent, setLeadSent] = useState(false);
 
   const roiAnual = calcTipo === "alquiler" ? 0.065 : calcTipo === "turistico" ? 0.12 : 0.15;
+
+  const handleLeadSubmit = (e) => {
+    e.preventDefault();
+    if (!leadName.trim() || !leadWa.trim()) return;
+    const tipoLabel = calcTipo === "alquiler" ? "Alquiler" : calcTipo === "turistico" ? "Turístico" : "Reventa";
+    const msg = encodeURIComponent(
+      `Hola Milton, soy ${leadName.trim()}. Usé la calculadora de inversiones y quiero recibir una propuesta personalizada.\n\n` +
+      `📊 Mi simulación:\n` +
+      `• Monto: USD ${calcMonto.toLocaleString()}\n` +
+      `• Tipo: ${tipoLabel}\n` +
+      `• Plazo: ${calcPlazo} año${calcPlazo > 1 ? "s" : ""}\n` +
+      `• ROI anual estimado: ${roiAnual * 100}%\n` +
+      `• Ganancia total estimada: USD ${Math.round(calcMonto * roiAnual * calcPlazo).toLocaleString()}\n\n` +
+      `Mi WhatsApp: ${leadWa.trim()}`
+    );
+    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
+    setLeadSent(true);
+  };
   const scoredAssets = useMemo(
     () => SCORE_DATA.map((activo) => ({ ...activo, score: calcularScore(activo.factores) })).sort((a, b) => b.score - a.score),
     []
@@ -161,12 +196,16 @@ export default function InversionesPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-            <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Inversiones</span>
+            <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Inversiones · San Martín de los Andes</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-black text-white font-jakarta">Inversiones Inmobiliarias</h1>
-              <p className="text-gray-500 text-sm mt-2">San Martín de los Andes · Patagonia</p>
+              <h1 className="text-4xl font-black text-white font-jakarta leading-tight">Invertí mejor en<br className="hidden sm:block" /> San Martín de los Andes</h1>
+              <p className="text-gray-400 text-sm sm:text-base mt-3 max-w-xl">No solo publicamos propiedades. Analizamos el mercado para ayudarte a tomar mejores decisiones de inversión.</p>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                <span className="text-gray-500 text-xs">Análisis basado en más de 600 propiedades relevadas en San Martín de los Andes · 2026</span>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 bg-gray-900 px-3 py-2 rounded-lg border border-gray-800 shadow-sm">
@@ -192,69 +231,56 @@ export default function InversionesPage() {
       <div className="bg-[#0a0a0f]">
         <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
 
-          {/* Tabs chart */}
-          <div className="bg-[#111118] rounded-xl border border-gray-800 p-4 sm:p-6 mb-8">
-            <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
-              {["zonas", "rentabilidad"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab ? "bg-primary-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
-                >
-                  {tab === "zonas" ? "Evolución" : "Rentabilidad"}
-                </button>
-              ))}
+          {/* Bloque de confianza — modelo interno */}
+          <div className="bg-[#111118] rounded-2xl p-6 sm:p-8 border border-gray-800 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 mb-4">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                  <span className="text-green-400 text-xs font-semibold tracking-widest uppercase">Análisis interno de mercado</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white mb-3">Decisiones basadas en datos reales del mercado local</h2>
+                <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                  Relevamos y analizamos de forma continua las propiedades publicadas en San Martín de los Andes. Esa información nos permite orientarte mejor sobre zonas, precios y oportunidades, sin depender de promedios nacionales que no reflejan la realidad de la Patagonia.
+                </p>
+                <p className="text-gray-600 text-xs leading-relaxed border-t border-gray-800 pt-4">
+                  Las estimaciones son orientativas y no constituyen tasación profesional ni garantía de rentabilidad.
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { valor: "600+", label: "Propiedades analizadas", desc: "Datos del mercado local" },
+                  { valor: "2026", label: "Datos actualizados", desc: "Relevamiento continuo" },
+                  { valor: "SMA", label: "Mercado focalizado", desc: "Sin promedios nacionales" },
+                ].map((item) => (
+                  <div key={item.label} className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
+                    <div className="text-xl sm:text-2xl font-black text-white mb-1">{item.valor}</div>
+                    <div className="text-[11px] font-semibold text-gray-400 mb-1 leading-tight">{item.label}</div>
+                    <div className="text-[10px] text-gray-600">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-
-            {activeTab === "zonas" && (
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Evolución de precios (USD/m²)</h3>
-                <InversionesEvolucionChart data={ZONA_DATA.evolucionHistorica} />
-                <div className="mt-3 sm:mt-4 flex justify-between text-xs sm:text-sm text-gray-500">
-                  <span>2021: $1,680</span>
-                  <span className="text-green-400 font-semibold">+57.7%</span>
-                  <span>2026: $2,650</span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "rentabilidad" && (
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Rentabilidad por alquiler</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {ZONA_DATA.rentals.map((item) => (
-                    <div key={`${item.tipo}-${item.precioVenta}`} className="bg-green-950/20 rounded-xl p-4 border border-green-900/30">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-medium text-gray-100">{item.tipo}</span>
-                        <span className="text-2xl font-bold text-green-400">{item.rentabilidad}%</span>
-                      </div>
-                      <div className="text-sm text-gray-400 space-y-1">
-                        <div className="flex justify-between"><span>Precio venta:</span><span className="font-medium text-gray-300">USD {item.precioVenta.toLocaleString()}</span></div>
-                        <div className="flex justify-between"><span>Alquiler:</span><span className="font-medium text-gray-300">USD {item.alquiler}/mes</span></div>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-green-900/30">
-                        <div className="text-xs text-green-400">ROI anual: USD {(item.alquiler * 12).toLocaleString()}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Investment Score */}
+          {/* Test de perfil inversor */}
+          <div className="mb-8">
+            <InvestorQuiz />
+          </div>
+
+          {/* ¿Qué conviene comprar? */}
           <div className="bg-[#111118] rounded-2xl mb-8 p-6 sm:p-8 border border-gray-800 shadow-sm">
             <div className="mb-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                  <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Análisis de activos</span>
+                  <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Comparativa de activos</span>
                 </div>
-                <h2 className="text-2xl font-black text-white">Score de Inversión</h2>
-                <p className="text-gray-500 text-sm mt-1">Puntaje compuesto por demanda, liquidez, revalorización y estabilidad · Elaboración propia</p>
+                <h2 className="text-2xl font-black text-white">¿Qué tipo de propiedad puede convenirte?</h2>
+                <p className="text-gray-500 text-sm mt-1">Análisis orientativo basado en datos del mercado local · No constituye asesoramiento financiero</p>
               </div>
               <div className="rounded-2xl border border-gray-800 bg-gray-900 px-4 py-3 shadow-sm lg:min-w-[280px]">
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-500 mb-1">Mejor opción visual</p>
+                <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-500 mb-1">Mejor posicionado según el análisis</p>
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-white font-bold leading-tight">{bestAsset.tipo}</p>
@@ -265,44 +291,51 @@ export default function InversionesPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-6">
-              {Object.entries(PESOS).map(([nombre, peso]) => (
-                <div key={nombre} className="flex items-center gap-1.5 bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5">
-                  <span className="text-gray-400 text-[10px] font-medium">{nombre}</span>
-                  <span className="text-primary-500 text-[10px] font-black">{Math.round(peso * 100)}%</span>
-                </div>
-              ))}
+            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-6">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                <span className="text-white font-semibold">¿Cómo leer esto?</span> Analizamos 4 preguntas clave del mercado para cada tipo de propiedad. El puntaje resume todo en un número del 1 al 100: a mayor puntaje, mejor posicionado está ese tipo de inversión según los datos actuales de San Martín de los Andes.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {Object.entries(FACTOR_SIMPLE).map(([key, simple]) => (
+                  <span key={key} className="text-gray-500 text-[10px] bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1">{simple}</span>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {SCORE_DATA.map((activo) => {
                 const score = calcularScore(activo.factores);
                 return (
-                  <div key={activo.tipo} className={`group relative rounded-2xl p-6 transition-all duration-300 ${score === bestAsset.score ? "bg-gray-900 border border-primary-500/40 shadow-md ring-1 ring-primary-500/20" : "bg-gray-950/60 border border-gray-800 hover:border-gray-700 hover:shadow-md"}`}>
+                  <div key={activo.tipo} className={`group relative rounded-2xl p-6 transition-all duration-300 flex flex-col ${score === bestAsset.score ? "bg-gray-900 border border-primary-500/40 shadow-md ring-1 ring-primary-500/20" : "bg-gray-950/60 border border-gray-800 hover:border-gray-700 hover:shadow-md"}`}>
                     <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${activo.acento} opacity-70 rounded-t-2xl`} />
-                    {score === bestAsset.score && <div className="absolute -top-3 right-4 px-2.5 py-1 rounded-full bg-primary-600 text-white text-[10px] font-bold shadow">Mejor score</div>}
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-sm font-bold text-white leading-tight">{activo.tipo}</h3>
-                        <span className={`inline-flex items-center mt-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${activo.riesgoColor}`}>{activo.riesgo}</span>
-                      </div>
+                    {score === bestAsset.score && <div className="absolute -top-3 right-4 px-2.5 py-1 rounded-full bg-primary-600 text-white text-[10px] font-bold shadow">Mejor posicionado</div>}
+
+                    {/* Título y puntaje */}
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-sm font-bold text-white leading-tight">{activo.tipo}</h3>
                       <div className="text-right">
                         <span className={`text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br ${activo.acento}`}>{score}</span>
                         <p className="text-gray-600 text-[10px]">/100</p>
                       </div>
                     </div>
-                    <div className="h-2 bg-gray-800 rounded-full mb-5 overflow-hidden">
+
+                    {/* Label interpretación */}
+                    <span className={`inline-flex self-start text-[10px] font-semibold px-2 py-0.5 rounded-full border mb-3 ${scoreLabel(score).color}`}>
+                      {scoreLabel(score).texto}
+                    </span>
+
+                    {/* Barra general */}
+                    <div className="h-2 bg-gray-800 rounded-full mb-4 overflow-hidden">
                       <div className={`h-2 bg-gradient-to-r ${activo.acento} rounded-full`} style={{ width: `${score}%` }} />
                     </div>
-                    <div className="space-y-2.5">
+
+                    {/* Factores */}
+                    <div className="space-y-2.5 flex-1">
                       {activo.factores.map((f) => (
                         <div key={f.nombre} title={f.fuente}>
                           <div className="flex justify-between mb-1">
-                            <div className="flex items-center gap-1">
-                              <span className="text-gray-400 text-[10px] font-medium">{f.nombre}</span>
-                              <span className="text-gray-600 text-[9px]">·{Math.round(PESOS[f.nombre] * 100)}%</span>
-                            </div>
-                            <span className="text-gray-300 text-[10px] font-semibold">{f.valor}</span>
+                            <span className="text-gray-400 text-[10px] font-medium">{FACTOR_SIMPLE[f.nombre] ?? f.nombre}</span>
+                            <span className="text-gray-300 text-[10px] font-semibold">{f.valor}/100</span>
                           </div>
                           <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
                             <div className={`h-1 rounded-full bg-gradient-to-r ${activo.acento}`} style={{ width: `${f.valor}%` }} />
@@ -310,14 +343,81 @@ export default function InversionesPage() {
                         </div>
                       ))}
                     </div>
-                    <p className="text-gray-500 text-[11px] mt-4 leading-relaxed">{activo.descripcion}</p>
+
+                    {/* Descripción simple */}
+                    <p className="text-gray-500 text-[11px] mt-4 leading-relaxed border-t border-gray-800 pt-3">{activo.descripcion}</p>
+
+                    {/* Recomendación para el ganador */}
+                    {score === bestAsset.score && (
+                      <div className="mt-3 bg-primary-600/10 border border-primary-500/20 rounded-lg px-3 py-2 text-center">
+                        <p className="text-primary-400 text-[11px] font-semibold">Mejor posicionado en el mercado actual de SMA</p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
             <p className="text-gray-600 text-xs mt-6 text-center">
-              * Score = Demanda×35% + Liquidez×20% + Revalorización×30% + Estabilidad×15% · Fuentes: Zonaprop, Argenprop, Airbnb, Diario Andino · 2026
+              Análisis orientativo basado en datos del mercado local · Fuentes: Zonaprop, Argenprop, Airbnb, Diario Andino · 2026
             </p>
+          </div>
+
+          {/* Datos del mercado */}
+          <div className="bg-[#111118] rounded-xl border border-gray-800 p-4 sm:p-6 mb-8">
+            <div className="mb-4 sm:mb-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-900 mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                <span className="text-gray-400 text-xs font-semibold tracking-widest uppercase">Datos del mercado · San Martín de los Andes</span>
+              </div>
+              <p className="text-gray-600 text-[11px]">Información orientativa basada en análisis interno · No constituye tasación profesional</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
+              {["zonas", "rentabilidad"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab ? "bg-primary-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
+                >
+                  {tab === "zonas" ? "Evolución de precios" : "Estimación de rentabilidad"}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "zonas" && (
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Evolución del precio del m² (USD)</h3>
+                <InversionesEvolucionChart data={ZONA_DATA.evolucionHistorica} />
+                <div className="mt-3 sm:mt-4 flex justify-between text-xs sm:text-sm text-gray-500">
+                  <span>2021: $1.680/m²</span>
+                  <span className="text-green-400 font-semibold">+57.7% en 5 años</span>
+                  <span>2026: $2.650/m²</span>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "rentabilidad" && (
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Estimación de rentabilidad por alquiler</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  {ZONA_DATA.rentals.map((item) => (
+                    <div key={`${item.tipo}-${item.precioVenta}`} className="bg-green-950/20 rounded-xl p-4 border border-green-900/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium text-gray-100">{item.tipo}</span>
+                        <span className="text-2xl font-bold text-green-400">{item.rentabilidad}%</span>
+                      </div>
+                      <div className="text-sm text-gray-400 space-y-1">
+                        <div className="flex justify-between"><span>Precio referencia:</span><span className="font-medium text-gray-300">USD {item.precioVenta.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span>Alquiler estimado:</span><span className="font-medium text-gray-300">USD {item.alquiler}/mes</span></div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-green-900/30">
+                        <div className="text-xs text-green-400">Renta anual estimada: USD {(item.alquiler * 12).toLocaleString()}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-gray-600 text-[11px] mt-4">Estimaciones orientativas. Los valores reales varían según la propiedad y condiciones del mercado.</p>
+              </div>
+            )}
           </div>
 
           {/* Matriz Riesgo / Retorno */}
@@ -327,8 +427,8 @@ export default function InversionesPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
                 <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Comparativa</span>
               </div>
-              <h2 className="text-2xl font-black text-white">Matriz Riesgo / Retorno</h2>
-              <p className="text-gray-500 text-sm mt-1">Posicionamiento de cada activo según perfil de riesgo y retorno estimado anual</p>
+              <h2 className="text-2xl font-black text-white">¿Cuánto riesgo vale el retorno?</h2>
+              <p className="text-gray-500 text-sm mt-1">Posicionamiento orientativo de cada tipo de activo según riesgo y retorno estimado anual</p>
             </div>
             <div className="relative h-80">
               <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
@@ -340,7 +440,7 @@ export default function InversionesPage() {
               <div className="absolute top-2 left-2 text-[10px] font-semibold text-emerald-400 bg-gray-900/90 px-2 py-1 rounded-full border border-emerald-900/50 shadow-sm pointer-events-none">Conservador</div>
               <div className="absolute top-2 right-2 text-[10px] font-semibold text-amber-400 bg-gray-900/90 px-2 py-1 rounded-full border border-amber-900/50 shadow-sm pointer-events-none">Crecimiento</div>
               <div className="absolute bottom-2 left-2 text-[10px] font-semibold text-sky-400 bg-gray-900/90 px-2 py-1 rounded-full border border-sky-900/50 shadow-sm pointer-events-none">Bajo retorno</div>
-              <div className="absolute bottom-2 right-2 text-[10px] font-semibold text-primary-500 bg-gray-900/90 px-2 py-1 rounded-full border border-primary-900/50 shadow-sm pointer-events-none">Evitar</div>
+              <div className="absolute bottom-2 right-2 text-[10px] font-semibold text-primary-500 bg-gray-900/90 px-2 py-1 rounded-full border border-primary-900/50 shadow-sm pointer-events-none">Riesgo elevado</div>
               <InversionesMatrizChart data={MATRIX_DATA} />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
@@ -348,7 +448,7 @@ export default function InversionesPage() {
                 { arrow: '↙', color: 'text-emerald-400', label: 'Conservador', desc: 'Bajo riesgo · Bajo retorno' },
                 { arrow: '↖', color: 'text-primary-500', label: 'Zona óptima', desc: 'Bajo riesgo · Alto retorno' },
                 { arrow: '↗', color: 'text-orange-400', label: 'Crecimiento', desc: 'Alto riesgo · Alto retorno' },
-                { arrow: '↘', color: 'text-red-400', label: 'Evitar', desc: 'Alto riesgo · Bajo retorno' },
+                { arrow: '↘', color: 'text-red-400', label: 'Riesgo elevado', desc: 'Alto riesgo · Bajo retorno' },
               ].map((q) => (
                 <div key={q.label} className="flex items-start gap-2 bg-gray-900 rounded-xl p-3">
                   <span className={`${q.color} text-base leading-none mt-0.5`}>{q.arrow}</span>
@@ -365,8 +465,8 @@ export default function InversionesPage() {
           <div id="calculadora" className="bg-[#111118] rounded-xl border border-gray-800 p-4 sm:p-6 mb-8 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-white">Calculadora de Retorno</h2>
-                <p className="text-sm text-gray-500">Simulá tu inversión</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-white">¿Cuánto podrías ganar con tu inversión?</h2>
+                <p className="text-sm text-gray-500">Simulá tu escenario de retorno</p>
               </div>
               <span className="bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full self-start">Interactiva</span>
             </div>
@@ -443,18 +543,65 @@ export default function InversionesPage() {
               </div>
             </div>
 
-            <div className="mt-3 sm:mt-4 text-center">
-              <a
-                href={`mailto:${CONTACT_EMAIL}?subject=Propuesta%20de%20inversión%20-%20San%20Martín%20de%20los%20Andes`}
-                className="inline-block w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary-600 text-white font-semibold rounded-lg sm:rounded-xl hover:bg-primary-700 transition-colors text-sm text-center"
-              >
-                Solicitar propuesta
-              </a>
+            <div className="mt-5 border-t border-gray-800 pt-5">
+              {leadSent ? (
+                <div className="flex flex-col items-center gap-2 py-4 text-center">
+                  <div className="w-10 h-10 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-green-400 font-semibold text-sm">¡Listo! Te redirigimos a WhatsApp</p>
+                  <p className="text-gray-500 text-xs">Milton te responde en menos de 48 hs</p>
+                  <button onClick={() => { setLeadSent(false); setLeadName(""); setLeadWa(""); }} className="text-gray-600 hover:text-gray-400 text-xs underline mt-1 transition-colors">
+                    Enviar otra consulta
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleLeadSubmit}>
+                  <p className="text-gray-300 text-sm font-medium mb-1">Recibí una propuesta personalizada</p>
+                  <p className="text-gray-500 text-xs mb-4">Basada en tu simulación · Sin compromiso</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">Tu nombre</label>
+                      <input
+                        type="text"
+                        value={leadName}
+                        onChange={(e) => setLeadName(e.target.value)}
+                        placeholder="Ej: María González"
+                        required
+                        className="w-full px-3 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">Tu WhatsApp</label>
+                      <input
+                        type="tel"
+                        value={leadWa}
+                        onChange={(e) => setLeadWa(e.target.value)}
+                        placeholder="Ej: +54 9 11 1234-5678"
+                        required
+                        className="w-full px-3 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors text-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.122 1.528 5.855L.057 23.882l6.186-1.622A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.658-.518-5.168-1.418l-.371-.22-3.673.963.981-3.585-.242-.38A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                    </svg>
+                    Solicitar propuesta por WhatsApp
+                  </button>
+                  <p className="text-gray-600 text-[11px] mt-2.5">Tu información no se comparte con terceros · Respuesta en menos de 48 hs</p>
+                </form>
+              )}
             </div>
           </div>
 
           <AdvisoryProcess />
-          <InvestorQuiz />
         </div>
       </div>
     </div>

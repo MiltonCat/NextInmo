@@ -21,8 +21,10 @@ export default function Footer() {
             <h4 className="font-semibold text-gray-900 text-sm mb-4 font-jakarta">Explorar</h4>
             <div className="flex flex-col gap-3">
               <Link href="/propiedades" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Propiedades</Link>
+              <Link href="/alquileres" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Alquileres</Link>
               <Link href="/inversiones" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Inversiones</Link>
-              <Link href="/nosotros" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Sobre mí</Link>
+              <Link href="/precio-m2" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Precio del m²</Link>
+              <Link href="/tasacion" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Tasar mi propiedad</Link>
             </div>
           </div>
 

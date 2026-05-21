@@ -7,21 +7,21 @@ import { CONTACT_EMAIL } from "@/config";
 const BARRIO_VIDEOS = [
   {
     youtubeId: "REEMPLAZAR",
-    titulo: "Centro y Costanera",
-    descripcion: "El corazón comercial y la vida frente al lago Lacar",
-    imagen: "/hero-montana.jpg",
+    titulo: "Atardecer sobre el Lago Lácar",
+    descripcion: "Vistas únicas al lago desde las zonas residenciales elevadas",
+    imagen: "/foto1.jpeg",
   },
   {
     youtubeId: "REEMPLAZAR",
-    titulo: "Chapelco y Las Pendientes",
-    descripcion: "Las zonas de mayor revalorización de la ciudad",
-    imagen: "/muelle.jpg",
+    titulo: "San Martín de los Andes desde el aire",
+    descripcion: "La ciudad integrada al bosque nativo con el lago Lácar de fondo",
+    imagen: "/eme1.jpg",
   },
   {
     youtubeId: "REEMPLAZAR",
-    titulo: "Las Marías y zona Sur",
-    descripcion: "Tranquilidad y naturaleza a minutos del centro",
-    imagen: "/portada.jpg",
+    titulo: "Ríos y naturaleza patagónica",
+    descripcion: "Aguas cristalinas y vegetación virgen a minutos del centro",
+    imagen: "/foto.jpeg",
   },
 ];
 
@@ -113,6 +113,7 @@ const EMPTY_FORM = {
   recomienda_invertir: "",
   comentario: "",
   autorizo: false,
+  website: "",
 };
 
 // ─── Card de barrio — retrato con escalonado ──────────────────────────────────
@@ -166,37 +167,43 @@ function VideoCard({ youtubeId, titulo, descripcion, imagen }) {
 function EncuestaDrawer({ open, onClose }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [errorDetail, setErrorDetail] = useState("");
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.website) return;
     if (!form.autorizo) return;
     setStatus("loading");
+    setErrorDetail("");
     try {
-      const res = await fetch("https://formsubmit.co/ajax/ventascatalanprop@gmail.com", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          _subject: `Nueva experiencia de barrio — ${form.barrio || "Sin especificar"} · Catalán Propiedades`,
-          _template: "table",
-          Nombre: form.nombre || "Anónimo",
-          Barrio: form.barrio,
-          "Relación con la zona": form.relacion,
-          "Lo mejor del barrio": form.mejor_del_barrio,
-          "Qué tener en cuenta": form.que_tener_en_cuenta,
-          "Recomienda para vivir": form.recomienda_vivir,
-          "Recomienda para invertir": form.recomienda_invertir,
-          "Comentario publicable": form.comentario,
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY,
+          subject: `Nueva experiencia de barrio — ${form.barrio || "Sin especificar"} · Catalán Propiedades`,
+          from_name: "Guía de Barrios · Catalán Propiedades",
+          nombre: form.nombre || "Anónimo",
+          barrio: form.barrio,
+          relacion: form.relacion,
+          mejor_del_barrio: form.mejor_del_barrio,
+          que_tener_en_cuenta: form.que_tener_en_cuenta,
+          recomienda_vivir: form.recomienda_vivir,
+          recomienda_invertir: form.recomienda_invertir,
+          comentario: form.comentario,
         }),
       });
-      if (res.ok) {
-        setStatus("success");
-        setForm(EMPTY_FORM);
-      } else {
-        setStatus("error");
+      const data = await res.json();
+      if (!data.success) {
+        setErrorDetail(data.message ?? `HTTP ${res.status}`);
+        throw new Error();
       }
-    } catch {
+      setStatus("success");
+      setForm(EMPTY_FORM);
+    } catch (err) {
+      if (!errorDetail) setErrorDetail(err.message || "fetch falló (posible CORS o red)");
       setStatus("error");
     }
   };
@@ -251,6 +258,18 @@ function EncuestaDrawer({ open, onClose }) {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+              {/* Honeypot — invisible para humanos, los bots lo completan */}
+              <div style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
+                <input
+                  type="text"
+                  name="website"
+                  value={form.website}
+                  onChange={(e) => set("website", e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
+
               {/* Nombre */}
               <div>
                 <label className={labelCls}>Nombre <span className="text-gray-300 normal-case font-normal">(opcional)</span></label>
@@ -381,10 +400,11 @@ function EncuestaDrawer({ open, onClose }) {
               </label>
 
               {status === "error" && (
-                <p className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-xl">
-                  Hubo un error al enviar. Intentá de nuevo o escribinos a{" "}
-                  <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>.
-                </p>
+                <div className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-xl space-y-1">
+                  <p>Hubo un error al enviar. Intentá de nuevo o escribinos a{" "}
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a></p>
+                  {errorDetail && <p className="text-xs text-red-400 font-mono break-all">{errorDetail}</p>}
+                </div>
               )}
 
               {/* Submit */}
