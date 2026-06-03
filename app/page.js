@@ -2,12 +2,38 @@ import Image from "next/image";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
-import InvestmentMapClient from "@/components/InvestmentMapClient";
+import dynamic from "next/dynamic";
+const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
 import { properties } from "@/data/properties";
+
+import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
   title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
   description: "Venta de propiedades, alquileres permanentes y asesoría en inversiones inmobiliarias en San Martín de los Andes, Patagonia. +10 años de experiencia.",
+  openGraph: {
+    title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
+    description: "Venta de propiedades, alquileres permanentes y asesoría en inversiones inmobiliarias en San Martín de los Andes, Patagonia. +10 años de experiencia.",
+    url: canonicalUrl("/"),
+    type: "website",
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "Catalán Propiedades — Inmobiliaria en San Martín de los Andes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
+    description: "Venta de propiedades, alquileres permanentes y asesoría en inversiones inmobiliarias en la Patagonia.",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  alternates: {
+    canonical: canonicalUrl("/"),
+  },
 };
 
 export default function Home() {
@@ -112,20 +138,43 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-video rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/portada.jpg"
+                  src="/trayectoria.jpeg"
                   alt="San Martín de los Andes — Catalán Propiedades"
                   fill
                   priority
-                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover" style={{ objectPosition: 'center 65%' }}
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl hidden md:block">
+              <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl hidden md:block">
                 <p className="text-rose-600 text-3xl font-bold mb-1">100%</p>
                 <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Atención Personalizada</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Guía de Barrios — link a experiencia-barrio */}
+      <section className="border-t border-gray-100 bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 rounded-2xl bg-gray-50 border border-gray-200 px-8 py-7">
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase text-rose-600 mb-1">Guía de Barrios</p>
+              <h3 className="text-lg font-black text-gray-900 leading-snug">¿Vivís o viviste en San Martín de los Andes?</h3>
+              <p className="text-gray-500 text-sm mt-1">Tu experiencia local ayuda a otros a elegir mejor dónde comprar o invertir.</p>
+            </div>
+            <Link
+              href="/experiencia-barrio"
+              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl text-sm transition-colors"
+            >
+              Compartir mi barrio
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
           </div>
         </div>
       </section>

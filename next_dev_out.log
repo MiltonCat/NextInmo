@@ -1,0 +1,47 @@
+
+> nextjs@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env.local
+✓ Ready in 13.8s
+- Experiments (use with caution):
+  · optimizePackageImports
+
+○ Compiling / ...
+ GET / 200 in 14.2s (next.js: 11.9s, application-code: 2.4s)
+ GET / 200 in 10.9s (next.js: 6.7s, application-code: 4.2s)
+ GET /propiedades/ 200 in 995ms (next.js: 705ms, application-code: 289ms)
+ GET /propiedades/6/ 200 in 3.8s (next.js: 2.5s, generate-params: 2.2s, application-code: 1328ms)
+ GET /alquileres/ 200 in 956ms (next.js: 690ms, application-code: 265ms)
+○ Compiling /inversiones ...
+ GET /inversiones/ 200 in 3.7s (next.js: 3.5s, application-code: 184ms)
+ GET /inversiones/ 200 in 30.6s (next.js: 29.7s, application-code: 872ms)
+ GET /propiedades/ 200 in 4.3s (next.js: 1025ms, application-code: 3.3s)
+✓ Finished filesystem cache database compaction in 13.5s
+ GET / 200 in 374ms (next.js: 62ms, application-code: 312ms)
+○ Compiling /nosotros ...
+ GET /nosotros/ 200 in 17.7s (next.js: 15.0s, application-code: 2.6s)
+ GET /nosotros/ 200 in 2.8s (next.js: 1397ms, application-code: 1407ms)
+ GET /nosotros/ 200 in 607ms (next.js: 72ms, application-code: 535ms)
+ GET / 200 in 740ms (next.js: 83ms, application-code: 657ms)
+ HEAD / 200 in 863ms (next.js: 48ms, application-code: 815ms)
+ GET /propiedades/ 200 in 1061ms (next.js: 697ms, application-code: 364ms)
+ GET /alquileres/ 200 in 950ms (next.js: 403ms, application-code: 547ms)
+ GET /propiedades/101/ 200 in 736ms (next.js: 150ms, generate-params: 100ms, application-code: 586ms)
+ GET /tasacion/ 200 in 935ms (next.js: 538ms, application-code: 398ms)
+ GET /alquileres/ 200 in 203ms (next.js: 47ms, application-code: 155ms)
+ GET / 200 in 381ms (next.js: 90ms, application-code: 291ms)
+ GET /nosotros/ 200 in 747ms (next.js: 193ms, application-code: 555ms)
+○ Compiling /contacto ...
+ GET /contacto/ 200 in 18.6s (next.js: 14.8s, application-code: 3.8s)
+ GET /alquileres/ 200 in 570ms (next.js: 134ms, application-code: 436ms)
+ GET /propiedades/ 200 in 675ms (next.js: 162ms, application-code: 513ms)
+✓ Finished filesystem cache database compaction in 11.5s
+ GET /propiedades/15/ 200 in 3.5s (next.js: 1338ms, generate-params: 566ms, application-code: 2.2s)
+ GET /propiedades/ 200 in 1191ms (next.js: 578ms, application-code: 613ms)
+ GET /propiedades/4/ 200 in 272ms (next.js: 90ms, generate-params: 44ms, application-code: 182ms)
+○ Compiling /centro-ayuda ...
+ GET /centro-ayuda/ 200 in 13.1s (next.js: 12.6s, application-code: 505ms)

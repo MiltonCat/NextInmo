@@ -21,7 +21,7 @@ export default function Hero() {
       }}
     >
       <img
-        src="/portada.jpg"
+        src="/portada.webp"
         alt="San Martín de los Andes — Catalán Propiedades"
         loading="eager"
         fetchPriority="high"

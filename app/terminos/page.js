@@ -1,8 +1,16 @@
 import Link from "next/link";
+import { canonicalUrl } from "@/config";
 
 export const metadata = {
-  title: "Términos de Servicio | Catalan Propiedades",
-  description: "Términos y condiciones de uso del sitio web de Catalan Propiedades.",
+  title: "Términos de Servicio | Catalán Propiedades",
+  description: "Términos y condiciones de uso del sitio web de Catalán Propiedades.",
+  alternates: {
+    canonical: canonicalUrl("/terminos"),
+  },
+  robots: {
+    index: true,
+    follow: false,
+  },
 };
 
 const sections = [

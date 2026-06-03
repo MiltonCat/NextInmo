@@ -1,119 +1,119 @@
 // Propiedades
 
 // Casa de Taylor 1
-import imageT0 from "../assets/img/imgs/Imgs4/foto1.jpg";
-import imageT1 from "../assets/img/imgs/Imgs4/foto11.jpg";
-import imageT2 from "../assets/img/imgs/Imgs4/foto7.jpg";
-import imageT3 from "../assets/img/imgs/Imgs4/foto4.jpg";
-import imageT4 from "../assets/img/imgs/Imgs4/foto13.jpg";
+import imageT0 from "../assets/img/imgs/Imgs4/foto1.webp";
+import imageT1 from "../assets/img/imgs/Imgs4/foto11.webp";
+import imageT2 from "../assets/img/imgs/Imgs4/foto7.webp";
+import imageT3 from "../assets/img/imgs/Imgs4/foto4.webp";
+import imageT4 from "../assets/img/imgs/Imgs4/foto13.webp";
 // Cabaña en Helechos 2
-import imageH0 from "../assets/img/imgs/Imgs14/foto9.jpeg";
-import imageH1 from "../assets/img/imgs/Imgs14/foto18.jpeg";
-import imageH2 from "../assets/img/imgs/Imgs14/foto7.jpeg";
-import imageH3 from "../assets/img/imgs/Imgs14/foto15.jpeg";
-import imageH4 from "../assets/img/imgs/Imgs14/foto17.jpeg";
+import imageH0 from "../assets/img/imgs/Imgs14/foto9.webp";
+import imageH1 from "../assets/img/imgs/Imgs14/foto18.webp";
+import imageH2 from "../assets/img/imgs/Imgs14/foto7.webp";
+import imageH3 from "../assets/img/imgs/Imgs14/foto15.webp";
+import imageH4 from "../assets/img/imgs/Imgs14/foto17.webp";
 // Casa Frutillas 3
-import imageF0 from "../assets/img/imgs/Imgs1/fruti1.jpeg";
-import imageF1 from "../assets/img/imgs/Imgs1/fruti2.jpeg";
-import imageF2 from "../assets/img/imgs/Imgs1/fruti3.jpeg";
-import imageF3 from "../assets/img/imgs/Imgs1/fruti4.jpeg";
-import imageF4 from "../assets/img/imgs/Imgs1/fruti5.jpeg";
+import imageF0 from "../assets/img/imgs/Imgs1/fruti1.webp";
+import imageF1 from "../assets/img/imgs/Imgs1/fruti2.webp";
+import imageF2 from "../assets/img/imgs/Imgs1/fruti3.webp";
+import imageF3 from "../assets/img/imgs/Imgs1/fruti4.webp";
+import imageF4 from "../assets/img/imgs/Imgs1/fruti5.webp";
 // Casa peñon 4
-import imageP0 from "../assets/img/imgs/Imgs9/casa5.jpeg";
-import imageP1 from "../assets/img/imgs/Imgs9/casa6.jpeg";
-import imageP2 from "../assets/img/imgs/Imgs9/casa10.jpeg";
-import imageP3 from "../assets/img/imgs/Imgs9/casa8.jpeg";
-import imageP4 from "../assets/img/imgs/Imgs9/casa12.jpeg";
+import imageP0 from "../assets/img/imgs/Imgs9/casa5.webp";
+import imageP1 from "../assets/img/imgs/Imgs9/casa6.webp";
+import imageP2 from "../assets/img/imgs/Imgs9/casa10.webp";
+import imageP3 from "../assets/img/imgs/Imgs9/casa8.webp";
+import imageP4 from "../assets/img/imgs/Imgs9/casa12.webp";
 // Casa Vega 5
-// import imageV0 from "../assets/img/imgs/Imgs5/casa4.jpeg";
-// import imageV1 from "../assets/img/imgs/Imgs5/casa5.jpeg";
-// import imageV2 from "../assets/img/imgs/Imgs5/casa6.jpeg";
-// import imageV3 from "../assets/img/imgs/Imgs5/casa7.jpeg";
-// import imageV4 from "../assets/img/imgs/Imgs5/casa.jpeg";
+// import imageV0 from "../assets/img/imgs/Imgs5/casa4.webp";
+// import imageV1 from "../assets/img/imgs/Imgs5/casa5.webp";
+// import imageV2 from "../assets/img/imgs/Imgs5/casa6.webp";
+// import imageV3 from "../assets/img/imgs/Imgs5/casa7.webp";
+// import imageV4 from "../assets/img/imgs/Imgs5/casa.webp";
 // Monoambiente 6
-import imageM0 from "../assets/img/imgs/Imgs10/foto3.jpeg";
-import imageM1 from "../assets/img/imgs/Imgs10/foto4.jpeg";
-import imageM2 from "../assets/img/imgs/Imgs10/foto5.jpeg";
-import imageM3 from "../assets/img/imgs/Imgs10/foto6.jpeg";
-import imageM4 from "../assets/img/imgs/Imgs10/foto2.jpeg";
+import imageM0 from "../assets/img/imgs/Imgs10/foto3.webp";
+import imageM1 from "../assets/img/imgs/Imgs10/foto4.webp";
+import imageM2 from "../assets/img/imgs/Imgs10/foto5.webp";
+import imageM3 from "../assets/img/imgs/Imgs10/foto6.webp";
+import imageM4 from "../assets/img/imgs/Imgs10/foto2.webp";
 // Meliquina 7
-import imageMe0 from "../assets/img/imgs/Imgs11/foto10.jpeg";
-import imageMe1 from "../assets/img/imgs/Imgs11/foto25.jpeg";
-import imageMe2 from "../assets/img/imgs/Imgs11/foto9.jpeg";
-import imageMe3 from "../assets/img/imgs/Imgs11/foto22.jpeg";
-import imageMe4 from "../assets/img/imgs/Imgs11/foto16.jpeg";
+import imageMe0 from "../assets/img/imgs/Imgs11/foto10.webp";
+import imageMe1 from "../assets/img/imgs/Imgs11/foto25.webp";
+import imageMe2 from "../assets/img/imgs/Imgs11/foto9.webp";
+import imageMe3 from "../assets/img/imgs/Imgs11/foto22.webp";
+import imageMe4 from "../assets/img/imgs/Imgs11/foto16.webp";
 // Caleuche 8
-import imageCa from "../assets/img/imgs/Imgs3/foto9.jpg";
-import imageCa1 from "../assets/img/imgs/Imgs3/foto7.jpeg";
-import imageCa2 from "../assets/img/imgs/Imgs3/foto1.jpeg";
-import imageCa3 from "../assets/img/imgs/Imgs3/foto4.jpeg";
-import imageCa4 from "../assets/img/imgs/Imgs3/foto8.jpeg";
+import imageCa from "../assets/img/imgs/Imgs3/foto9.webp";
+import imageCa1 from "../assets/img/imgs/Imgs3/foto7.webp";
+import imageCa2 from "../assets/img/imgs/Imgs3/foto1.webp";
+import imageCa3 from "../assets/img/imgs/Imgs3/foto4.webp";
+import imageCa4 from "../assets/img/imgs/Imgs3/foto8.webp";
 // Cabaña San fernando 9
-import imageFe from "../assets/img/imgs/Imgs12/foto1.jpeg";
-import imageFe1 from "../assets/img/imgs/Imgs12/foto2.jpeg";
-import imageFe2 from "../assets/img/imgs/Imgs12/foto3.jpeg";
-import imageFe3 from "../assets/img/imgs/Imgs12/foto4.jpeg";
-import imageFe4 from "../assets/img/imgs/Imgs12/foto5.jpeg";
+import imageFe from "../assets/img/imgs/Imgs12/foto1.webp";
+import imageFe1 from "../assets/img/imgs/Imgs12/foto2.webp";
+import imageFe2 from "../assets/img/imgs/Imgs12/foto3.webp";
+import imageFe3 from "../assets/img/imgs/Imgs12/foto4.webp";
+import imageFe4 from "../assets/img/imgs/Imgs12/foto5.webp";
 // Departamento Felix amador
-import imageFelix from "../assets/img/imgs/Imgs20/foto20.jpeg";
-import imageFelix1 from "../assets/img/imgs/Imgs20/foto17.jpeg";
-import imageFelix2 from "../assets/img/imgs/Imgs20/foto25.jpeg";
-import imageFelix3 from "../assets/img/imgs/Imgs20/foto22.jpeg";
-import imageFelix4 from "../assets/img/imgs/Imgs20/foto19.jpeg";
+import imageFelix from "../assets/img/imgs/Imgs20/foto20.webp";
+import imageFelix1 from "../assets/img/imgs/Imgs20/foto17.webp";
+import imageFelix2 from "../assets/img/imgs/Imgs20/foto25.webp";
+import imageFelix3 from "../assets/img/imgs/Imgs20/foto22.webp";
+import imageFelix4 from "../assets/img/imgs/Imgs20/foto19.webp";
 // Orilla del quilquihue 11
-import imageOr from "../assets/img/imgs/Imgs6/foto2.jpeg";
-import imageOr1 from "../assets/img/imgs/Imgs6/foto.jpeg";
-import imageOr2 from "../assets/img/imgs/Imgs6/foto3.jpeg";
-import imageOr3 from "../assets/img/imgs/Imgs6/foto4.jpeg";
-import imageOr4 from "../assets/img/imgs/Imgs6/foto5.jpeg";
+import imageOr from "../assets/img/imgs/Imgs6/foto2.webp";
+import imageOr1 from "../assets/img/imgs/Imgs6/foto.webp";
+import imageOr2 from "../assets/img/imgs/Imgs6/foto3.webp";
+import imageOr3 from "../assets/img/imgs/Imgs6/foto4.webp";
+import imageOr4 from "../assets/img/imgs/Imgs6/foto5.webp";
 // Reamanso 12
-import imageRe from "../assets/img/imgs/Imgs13/foto.jpeg";
-import imageRe1 from "../assets/img/imgs/Imgs13/foto11.jpeg";
-import imageRe2 from "../assets/img/imgs/Imgs13/foto13.jpeg";
-import imageRe3 from "../assets/img/imgs/Imgs13/foto15.jpeg";
-import imageRe4 from "../assets/img/imgs/Imgs13/foto8.jpeg";
+import imageRe from "../assets/img/imgs/Imgs13/foto.webp";
+import imageRe1 from "../assets/img/imgs/Imgs13/foto11.webp";
+import imageRe2 from "../assets/img/imgs/Imgs13/foto13.webp";
+import imageRe3 from "../assets/img/imgs/Imgs13/foto15.webp";
+import imageRe4 from "../assets/img/imgs/Imgs13/foto8.webp";
 // Vega 13
-import imageVe from "../assets/img/imgs/Imgs2/foto1.jpg";
-import imageVe1 from "../assets/img/imgs/Imgs2/foto2.jpg";
-import imageVe2 from "../assets/img/imgs/Imgs2/foto3.jpg";
-import imageVe3 from "../assets/img/imgs/Imgs2/foto4.jpg";
-import imageVe4 from "../assets/img/imgs/Imgs2/foto5.jpg";
+import imageVe from "../assets/img/imgs/Imgs2/foto1.webp";
+import imageVe1 from "../assets/img/imgs/Imgs2/foto2.webp";
+import imageVe2 from "../assets/img/imgs/Imgs2/foto3.webp";
+import imageVe3 from "../assets/img/imgs/Imgs2/foto4.webp";
+import imageVe4 from "../assets/img/imgs/Imgs2/foto5.webp";
 // Ruka 6  14
-import imageRuka from "../assets/img/imgs/Imgs17/foto1.jpeg";
-import imageRuka1 from "../assets/img/imgs/Imgs17/foto2.jpeg";
-import imageRuka2 from "../assets/img/imgs/Imgs17/foto3.jpeg";
-import imageRuka3 from "../assets/img/imgs/Imgs17/foto4.jpeg";
-import imageRuka4 from "../assets/img/imgs/Imgs17/foto9.jpeg";
+import imageRuka from "../assets/img/imgs/Imgs17/foto1.webp";
+import imageRuka1 from "../assets/img/imgs/Imgs17/foto2.webp";
+import imageRuka2 from "../assets/img/imgs/Imgs17/foto3.webp";
+import imageRuka3 from "../assets/img/imgs/Imgs17/foto4.webp";
+import imageRuka4 from "../assets/img/imgs/Imgs17/foto9.webp";
 // Lote GInGin
-import imageGingins from "../assets/img/imgs/Imgs15/foto1.jpeg";
-import imageGingins1 from "../assets/img/imgs/Imgs15/foto6.jpeg";
-import imageGingins2 from "../assets/img/imgs/Imgs15/foto3.jpeg";
-import imageGingins3 from "../assets/img/imgs/Imgs15/foto4.jpeg";
-import imageGingins4 from "../assets/img/imgs/Imgs15/foto5.jpeg";
+import imageGingins from "../assets/img/imgs/Imgs15/foto1.webp";
+import imageGingins1 from "../assets/img/imgs/Imgs15/foto6.webp";
+import imageGingins2 from "../assets/img/imgs/Imgs15/foto3.webp";
+import imageGingins3 from "../assets/img/imgs/Imgs15/foto4.webp";
+import imageGingins4 from "../assets/img/imgs/Imgs15/foto5.webp";
 // Aldea de montaña
-import imageAldea from "../assets/img/imgs/Imgs8/foto1.jpeg";
-import imageAldea1 from "../assets/img/imgs/Imgs8/foto2.jpeg";
-import imageAldea2 from "../assets/img/imgs/Imgs8/foto3.jpeg";
-import imageAldea3 from "../assets/img/imgs/Imgs8/foto4.jpeg";
-import imageAldea4 from "../assets/img/imgs/Imgs8/foto5.jpeg";
+import imageAldea from "../assets/img/imgs/Imgs8/foto1.webp";
+import imageAldea1 from "../assets/img/imgs/Imgs8/foto2.webp";
+import imageAldea2 from "../assets/img/imgs/Imgs8/foto3.webp";
+import imageAldea3 from "../assets/img/imgs/Imgs8/foto4.webp";
+import imageAldea4 from "../assets/img/imgs/Imgs8/foto5.webp";
 // Departamento de Gustavo
-import imageGus from "../assets/img/imgs/Imgs18/foto3.jpeg";
-import imageGus1 from "../assets/img/imgs/Imgs18/foto4.jpeg";
-import imageGus2 from "../assets/img/imgs/Imgs18/foto5.jpeg";
-import imageGus3 from "../assets/img/imgs/Imgs18/foto6.jpeg";
-import imageGus4 from "../assets/img/imgs/Imgs18/foto7.jpeg";
+import imageGus from "../assets/img/imgs/Imgs18/foto3.webp";
+import imageGus1 from "../assets/img/imgs/Imgs18/foto4.webp";
+import imageGus2 from "../assets/img/imgs/Imgs18/foto5.webp";
+import imageGus3 from "../assets/img/imgs/Imgs18/foto6.webp";
+import imageGus4 from "../assets/img/imgs/Imgs18/foto7.webp";
 // Lote Maria del valle
-import imageMar from "../assets/img/imgs/Imgs21/imagen1.jpeg";
-import imageMar1 from "../assets/img/imgs/Imgs21/imagen1.jpeg";
-import imageMar2 from "../assets/img/imgs/Imgs21/imagen2.jpeg";
-import imageMar3 from "../assets/img/imgs/Imgs21/imagen3.jpeg";
-import imageMar4 from "../assets/img/imgs/Imgs21/imagen4.jpeg";
+import imageMar from "../assets/img/imgs/Imgs21/imagen1.webp";
+import imageMar1 from "../assets/img/imgs/Imgs21/imagen1.webp";
+import imageMar2 from "../assets/img/imgs/Imgs21/imagen2.webp";
+import imageMar3 from "../assets/img/imgs/Imgs21/imagen3.webp";
+import imageMar4 from "../assets/img/imgs/Imgs21/imagen4.webp";
 //Casa facini
-import imageFacini from "../assets/img/imgs/Imgs22/foto1.jpg";
+import imageFacini from "../assets/img/imgs/Imgs22/foto1.webp";
 import imageFacini1 from "../assets/img/imgs/Imgs22/fotogemini2.png";
-import imageFacini2 from "../assets/img/imgs/Imgs22/foto18.jpg";
-import imageFacini3 from "../assets/img/imgs/Imgs22/foto22.jpg";
-import imageFacini4 from "../assets/img/imgs/Imgs22/foto24.jpg";
+import imageFacini2 from "../assets/img/imgs/Imgs22/foto18.webp";
+import imageFacini3 from "../assets/img/imgs/Imgs22/foto22.webp";
+import imageFacini4 from "../assets/img/imgs/Imgs22/foto24.webp";
 
 
 

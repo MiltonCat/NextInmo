@@ -1,9 +1,68 @@
 import Link from "next/link";
+import Image from "next/image";
+import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+
 
 export const metadata = {
   title: "Blog | Catalán Propiedades",
   description: "Artículos sobre inversión inmobiliaria, mercado en la Patagonia y guías para comprar o alquilar en San Martín de los Andes.",
+  openGraph: {
+    title: "Blog de inversión inmobiliaria — Catalán Propiedades",
+    description: "Análisis, guías y tendencias del mercado inmobiliario en San Martín de los Andes y la Patagonia.",
+    url: canonicalUrl("/blog"),
+    type: "website",
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "Blog Catalán Propiedades — San Martín de los Andes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog de inversión inmobiliaria — Catalán Propiedades",
+    description: "Análisis, guías y tendencias del mercado inmobiliario en San Martín de los Andes y la Patagonia.",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  alternates: {
+    canonical: canonicalUrl("/blog"),
+  },
 };
+
+const blogPosts = [
+  {
+    id: "donde-vivir-san-martin-de-los-andes",
+    title: "¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026",
+    excerpt: "Análisis real de cada barrio: precio del m², tranquilidad, servicios y potencial de inversión. Lo que le diría a un amigo que me pregunta dónde comprar o mudarse.",
+    category: "Guía de Barrios",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "7 min",
+    image: "/sanmartin.jpeg",
+  },
+  {
+    id: "creditos-hipotecarios-uva-2026",
+    title: "Créditos Hipotecarios UVA: La Llave para tu Casa Propia en la Patagonia",
+    excerpt: "El crédito hipotecario volvió a Argentina. Descubrí cómo los créditos UVA te abren la puerta a comprar una propiedad en San Martín de los Andes: requisitos, bancos y guía paso a paso.",
+    category: "Guía de Compra",
+    date: "Mayo 2026",
+    dateTime: "2026-05",
+    readTime: "9 min",
+    image: "/hipotecario.jpeg",
+  },
+  {
+    id: "bitcoin-ladrillos-patagonicos",
+    title: "El Bitcoin de los Ladrillos Patagónicos",
+    excerpt: "¿Por qué invertir en propiedades en San Martín de los Andes es como comprar Bitcoin en 2013? Descubrí la tokenización del mercado inmobiliario patagónico.",
+    category: "Inversión",
+    date: "Mayo 2026",
+    dateTime: "2026-05",
+    readTime: "8 min",
+    image: "/fintech.jpeg",
+  },
+];
 
 export default function BlogPage() {
   return (
@@ -16,42 +75,92 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center text-center">
-        <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-          </svg>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {blogPosts.map((post) => (
+            <Link
+              key={post.id}
+              href={`/blog/${post.id}`}
+              className="group bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="relative h-48 overflow-hidden bg-gray-100">
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-4 left-4">
+                  <span className="bg-rose-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                    {post.category}
+                  </span>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                  <time dateTime={post.dateTime}>{post.date}</time>
+                  <span>·</span>
+                  <span>{post.readTime} de lectura</span>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-rose-600 transition-colors">
+                  {post.title}
+                </h2>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  {post.excerpt}
+                </p>
+                <div className="flex items-center gap-2 text-rose-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                  Leer artículo
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
 
-        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-xs font-semibold tracking-widest uppercase mb-5">
-          Próximamente
-        </span>
-
-        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4 max-w-lg leading-tight">
-          Estamos preparando contenido exclusivo sobre el mercado de SMA
-        </h2>
-
-        <p className="text-gray-500 text-base max-w-md mb-3 leading-relaxed">
-          Próximamente publicaremos análisis del mercado, guías de compra, evolución del valor del m² y tendencias de inversión en San Martín de los Andes.
-        </p>
-
-        <p className="text-gray-400 text-sm mb-10">
-          Mientras tanto, podés consultar directamente con nosotros.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link
-            href="/contacto"
-            className="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm shadow-sm"
-          >
-            Contactanos
-          </Link>
-          <Link
-            href="/inversiones"
-            className="bg-white hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors text-sm border border-gray-200"
-          >
-            Ver análisis de mercado
-          </Link>
+        {/* Guía de Barrios CTA */}
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-10 bg-gray-900 rounded-3xl flex flex-col justify-between">
+            <div>
+              <p className="text-gray-400 text-xs font-bold tracking-widest uppercase mb-3">Guía de Barrios</p>
+              <h2 className="text-2xl font-black text-white mb-3 leading-tight">
+                ¿Cómo es vivir en tu barrio de San Martín?
+              </h2>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Compartí tu experiencia y ayudá a otros a elegir mejor dónde comprar, invertir o mudarse. Anónimo, menos de 5 minutos.
+              </p>
+            </div>
+            <Link
+              href="/experiencia-barrio"
+              className="mt-8 inline-flex items-center gap-2 bg-white hover:bg-gray-100 text-gray-900 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors self-start"
+            >
+              Compartir mi barrio
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+          <div className="p-10 bg-rose-600 rounded-3xl flex flex-col justify-between">
+            <div>
+              <p className="text-rose-200 text-xs font-bold tracking-widest uppercase mb-3">Más contenido en camino</p>
+              <h2 className="text-2xl font-black text-white mb-3 leading-tight">
+                Análisis, guías y tendencias del mercado patagónico
+              </h2>
+              <p className="text-rose-100 text-sm leading-relaxed">
+                Evolución del precio del m², guías de compra, oportunidades de inversión y mucho más.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-8">
+              <Link href="/inversiones" className="bg-white hover:bg-rose-50 text-rose-600 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
+                Ver análisis de mercado
+              </Link>
+              <Link href="/precio-m2" className="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors border border-white/20">
+                Precio del m²
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

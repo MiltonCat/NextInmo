@@ -1,8 +1,19 @@
 import Link from "next/link";
+import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
-  title: "Prensa | Catalan Propiedades",
-  description: "Catalan Propiedades en los medios. Coberturas, entrevistas y apariciones.",
+  title: "Prensa | Catalán Propiedades",
+  description: "Catalán Propiedades en los medios. Coberturas, entrevistas y apariciones de Milton Catalán y la firma en la prensa argentina.",
+  openGraph: {
+    title: "Prensa — Catalán Propiedades",
+    description: "Coberturas, entrevistas y apariciones en los principales medios.",
+    url: canonicalUrl("/prensa"),
+    type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Prensa Catalán Propiedades" }],
+  },
+  alternates: {
+    canonical: canonicalUrl("/prensa"),
+  },
 };
 
 const gridStyle = {

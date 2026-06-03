@@ -22,6 +22,17 @@ function PropertyCard({ property }) {
     ambas: "bg-rose-600 text-white",
   };
 
+  const TYPE_EMOJI = {
+    "Casa": "🏡",
+    "Departamento": "🏢",
+    "Monoambiente": "🏢",
+    "Lote": "🏔️",
+    "Cabaña": "🏕️",
+    "Cabañas": "🏕️",
+    "PH": "🏘️",
+  };
+  const typeEmoji = TYPE_EMOJI[property.type] || "🏠";
+
   const handleToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -41,11 +52,21 @@ function PropertyCard({ property }) {
           alt={property.title}
           loading="lazy"
           decoding="async"
-          className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform duration-500"
+          className={`w-full h-48 object-cover group-hover:scale-[1.02] transition-transform duration-500 ${property.alquilada ? "brightness-50" : property.reservada ? "brightness-75" : ""}`}
         />
-        <span className={`absolute top-2 left-2 text-xs font-semibold px-2 py-1 rounded ${operationColor[property.operation]}`}>
-          {operationLabel[property.operation]}
-        </span>
+        {property.alquilada ? (
+          <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded bg-gray-800 text-white tracking-wide">
+            ALQUILADA
+          </span>
+        ) : property.reservada ? (
+          <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded bg-gray-600 text-white tracking-wide">
+            RESERVADA
+          </span>
+        ) : (
+          <span className={`absolute top-2 left-2 text-xs font-semibold px-2 py-1 rounded ${operationColor[property.operation]}`}>
+            {operationLabel[property.operation]}
+          </span>
+        )}
         {property.roi && (
           <span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded-full shadow text-green-700">
             ROI ~{property.roi}%
@@ -89,7 +110,13 @@ function PropertyCard({ property }) {
       </div>
 
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-1">{property.title}</h3>
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <h3 className="text-lg font-semibold text-gray-800 leading-snug flex-1 min-w-0">{property.title}</h3>
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold flex-shrink-0 whitespace-nowrap">
+            <span>{typeEmoji}</span>
+            <span>{property.type}</span>
+          </span>
+        </div>
         <p className="text-gray-500 text-sm mb-2">{property.location}</p>
 
         {isAlquiler ? (
@@ -104,12 +131,12 @@ function PropertyCard({ property }) {
           <div className="mb-3">
             {(property.operation === "venta" || property.operation === "ambas") && (
               <p className="text-xl font-bold text-rose-600">
-                USD {property.price.toLocaleString()}
+                USD {property.price.toLocaleString('es-AR')}
               </p>
             )}
             {(property.operation === "alquiler" || property.operation === "ambas") && (
               <p className="text-xl font-bold text-rose-600">
-                ${property.rentPrice?.toLocaleString()}
+                ${property.rentPrice?.toLocaleString('es-AR')}
                 <span className="text-sm font-normal text-gray-500"> /mes</span>
               </p>
             )}

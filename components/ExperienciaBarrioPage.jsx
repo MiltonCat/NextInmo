@@ -9,19 +9,19 @@ const BARRIO_VIDEOS = [
     youtubeId: "REEMPLAZAR",
     titulo: "Atardecer sobre el Lago Lácar",
     descripcion: "Vistas únicas al lago desde las zonas residenciales elevadas",
-    imagen: "/foto1.jpeg",
+    imagen: "/foto1.webp",
   },
   {
     youtubeId: "REEMPLAZAR",
     titulo: "San Martín de los Andes desde el aire",
     descripcion: "La ciudad integrada al bosque nativo con el lago Lácar de fondo",
-    imagen: "/eme1.jpg",
+    imagen: "/eme1.webp",
   },
   {
     youtubeId: "REEMPLAZAR",
     titulo: "Ríos y naturaleza patagónica",
     descripcion: "Aguas cristalinas y vegetación virgen a minutos del centro",
-    imagen: "/foto.jpeg",
+    imagen: "/foto.webp",
   },
 ];
 
@@ -105,6 +105,7 @@ const GUIDE_QUESTIONS = [
 
 const EMPTY_FORM = {
   nombre: "",
+  email: "",
   barrio: "",
   relacion: "",
   mejor_del_barrio: "",
@@ -186,6 +187,7 @@ function EncuestaDrawer({ open, onClose }) {
           subject: `Nueva experiencia de barrio — ${form.barrio || "Sin especificar"} · Catalán Propiedades`,
           from_name: "Guía de Barrios · Catalán Propiedades",
           nombre: form.nombre || "Anónimo",
+          email: form.email || "No proporcionado",
           barrio: form.barrio,
           relacion: form.relacion,
           mejor_del_barrio: form.mejor_del_barrio,
@@ -280,6 +282,26 @@ function EncuestaDrawer({ open, onClose }) {
                   placeholder="Podés dejarlo en blanco para ser anónimo"
                   className={inputCls}
                 />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className={labelCls}>
+                  Email <span className="text-gray-300 normal-case font-normal">(opcional)</span>
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  placeholder="Para recibir el informe de precio del m² por zona"
+                  className={inputCls}
+                />
+                <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Te avisamos cuando actualicemos el análisis de precio del m² por barrio
+                </p>
               </div>
 
               {/* Barrio */}
@@ -788,9 +810,17 @@ export default function ExperienciaBarrioPage() {
           <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black text-gray-900 font-jakarta leading-[1.06] mb-6">
             Conocé cada barrio desde la mirada de quienes lo viven.
           </h1>
-          <p className="text-gray-500 text-lg leading-relaxed mb-10 max-w-md">
-            Tu experiencia local puede ayudar a otras personas a tomar mejores decisiones al comprar, invertir o mudarse en San Martín de los Andes.
+          <p className="text-gray-500 text-lg leading-relaxed mb-6 max-w-md">
+            Compartí cómo es vivir en tu barrio y accedé al análisis actualizado de precio del m² por zona — datos que usamos para asesorar inversiones reales.
           </p>
+          <div className="flex items-start gap-3 mb-8 p-4 bg-gray-50 border border-gray-200 rounded-xl max-w-md">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Quienes comparten su experiencia reciben antes que nadie el <strong className="text-gray-900">informe de precio del m² por barrio</strong> cuando se actualiza.
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => setDrawerOpen(true)}
@@ -989,7 +1019,7 @@ export default function ExperienciaBarrioPage() {
               <p className="text-gray-400 text-sm mt-5">Anónimo · Menos de 5 minutos · Sin registro</p>
             </div>
             <div className="relative rounded-3xl overflow-hidden aspect-[4/3]">
-              <img src="/muelle.jpg" alt="San Martín de los Andes" className="w-full h-full object-cover" />
+              <img src="/muelle.webp" alt="San Martín de los Andes" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               <div className="absolute bottom-6 left-6">
                 <p className="text-white font-black text-2xl font-jakarta leading-tight">San Martín de los Andes</p>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { properties } from "@/data/properties";
 import Lightbox from "@/components/Lightbox";
@@ -7,6 +7,7 @@ import VisitScheduler from "@/components/VisitScheduler";
 import PropertyInquiry from "@/components/PropertyInquiry";
 import PropertySheet from "@/components/PropertySheet";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { WA_NUMBER } from "@/config";
 
 function waLink(propertyTitle, message = "") {
@@ -24,6 +25,14 @@ export default function PropertyDetailClient({ id }) {
   const [showInquiry, setShowInquiry] = useState(false);
   const [showSheet, setShowSheet] = useState(false);
   const { isFavorite, toggle } = useFavorites();
+  const { trackPropertyView, trackPropertyInquiry, trackFavoriteToggle, trackWhatsAppClick, trackPropertyShare } = useAnalytics();
+
+  // Track property view on mount
+  useEffect(() => {
+    if (property) {
+      trackPropertyView(property);
+    }
+  }, [property?.id]);
 
   if (!property) {
     return (
@@ -50,6 +59,9 @@ export default function PropertyDetailClient({ id }) {
 
   const handleShare = async () => {
     const url = window.location.href;
+    const method = navigator.share ? 'native' : 'copy_link';
+    trackPropertyShare(property, method);
+    
     if (navigator.share) {
       await navigator.share({ title: property.title, url });
     } else {
@@ -63,6 +75,9 @@ export default function PropertyDetailClient({ id }) {
     const msg = inquiry.trim()
       ? `Hola! Me interesa la propiedad: "${property.title}".\n\n${inquiry}`
       : `Hola! Me interesa la propiedad: "${property.title}". Podemos hablar?`;
+    
+    trackPropertyInquiry(property, 'whatsapp');
+    trackWhatsAppClick(property);
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -78,6 +93,18 @@ export default function PropertyDetailClient({ id }) {
 
   return (
     <div>
+      {property.alquilada && (
+        <div className="bg-gray-800 text-white text-center py-3 px-4">
+          <span className="font-bold tracking-wide text-sm">PROPIEDAD ALQUILADA</span>
+          <span className="text-gray-300 text-sm ml-2">— Esta propiedad ya no está disponible. Consultanos por opciones similares.</span>
+        </div>
+      )}
+      {property.reservada && (
+        <div className="bg-gray-600 text-white text-center py-3 px-4">
+          <span className="font-bold tracking-wide text-sm">PROPIEDAD RESERVADA</span>
+          <span className="text-gray-200 text-sm ml-2">— Esta propiedad está reservada. Consultanos por disponibilidad u opciones similares.</span>
+        </div>
+      )}
       {/* Header */}
       <section className="bg-white pt-24 pb-8 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,7 +135,11 @@ export default function PropertyDetailClient({ id }) {
             </div>
             <div className="flex items-center gap-2 shrink-0 mt-1">
               <button
-                onClick={() => toggle(property.id)}
+                onClick={() => {
+                  const newFav = !fav;
+                  toggle(property.id);
+                  trackFavoriteToggle(property, newFav ? 'add' : 'remove');
+                }}
                 className="flex items-center gap-1.5 border rounded-lg px-3 py-2 text-sm transition"
                 style={{ borderColor: fav ? "#6366f1" : "#d1d5db", color: fav ? "#818cf8" : "#6b7280" }}
                 aria-label={fav ? "Quitar de favoritos" : "Guardar"}
@@ -140,7 +171,7 @@ export default function PropertyDetailClient({ id }) {
           {/* Gallery - desktop */}
           <div className="relative mb-8 hidden lg:grid grid-cols-4 grid-rows-2 gap-1 h-64 lg:h-80 overflow-hidden rounded-xl">
             <div className="col-span-2 row-span-2">
-              <img src={property.image} alt={property.title} className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" onClick={() => openGallery(0)} />
+              <img src={property.image} alt={property.title} fetchPriority="high" decoding="async" className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" onClick={() => openGallery(0)} />
             </div>
             {[property.image1, property.image2, property.image3, property.image4].map((image, index) => (
               <div key={index} className="col-span-1 row-span-1">
@@ -148,6 +179,7 @@ export default function PropertyDetailClient({ id }) {
                   src={image || property.image}
                   alt={`${property.title} - ${index + 2}`}
                   loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
                   onClick={() => openGallery(index + 1)}
                 />
@@ -166,7 +198,7 @@ export default function PropertyDetailClient({ id }) {
             <div className="overflow-x-auto flex gap-1 pb-2 snap-x snap-mandatory">
               {allImages.map((img, idx) => (
                 <div key={idx} className="flex-shrink-0 w-full snap-center">
-                  <img src={img} alt={`${property.title} - ${idx + 1}`} loading={idx > 0 ? "lazy" : undefined} className="w-full h-64 object-cover rounded-xl cursor-pointer" onClick={() => openGallery(idx)} />
+                  <img src={img} alt={`${property.title} - ${idx + 1}`} loading={idx > 0 ? "lazy" : "eager"} fetchPriority={idx === 0 ? "high" : "low"} decoding="async" className="w-full h-64 object-cover rounded-xl cursor-pointer" onClick={() => openGallery(idx)} />
                 </div>
               ))}
             </div>
@@ -226,14 +258,34 @@ export default function PropertyDetailClient({ id }) {
                           )}
                         </div>
                       )}
-                      <a
-                        href={waLink(property.title, `Hola! Me interesa alquilar la propiedad: "${property.title}". Podemos hablar?`)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-xl text-center transition"
-                      >
-                        Consultar disponibilidad
-                      </a>
+                      {property.alquilada ? (
+                        <a
+                          href={waLink(property.title, `Hola! Vi la cabaña en la Cascada (alquilada) y me interesa algo similar. ¿Tienen disponibilidad?`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl text-center transition"
+                        >
+                          Consultar por opciones similares
+                        </a>
+                      ) : property.reservada ? (
+                        <a
+                          href={waLink(property.title, `Hola! Vi la propiedad "${property.title}" (reservada) y me interesa. ¿Sigue disponible o tienen algo similar?`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 rounded-xl text-center transition"
+                        >
+                          Consultar disponibilidad
+                        </a>
+                      ) : (
+                        <a
+                          href={waLink(property.title, `Hola! Me interesa alquilar la propiedad: "${property.title}". Podemos hablar?`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-xl text-center transition"
+                        >
+                          Consultar disponibilidad
+                        </a>
+                      )}
                     </div>
                   ) : (
                     <div className="flex flex-col gap-4">
@@ -309,7 +361,7 @@ export default function PropertyDetailClient({ id }) {
 
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="border border-gray-200 rounded-xl p-6 flex items-center gap-4">
-                  <img src="/Milton.jpeg" alt="Asesor" loading="lazy" className="w-20 h-20 rounded-full object-cover shrink-0" />
+                  <img src="/Milton.webp" alt="Asesor" loading="lazy" decoding="async" className="w-20 h-20 rounded-full object-cover shrink-0" />
                   <div>
                     <h3 className="font-semibold text-gray-800">Milton</h3>
                     <p className="text-gray-500 text-sm">Asesor inmobiliario</p>
