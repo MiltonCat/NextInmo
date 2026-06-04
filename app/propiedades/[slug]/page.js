@@ -125,9 +125,12 @@ export default async function PropiedadesSlugPage({ params }) {
   const canonical = canonicalUrl(`/propiedades/${getPropertySlug(property)}`);
   const imageUrl = property.image?.startsWith("http") ? property.image : `${SITE_URL}${property.image}`;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
+  const price = isAlquiler ? property.precioAlquilerARS : property.price;
+  const priceCurrency = isAlquiler ? "ARS" : "USD";
+
+  const realEstateListing = {
     "@type": isAlquiler ? "RentalListing" : "RealEstateListing",
+    "@id": `${canonical}#listing`,
     name: property.title,
     description: property.description,
     url: canonical,
@@ -142,8 +145,8 @@ export default async function PropiedadesSlugPage({ params }) {
     geo: { "@type": "GeoCoordinates", latitude: -40.1576, longitude: -71.3533 },
     offers: {
       "@type": "Offer",
-      price: isAlquiler ? property.precioAlquilerARS : property.price,
-      priceCurrency: isAlquiler ? "ARS" : "USD",
+      price,
+      priceCurrency,
       availability: "https://schema.org/InStock",
       ...(isAlquiler && {
         priceSpecification: {
@@ -158,6 +161,34 @@ export default async function PropiedadesSlugPage({ params }) {
     ...(property.bedrooms > 0 && { numberOfRooms: property.bedrooms }),
     ...(property.bathrooms > 0 && { numberOfBathroomsTotal: property.bathrooms }),
     amenityFeature: property.features?.map((f) => ({ "@type": "LocationFeatureSpecification", name: f })),
+  };
+
+  // Product habilita el rich snippet de precio en resultados de Google
+  // (RealEstateListing por sí solo no califica para snippet de precio en SERP).
+  const productListing = {
+    "@type": "Product",
+    "@id": `${canonical}#product`,
+    name: property.title,
+    description: property.description,
+    image: imageUrl,
+    sku: String(property.id),
+    category: property.type,
+    brand: { "@type": "Brand", name: "Catalán Propiedades" },
+    offers: {
+      "@type": "Offer",
+      url: canonical,
+      price,
+      priceCurrency,
+      availability: property.alquilada || property.reservada
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      seller: { "@id": `${SITE_URL}/#organization` },
+    },
+  };
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [realEstateListing, productListing],
   };
 
   const breadcrumbJsonLd = {

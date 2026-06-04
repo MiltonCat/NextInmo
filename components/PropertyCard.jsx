@@ -1,7 +1,9 @@
 "use client";
 import { memo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useFavorites } from "@/hooks/useFavorites";
+import { getPropertySlug } from "@/data/properties";
 
 function PropertyCard({ property }) {
   const { isFavorite, toggle } = useFavorites();
@@ -45,14 +47,14 @@ function PropertyCard({ property }) {
   };
 
   return (
-    <Link href={`/propiedades/${property.id}`} className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow block">
-      <div className="relative">
-        <img
+    <Link href={`/propiedades/${getPropertySlug(property)}`} className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow block">
+      <div className="relative h-48">
+        <Image
           src={property.image}
           alt={property.title}
-          loading="lazy"
-          decoding="async"
-          className={`w-full h-48 object-cover group-hover:scale-[1.02] transition-transform duration-500 ${property.alquilada ? "brightness-50" : property.reservada ? "brightness-75" : ""}`}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className={`object-cover group-hover:scale-[1.02] transition-transform duration-500 ${property.alquilada ? "brightness-50" : property.reservada ? "brightness-75" : ""}`}
         />
         {property.alquilada ? (
           <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded bg-gray-800 text-white tracking-wide">

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { properties } from "@/data/properties";
+import { properties, getPropertySlug } from "@/data/properties";
 import { WA_URL } from "@/config";
 
 const WHATSAPP_URL = WA_URL;
@@ -179,7 +179,7 @@ export default function ChatBot() {
                       {msg.results.map((prop) => (
                         <Link
                           key={prop.id}
-                          href={`/propiedades/${prop.id}`}
+                          href={`/propiedades/${getPropertySlug(prop)}`}
                           onClick={() => setOpen(false)}
                           className="flex gap-2 bg-white rounded-xl p-2 shadow-sm hover:shadow-md transition border border-gray-100"
                         >

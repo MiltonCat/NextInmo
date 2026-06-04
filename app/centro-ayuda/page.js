@@ -89,6 +89,19 @@ const gridStyle = {
   backgroundSize: "48px 48px",
 };
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
+
 export default function CentroAyudaPage() {
   const [openFaq, setOpenFaq] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -110,6 +123,10 @@ export default function CentroAyudaPage() {
 
   return (
     <div className="min-h-screen bg-white" style={gridStyle}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <section className="relative overflow-hidden pt-24 pb-16 bg-transparent">
         <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-transparent to-white/80 pointer-events-none" />
 

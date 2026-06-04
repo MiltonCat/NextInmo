@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Hero() {
   const [collapsed, setCollapsed] = useState(false);
@@ -20,12 +21,13 @@ export default function Hero() {
         transition: "height 900ms cubic-bezier(0.4, 0, 0.2, 1), min-height 900ms cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      <img
+      <Image
         src="/portada.webp"
         alt="San Martín de los Andes — Catalán Propiedades"
-        loading="eager"
-        fetchPriority="high"
-        className="absolute inset-0 w-full h-full object-cover hero-kenburns"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover hero-kenburns"
         style={{
           transition: "opacity 900ms ease",
           opacity: collapsed ? 0.35 : 1,

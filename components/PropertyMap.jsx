@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Link from "next/link";
 import L from "leaflet";
+import { getPropertySlug } from "@/data/properties";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -45,7 +46,7 @@ export default function PropertyMap({ properties, selectedId }) {
                 <img src={property.image} alt={property.title} className="w-full h-24 object-cover rounded mb-2" />
                 <h3 className="font-semibold text-sm mb-1 line-clamp-2">{property.title}</h3>
                 <p className="text-rose-500 font-bold">USD {property.price?.toLocaleString()}</p>
-                <Link href={`/propiedades/${property.id}`} className="text-xs text-rose-500 hover:underline mt-1 block">
+                <Link href={`/propiedades/${getPropertySlug(property)}`} className="text-xs text-rose-500 hover:underline mt-1 block">
                   Ver detalles →
                 </Link>
               </div>
