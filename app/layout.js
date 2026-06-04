@@ -1,6 +1,8 @@
 import "./globals.css";
 import Script from "next/script";
 import { Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientShell from "@/components/ClientShell";
@@ -189,6 +191,8 @@ export default function RootLayout({ children }) {
         </main>
         <Footer />
         <ClientShell />
+        <SpeedInsights />
+        <Analytics />
         {/* Google Analytics */}
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">{`
