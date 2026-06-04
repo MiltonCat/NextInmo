@@ -274,7 +274,7 @@ export const properties = [
     operation: "alquiler",
     location: "Belgrano 555, San Martín de los Andes",
     price: 0,
-    precioAlquilerARS: 1400000,
+    precioAlquilerARS: 1300000,
     disponibleDesde: "Inmediato",
     mesesMinimos: 12,
     condiciones: "1 mes de alquiler + 1 mes de depósito + 1 mes de comisión",
