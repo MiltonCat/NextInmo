@@ -1,13 +1,14 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { properties, getPropertySlug } from "@/data/properties";
+import { properties as fallbackProperties, getPropertySlug } from "@/data/properties";
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { WA_URL } from "@/config";
 
 const WHATSAPP_URL = WA_URL;
 
-function filterProps(filters) {
-  return properties.filter((p) => {
+function filterProps(filters, list) {
+  return list.filter((p) => {
     if (filters.types?.length && !filters.types.some((t) => p.type.toLowerCase().includes(t.toLowerCase()))) return false;
     if (filters.minPrice && p.price < filters.minPrice) return false;
     if (filters.maxPrice && p.price > filters.maxPrice) return false;
@@ -72,11 +73,25 @@ export default function ChatBot() {
   ]);
   const [activeStep, setActiveStep] = useState("welcome");
   const [filters, setFilters] = useState({});
+  // Arranca con el array estático de respaldo y se actualiza con datos frescos de la base.
+  const [dataset, setDataset] = useState(fallbackProperties);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
+
+  useEffect(() => {
+    const supabase = supabaseBrowser();
+    if (!supabase) return;
+    supabase
+      .from("properties")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .then(({ data, error }) => {
+        if (!error && data?.length) setDataset(data);
+      });
+  }, []);
 
   const handleOption = (opt, currentFilters) => {
     const userMsg = { role: "user", text: opt.label };
@@ -96,7 +111,7 @@ export default function ChatBot() {
     const merged = opt.filter ? { ...currentFilters, ...opt.filter } : currentFilters;
 
     if (opt.next === "results") {
-      const found = filterProps(merged);
+      const found = filterProps(merged, dataset);
       const botText =
         found.length === 0
           ? "No encontré propiedades con esos filtros exactos. Te recomiendo hablar con un asesor para explorar más opciones."

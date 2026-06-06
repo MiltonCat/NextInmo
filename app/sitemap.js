@@ -1,8 +1,10 @@
-export const dynamic = "force-static";
-import { properties, getPropertySlug } from "@/data/properties";
+export const revalidate = 3600;
+import { getPropertySlug } from "@/data/properties";
+import { getProperties } from "@/lib/properties";
 import { canonicalUrl } from "@/config";
 
-export default function sitemap() {
+export default async function sitemap() {
+  const properties = await getProperties();
   const now = new Date();
 
   const staticRoutes = [

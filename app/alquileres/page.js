@@ -1,6 +1,9 @@
 import dynamic from "next/dynamic";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+import { getProperties } from "@/lib/properties";
 const AlquileresClient = dynamic(() => import("./AlquileresClient"));
+
+export const revalidate = 300;
 
 export const metadata = {
   title: "Alquileres permanentes en San Martín de los Andes | Catalán Propiedades",
@@ -26,11 +29,12 @@ const breadcrumbJsonLd = {
   ],
 };
 
-export default function AlquileresPage() {
+export default async function AlquileresPage() {
+  const properties = await getProperties();
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <AlquileresClient />
+      <AlquileresClient properties={properties} />
     </>
   );
 }

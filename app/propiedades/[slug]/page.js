@@ -1,11 +1,22 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import PropertyDetailClient from "@/components/PropertyDetailClient";
-import { properties, getPropertySlug, findPropertyBySlug } from "@/data/properties";
+import { getPropertySlug } from "@/data/properties";
+import { getProperties, getPropertyById } from "@/lib/properties";
 import { SITE_URL, canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import dynamic from "next/dynamic";
 
 const PropertiesClient = dynamic(() => import("../PropertiesClient"));
+
+// Refresca desde la base cada 5 minutos. Las propiedades nuevas (no incluidas
+// en generateStaticParams) se renderizan bajo demanda gracias a dynamicParams.
+export const revalidate = 300;
+
+// Extrae el id numérico del final del slug (o de un slug que sea solo el id).
+function idFromSlug(slug) {
+  const match = String(slug).match(/(\d+)$/);
+  return match ? parseInt(match[1], 10) : null;
+}
 
 const TIPO_MAP = {
   casas:         { tipos: ["Casa"],               label: "Casas",         labelSingular: "casa" },
@@ -17,6 +28,7 @@ const TIPO_MAP = {
 };
 
 export async function generateStaticParams() {
+  const properties = await getProperties();
   // Slug descriptivo (canónico) de cada propiedad.
   const slugParams = properties.map((p) => ({ slug: getPropertySlug(p) }));
   // Id numérico como respaldo: mantiene vivas las URLs viejas ya indexadas
@@ -32,6 +44,7 @@ export async function generateMetadata({ params }) {
   // Página por tipo
   const tipoConfig = TIPO_MAP[slug];
   if (tipoConfig) {
+    const properties = await getProperties();
     const count = properties.filter((p) => tipoConfig.tipos.includes(p.type)).length;
     return {
       title: `${tipoConfig.label} en venta en San Martín de los Andes | Catalán Propiedades`,
@@ -54,7 +67,7 @@ export async function generateMetadata({ params }) {
   }
 
   // Página de detalle de propiedad
-  const property = findPropertyBySlug(slug);
+  const property = await getPropertyById(idFromSlug(slug));
   if (!property) return { title: "Propiedad no encontrada | Catalán Propiedades" };
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
@@ -112,13 +125,13 @@ export default async function PropiedadesSlugPage({ params }) {
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-        <PropertiesClient tipoFiltro={tipoConfig.tipos} tipoLabel={tipoConfig.label} />
+        <PropertiesClient properties={await getProperties()} tipoFiltro={tipoConfig.tipos} tipoLabel={tipoConfig.label} />
       </>
     );
   }
 
   // Página de detalle de propiedad — acepta tanto slug descriptivo como ID numérico.
-  const property = findPropertyBySlug(slug);
+  const property = await getPropertyById(idFromSlug(slug));
   if (!property) notFound();
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
@@ -217,7 +230,7 @@ export default async function PropiedadesSlugPage({ params }) {
             </nav>
           </div>
         </div>
-        <PropertyDetailClient id={String(property.id)} />
+        <PropertyDetailClient property={property} />
       </div>
     </>
   );

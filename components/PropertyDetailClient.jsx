@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { properties } from "@/data/properties";
 import Lightbox from "@/components/Lightbox";
 import VisitScheduler from "@/components/VisitScheduler";
 import PropertyInquiry from "@/components/PropertyInquiry";
@@ -15,8 +14,7 @@ function waLink(propertyTitle, message = "") {
   return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
 }
 
-export default function PropertyDetailClient({ id }) {
-  const property = properties.find((p) => p.id === parseInt(id));
+export default function PropertyDetailClient({ property }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [copied, setCopied] = useState(false);

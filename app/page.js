@@ -4,9 +4,12 @@ import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import dynamic from "next/dynamic";
 const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
-import { properties } from "@/data/properties";
+import { getProperties } from "@/lib/properties";
 
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+
+// Refresca el contenido desde la base cada 5 minutos sin necesidad de redeploy.
+export const revalidate = 300;
 
 export const metadata = {
   title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
@@ -36,7 +39,8 @@ export const metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const properties = await getProperties();
   const featuredProperties = properties.slice(0, 3);
 
   return (

@@ -4,9 +4,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
-import { properties } from "@/data/properties";
 
-function AlquileresContent() {
+function AlquileresContent({ properties = [] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -91,10 +90,10 @@ function AlquileresContent() {
   );
 }
 
-export default function AlquileresClient() {
+export default function AlquileresClient({ properties = [] }) {
   return (
     <Suspense fallback={<div className="min-h-screen bg-white pt-24 flex items-center justify-center"><div className="text-gray-400">Cargando...</div></div>}>
-      <AlquileresContent />
+      <AlquileresContent properties={properties} />
     </Suspense>
   );
 }
