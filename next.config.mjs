@@ -12,6 +12,13 @@ const nextConfig = {
   compress: true,
   images: {
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "fukarishpopbtxtzhrrd.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
   },
   experimental: {
     optimizePackageImports: ["recharts"],

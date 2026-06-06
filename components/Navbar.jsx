@@ -219,9 +219,12 @@ export default function Navbar() {
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-                className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                className="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all"
               >
-                {menuOpen ? <XIcon className="h-4 w-4 text-gray-600" /> : <BurgerIcon className="h-4 w-4 text-gray-600" />}
+                <BurgerIcon className="h-4 w-4 text-gray-600" />
+                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-500 text-white">
+                  <UserIcon className="h-5 w-5" />
+                </span>
               </button>
 
               {menuOpen && (
@@ -253,6 +256,14 @@ export default function Navbar() {
                       className="flex items-center justify-center w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors"
                     >
                       Tasar mi propiedad
+                    </Link>
+                  </div>
+                  <div className="border-t border-gray-100">
+                    <Link href="/admin"
+                      className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                    >
+                      <UserIcon className="h-4 w-4" />
+                      Ingresar
                     </Link>
                   </div>
                 </div>
@@ -391,6 +402,13 @@ function HeartIcon({ filled, className }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={filled ? 0 : 2} viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+  );
+}
+function UserIcon({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.42 0-8 2.69-8 6v1h16v-1c0-3.31-3.58-6-8-6z" />
     </svg>
   );
 }
