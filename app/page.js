@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
+import SuscripcionForm from "@/components/SuscripcionForm";
 import dynamic from "next/dynamic";
 const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
 import { getProperties } from "@/lib/properties";
@@ -101,6 +102,25 @@ export default async function Home() {
           >
             Ver todas las propiedades
           </Link>
+        </div>
+      </section>
+
+      {/* Suscripción — "sé el primero en enterarte" */}
+      <section className="bg-rose-600">
+        <div className="max-w-4xl mx-auto px-4 py-14 sm:px-6 lg:px-8">
+          <div className="text-center mb-7">
+            <p className="text-rose-200 text-xs font-bold tracking-widest uppercase mb-2">Propiedades nuevas</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-3">
+              Sé el primero en enterarte
+            </h2>
+            <p className="text-rose-100 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+              En San Martín de los Andes las mejores oportunidades se venden rápido. Dejanos tu email
+              y te avisamos apenas entra una propiedad nueva — antes de que llegue a los portales.
+            </p>
+          </div>
+          <div className="max-w-xl mx-auto">
+            <SuscripcionForm />
+          </div>
         </div>
       </section>
 
