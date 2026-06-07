@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getProperties } from "@/lib/properties";
+import { countNuevas } from "@/lib/crm";
 import { signOut } from "./actions";
 import DeleteButton from "./DeleteButton";
 
@@ -15,6 +16,7 @@ function formatPrice(p) {
 export default async function AdminPage() {
   const user = await requireUser();
   const properties = await getProperties();
+  const nuevas = await countNuevas();
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -25,6 +27,23 @@ export default async function AdminPage() {
             <p className="text-xs text-gray-500">{user.email}</p>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/consultas"
+              className="relative text-sm text-gray-600 hover:text-gray-900"
+            >
+              Consultas
+              {nuevas > 0 && (
+                <span className="absolute -top-2 -right-4 bg-rose-600 text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none">
+                  {nuevas}
+                </span>
+              )}
+            </Link>
+            <Link
+              href="/admin/suscriptores"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              Suscriptores
+            </Link>
             <Link
               href="/admin/propiedades/nueva"
               className="rounded-lg bg-gray-900 text-white px-4 py-2 text-sm font-medium hover:bg-gray-800"

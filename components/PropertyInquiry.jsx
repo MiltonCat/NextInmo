@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { WA_NUMBER } from "@/config";
+import { registrarConsulta } from "@/lib/registrarConsulta";
 
 export default function PropertyInquiry({ property, onClose }) {
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
@@ -25,6 +26,22 @@ export default function PropertyInquiry({ property, onClose }) {
     }
 
     const url = typeof window !== "undefined" ? window.location.href : "";
+
+    registrarConsulta({
+      tipo: "propiedad",
+      nombre: form.name,
+      telefono: form.phone,
+      email: form.email,
+      mensaje: form.message,
+      property_id: property.id,
+      property_title: property.title,
+      detalle: {
+        operacion: operationLabel[property.operation] ?? property.operation ?? null,
+        ubicacion: property.location,
+        precio: priceDisplay,
+        link: url,
+      },
+    });
 
     let msg = `Hola, me interesa esta propiedad.\n\n`;
     msg += `Propiedad: ${property.title}\n`;

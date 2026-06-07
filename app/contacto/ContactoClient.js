@@ -2,6 +2,7 @@
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { WA_URL, CONTACT_EMAIL, PHONE_DISPLAY, LOCATION_DISPLAY, BUSINESS_HOURS } from "@/config";
+import { registrarConsulta } from "@/lib/registrarConsulta";
 
 const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "", website: "" };
 
@@ -54,6 +55,19 @@ export default function ContactoClient() {
     }
 
     setStatus("sending");
+
+    registrarConsulta({
+      tipo: "contacto",
+      nombre: formData.name,
+      telefono: formData.phone,
+      email: formData.email,
+      mensaje: formData.message,
+      detalle: {
+        monto: formData.monto,
+        objetivo: formData.objetivo,
+        plazo: formData.plazo,
+      },
+    });
 
     try {
       await emailjs.send(

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { WA_NUMBER } from "@/config";
+import { registrarConsulta } from "@/lib/registrarConsulta";
 
 const TIME_SLOTS = ["9:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 const DAYS_HEADER = ["D", "L", "M", "M", "J", "V", "S"];
@@ -77,6 +78,21 @@ export default function VisitScheduler({ property, onClose }) {
   };
 
   const handleSend = () => {
+    registrarConsulta({
+      tipo: "visita",
+      nombre: form.name,
+      telefono: form.phone,
+      email: form.email,
+      mensaje: form.message,
+      property_id: property.id,
+      property_title: property.title,
+      detalle: {
+        ubicacion: property.location,
+        dia: selectedDate ? formatDateLong(selectedDate) : null,
+        horario: selectedTime ? `${selectedTime} hs` : null,
+      },
+    });
+
     let msg = `Hola, quiero agendar una visita.\n\n`;
     msg += `Propiedad: ${property.title}\n`;
     msg += `Ubicación: ${property.location}\n`;

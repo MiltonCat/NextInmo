@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { WA_NUMBER } from "@/config";
+import { registrarConsulta } from "@/lib/registrarConsulta";
 
 const TIPOS = ["Casa", "Departamento", "Terreno", "Local comercial", "Cabaña"];
 const ZONAS = ["Centro", "Chapelco Golf", "Costanera", "Las Marías", "Las Pendientes", "Otro"];
@@ -24,6 +25,22 @@ export default function TasacionForm() {
       return;
     }
     setError("");
+
+    registrarConsulta({
+      tipo: "tasacion",
+      nombre: form.nombre,
+      telefono: form.whatsapp,
+      mensaje: form.comentarios,
+      detalle: {
+        tipoPropiedad: form.tipo,
+        zona: form.zona,
+        superficie: form.superficie,
+        dormitorios: form.dormitorios,
+        estado: form.estado,
+        anio: form.anio,
+      },
+    });
+
     const msg = encodeURIComponent(
       `Hola Milton, soy ${form.nombre.trim()} y quiero una tasación orientativa de mi propiedad.\n\n` +
       `🏠 Datos de la propiedad:\n` +
