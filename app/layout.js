@@ -102,7 +102,6 @@ export const metadata = {
   icons: {
     icon: [
       { url: "/iso1.png", type: "image/png" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
     apple: "/iso1.png",
   },
@@ -174,6 +173,7 @@ export default function RootLayout({ children }) {
     <html lang="es-AR">
       <head>
         <link rel="icon" type="image/png" href="/iso1.png" id="favicon" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="canonical" href={canonicalUrl("/")} />
         <script
           type="application/ld+json"
