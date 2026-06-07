@@ -51,7 +51,7 @@ const faqJsonLd = {
       name: "¿Cuál es el barrio más barato para vivir en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "San Fernando y Caleuche ofrecen los precios más accesibles, con propiedades desde USD 900/m². Vega Maipú es la segunda opción más económica (USD 1.400–1.900/m²) y tiene el mayor potencial de valorización a futuro por ser zona de expansión.",
+        text: "Caleuche ofrece precios accesibles, con propiedades desde USD 900/m². Vega Maipú es otra opción económica (USD 1.400–1.900/m²) y tiene alto potencial de valorización a futuro por ser zona de expansión.",
       },
     },
     {
@@ -67,7 +67,7 @@ const faqJsonLd = {
       name: "¿Cómo es el internet en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Excelente en zonas céntricas. COTESMA, la cooperativa local, ofrece fibra óptica con velocidades de hasta 2.000 Mbps desde enero 2026. La cobertura es completa en el Centro, San Fernando y Vega Maipú. En Chapelco Golf, La Cascada y Peñón de Lolog la cobertura es parcial según el sector exacto.",
+        text: "Excelente en zonas céntricas. COTESMA, la cooperativa local, ofrece fibra óptica con velocidades de hasta 2.000 Mbps desde enero 2026. La cobertura es completa en el Centro y Vega Maipú. En Chapelco Golf, La Cascada y Peñón de Lolog la cobertura es parcial según el sector exacto.",
       },
     },
     {
@@ -306,9 +306,9 @@ const BARRIOS = [
     tags: ["Exclusivo", "Vista al lago", "Aislado"],
   },
   {
-    nombre: "San Fernando / Caleuche",
+    nombre: "Caleuche",
     emoji: "🏡",
-    descripcion: "Barrios populares consolidados con los precios más accesibles de la ciudad. Comunidad local auténtica, buena conectividad al centro y servicios básicos completos. Los más elegidos para residencia permanente.",
+    descripcion: "Barrio popular consolidado con precios accesibles dentro de la ciudad. Comunidad local auténtica, buena conectividad al centro y servicios básicos completos. Muy elegido para residencia permanente.",
     perfil: ["Residencia permanente", "Primera vivienda", "Comunidad local"],
     precioM2: "USD 900 – 1.400",
     precioFuente: "Argenprop / Mercado Libre 2025",
@@ -374,12 +374,12 @@ function BarrioCard({ barrio }) {
   return (
     <div className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
       {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-100 px-6 py-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1">
+      <div className="bg-gray-50 border-b border-gray-100 px-4 py-5 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl">{barrio.emoji}</span>
-              <h3 className="text-xl font-black text-gray-900">{barrio.nombre}</h3>
+              <h3 className="text-xl font-black text-gray-900 leading-snug">{barrio.nombre}</h3>
               {barrio.autoObligatorio && (
                 <span title="Auto obligatorio" className="text-sm">🚗</span>
               )}
@@ -393,7 +393,7 @@ function BarrioCard({ barrio }) {
               ))}
             </div>
           </div>
-          <div className="text-right flex-shrink-0">
+          <div className="text-left flex-shrink-0 sm:text-right">
             <p className="text-xs text-gray-400 font-medium mb-0.5">Precio del m²</p>
             <p className="text-sm font-black text-gray-900">{barrio.precioM2}</p>
             <p className="text-xs text-gray-400 mt-0.5">{barrio.precioFuente}</p>
@@ -401,7 +401,7 @@ function BarrioCard({ barrio }) {
         </div>
       </div>
 
-      <div className="px-6 py-5">
+      <div className="px-4 py-5 sm:px-6">
         <p className="text-gray-600 text-sm leading-relaxed mb-5">{barrio.descripcion}</p>
 
         {/* Métricas generales */}
@@ -429,7 +429,7 @@ function BarrioCard({ barrio }) {
               <span className="text-base flex-shrink-0">🌐</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-700">Internet</p>
-                <p className="text-xs text-gray-400 truncate">{barrio.internet.detalle}</p>
+                <p className="text-xs text-gray-400 leading-snug">{barrio.internet.detalle}</p>
               </div>
               <Puntos valor={barrio.internet.nivel} color="bg-blue-500" />
             </div>
@@ -437,7 +437,7 @@ function BarrioCard({ barrio }) {
               <span className="text-base flex-shrink-0">🚌</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-700">Transporte público</p>
-                <p className="text-xs text-gray-400 truncate">{barrio.transporte.detalle}</p>
+                <p className="text-xs text-gray-400 leading-snug">{barrio.transporte.detalle}</p>
               </div>
               <Puntos valor={barrio.transporte.nivel} color="bg-green-500" />
             </div>
@@ -485,7 +485,7 @@ function BarrioCard({ barrio }) {
               <span className="text-base flex-shrink-0">🔒</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-700">Seguridad</p>
-                <p className="text-xs text-gray-400 truncate">{barrio.seguridad.detalle}</p>
+                <p className="text-xs text-gray-400 leading-snug">{barrio.seguridad.detalle}</p>
               </div>
               <Puntos valor={barrio.seguridad.nivel} color="bg-purple-500" />
             </div>
@@ -544,18 +544,18 @@ export default function DondeVivirPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <article className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <article className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 [hyphens:none] [overflow-wrap:normal]">
 
         {/* Header */}
-        <header className="mb-12">
-          <p className="text-rose-600 text-sm font-bold tracking-widest uppercase mb-3">Guía de Barrios · 2026</p>
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
+        <header className="mb-10 md:mb-12">
+          <p className="text-rose-600 text-xs sm:text-sm font-bold tracking-widest uppercase mb-3">Guía de Barrios · 2026</p>
+          <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
             ¿Dónde vivir en San Martín de los Andes?
           </h1>
-          <p className="text-xl text-gray-600 leading-relaxed mb-6">
+          <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-6">
             La guía más completa de cada barrio: precio del m², internet, transporte, distancia al hospital, cloacas, seguridad y pet friendly. Sin filtros, con fuentes.
           </p>
-          <div className="flex items-center gap-4 text-sm text-gray-500 border-t border-b border-gray-100 py-4">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 border-t border-b border-gray-100 py-4">
             <img src="/Milton.webp" alt="Milton Catalán" className="w-9 h-9 rounded-full object-cover flex-shrink-0" loading="lazy" decoding="async" />
             <div>
               <p className="font-semibold text-gray-900 text-sm">Milton Catalán</p>
@@ -651,7 +651,7 @@ export default function DondeVivirPage() {
               { perfil: "Querés vivir cerca de todo sin auto", recomendacion: "Centro", razon: "Acceso a pie a lago, comercios, hospital. Mayor demanda y liquidez." },
               { perfil: "Trabajás de forma remota y necesitás buena conexión", recomendacion: "Centro o Vega Maipú", razon: "Fibra óptica COTESMA hasta 2.000 Mbps — el mejor internet de la región." },
               { perfil: "Buscás tranquilidad y naturaleza con familia", recomendacion: "La Cascada", razon: "Bosque nativo, silencio y entorno patagónico a minutos del centro." },
-              { perfil: "Primera vivienda con presupuesto limitado", recomendacion: "Vega Maipú o San Fernando", razon: "Los precios del m² más accesibles con colectivo disponible." },
+              { perfil: "Primera vivienda con presupuesto limitado", recomendacion: "Vega Maipú o Caleuche", razon: "Precios del m² más accesibles y buena conexión con el centro." },
               { perfil: "Invertir para alquiler turístico", recomendacion: "Centro", razon: "Mayor demanda turística y mejor rentabilidad por noche durante todo el año." },
               { perfil: "Inversión premium a largo plazo", recomendacion: "Chapelco Golf", razon: "Mayor valorización histórica, seguridad privada y perfil de comprador internacional." },
               { perfil: "Exclusividad total y no te importa el aislamiento", recomendacion: "Peñón de Lolog", razon: "Vistas al lago Lolog únicas, pero distante 30–40 min del hospital y sin cloacas." },

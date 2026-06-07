@@ -136,11 +136,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative" ref={searchRef}>
 
         {/* ── Fila 1 ── */}
-        <div className="flex items-center h-16 gap-4">
+        <div className="flex items-center h-14 md:h-16 gap-3 md:gap-4">
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <img src="/marca1.png" alt="Catalán Propiedades" className="h-9 w-auto" />
+            <img src="/marca1.png" alt="Catalán Propiedades" className="h-8 md:h-9 w-auto" />
           </Link>
 
           {/* Tabs — desktop */}
@@ -280,12 +280,12 @@ export default function Navbar() {
           transition: "max-height 350ms cubic-bezier(0.4,0,0.2,1), opacity 200ms ease",
           pointerEvents: scrolled ? "none" : "auto",
         }}>
-          <div className="pb-3 max-w-xl mx-auto">
+          <div className="pb-2 md:pb-3 max-w-xl mx-auto">
 
             {/* Trigger */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 bg-white border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 md:py-2.5 bg-white border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow text-left"
             >
               <span className={`flex-1 text-sm ${selectedType ? "text-gray-900 font-medium" : "text-gray-400"}`}>
                 {selectedType ? selectedType : "¿Qué tipo de propiedad buscás?"}
@@ -323,20 +323,20 @@ export default function Navbar() {
           >
             <div className="p-4">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">¿Qué tipo de propiedad buscás?</p>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {PROP_TYPES.map(({ type, label, emoji, ring }) => {
                   const active = selectedType === type;
                   return (
                     <button
                       key={type}
                       onMouseDown={() => selectType(type)}
-                      className={`flex flex-col items-center justify-center gap-2 rounded-2xl h-28 bg-white border-2 transition-all duration-200 hover:scale-[1.05] hover:shadow-md ${
+                      className={`flex flex-col items-center justify-center gap-2 rounded-2xl h-24 sm:h-28 bg-white border-2 transition-all duration-200 hover:scale-[1.05] hover:shadow-md ${
                         active
                           ? `ring-2 ${ring} border-transparent scale-[1.04] shadow-md`
                           : "border-gray-100 hover:border-gray-200 shadow-sm"
                       }`}
                     >
-                      <span className="text-4xl leading-none select-none">{emoji}</span>
+                      <span className="text-3xl sm:text-4xl leading-none select-none">{emoji}</span>
                       <span className={`text-xs font-bold leading-tight text-center px-1 ${active ? "text-gray-900" : "text-gray-600"}`}>{label}</span>
                     </button>
                   );
@@ -378,6 +378,39 @@ export default function Navbar() {
         }}
       />
     ))}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+      <div className="grid grid-cols-4 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5">
+        {TABS.map(({ href, label, icon }) => {
+          const active = pathname.startsWith(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-colors ${
+                active ? "text-rose-600 bg-rose-50" : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              <span className={active ? "text-rose-600" : "text-gray-400"}>{icon}</span>
+              {label}
+            </Link>
+          );
+        })}
+        <Link
+          href="/favoritos"
+          className={`relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-colors ${
+            pathname.startsWith("/favoritos") ? "text-rose-600 bg-rose-50" : "text-gray-500 hover:text-gray-800"
+          }`}
+        >
+          <HeartIcon filled={favorites.length > 0} className="h-4 w-4" />
+          Favoritos
+          {favorites.length > 0 && (
+            <span className="absolute right-5 top-1.5 min-w-4 rounded-full bg-rose-600 px-1 text-center text-[10px] leading-4 text-white">
+              {favorites.length}
+            </span>
+          )}
+        </Link>
+      </div>
+    </nav>
     </>
   );
 }

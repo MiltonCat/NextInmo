@@ -110,32 +110,32 @@ export default function CreditosHipotecariosUVAPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-    <article className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <article className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 [hyphens:none] [overflow-wrap:normal]">
 
       {/* Header */}
-      <header className="mb-12">
-        <p className="text-rose-600 text-sm font-bold tracking-widest uppercase mb-3">
+      <header className="mb-10 md:mb-12">
+        <p className="text-rose-600 text-xs sm:text-sm font-bold tracking-widest uppercase mb-3">
           Guía de Compra
         </p>
-        <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
+        <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
           Créditos Hipotecarios UVA: La Llave para tu Casa Propia en la Patagonia
         </h1>
-        <p className="text-xl text-gray-600 leading-relaxed mb-6">
+        <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-6">
           El crédito hipotecario volvió a Argentina con fuerza. Si siempre soñaste con una propiedad
           en San Martín de los Andes pero creías que estaba fuera de tu alcance, esta guía es para vos.
         </p>
-        <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-6">
           <time dateTime="2026-05-26">Mayo 2026</time>
           <span>·</span>
           <span>9 min de lectura</span>
         </div>
 
         {/* Autor */}
-        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <div className="flex items-center gap-3 sm:gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
           <img
             src="/Milton.webp"
             alt="Milton Catalán"
-            className="w-16 h-16 rounded-full object-cover border-2 border-rose-200"
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-rose-200 flex-shrink-0"
           />
           <div>
             <p className="text-sm font-bold text-gray-900">Escrito por Milton Catalán</p>
@@ -145,7 +145,7 @@ export default function CreditosHipotecariosUVAPage() {
       </header>
 
       {/* Contenido */}
-      <div className="prose prose-lg max-w-none">
+      <div className="prose prose-base sm:prose-lg max-w-none [hyphens:none] [overflow-wrap:normal]">
 
         {/* Introducción */}
         <section className="mb-12">
@@ -162,7 +162,7 @@ export default function CreditosHipotecariosUVAPage() {
 
         {/* Qué es UVA */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             ¿Qué es un Crédito Hipotecario UVA?
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
@@ -209,7 +209,7 @@ export default function CreditosHipotecariosUVAPage() {
 
         {/* Bancos */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             ¿Qué Bancos Ofrecen Créditos UVA en 2026?
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-6">
@@ -217,45 +217,45 @@ export default function CreditosHipotecariosUVAPage() {
             principales actores con productos vigentes:
           </p>
 
-          <div className="bg-gray-900 text-white rounded-2xl p-8 my-8">
-            <h3 className="text-xl font-bold mb-6">Comparativa de Líneas UVA Activas</h3>
+          <div className="bg-gray-900 text-white rounded-2xl p-6 sm:p-8 my-8">
+            <h3 className="text-lg sm:text-xl font-bold mb-6">Comparativa de Líneas UVA Activas</h3>
             <div className="space-y-4">
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-2 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">Banco Nación</p>
                   <p className="text-gray-400 text-sm">Casa Propia / ProCreAr</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-green-400 font-bold">3.5% + UVA</p>
                   <p className="text-gray-400 text-sm">Hasta 30 años</p>
                 </div>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-2 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">Banco Hipotecario</p>
                   <p className="text-gray-400 text-sm">Primera Vivienda</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-blue-400 font-bold">4.5% + UVA</p>
                   <p className="text-gray-400 text-sm">Hasta 30 años</p>
                 </div>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-2 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">Santander / Galicia / BBVA</p>
                   <p className="text-gray-400 text-sm">Banca privada</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-purple-400 font-bold">5% – 7% + UVA</p>
                   <p className="text-gray-400 text-sm">Hasta 20-25 años</p>
                 </div>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">Bancos Provinciales</p>
-                  <p className="text-gray-400 text-sm">Banco Nequén, Banco Provincia, etc.</p>
+                  <p className="text-gray-400 text-sm">Banco Neuquén, Banco Provincia, etc.</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-rose-400 font-bold">4% – 6% + UVA</p>
                   <p className="text-gray-400 text-sm">Hasta 20 años</p>
                 </div>
@@ -269,7 +269,7 @@ export default function CreditosHipotecariosUVAPage() {
 
         {/* Requisitos */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             ¿Quién Puede Acceder? Requisitos Generales
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-6">
@@ -295,21 +295,21 @@ export default function CreditosHipotecariosUVAPage() {
           </div>
 
           <div className="bg-blue-50 rounded-xl p-6 my-8 border border-blue-200">
-            <h3 className="text-xl font-bold text-blue-900 mb-4">Documentación típica requerida</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-4">Documentación típica requerida</h3>
             <div className="grid md:grid-cols-2 gap-3 text-blue-900 text-sm">
-              <div className="flex items-center gap-2"><span className="text-blue-600">✓</span> DNI del solicitante (y cónyuge si aplica)</div>
-              <div className="flex items-center gap-2"><span className="text-blue-600">✓</span> Últimos 3 recibos de sueldo o declaraciones AFIP</div>
-              <div className="flex items-center gap-2"><span className="text-blue-600">✓</span> Extractos bancarios de los últimos 6 meses</div>
-              <div className="flex items-center gap-2"><span className="text-blue-600">✓</span> Constancia de CUIL/CUIT activo</div>
-              <div className="flex items-center gap-2"><span className="text-blue-600">✓</span> Tasación de la propiedad (la hace el banco)</div>
-              <div className="flex items-center gap-2"><span className="text-blue-600">✓</span> Título de propiedad del vendedor</div>
+              <div className="flex items-start gap-2"><span className="text-blue-600 flex-shrink-0">✓</span> DNI del solicitante (y cónyuge si aplica)</div>
+              <div className="flex items-start gap-2"><span className="text-blue-600 flex-shrink-0">✓</span> Últimos 3 recibos de sueldo o declaraciones AFIP</div>
+              <div className="flex items-start gap-2"><span className="text-blue-600 flex-shrink-0">✓</span> Extractos bancarios de los últimos 6 meses</div>
+              <div className="flex items-start gap-2"><span className="text-blue-600 flex-shrink-0">✓</span> Constancia de CUIL/CUIT activo</div>
+              <div className="flex items-start gap-2"><span className="text-blue-600 flex-shrink-0">✓</span> Tasación de la propiedad (la hace el banco)</div>
+              <div className="flex items-start gap-2"><span className="text-blue-600 flex-shrink-0">✓</span> Título de propiedad del vendedor</div>
             </div>
           </div>
         </section>
 
         {/* Ejemplo práctico */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             Ejemplo Real: Comprando en San Martín de los Andes con UVA
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-6">
@@ -317,33 +317,33 @@ export default function CreditosHipotecariosUVAPage() {
             real del mercado local de San Martín de los Andes:
           </p>
 
-          <div className="bg-gray-900 text-white rounded-2xl p-8 my-8">
+          <div className="bg-gray-900 text-white rounded-2xl p-6 sm:p-8 my-8">
             <p className="text-gray-400 text-sm uppercase tracking-wide mb-4">Ejemplo orientativo — Mayo 2026</p>
-            <h3 className="text-xl font-bold mb-6">Departamento 2 ambientes — San Martín de los Andes</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-6 leading-snug">Departamento 2 ambientes — San Martín de los Andes</h3>
             <div className="space-y-3 text-base">
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-1 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-300">Valor de la propiedad</span>
                 <span className="font-bold text-white">USD 95.000</span>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-1 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-300">Aporte propio (25%)</span>
                 <span className="font-bold text-yellow-400">USD 23.750</span>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-1 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-300">Monto del crédito (75%)</span>
                 <span className="font-bold text-green-400">USD 71.250</span>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-1 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-300">Plazo</span>
                 <span className="font-bold text-white">20 años</span>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+              <div className="flex flex-col items-start gap-1 border-b border-gray-700 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-300">Tasa (referencial)</span>
                 <span className="font-bold text-white">4.5% + UVA</span>
               </div>
-              <div className="flex justify-between items-center pt-2">
+              <div className="flex flex-col items-start gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-300 font-semibold">Cuota inicial estimada</span>
-                <span className="text-2xl font-bold text-rose-400">~$850.000 ARS / mes</span>
+                <span className="text-xl sm:text-2xl font-bold text-rose-400">~$850.000 ARS / mes</span>
               </div>
             </div>
             <p className="text-gray-400 text-sm mt-6">
@@ -363,7 +363,7 @@ export default function CreditosHipotecariosUVAPage() {
 
         {/* Paso a paso */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             Guía Paso a Paso para Obtener tu Crédito UVA
           </h2>
 
@@ -371,35 +371,35 @@ export default function CreditosHipotecariosUVAPage() {
             <div className="flex gap-5 items-start">
               <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg shrink-0 mt-1">1</div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Ordená tu situación financiera</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Ordená tu situación financiera</h3>
                 <p className="text-gray-700">Verificá tu historial en el Veraz y en el BCRA. Cancelá deudas pendientes si las tenés. Confirmá que tu CUIL/CUIT esté activo y sin irregularidades.</p>
               </div>
             </div>
             <div className="flex gap-5 items-start">
               <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg shrink-0 mt-1">2</div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Simulá en varios bancos</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Simulá en varios bancos</h3>
                 <p className="text-gray-700">Usá las simuladoras online del Banco Nación, Hipotecario y tu banco privado. Compará cuota inicial, plazo y comisiones. No te quedés con la primera opción.</p>
               </div>
             </div>
             <div className="flex gap-5 items-start">
               <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg shrink-0 mt-1">3</div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Pedí la preaprobación</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Pedí la preaprobación</h3>
                 <p className="text-gray-700">Antes de buscar propiedad, solicitá una preaprobación de crédito. Te dará un límite real de cuánto podés pedir y te posicionará mejor frente a los vendedores.</p>
               </div>
             </div>
             <div className="flex gap-5 items-start">
               <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg shrink-0 mt-1">4</div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Buscá la propiedad con un asesor</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Buscá la propiedad con un asesor</h3>
                 <p className="text-gray-700">Trabajar con un asesor inmobiliario local es clave. En SMA hay particularidades regulatorias (zonas, restricciones de construcción) que conviene conocer antes de comprometerse.</p>
               </div>
             </div>
             <div className="flex gap-5 items-start">
               <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg shrink-0 mt-1">5</div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Boleto, tasación y escritura</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Boleto, tasación y escritura</h3>
                 <p className="text-gray-700">Una vez elegida la propiedad, firmás el boleto de compraventa con seña. El banco hace la tasación oficial. Si aprueba, se coordina la escritura con el escribano donde se liquida el crédito.</p>
               </div>
             </div>
@@ -408,7 +408,7 @@ export default function CreditosHipotecariosUVAPage() {
 
         {/* Tips */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             4 Claves para Calificar con Éxito
           </h2>
 
@@ -424,8 +424,8 @@ export default function CreditosHipotecariosUVAPage() {
         </section>
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-2xl p-8 my-12 text-center">
-          <h3 className="text-2xl font-bold mb-4">
+        <div className="bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-2xl p-6 sm:p-8 my-12 text-center">
+          <h3 className="text-xl sm:text-2xl font-bold mb-4 leading-tight">
             ¿Querés saber si calificás para comprar en San Martín de los Andes?
           </h3>
           <p className="text-rose-100 mb-6">
@@ -435,13 +435,13 @@ export default function CreditosHipotecariosUVAPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/contacto"
-              className="inline-block bg-white text-rose-600 font-bold px-8 py-4 rounded-xl hover:bg-rose-50 transition-colors shadow-lg"
+              className="inline-block bg-white text-rose-600 font-bold px-5 py-4 sm:px-8 rounded-xl hover:bg-rose-50 transition-colors shadow-lg"
             >
               Consultar sin compromiso →
             </a>
             <a
               href="/propiedades"
-              className="inline-block bg-rose-700 text-white font-bold px-8 py-4 rounded-xl hover:bg-rose-800 transition-colors shadow-lg border border-rose-500"
+              className="inline-block bg-rose-700 text-white font-bold px-5 py-4 sm:px-8 rounded-xl hover:bg-rose-800 transition-colors shadow-lg border border-rose-500"
             >
               Ver propiedades disponibles
             </a>
@@ -449,14 +449,14 @@ export default function CreditosHipotecariosUVAPage() {
         </div>
 
         {/* FAQ */}
-        <section className="mb-12 bg-gray-50 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+        <section className="mb-12 bg-gray-50 rounded-2xl p-5 sm:p-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
             Preguntas Frecuentes
           </h2>
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 ¿Puedo usar el crédito UVA para una segunda vivienda o inversión?
               </h3>
               <p className="text-gray-700">
@@ -467,7 +467,7 @@ export default function CreditosHipotecariosUVAPage() {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 ¿Qué pasa si el sueldo no acompaña la suba de la cuota?
               </h3>
               <p className="text-gray-700">
@@ -479,7 +479,7 @@ export default function CreditosHipotecariosUVAPage() {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 ¿Cuánto tiempo tarda el proceso desde que aplico hasta que escrituro?
               </h3>
               <p className="text-gray-700">
@@ -490,7 +490,7 @@ export default function CreditosHipotecariosUVAPage() {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 ¿Puedo pagar el crédito antes del plazo?
               </h3>
               <p className="text-gray-700">
@@ -501,7 +501,7 @@ export default function CreditosHipotecariosUVAPage() {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                 ¿Las propiedades de San Martín de los Andes son elegibles para crédito UVA?
               </h3>
               <p className="text-gray-700">

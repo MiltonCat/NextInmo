@@ -45,13 +45,13 @@ export default function FavoritosClient({ properties = [] }) {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-white relative overflow-hidden pt-24 pb-10">
+      <section className="bg-white relative overflow-hidden pt-8 pb-8 md:pt-24 md:pb-10">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
             <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Favoritos</span>
           </div>
-          <h1 className="text-4xl font-black text-gray-900 font-jakarta">Mis favoritos</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 font-jakarta leading-tight">Mis favoritos</h1>
           <p className="text-gray-500 text-sm mt-2">
             {favoriteProperties.length === 0
               ? "Todavía no guardaste ninguna propiedad."
@@ -62,7 +62,7 @@ export default function FavoritosClient({ properties = [] }) {
 
       <div className="max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
         {favoriteProperties.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="flex flex-col items-center justify-center py-16 md:py-24 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-gray-200 mb-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>

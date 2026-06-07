@@ -76,19 +76,19 @@ export default function TasacionPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <section className="bg-gray-50 border-b border-gray-100 pt-24 pb-12">
+      <section className="bg-gray-50 border-b border-gray-100 pt-8 pb-10 md:pt-24 md:pb-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-rose-600 text-xs font-bold tracking-widest uppercase mb-3">Gratuito · Sin compromiso</p>
-          <h1 className="text-4xl font-black text-gray-900 mb-3 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-3 leading-tight">
             ¿Cuánto vale tu propiedad en San Martín de los Andes?
           </h1>
-          <p className="text-gray-500 text-base leading-relaxed max-w-xl">
+          <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-xl">
             Completá el formulario y Milton te envía una estimación orientativa basada en datos reales del mercado local. Sin turnos, sin costo, sin compromiso.
           </p>
         </div>
       </section>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
         {/* Beneficios */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">

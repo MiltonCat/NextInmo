@@ -89,8 +89,34 @@ export default function PropertyDetailClient({ property }) {
     `Hola! Quiero agendar una visita para la propiedad: "${property.title}". Que horarios tienen disponibles?`
   );
 
+  const mobilePriceLabel = isAlquiler
+    ? `$ ${property.precioAlquilerARS?.toLocaleString("es-AR") || "-"}`
+    : `USD ${property.price?.toLocaleString("es-AR") || "-"}`;
+  const mobileActionLabel = property.alquilada
+    ? "Opciones similares"
+    : property.reservada
+      ? "Consultar"
+      : isAlquiler
+        ? "Consultar"
+        : "Me interesa";
+
+  const handleMobilePrimaryAction = () => {
+    if (isAlquiler || property.alquilada || property.reservada) {
+      const message = property.alquilada
+        ? `Hola! Vi la propiedad "${property.title}" (alquilada) y me interesa algo similar. ¿Tienen disponibilidad?`
+        : property.reservada
+          ? `Hola! Vi la propiedad "${property.title}" (reservada) y me interesa. ¿Sigue disponible o tienen algo similar?`
+          : `Hola! Me interesa alquilar la propiedad: "${property.title}". Podemos hablar?`;
+      trackPropertyInquiry(property, "whatsapp");
+      trackWhatsAppClick(property);
+      window.open(waLink(property.title, message), "_blank");
+      return;
+    }
+    handleInquiry();
+  };
+
   return (
-    <div>
+    <div className="pb-6 lg:pb-0">
       {property.alquilada && (
         <div className="bg-gray-800 text-white text-center py-3 px-4">
           <span className="font-bold tracking-wide text-sm">PROPIEDAD ALQUILADA</span>
@@ -104,9 +130,9 @@ export default function PropertyDetailClient({ property }) {
         </div>
       )}
       {/* Header */}
-      <section className="bg-white pt-24 pb-8 border-b border-gray-200">
+      <section className="bg-white pt-5 pb-7 sm:pt-8 md:pt-24 md:pb-8 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+          <nav className="hidden md:flex items-center gap-2 text-sm text-gray-500 mb-4">
             <Link href="/" className="hover:text-gray-900 transition-colors">Inicio</Link>
             <span>/</span>
             <Link href="/propiedades" className="hover:text-gray-900 transition-colors">Propiedades</Link>
@@ -121,17 +147,17 @@ export default function PropertyDetailClient({ property }) {
             Volver a propiedades
           </Link>
 
-          <div className="flex gap-2 mb-3">
+          <div className="hidden sm:flex gap-2 mb-3">
             <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full border border-gray-200">{property.type}</span>
             <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full border border-gray-200">{operationLabel[property.operation]}</span>
           </div>
 
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{property.title}</h1>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-[1.7rem] sm:text-3xl font-bold text-gray-900 leading-tight break-words">{property.title}</h1>
               <p className="text-gray-500 text-sm mt-1">{property.location}</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0 mt-1">
+            <div className="flex items-center gap-2 shrink-0 sm:mt-1">
               <button
                 onClick={() => {
                   const newFav = !fav;
@@ -164,7 +190,7 @@ export default function PropertyDetailClient({ property }) {
 
       {/* Content */}
       <div className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 pt-6 pb-2 sm:px-6 sm:py-8 lg:px-8">
 
           {/* Gallery - desktop */}
           <div className="relative mb-8 hidden lg:grid grid-cols-4 grid-rows-2 gap-1 h-64 lg:h-80 overflow-hidden rounded-xl">
@@ -400,6 +426,22 @@ export default function PropertyDetailClient({ property }) {
       {showSheet && (
         <PropertySheet property={property} onClose={() => setShowSheet(false)} />
       )}
+      <div className="lg:hidden fixed inset-x-0 bottom-[4.55rem] z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-10px_30px_rgba(15,23,42,0.12)] backdrop-blur">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[11px] font-bold uppercase tracking-wide text-gray-400">
+              {isAlquiler ? "Alquiler mensual" : "Precio"}
+            </p>
+            <p className="truncate text-lg font-black text-gray-900">{mobilePriceLabel}</p>
+          </div>
+          <button
+            onClick={handleMobilePrimaryAction}
+            className="min-h-12 flex-shrink-0 rounded-xl bg-rose-600 px-5 text-sm font-bold text-white shadow-lg shadow-rose-200"
+          >
+            {mobileActionLabel}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

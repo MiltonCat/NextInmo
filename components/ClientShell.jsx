@@ -13,14 +13,18 @@ export default function ClientShell() {
   return (
     <>
       {showToast && (
-        <Toast
-          message="¿Buscando propiedades en la Patagonia? Tenemos las mejores opciones para vos."
-          linkText="Ver propiedades"
-          link="/propiedades"
-          onClose={() => setShowToast(false)}
-        />
+        <div className="hidden md:block">
+          <Toast
+            message="¿Buscando propiedades en la Patagonia? Tenemos las mejores opciones para vos."
+            linkText="Ver propiedades"
+            link="/propiedades"
+            onClose={() => setShowToast(false)}
+          />
+        </div>
       )}
-      <ChatBot />
+      <div className="hidden md:block">
+        <ChatBot />
+      </div>
       <ScrollToTop />
       <WhatsAppFloat />
     </>

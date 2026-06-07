@@ -114,7 +114,7 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-white relative overflow-hidden pt-24 pb-12">
+      <section className="bg-white relative overflow-hidden pt-8 pb-10 md:pt-24 md:pb-12">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-center lg:pt-4">
             <div>
@@ -122,7 +122,7 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
                 <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Propiedades</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-gray-900 font-jakarta leading-[1.1]">
+              <h1 className="text-3xl md:text-5xl font-black text-gray-900 font-jakarta leading-tight md:leading-[1.1]">
                 {tipoLabel ? `${tipoLabel} en San Martín de los Andes` : <>Encontrá tu lugar<br />en el sur</>}
               </h1>
               <p className="text-gray-500 text-base mt-3 max-w-md leading-relaxed">
@@ -156,7 +156,52 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
+        <div className="sticky top-[104px] z-30 -mx-4 mb-6 border-y border-gray-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur md:hidden">
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            {[
+              { key: "venta", label: "Comprar" },
+              { key: "alquiler_permanente", label: "Alquilar" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => { setModalidadTab(tab.key); setFilter("Todos"); clearFilters(); }}
+                className={`min-h-11 rounded-xl border px-3 text-sm font-bold transition-colors ${
+                  modalidadTab === tab.key
+                    ? "border-rose-500 bg-rose-50 text-rose-600"
+                    : "border-gray-200 bg-white text-gray-600"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => updateSearch(e.target.value)}
+            placeholder="Buscar por barrio, tipo o nombre..."
+            className="mb-3 w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
+          />
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="min-h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 outline-none focus:border-rose-500"
+            >
+              <option value="default">Ordenar</option>
+              <option value="price-asc">Menor precio</option>
+              <option value="price-desc">Mayor precio</option>
+            </select>
+            <button
+              onClick={() => setViewMode(viewMode === "map" ? "list" : "map")}
+              className="min-h-11 rounded-xl bg-gray-900 px-4 text-sm font-bold text-white"
+            >
+              {viewMode === "map" ? "Lista" : "Mapa"}
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden md:flex gap-2 mb-6 border-b border-gray-200">
           {[
             { key: "venta", label: "Comprar" },
             { key: "alquiler_permanente", label: "Alquiler permanente" },
@@ -176,15 +221,15 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
         </div>
 
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
             Nuestras Propiedades
             {hasActiveFilters && (
-              <span className="text-lg font-normal text-gray-500 ml-2">
+              <span className="block text-sm font-normal text-gray-500 md:ml-2 md:inline md:text-lg">
                 ({filteredProperties.length} resultados)
               </span>
             )}
           </h2>
-          <div className="flex gap-2 flex-wrap">
+          <div className="hidden md:flex gap-2 flex-wrap">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -224,7 +269,7 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
           </div>
         )}
 
-        <div className="mb-6">
+        <div className="hidden md:block mb-6">
           <input
             type="text"
             value={searchQuery}

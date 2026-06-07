@@ -67,15 +67,15 @@ const blogPosts = [
 export default function BlogPage() {
   return (
     <div className="min-h-screen bg-white">
-      <section className="pt-24 pb-12 bg-gray-50 border-b border-gray-100">
+      <section className="pt-8 pb-10 md:pt-24 md:pb-12 bg-gray-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-rose-600 text-sm font-bold tracking-widest uppercase mb-3">Blog</p>
-          <h1 className="text-4xl font-black text-gray-900 mb-3">Inversión y mercado inmobiliario</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-3 leading-tight">Inversión y mercado inmobiliario</h1>
           <p className="text-gray-500 text-base max-w-xl">Análisis, guías y tendencias del mercado inmobiliario en San Martín de los Andes y la Patagonia.</p>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogPosts.map((post) => (
             <Link
@@ -103,7 +103,7 @@ export default function BlogPage() {
                   <span>·</span>
                   <span>{post.readTime} de lectura</span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-rose-600 transition-colors">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-3 leading-snug group-hover:text-rose-600 transition-colors">
                   {post.title}
                 </h2>
                 <p className="text-gray-600 text-sm leading-relaxed mb-4">

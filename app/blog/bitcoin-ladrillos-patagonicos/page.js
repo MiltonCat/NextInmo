@@ -62,16 +62,16 @@ export default function BitcoinLadrillosPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
-    <article className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <article className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       {/* Header */}
-      <header className="mb-12">
+      <header className="mb-8 sm:mb-12">
         <p className="text-rose-600 text-sm font-bold tracking-widest uppercase mb-3">
           Inversión Inmobiliaria
         </p>
-        <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
+        <h1 className="max-w-3xl text-[2rem] sm:text-4xl md:text-5xl font-black text-gray-900 leading-[1.08] mb-4">
           El Bitcoin de los Ladrillos Patagónicos
         </h1>
-        <p className="text-xl text-gray-600 leading-relaxed mb-6">
+        <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-6">
           ¿Por qué invertir en propiedades en San Martín de los Andes es como comprar Bitcoin en 2013? 
           Descubrí la tokenización del mercado inmobiliario patagónico.
         </p>

@@ -67,16 +67,16 @@ export default function PrecioM2Page() {
     <div className="min-h-screen bg-white">
 
       {/* Header */}
-      <section className="bg-gray-50 border-b border-gray-100 pt-24 pb-12">
+      <section className="bg-gray-50 border-b border-gray-100 pt-8 pb-10 md:pt-24 md:pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-200 bg-green-50 text-green-700 text-xs font-semibold tracking-widest uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
             Actualizado — Abril 2026
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
             Precio del m² en San Martín de los Andes 2026
           </h1>
-          <p className="text-gray-500 text-lg max-w-2xl leading-relaxed">
+          <p className="text-gray-500 text-base md:text-lg max-w-2xl leading-relaxed">
             Análisis actualizado del valor del metro cuadrado por zona y tipo de propiedad en San Martín de los Andes, basado en más de 600 propiedades relevadas en portales inmobiliarios locales.
           </p>
           <p className="text-gray-400 text-xs mt-4">
@@ -85,7 +85,7 @@ export default function PrecioM2Page() {
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-10 md:space-y-12">
 
         {/* Stat principal */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -95,7 +95,7 @@ export default function PrecioM2Page() {
             { valor: "USD 3.400", label: "Máximo por zona", sub: "Chapelco Golf · Departamentos", color: "text-gray-900" },
           ].map((s) => (
             <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <p className={`text-3xl font-black ${s.color} mb-1`}>{s.valor}</p>
+              <p className={`text-2xl md:text-3xl font-black ${s.color} mb-1`}>{s.valor}</p>
               <p className="text-sm font-semibold text-gray-700">{s.label}</p>
               <p className="text-xs text-gray-400 mt-0.5">{s.sub}</p>
             </div>

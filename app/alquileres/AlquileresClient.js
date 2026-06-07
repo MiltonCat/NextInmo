@@ -32,22 +32,22 @@ function AlquileresContent({ properties = [] }) {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-white relative overflow-hidden pt-24 pb-12">
+      <section className="bg-white relative overflow-hidden pt-8 pb-10 md:pt-24 md:pb-12">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
             <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Alquileres</span>
           </div>
-          <h1 className="text-4xl font-black text-gray-900 font-jakarta">Alquileres permanentes</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 font-jakarta leading-tight">Alquileres permanentes</h1>
           <p className="text-gray-500 text-sm mt-2">San Martín de los Andes · Patagonia Argentina</p>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight">
             Propiedades en alquiler
-            <span className="text-lg font-normal text-gray-500 ml-2">({filteredProperties.length})</span>
+            <span className="block text-sm font-normal text-gray-500 sm:ml-2 sm:inline sm:text-lg">({filteredProperties.length})</span>
           </h2>
           <select
             value={sortBy}
