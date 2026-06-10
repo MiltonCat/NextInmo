@@ -4,7 +4,8 @@ export const WA_URL = `https://wa.me/${WA_NUMBER}`;
 export const PHONE_DISPLAY = process.env.NEXT_PUBLIC_PHONE_DISPLAY ?? "+54 9 2944 30-1470";
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "ventascatalanprop@gmail.com";
 export const LOCATION_DISPLAY = "San Martín de los Andes, Patagonia";
-export const TASADOR_URL = process.env.NEXT_PUBLIC_TASADOR_URL ?? "https://tasador.catalanpropiedades.com.ar";
+// Cambiar a https://tasador.catalanpropiedades.com.ar cuando exista el registro DNS en WNPower.
+export const TASADOR_URL = process.env.NEXT_PUBLIC_TASADOR_URL ?? "https://tasador-sma.vercel.app";
 export const BUSINESS_HOURS = "Lun–Vie: 9:30 a 19:00 · Sáb: 10:00 a 13:00";
 
 // Code de verificación de Google Search Console.
