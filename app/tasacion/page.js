@@ -1,5 +1,5 @@
 import TasacionForm from "@/components/TasacionForm";
-import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
 
 export const metadata = {
   title: "Tasación de propiedades en San Martín de los Andes | Catalán Propiedades",
@@ -89,6 +89,34 @@ export default function TasacionPage() {
       </section>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        {/* Tasador instantáneo con IA */}
+        <a
+          href={TASADOR_URL}
+          className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 mb-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
+        >
+          <div className="flex-1">
+            <p className="text-rose-400 text-[11px] font-bold tracking-widest uppercase mb-1.5">Nuevo · Resultado al instante</p>
+            <p className="text-white text-lg font-bold leading-snug mb-1">
+              ¿No querés esperar? Probá el tasador con IA
+            </p>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes, más un informe PDF gratis.
+            </p>
+          </div>
+          <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap flex-shrink-0">
+            Tasar al instante
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </span>
+        </a>
+
+        <div className="flex items-center gap-3 mb-10">
+          <span className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">o pedí la tasación personal de Milton</span>
+          <span className="flex-1 h-px bg-gray-200" />
+        </div>
 
         {/* Beneficios */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
