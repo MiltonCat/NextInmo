@@ -8,6 +8,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const INTERESES = new Set(["comprar", "alquilar", "invertir", "mirar"]);
+// Orígenes válidos del alta: el sitio propio y el tasador (tasador-sma).
+const SOURCES = new Set(["web", "tasador"]);
 // Validación de email simple y suficiente (formato básico).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -29,7 +31,7 @@ export async function POST(request) {
       email,
       nombre: body.nombre?.trim() || null,
       interes,
-      source: "web",
+      source: SOURCES.has(body.source) ? body.source : "web",
     });
 
     return NextResponse.json({ ok: true });
