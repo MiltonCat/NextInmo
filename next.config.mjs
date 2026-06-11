@@ -22,6 +22,11 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ["recharts"],
+    // El panel /admin sube hasta 5 fotos por propiedad en una Server Action.
+    // El límite por defecto es 1 MB y las fotos pesan varios MB, así que se amplía.
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
   },
 };
 
