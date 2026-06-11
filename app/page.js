@@ -232,7 +232,7 @@ export default async function Home() {
                 tipo: "Lote 600 m² · Caleuche",
                 zona: "Paseo de los Músicos",
                 precio: "USD 30.000",
-                detalle: "Vendido",
+                detalle: "Vendido · 2020",
               },
               {
                 emoji: "🏪",
@@ -246,7 +246,7 @@ export default async function Home() {
                 tipo: "Monoambiente en pozo",
                 zona: "Centro",
                 precio: "USD 105.000",
-                detalle: "Vendido",
+                detalle: "Vendido · 2020",
               },
             ].map((op) => (
               <div key={`${op.tipo}-${op.precio}`} className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col">
