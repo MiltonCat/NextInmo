@@ -56,8 +56,7 @@ async function buildRowFromForm(formData) {
     reservada: bool(formData.get("reservada")),
   };
 
-  // "modalidad" se conserva por compatibilidad: igual a la operación elegida.
-  row.modalidad = row.operation;
+  row.modalidad = row.operation === "alquiler" ? "alquiler_permanente" : row.operation;
 
   // Imágenes: si se subió un archivo nuevo, se sube y se usa su URL;
   // si no, se conserva la URL actual (campo oculto `<campo>_current`).
