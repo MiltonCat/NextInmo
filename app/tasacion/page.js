@@ -90,7 +90,7 @@ export default function TasacionPage() {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-        {/* Tasador instantáneo con IA */}
+        {/* Tasador instantáneo con modelo entrenado */}
         <a
           href={TASADOR_URL}
           className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 mb-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
@@ -98,7 +98,7 @@ export default function TasacionPage() {
           <div className="flex-1">
             <p className="text-rose-400 text-[11px] font-bold tracking-widest uppercase mb-1.5">Nuevo · Resultado al instante</p>
             <p className="text-white text-lg font-bold leading-snug mb-1">
-              ¿No querés esperar? Probá el tasador con IA
+              ¿No querés esperar? Accedé al tasador predictivo
             </p>
             <p className="text-slate-300 text-sm leading-relaxed">
               Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes, más un informe PDF gratis.
