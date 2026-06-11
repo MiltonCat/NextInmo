@@ -8,8 +8,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const INTERESES = new Set(["comprar", "alquilar", "invertir", "mirar"]);
-// Orígenes válidos del alta: el sitio propio y el tasador (tasador-sma).
-const SOURCES = new Set(["web", "tasador"]);
+// Orígenes válidos del alta: el sitio propio, el tasador (tasador-sma)
+// y el test de perfil inversor de /inversiones.
+const SOURCES = new Set(["web", "tasador", "test-inversor"]);
 // Validación de email simple y suficiente (formato básico).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

@@ -96,6 +96,9 @@ export default function InvestorQuiz() {
   const [paso, setPaso] = useState(0);
   const [respuestas, setRespuestas] = useState([]);
   const [seleccion, setSeleccion] = useState(null);
+  const [email, setEmail] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [errorEmail, setErrorEmail] = useState(false);
 
   const preguntaActual = QUESTIONS[paso - 1];
 
@@ -124,9 +127,36 @@ export default function InvestorQuiz() {
     setPaso(0);
     setRespuestas([]);
     setSeleccion(null);
+    setEmail("");
+    setEnviando(false);
+    setErrorEmail(false);
   };
 
-  const perfil = paso === 5 ? PERFILES[calcularPerfil(respuestas)] : null;
+  // Envía el email a /api/suscripcion y pasa al resultado completo.
+  // Si el guardado falla, el usuario ve su estrategia igual: el lead
+  // no vale más que la experiencia.
+  const handleEmail = async (e) => {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorEmail(true);
+      return;
+    }
+    setErrorEmail(false);
+    setEnviando(true);
+    try {
+      await fetch("/api/suscripcion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), interes: "invertir", source: "test-inversor" }),
+      });
+    } catch {
+      // sin red: seguimos igual al resultado
+    }
+    setEnviando(false);
+    setPaso(6);
+  };
+
+  const perfil = paso >= 5 ? PERFILES[calcularPerfil(respuestas)] : null;
   const colores = perfil ? colorMap[perfil.color] : null;
   const progreso = paso >= 1 && paso <= 4 ? (paso / QUESTIONS.length) * 100 : 0;
 
@@ -194,8 +224,58 @@ export default function InvestorQuiz() {
           </div>
         )}
 
-        {/* Paso 5 — Resultado */}
+        {/* Paso 5 — Perfil revelado + captura de email */}
         {paso === 5 && perfil && (
+          <div>
+            <div className="text-center mb-6">
+              <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Tu perfil de inversión</p>
+              <h2 className="text-white text-2xl font-bold mb-2">{perfil.label}</h2>
+              <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">{perfil.descripcion}</p>
+            </div>
+
+            <div className={`${colores.bg} ${colores.border} border rounded-xl p-5 mb-5 text-center`}>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tu estrategia está lista</p>
+              <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-sm mx-auto">
+                Dejá tu email y te mostramos qué tipo de propiedad te conviene, el retorno
+                estimado y el nivel de riesgo de tu perfil.
+              </p>
+              <form onSubmit={handleEmail} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  className={`flex-1 bg-gray-900 border rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-500 transition-colors ${
+                    errorEmail ? "border-red-500" : "border-gray-700"
+                  }`}
+                />
+                <button
+                  type="submit"
+                  disabled={enviando}
+                  className={`text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm disabled:opacity-60 ${colores.btn}`}
+                >
+                  {enviando ? "Un segundo..." : "Ver mi estrategia →"}
+                </button>
+              </form>
+              {errorEmail && (
+                <p className="text-red-400 text-xs mt-2">Ingresá un email válido.</p>
+              )}
+              <p className="text-gray-600 text-xs mt-3">Cero spam. Solo análisis y oportunidades del mercado de SMA.</p>
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={() => setPaso(6)}
+                className="text-gray-600 hover:text-gray-400 text-xs underline underline-offset-2 transition-colors"
+              >
+                Prefiero ver la estrategia sin dejar mi email
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Paso 6 — Resultado completo */}
+        {paso === 6 && perfil && (
           <div>
             <div className="text-center mb-6">
               <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Tu perfil de inversión</p>
