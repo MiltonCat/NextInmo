@@ -11,6 +11,7 @@ const TABS = [
 ];
 
 const SECONDARY_LINKS = [
+  { href: "/vender",             label: "Vender" },
   { href: "/nosotros",           label: "Nosotros" },
   { href: "/contacto",           label: "Contacto" },
   { href: "/precio-m2",          label: "Precio del m²" },

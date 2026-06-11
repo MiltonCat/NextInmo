@@ -14,6 +14,7 @@ export default async function sitemap() {
     { url: canonicalUrl("/inversiones"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/precio-m2"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/tasacion"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: canonicalUrl("/vender"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/nosotros"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: canonicalUrl("/blog"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: canonicalUrl("/blog/donde-vivir-san-martin-de-los-andes"), lastModified: new Date("2026-06-02"), changeFrequency: "monthly", priority: 0.9 },
