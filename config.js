@@ -9,8 +9,8 @@ export const TASADOR_URL = process.env.NEXT_PUBLIC_TASADOR_URL ?? "https://tasad
 export const BUSINESS_HOURS = "Lun–Vie: 9:30 a 19:00 · Sáb: 10:00 a 13:00";
 
 // Code de verificación de Google Search Console.
-// Reemplazar por el valor del atributo content="..." del meta de verificación.
-export const GOOGLE_SITE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "REEMPLAZAR_CON_CODIGO_DE_SEARCH_CONSOLE";
+// Si la variable no está definida, el meta no se renderiza.
+export const GOOGLE_SITE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined;
 
 // URL absoluta de la imagen por defecto para Open Graph / Twitter (1200x630).
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/hero-montana.webp`;
