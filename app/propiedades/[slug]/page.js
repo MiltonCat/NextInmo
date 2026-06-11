@@ -80,7 +80,7 @@ export async function generateMetadata({ params }) {
   const specs = [bedroomText, areaText, property.location].filter(Boolean).join(" · ");
 
   const seoTitle = `${property.title} - ${priceText} | Catalán Propiedades`;
-  const seoDescription = `${property.type} en ${property.location}. ${specs}. ${property.description.slice(0, 120)}...`;
+  const seoDescription = `${property.type} en ${property.location}. ${specs}${property.description ? `. ${property.description.slice(0, 120)}...` : "."}`;
   const ogImage = property.image?.startsWith("http") ? property.image : `${SITE_URL}${property.image}`;
   // El canónico siempre apunta al slug descriptivo, aunque la URL actual venga del ID numérico.
   const canonical = canonicalUrl(`/propiedades/${getPropertySlug(property)}`);
