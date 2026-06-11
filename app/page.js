@@ -205,6 +205,73 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Operaciones cerradas — prueba social */}
+      <section className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-rose-600 text-xs font-bold tracking-widest uppercase mb-2">Resultados reales</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-3">
+              Operaciones cerradas en San Martín de los Andes
+            </h2>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              Algunas de las ventas gestionadas por Catalán Propiedades. Cada operación se cerró
+              con tasación basada en datos y acompañamiento hasta la escritura.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                emoji: "🏔️",
+                tipo: "Lote",
+                zona: "Vega Maipú",
+                precio: "USD 110.000",
+                detalle: "Vendido · 2024",
+              },
+              {
+                emoji: "🏔️",
+                tipo: "Lote 600 m² · Caleuche",
+                zona: "Paseo de los Músicos",
+                precio: "USD 30.000",
+                detalle: "Vendido",
+              },
+              {
+                emoji: "🏪",
+                tipo: "Local comercial a estrenar",
+                zona: "Centro",
+                precio: "USD 200.000",
+                detalle: "Vendido · 2025",
+              },
+              {
+                emoji: "🏢",
+                tipo: "Monoambiente en pozo",
+                zona: "Centro",
+                precio: "USD 105.000",
+                detalle: "Vendido",
+              },
+            ].map((op) => (
+              <div key={`${op.tipo}-${op.precio}`} className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col">
+                <span className="text-2xl mb-3">{op.emoji}</span>
+                <p className="text-sm font-bold text-gray-900 leading-snug">{op.tipo}</p>
+                <p className="text-xs text-gray-400 mt-0.5 mb-4">{op.zona}</p>
+                <p className="text-xl font-black text-gray-900 mt-auto">{op.precio}</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-emerald-600 mt-1">{op.detalle}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/vender"
+              className="inline-flex items-center gap-2 text-rose-600 hover:text-rose-500 text-sm font-semibold transition-colors"
+            >
+              ¿Querés que la próxima sea tu propiedad? Conocé cómo trabajamos
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Guía de Barrios — link a experiencia-barrio */}
       <section className="border-t border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
