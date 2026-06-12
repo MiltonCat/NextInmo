@@ -1,4 +1,5 @@
 import TasacionForm from "@/components/TasacionForm";
+import TrackedLink from "@/components/TrackedLink";
 import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
 
 export const metadata = {
@@ -91,7 +92,9 @@ export default function TasacionPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
         {/* Tasador instantáneo con modelo entrenado */}
-        <a
+        <TrackedLink
+          event="tasador_click"
+          eventParams={{ source: "tasacion" }}
           href={TASADOR_URL}
           className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 mb-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
         >
@@ -110,7 +113,7 @@ export default function TasacionPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </span>
-        </a>
+        </TrackedLink>
 
         <div className="flex items-center gap-3 mb-10">
           <span className="flex-1 h-px bg-gray-200" />

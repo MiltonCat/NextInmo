@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { WA_NUMBER } from "@/config";
 import { registrarConsulta } from "@/lib/registrarConsulta";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const TIME_SLOTS = ["9:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 const DAYS_HEADER = ["D", "L", "M", "M", "J", "V", "S"];
@@ -32,6 +33,7 @@ export default function VisitScheduler({ property, onClose }) {
   const [selectedTime, setSelectedTime] = useState("");
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
   const [error, setError] = useState("");
+  const { trackPropertyInquiry, trackWhatsAppClick } = useAnalytics();
 
   const calDays = useMemo(() => getCalendarDays(calYear, calMonth), [calYear, calMonth]);
 
@@ -102,6 +104,8 @@ export default function VisitScheduler({ property, onClose }) {
     msg += `Teléfono: ${form.phone}\n`;
     if (form.email.trim()) msg += `Email: ${form.email}\n`;
     if (form.message.trim()) msg += `\nMensaje:\n${form.message}`;
+    trackPropertyInquiry(property, "visit");
+    trackWhatsAppClick(property, "visit_scheduler");
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
     onClose();
   };

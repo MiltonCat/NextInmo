@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { WA_NUMBER } from "@/config";
 import { registrarConsulta } from "@/lib/registrarConsulta";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function PropertyInquiry({ property, onClose }) {
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
   const [error, setError] = useState("");
+  const { trackPropertyInquiry, trackWhatsAppClick } = useAnalytics();
 
   const set = (field) => (e) => { setForm(f => ({ ...f, [field]: e.target.value })); setError(""); };
 
@@ -57,6 +59,8 @@ export default function PropertyInquiry({ property, onClose }) {
     if (form.email.trim()) msg += `Email: ${form.email}\n`;
     if (form.message.trim()) msg += `\nMensaje:\n${form.message}`;
 
+    trackPropertyInquiry(property, "form");
+    trackWhatsAppClick(property, "property_inquiry_form");
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
     onClose();
   };

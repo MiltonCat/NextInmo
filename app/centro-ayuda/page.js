@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import TrackedLink from "@/components/TrackedLink";
 import { WA_URL, CONTACT_EMAIL, PHONE_DISPLAY } from "@/config";
 
 const CATEGORIAS = ["Todas", "Compra", "Alquiler", "Inversión", "Zona", "Proceso"];
@@ -233,7 +234,9 @@ export default function CentroAyudaPage() {
               <p className="text-[#717171] text-[10px] mt-1">Lun–Vie 9 a 18hs</p>
             </Link>
 
-            <a
+            <TrackedLink
+              event="whatsapp_click"
+              eventParams={{ location: "centro_ayuda" }}
               href={WA_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -250,7 +253,7 @@ export default function CentroAyudaPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
                 <p className="text-primary-500 text-[10px] font-medium">Respuesta rápida</p>
               </div>
-            </a>
+            </TrackedLink>
           </div>
         </div>
       </section>

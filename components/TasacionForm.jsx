@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { WA_NUMBER } from "@/config";
 import { registrarConsulta } from "@/lib/registrarConsulta";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const TIPOS = ["Casa", "Departamento", "Terreno", "Local comercial", "Cabaña"];
 const ZONAS = ["Centro", "Chapelco Golf", "Costanera", "Las Marías", "Las Pendientes", "Otro"];
@@ -15,6 +16,7 @@ export default function TasacionForm() {
   });
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
+  const { trackTasacionSubmit, trackWhatsAppClick } = useAnalytics();
 
   const set = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
@@ -53,6 +55,8 @@ export default function TasacionForm() {
       `${form.comentarios.trim() ? `• Comentarios: ${form.comentarios.trim()}\n` : ""}` +
       `\nMi WhatsApp: ${form.whatsapp.trim()}`
     );
+    trackTasacionSubmit({ propertyType: form.tipo, zone: form.zona });
+    trackWhatsAppClick(null, "tasacion_form");
     window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
     setEnviado(true);
   };

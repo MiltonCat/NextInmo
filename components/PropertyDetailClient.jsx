@@ -75,7 +75,7 @@ export default function PropertyDetailClient({ property }) {
       : `Hola! Me interesa la propiedad: "${property.title}". Podemos hablar?`;
     
     trackPropertyInquiry(property, 'whatsapp');
-    trackWhatsAppClick(property);
+    trackWhatsAppClick(property, 'property_detail');
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -108,7 +108,7 @@ export default function PropertyDetailClient({ property }) {
           ? `Hola! Vi la propiedad "${property.title}" (reservada) y me interesa. ¿Sigue disponible o tienen algo similar?`
           : `Hola! Me interesa alquilar la propiedad: "${property.title}". Podemos hablar?`;
       trackPropertyInquiry(property, "whatsapp");
-      trackWhatsAppClick(property);
+      trackWhatsAppClick(property, "property_detail_mobile");
       window.open(waLink(property.title, message), "_blank");
       return;
     }

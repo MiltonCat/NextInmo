@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { WA_NUMBER } from "@/config";
 import AdvisoryProcess from "@/components/AdvisoryProcess";
 import InvestorQuiz from "@/components/InvestorQuiz";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const InversionesEvolucionChart = dynamic(
   () => import("@/components/InversionesEvolucionChart"),
@@ -151,6 +152,7 @@ export default function InversionesClient() {
   const [leadName, setLeadName] = useState("");
   const [leadWa, setLeadWa] = useState("");
   const [leadSent, setLeadSent] = useState(false);
+  const { trackEvent, trackWhatsAppClick } = useAnalytics();
 
   const roiAnual = calcTipo === "alquiler" ? 0.065 : calcTipo === "turistico" ? 0.12 : 0.15;
 
@@ -168,6 +170,12 @@ export default function InversionesClient() {
       `• Ganancia total estimada: USD ${Math.round(calcMonto * roiAnual * calcPlazo).toLocaleString()}\n\n` +
       `Mi WhatsApp: ${leadWa.trim()}`
     );
+    trackEvent("generate_lead", {
+      inquiry_type: "inversion",
+      investment_type: calcTipo,
+      amount: calcMonto,
+    });
+    trackWhatsAppClick(null, "inversiones_calculadora");
     window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
     setLeadSent(true);
   };

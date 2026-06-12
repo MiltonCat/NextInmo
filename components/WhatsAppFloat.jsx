@@ -1,12 +1,16 @@
 "use client";
 import { WA_URL } from "@/config";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function WhatsAppFloat() {
+  const { trackWhatsAppClick } = useAnalytics();
+
   return (
     <a
       href={WA_URL}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackWhatsAppClick(null, "float_button")}
       className="hidden sm:flex fixed bottom-6 right-6 z-50 bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 items-center justify-center group"
       aria-label="Contactar por WhatsApp"
     >

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import SuscripcionForm from "@/components/SuscripcionForm";
+import TrackedLink from "@/components/TrackedLink";
 import dynamic from "next/dynamic";
 const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
 import { getProperties } from "@/lib/properties";
@@ -88,7 +89,9 @@ export default async function Home() {
 
       {/* Tasador predictivo */}
       <section className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8">
-        <a
+        <TrackedLink
+          event="tasador_click"
+          eventParams={{ source: "home" }}
           href={TASADOR_URL}
           className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
         >
@@ -107,7 +110,7 @@ export default async function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </span>
-        </a>
+        </TrackedLink>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">

@@ -3,6 +3,7 @@ import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { WA_URL, CONTACT_EMAIL, PHONE_DISPLAY, LOCATION_DISPLAY, BUSINESS_HOURS } from "@/config";
 import { registrarConsulta } from "@/lib/registrarConsulta";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "", website: "" };
 
@@ -38,6 +39,7 @@ export default function ContactoClient() {
   const [formData, setFormData] = useState(INITIAL);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("idle");
+  const { trackContactSubmit, trackWhatsAppClick } = useAnalytics();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,6 +86,7 @@ export default function ContactoClient() {
         },
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
       );
+      trackContactSubmit();
       setStatus("success");
       setFormData(INITIAL);
       setErrors({});
@@ -184,7 +187,13 @@ export default function ContactoClient() {
                     <div>
                       <p className="font-semibold text-[#222222] text-sm">{item.label}</p>
                       {item.href ? (
-                        <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-500 text-sm transition">
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={item.href === WA_URL ? () => trackWhatsAppClick(null, "contacto_info") : undefined}
+                          className="text-primary-600 hover:text-primary-500 text-sm transition"
+                        >
                           {item.value}
                         </a>
                       ) : (
@@ -374,6 +383,7 @@ export default function ContactoClient() {
                   href={WA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackWhatsAppClick(null, "contacto_form")}
                   className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-primary-300 text-[#484848] hover:text-primary-600 py-3 rounded-xl font-medium transition-all duration-200 text-sm"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

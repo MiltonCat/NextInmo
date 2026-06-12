@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TrackedLink from "@/components/TrackedLink";
 import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL, WA_URL } from "@/config";
 
 export const metadata = {
@@ -144,7 +145,9 @@ export default function VenderPage() {
             desde la tasación hasta la escritura.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
-            <a
+            <TrackedLink
+              event="tasador_click"
+              eventParams={{ source: "vender_hero" }}
               href={TASADOR_URL}
               className="inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors"
             >
@@ -152,15 +155,17 @@ export default function VenderPage() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </a>
-            <a
+            </TrackedLink>
+            <TrackedLink
+              event="whatsapp_click"
+              eventParams={{ location: "vender_hero" }}
               href={WA_VENDER_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-800 font-semibold px-6 py-3 rounded-full text-sm transition-colors"
             >
               Hablar con Milton por WhatsApp
-            </a>
+            </TrackedLink>
           </div>
         </div>
       </section>
@@ -204,7 +209,9 @@ export default function VenderPage() {
         </div>
 
         {/* CTA tasador */}
-        <a
+        <TrackedLink
+          event="tasador_click"
+          eventParams={{ source: "vender_cta" }}
           href={TASADOR_URL}
           className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 mb-14 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
         >
@@ -226,7 +233,7 @@ export default function VenderPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </span>
-        </a>
+        </TrackedLink>
 
         {/* FAQ */}
         <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">
@@ -262,14 +269,16 @@ export default function VenderPage() {
             >
               Pedir tasación gratuita
             </Link>
-            <a
+            <TrackedLink
+              event="whatsapp_click"
+              eventParams={{ location: "vender_footer" }}
               href={WA_VENDER_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center bg-white border border-gray-300 hover:border-gray-400 text-gray-800 font-semibold px-6 py-3 rounded-full text-sm transition-colors"
             >
               Escribir por WhatsApp
-            </a>
+            </TrackedLink>
           </div>
         </div>
       </div>

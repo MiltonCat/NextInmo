@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const INTERESES = [
   { value: "", label: "¿Qué buscás? (opcional)" },
@@ -16,6 +17,7 @@ export default function SuscripcionForm() {
   const [interes, setInteres] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [estado, setEstado] = useState("idle"); // idle | enviando | ok | error
+  const { trackNewsletterSignup } = useAnalytics();
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -28,7 +30,9 @@ export default function SuscripcionForm() {
         body: JSON.stringify({ email, nombre, interes, website }),
       });
       const data = await res.json().catch(() => ({}));
-      setEstado(res.ok && data.ok ? "ok" : "error");
+      const ok = res.ok && data.ok;
+      if (ok) trackNewsletterSignup(interes || "no_indicado");
+      setEstado(ok ? "ok" : "error");
     } catch {
       setEstado("error");
     }

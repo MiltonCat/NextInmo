@@ -25,12 +25,30 @@ export const useAnalytics = () => {
     });
   };
 
-  const trackWhatsAppClick = (property = null) => {
+  const trackWhatsAppClick = (property = null, location = null) => {
     trackEvent('whatsapp_click', {
       ...(property && {
         property_id: property.id,
         property_type: property.type,
       }),
+      ...(location && { location }),
+    });
+  };
+
+  const trackNewsletterSignup = (interest = null) => {
+    trackEvent('newsletter_signup', {
+      ...(interest && { interest }),
+    });
+  };
+
+  const trackContactSubmit = () => {
+    trackEvent('contact_submit', {});
+  };
+
+  const trackTasacionSubmit = ({ propertyType, zone } = {}) => {
+    trackEvent('tasacion_submit', {
+      ...(propertyType && { property_type: propertyType }),
+      ...(zone && { zone }),
     });
   };
 
@@ -75,6 +93,9 @@ export const useAnalytics = () => {
     trackPropertyView,
     trackPropertyInquiry,
     trackWhatsAppClick,
+    trackNewsletterSignup,
+    trackContactSubmit,
+    trackTasacionSubmit,
     trackFavoriteToggle,
     trackPropertyShare,
     trackFormSubmit,
