@@ -33,6 +33,16 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "comprar-en-san-martin-de-los-andes-desde-buenos-aires",
+    title: "Cómo comprar en San Martín de los Andes desde Buenos Aires",
+    excerpt: "Guía paso a paso para comprar a distancia: cuántas veces viajar, los gastos reales de la operación, cómo se transfiere el dinero en dólares y cómo evitar estafas. Lo que le explico a cada comprador de otra provincia.",
+    category: "Guía para Compradores",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "9 min",
+    image: "/muelle.jpg",
+  },
+  {
     id: "donde-vivir-san-martin-de-los-andes",
     title: "¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026",
     excerpt: "Análisis real de cada barrio: precio del m², tranquilidad, servicios y potencial de inversión. Lo que le diría a un amigo que me pregunta dónde comprar o mudarse.",
