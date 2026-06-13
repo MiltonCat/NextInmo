@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Pelota mundial Catalan Propiedades">
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ball { animation: spin 0.9s linear infinite; transform-origin: 32px 32px; }
+  </style>
+  <rect width="64" height="64" fill="transparent"/>
+  <g class="ball">
+    <circle cx="32" cy="32" r="29" fill="#ffffff"/>
+    <path fill="#111827" d="M32 13l9 7-3.5 10.5h-11L23 20l9-7Z"/>
+    <path fill="#111827" d="M12 26l9-5 6 9-4 10H12a29 29 0 0 1 0-14Z"/>
+    <path fill="#111827" d="M52 26l-9-5-6 9 4 10h11a29 29 0 0 0 0-14Z"/>
+    <path fill="#111827" d="M23 42h18l4 11a29 29 0 0 1-26 0l4-11Z"/>
+    <path fill="none" stroke="#111827" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" d="M26.5 30.5 23 40m14.5-9.5L41 40M23 20l-11 6m29-6 11 6M23 42h18M32 13V4"/>
+    <path fill="none" stroke="#e11d48" stroke-width="5" stroke-linecap="round" d="M10 17c7-8 17-12 28-11"/>
+    <path fill="none" stroke="#16a34a" stroke-width="5" stroke-linecap="round" d="M54 47c-7 8-17 12-28 11"/>
+    <circle cx="32" cy="32" r="29" fill="none" stroke="#111827" stroke-width="3"/>
+  </g>
+</svg>
