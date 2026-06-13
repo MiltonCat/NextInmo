@@ -101,11 +101,11 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.svg?v=worldcup-spin", type: "image/svg+xml" },
-      { url: "/icon.png?v=worldcup-spin", type: "image/png" },
+      { url: "/favicon.svg?v=bounce-ball-v2", type: "image/svg+xml" },
+      { url: "/icon.png?v=bounce-ball-v2", type: "image/png" },
     ],
-    shortcut: "/favicon.ico?v=worldcup-spin",
-    apple: "/icon.png?v=worldcup-spin",
+    shortcut: "/favicon.ico?v=bounce-ball-v2",
+    apple: "/icon.png?v=bounce-ball-v2",
   },
 };
 
@@ -158,7 +158,7 @@ const realEstateAgentJsonLd = {
   founder: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
 };
 
-const animatedFaviconScript = "(() => {\n  const frames = [\n    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 0 },\n    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 45 },\n    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 90 },\n    { y: 15, s: 1.16, pulse: 27, shadow: 0.25, angle: 135 },\n    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 180 },\n    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 225 },\n    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 270 },\n    { y: 37, s: 0.92, pulse: 17, shadow: 1.15, angle: 315 },\n  ];\n\n  const ball = (y, scale, angle) => '<g transform=\"translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')\"><circle cx=\"0\" cy=\"0\" r=\"14\" fill=\"#fff\"/><path fill=\"#111827\" d=\"M0-9l8 6-3 9H-5l-3-9 8-6Z\"/><path fill=\"none\" stroke=\"#111827\" stroke-width=\"2.2\" stroke-linecap=\"round\" d=\"M-5 6l-7 6M5 6l7 6M-8-3l-8-3M8-3l8-3M0-9V-14\"/><path fill=\"none\" stroke=\"#e11d48\" stroke-width=\"3\" stroke-linecap=\"round\" d=\"M-10-9c6-4 14-4 20 0\"/><path fill=\"none\" stroke=\"#16a34a\" stroke-width=\"3\" stroke-linecap=\"round\" d=\"M-10 11c6 4 14 4 20 0\"/><circle cx=\"0\" cy=\"0\" r=\"14\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/></g>';\n\n  const drawFrame = (frame) => '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"12\" fill=\"#ffffff\"/><circle cx=\"32\" cy=\"32\" r=\"' + frame.pulse + '\" fill=\"#e11d48\" opacity=\"0.18\"/><path d=\"M8 49h48\" stroke=\"#16a34a\" stroke-width=\"7\" stroke-linecap=\"round\"/><ellipse cx=\"32\" cy=\"48\" rx=\"' + (15 * frame.shadow) + '\" ry=\"3\" fill=\"#111827\" opacity=\"0.25\"/>' + ball(frame.y, frame.s, frame.angle) + '</svg>';\n\n  const setIcon = (frame) => {\n    let link = document.querySelector('link#favicon');\n    if (!link) {\n      link = document.createElement('link');\n      link.id = 'favicon';\n      link.rel = 'icon';\n      document.head.appendChild(link);\n    }\n    link.type = 'image/svg+xml';\n    link.href = 'data:image/svg+xml,' + encodeURIComponent(drawFrame(frame));\n  };\n\n  let index = 0;\n  setIcon(frames[index]);\n  window.setInterval(() => {\n    index = (index + 1) % frames.length;\n    setIcon(frames[index]);\n  }, 120);\n})();";
+const animatedFaviconScript = "(() => {\n  const frames = [\n    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 0 },\n    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 45 },\n    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 90 },\n    { y: 15, s: 1.16, pulse: 27, shadow: 0.25, angle: 135 },\n    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 180 },\n    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 225 },\n    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 270 },\n    { y: 37, s: 0.92, pulse: 17, shadow: 1.15, angle: 315 },\n  ];\n\n  const ball = (y, scale, angle) => '<g transform=\"translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')\"><circle cx=\"0\" cy=\"0\" r=\"14\" fill=\"#fff\"/><path fill=\"#111827\" d=\"M0-9l8 6-3 9H-5l-3-9 8-6Z\"/><path fill=\"none\" stroke=\"#111827\" stroke-width=\"2.2\" stroke-linecap=\"round\" d=\"M-5 6l-7 6M5 6l7 6M-8-3l-8-3M8-3l8-3M0-9V-14\"/><path fill=\"none\" stroke=\"#e11d48\" stroke-width=\"3\" stroke-linecap=\"round\" d=\"M-10-9c6-4 14-4 20 0\"/><path fill=\"none\" stroke=\"#16a34a\" stroke-width=\"3\" stroke-linecap=\"round\" d=\"M-10 11c6 4 14 4 20 0\"/><circle cx=\"0\" cy=\"0\" r=\"14\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/></g>';\n\n  const drawFrame = (frame) => '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"12\" fill=\"#ffffff\"/><circle cx=\"32\" cy=\"32\" r=\"' + frame.pulse + '\" fill=\"#e11d48\" opacity=\"0.18\"/><path d=\"M8 49h48\" stroke=\"#16a34a\" stroke-width=\"7\" stroke-linecap=\"round\"/><ellipse cx=\"32\" cy=\"48\" rx=\"' + (15 * frame.shadow) + '\" ry=\"3\" fill=\"#111827\" opacity=\"0.25\"/>' + ball(frame.y, frame.s, frame.angle) + '</svg>';\n\n  const setIcon = (frame) => {\n    const href = 'data:image/svg+xml,' + encodeURIComponent(drawFrame(frame));\n    document.querySelectorAll('link[rel*=\"icon\"]').forEach((node) => {\n      if (node.id !== 'favicon') node.remove();\n    });\n    let link = document.querySelector('link#favicon');\n    if (!link) {\n      link = document.createElement('link');\n      link.id = 'favicon';\n      document.head.appendChild(link);\n    }\n    link.rel = 'icon';\n    link.type = 'image/svg+xml';\n    link.href = href;\n  };\n\n  let index = 0;\n  setIcon(frames[index]);\n  window.setInterval(() => {\n    index = (index + 1) % frames.length;\n    setIcon(frames[index]);\n  }, 120);\n})();";
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -175,9 +175,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es-AR">
       <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=worldcup-spin" id="favicon" />
-        <link rel="alternate icon" type="image/png" href="/icon.png?v=worldcup-spin" />
-        <link rel="shortcut icon" href="/favicon.ico?v=worldcup-spin" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
+        <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
+        <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />
         <link rel="canonical" href={canonicalUrl("/")} />
         <script
           type="application/ld+json"
