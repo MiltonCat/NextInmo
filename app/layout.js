@@ -171,10 +171,31 @@ const websiteJsonLd = {
   publisher: { "@id": `${SITE_URL}/#organization` },
 };
 
+// Guardia anti-crash con traductores del navegador (Google Translate, etc.).
+// Esas extensiones reemplazan nodos de texto por su cuenta; cuando React
+// desmonta el árbol, llama removeChild/insertBefore sobre un nodo cuyo padre
+// ya cambió y lanza "Cannot read properties of null (reading 'removeChild')".
+// Hacemos esos métodos defensivos para que no tiren la página. NO desactiva la
+// traducción. Patrón conocido (facebook/react#11538). Debe correr antes de hidratar.
+const domGuardScript = `(function(){
+  if (typeof Node !== "function" || !Node.prototype) return;
+  var rc = Node.prototype.removeChild;
+  Node.prototype.removeChild = function(child){
+    if (child && child.parentNode !== this) { return child; }
+    return rc.apply(this, arguments);
+  };
+  var ib = Node.prototype.insertBefore;
+  Node.prototype.insertBefore = function(newNode, referenceNode){
+    if (referenceNode && referenceNode.parentNode !== this) { return newNode; }
+    return ib.apply(this, arguments);
+  };
+})();`;
+
 export default function RootLayout({ children }) {
   return (
     <html lang="es-AR">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: domGuardScript }} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
         <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
         <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />

@@ -54,7 +54,7 @@ const faqJsonLd = {
       name: "¿Cómo se define el precio de venta de mi propiedad?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "El precio se define con datos: más de 600 propiedades relevadas en San Martín de los Andes, valores reales del m² por barrio y un modelo predictivo propio. Un precio correcto desde el inicio evita que la propiedad quede meses sin consultas.",
+        text: "El precio se define con datos: 324 propiedades relevadas en San Martín de los Andes, valores reales del m² por barrio y un modelo predictivo propio. Un precio correcto desde el inicio evita que la propiedad quede meses sin consultas.",
       },
     },
     {
@@ -103,7 +103,7 @@ const DIFERENCIALES = [
   {
     icon: "📊",
     titulo: "Precio respaldado por datos",
-    desc: "600+ propiedades relevadas en SMA y un modelo predictivo propio. El precio correcto desde el día uno.",
+    desc: "324 propiedades relevadas en SMA y un modelo predictivo propio. El precio correcto desde el día uno.",
   },
   {
     icon: "📣",

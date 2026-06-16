@@ -59,12 +59,12 @@ export default async function Home() {
                 No somos un portal. Somos asesores con datos reales del mercado local.
               </h2>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Analizamos más de 600 propiedades en San Martín de los Andes para ayudarte a comprar, alquilar o invertir con información concreta, no promedios nacionales.
+                Analizamos 324 propiedades en San Martín de los Andes para ayudarte a comprar, alquilar o invertir con información concreta, no promedios nacionales.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-6 lg:gap-10 lg:flex-shrink-0">
               {[
-                { valor: "600+", label: "Propiedades relevadas" },
+                { valor: "324", label: "Propiedades relevadas" },
                 { valor: "10+", label: "Años de experiencia" },
                 { valor: "+18%", label: "ROI promedio gestionado" },
               ].map((stat) => (

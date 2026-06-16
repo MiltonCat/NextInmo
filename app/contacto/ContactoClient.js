@@ -208,7 +208,7 @@ export default function ContactoClient() {
               <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-4">
                 <p className="text-xs font-semibold text-[#717171] uppercase tracking-widest">Por qué trabajar conmigo</p>
                 {[
-                  { valor: "600+", texto: "propiedades relevadas como base de análisis" },
+                  { valor: "324", texto: "propiedades relevadas como base de análisis" },
                   { valor: "10+", texto: "años en el mercado inmobiliario de la Patagonia" },
                   { valor: "<48h", texto: "tiempo de respuesta garantizado" },
                 ].map((item) => (

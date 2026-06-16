@@ -4,7 +4,7 @@ import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
   title: "Precio del m² en San Martín de los Andes 2026 | Catalán Propiedades",
-  description: "Consultá el precio del metro cuadrado en San Martín de los Andes por zona y tipo de propiedad. Evolución histórica 2021–2026 basada en más de 600 propiedades relevadas.",
+  description: "Consultá el precio del metro cuadrado en San Martín de los Andes por zona y tipo de propiedad. Evolución histórica 2021–2026 basada en 324 propiedades relevadas.",
   openGraph: {
     title: "Precio del m² en San Martín de los Andes 2026 — Catalán Propiedades",
     description: "Evolución del precio del metro cuadrado 2021–2026 por zona y tipo de propiedad en la Patagonia Argentina.",
@@ -22,7 +22,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Precio del m² en San Martín de los Andes 2026",
-    description: "Evolución 2021–2026 por zona. Más de 600 propiedades relevadas.",
+    description: "Evolución 2021–2026 por zona. 324 propiedades relevadas.",
     images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
@@ -77,7 +77,7 @@ export default function PrecioM2Page() {
             Precio del m² en San Martín de los Andes 2026
           </h1>
           <p className="text-gray-500 text-base md:text-lg max-w-2xl leading-relaxed">
-            Análisis actualizado del valor del metro cuadrado por zona y tipo de propiedad en San Martín de los Andes, basado en más de 600 propiedades relevadas en portales inmobiliarios locales.
+            Análisis actualizado del valor del metro cuadrado por zona y tipo de propiedad en San Martín de los Andes, basado en 324 propiedades relevadas en portales inmobiliarios locales.
           </p>
           <p className="text-gray-400 text-xs mt-4">
             Datos orientativos basados en listings públicos · No constituyen tasación profesional

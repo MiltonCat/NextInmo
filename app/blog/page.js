@@ -33,6 +33,16 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "como-tasamos-tu-propiedad-con-datos",
+    title: "Cómo tasamos tu propiedad con datos (y por qué te damos un rango)",
+    excerpt: "Cómo funciona nuestro tasador por dentro: un modelo entrenado con 324 propiedades reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.",
+    category: "Tasación con Datos",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "8 min",
+    image: "/portada.jpg",
+  },
+  {
     id: "comprar-en-san-martin-de-los-andes-desde-buenos-aires",
     title: "Cómo comprar en San Martín de los Andes desde Buenos Aires",
     excerpt: "Guía paso a paso para comprar a distancia: cuántas veces viajar, los gastos reales de la operación, cómo se transfiere el dinero en dólares y cómo evitar estafas. Lo que le explico a cada comprador de otra provincia.",
