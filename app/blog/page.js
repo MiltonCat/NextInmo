@@ -33,6 +33,16 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "cuanto-cuesta-una-casa-en-san-martin-de-los-andes",
+    title: "¿Cuánto cuesta una casa en San Martín de los Andes? (2026)",
+    excerpt: "Qué define el precio de una casa: zona, superficie, estado y vista. Cómo estimarlo con datos reales del m² por zona, por qué el precio publicado no es el valor real y cómo saber el precio justo de una propiedad puntual.",
+    category: "Precios",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "7 min",
+    image: "/hero-montana.jpg",
+  },
+  {
     id: "como-tasamos-tu-propiedad-con-datos",
     title: "Cómo tasamos tu propiedad con datos (y por qué te damos un rango)",
     excerpt: "Cómo funciona nuestro tasador por dentro: un modelo entrenado con 324 propiedades reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.",
