@@ -30,6 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 devserver.log
+# logs descartables de ejecuciones locales
+codex_*.log
+srv_*.log
 
 # claude code (config local)
 .claude/

@@ -28,6 +28,12 @@ export default async function AdminPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              href="/admin/analytics"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              Analítica
+            </Link>
+            <Link
               href="/admin/consultas"
               className="relative text-sm text-gray-600 hover:text-gray-900"
             >
