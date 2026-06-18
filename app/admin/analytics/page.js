@@ -7,8 +7,10 @@ import {
   summarizeCauses,
   canalES,
   dispositivoES,
+  eventoES,
 } from "@/lib/analytics";
 import TrendChart from "./TrendChart";
+import NoTrackToggle from "@/components/NoTrackToggle";
 
 // La API de GA4 usa gRPC: necesita runtime Node, y los datos siempre frescos.
 export const runtime = "nodejs";
@@ -140,9 +142,13 @@ export default async function AnalyticsPage({ searchParams }) {
     );
   }
 
-  const { kpis, series, topPages, channels, devices } = overview;
+  const { kpis, series, topPages, channels, devices, conversions } = overview;
   const causas = summarizeCauses(overview);
   const totalPageViews = topPages.reduce((acc, p) => acc + p.views, 0) || 1;
+  // Total de contactos "fuertes" (todo menos suscripciones al newsletter).
+  const totalContactos = conversions
+    .filter((c) => c.event !== "newsletter_signup")
+    .reduce((acc, c) => acc + c.count, 0);
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -174,6 +180,9 @@ export default async function AnalyticsPage({ searchParams }) {
           <p className="mt-1 text-sm leading-relaxed text-gray-800">{causas}</p>
         </div>
 
+        {/* Excluir el propio tráfico de este dispositivo */}
+        <NoTrackToggle />
+
         {/* KPIs */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
           <KpiCard label="Usuarios" value={formatNum(kpis.activeUsers.current)} pct={kpis.activeUsers.changePct} prev={formatNum(kpis.activeUsers.previous)} />
@@ -181,6 +190,29 @@ export default async function AnalyticsPage({ searchParams }) {
           <KpiCard label="Páginas vistas" value={formatNum(kpis.screenPageViews.current)} pct={kpis.screenPageViews.changePct} prev={formatNum(kpis.screenPageViews.previous)} />
           <KpiCard label="Duración media" value={formatDuration(kpis.avgSessionDuration.current)} pct={kpis.avgSessionDuration.changePct} prev={formatDuration(kpis.avgSessionDuration.previous)} />
           <KpiCard label="% Rebote" value={formatPct(kpis.bounceRate.current * 100)} pct={kpis.bounceRate.changePct} lowerIsBetter prev={formatPct(kpis.bounceRate.previous * 100)} />
+        </div>
+
+        {/* Conversiones / contactos: lo que de verdad importa para el negocio. */}
+        <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Contactos y conversiones</p>
+              <p className="text-xs text-gray-400">Cuántas personas dieron el paso de contactarte</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-black text-emerald-600">{formatNum(totalContactos)}</p>
+              <p className="text-xs text-gray-400">contactos directos</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {conversions.map((c) => (
+              <div key={c.event} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                <p className="text-2xl font-black text-gray-900">{formatNum(c.count)}</p>
+                <p className="mt-0.5 text-xs font-medium text-gray-600">{eventoES(c.event)}</p>
+                <div className="mt-2"><Delta pct={c.changePct} /></div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Gráfico de tendencia */}

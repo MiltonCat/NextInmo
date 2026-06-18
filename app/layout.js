@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientShell from "@/components/ClientShell";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import {
   SITE_URL,
   PHONE_DISPLAY,
@@ -191,11 +192,28 @@ const domGuardScript = `(function(){
   };
 })();`;
 
+// Guard de Analytics: corre síncrono en el <head>, antes de que cargue gtag.js,
+// para que la PRIMERA página vista ya respete la exclusión (entrar directo a
+// /admin, o un dispositivo marcado con "no contarme"). Las navegaciones cliente
+// posteriores las mantiene al día el componente GoogleAnalytics. Si cambiás esta
+// lógica, replicala en components/GoogleAnalytics.jsx (shouldDisable).
+const gaGuardScript = `(function(){
+  try {
+    var id = ${JSON.stringify(process.env.NEXT_PUBLIC_GA_ID || "")};
+    if (!id) return;
+    var admin = location.pathname.indexOf("/admin") === 0;
+    var optout = false;
+    try { optout = localStorage.getItem("cp-no-track") === "1"; } catch(e){}
+    window["ga-disable-" + id] = admin || optout;
+  } catch(e){}
+})();`;
+
 export default function RootLayout({ children }) {
   return (
     <html lang="es-AR">
       <head>
         <script dangerouslySetInnerHTML={{ __html: domGuardScript }} />
+        <script dangerouslySetInnerHTML={{ __html: gaGuardScript }} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
         <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
         <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />
@@ -219,14 +237,8 @@ export default function RootLayout({ children }) {
         <SpeedInsights />
         <Analytics />
         <Script id="animated-favicon" strategy="afterInteractive">{animatedFaviconScript}</Script>
-        {/* Google Analytics */}
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
-        `}</Script>
+        {/* Google Analytics: excluye /admin y los dispositivos con "no contarme". */}
+        <GoogleAnalytics />
       </body>
     </html>
   );
