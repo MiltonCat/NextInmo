@@ -5,6 +5,7 @@ import { WA_NUMBER } from "@/config";
 import AdvisoryProcess from "@/components/AdvisoryProcess";
 import InvestorQuiz from "@/components/InvestorQuiz";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 const InversionesEvolucionChart = dynamic(
   () => import("@/components/InversionesEvolucionChart"),
@@ -212,7 +213,7 @@ export default function InversionesClient() {
               <p className="text-gray-400 text-sm sm:text-base mt-3 max-w-xl">No solo publicamos propiedades. Analizamos el mercado para ayudarte a tomar mejores decisiones de inversión.</p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
-                <span className="text-gray-500 text-xs">Análisis basado en 324 propiedades relevadas en San Martín de los Andes · 2026</span>
+                <span className="text-gray-500 text-xs">Análisis basado en {RELEVADAS_TOTAL_FMT} propiedades relevadas en San Martín de los Andes · 2026</span>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -257,7 +258,7 @@ export default function InversionesClient() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { valor: "324", label: "Propiedades analizadas", desc: "Datos del mercado local" },
+                  { valor: RELEVADAS_TOTAL_FMT, label: "Propiedades analizadas", desc: "Datos del mercado local" },
                   { valor: "2026", label: "Datos actualizados", desc: "Relevamiento continuo" },
                   { valor: "SMA", label: "Mercado focalizado", desc: "Sin promedios nacionales" },
                 ].map((item) => (

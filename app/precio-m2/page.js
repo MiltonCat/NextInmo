@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PrecioM2Chart from "@/components/PrecioM2Chart";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 export const metadata = {
   title: "Precio del m² en San Martín de los Andes 2026 | Por zona y tipo",
@@ -22,7 +23,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Precio del m² en San Martín de los Andes 2026",
-    description: "Evolución 2021–2026 por zona. 324 propiedades relevadas.",
+    description: `Evolución 2021–2026 por zona. ${RELEVADAS_TOTAL_FMT} propiedades relevadas.`,
     images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
@@ -77,7 +78,7 @@ export default function PrecioM2Page() {
             Precio del m² en San Martín de los Andes 2026
           </h1>
           <p className="text-gray-500 text-base md:text-lg max-w-2xl leading-relaxed">
-            Análisis actualizado del valor del metro cuadrado por zona y tipo de propiedad en San Martín de los Andes, basado en 324 propiedades relevadas en portales inmobiliarios locales.
+            Análisis actualizado del valor del metro cuadrado por zona y tipo de propiedad en San Martín de los Andes, basado en {RELEVADAS_TOTAL_FMT} propiedades relevadas en portales inmobiliarios locales.
           </p>
           <p className="text-gray-400 text-xs mt-4">
             Datos orientativos basados en listings públicos · No constituyen tasación profesional

@@ -4,6 +4,7 @@ import emailjs from "@emailjs/browser";
 import { WA_URL, CONTACT_EMAIL, PHONE_DISPLAY, LOCATION_DISPLAY, BUSINESS_HOURS } from "@/config";
 import { registrarConsulta } from "@/lib/registrarConsulta";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "", website: "" };
 
@@ -208,7 +209,7 @@ export default function ContactoClient() {
               <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-4">
                 <p className="text-xs font-semibold text-[#717171] uppercase tracking-widest">Por qué trabajar conmigo</p>
                 {[
-                  { valor: "324", texto: "propiedades relevadas como base de análisis" },
+                  { valor: RELEVADAS_TOTAL_FMT, texto: "propiedades relevadas como base de análisis" },
                   { valor: "10+", texto: "años en el mercado inmobiliario de la Patagonia" },
                   { valor: "<48h", texto: "tiempo de respuesta garantizado" },
                 ].map((item) => (

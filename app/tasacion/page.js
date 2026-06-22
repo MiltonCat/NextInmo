@@ -1,6 +1,7 @@
 import TasacionForm from "@/components/TasacionForm";
 import TrackedLink from "@/components/TrackedLink";
 import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
+import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 export const metadata = {
   title: "Tasación de propiedades en San Martín de los Andes | Catalán Propiedades",
@@ -55,7 +56,7 @@ const faqJsonLd = {
       name: "¿En qué se basa la tasación de propiedades en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "La tasación se basa en 324 propiedades relevadas en San Martín de los Andes, datos reales de operaciones cerradas en la zona, precio del m² por barrio, y características específicas de la propiedad como superficie, estado, ubicación y amenidades.",
+        text: `La tasación se basa en ${RELEVADAS_TOTAL_FMT} propiedades relevadas en San Martín de los Andes, datos reales de operaciones cerradas en la zona, precio del m² por barrio, y características específicas de la propiedad como superficie, estado, ubicación y amenidades.`,
       },
     },
     {
@@ -125,7 +126,7 @@ export default function TasacionPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
           {[
             { icon: "⏱", titulo: "Respuesta en 48 hs", desc: "Sin esperas largas ni burocracia" },
-            { icon: "📊", titulo: "Basado en datos reales", desc: "324 propiedades relevadas en SMA" },
+            { icon: "📊", titulo: "Basado en datos reales", desc: `${RELEVADAS_TOTAL_FMT} propiedades relevadas en SMA` },
             { icon: "🤝", titulo: "Sin compromiso", desc: "La tasación es orientativa y gratuita" },
           ].map((b) => (
             <div key={b.titulo} className="flex gap-3 p-4 bg-gray-50 border border-gray-100 rounded-xl">

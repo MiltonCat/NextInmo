@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+import { RELEVADAS_MODELO_FMT } from "@/lib/mercado";
 
 
 export const metadata = {
@@ -55,7 +56,7 @@ const blogPosts = [
   {
     id: "como-tasamos-tu-propiedad-con-datos",
     title: "Cómo tasamos tu propiedad con datos (y por qué te damos un rango)",
-    excerpt: "Cómo funciona nuestro tasador por dentro: un modelo entrenado con 324 propiedades reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.",
+    excerpt: `Cómo funciona nuestro tasador por dentro: un modelo entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.`,
     category: "Tasación con Datos",
     date: "Junio 2026",
     dateTime: "2026-06",

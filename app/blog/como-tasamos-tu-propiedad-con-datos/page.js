@@ -1,17 +1,18 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl, TASADOR_URL } from "@/config";
+import { RELEVADAS_TOTAL_FMT, RELEVADAS_MODELO_FMT } from "@/lib/mercado";
 
 export const metadata = {
   title: "Cómo tasamos tu propiedad con datos en San Martín de los Andes | Catalán Propiedades",
   description:
-    "Te explicamos cómo funciona nuestro tasador: un modelo predictivo entrenado con 324 propiedades reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.",
+    `Te explicamos cómo funciona nuestro tasador: un modelo predictivo entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.`,
   keywords:
     "cuanto vale mi propiedad san martin de los andes, tasacion online san martin de los andes, como se calcula el valor del m2, tasador de propiedades patagonia, valor m2 san martin de los andes, tasacion con datos",
   openGraph: {
     title: "Cómo tasamos tu propiedad con datos (y por qué te damos un rango)",
     description:
-      "El modelo predictivo detrás de nuestro tasador: 324 propiedades reales de San Martín de los Andes, qué mira y por qué un rango es más honesto que un número exacto.",
+      `El modelo predictivo detrás de nuestro tasador: ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes, qué mira y por qué un rango es más honesto que un número exacto.`,
     url: canonicalUrl("/blog/como-tasamos-tu-propiedad-con-datos"),
     type: "article",
     publishedTime: "2026-06-16T00:00:00Z",
@@ -35,10 +36,10 @@ const articleJsonLd = {
   "@type": "Article",
   headline: "Cómo tasamos tu propiedad con datos en San Martín de los Andes",
   description:
-    "Cómo funciona el tasador de Catalán Propiedades: un modelo predictivo entrenado con 324 propiedades reales de San Martín de los Andes. Qué mira, por qué da un rango y no un número exacto, y qué cosas un modelo no puede ver.",
+    `Cómo funciona el tasador de Catalán Propiedades: un modelo predictivo entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes. Qué mira, por qué da un rango y no un número exacto, y qué cosas un modelo no puede ver.`,
   image: `${SITE_URL}/portada.jpg`,
   datePublished: "2026-06-16",
-  dateModified: "2026-06-16",
+  dateModified: "2026-06-22",
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: {
     "@type": "Organization",
@@ -57,7 +58,7 @@ const faqJsonLd = {
       name: "¿En qué datos se basa la tasación?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "El tasador se apoya en un modelo entrenado con 324 propiedades reales relevadas en San Martín de los Andes. En vez de copiar el precio de un aviso, aprende cómo distintas características —superficie, tipo, ubicación, estado— forman el valor del m² en la zona, y estima cuánto vale una propiedad a partir de ese patrón.",
+        text: `El tasador se apoya en un modelo entrenado con las ${RELEVADAS_MODELO_FMT} casas y departamentos relevados en San Martín de los Andes. En vez de copiar el precio de un aviso, aprende cómo distintas características —superficie, tipo, ubicación, estado— forman el valor del m² en la zona, y estima cuánto vale una propiedad a partir de ese patrón.`,
       },
     },
     {
@@ -108,9 +109,9 @@ const PASOS = [
     numero: "01",
     titulo: "Relevamos el mercado real",
     descripcion:
-      "Todo arranca con datos. Reunimos y depuramos 324 propiedades publicadas y operadas en San Martín de los Andes, descartando avisos duplicados, publicaciones desactualizadas y datos cargados con errores. Sin datos limpios, cualquier estimación es humo.",
+      `Todo arranca con datos. Reunimos y depuramos ${RELEVADAS_TOTAL_FMT} propiedades publicadas y operadas en San Martín de los Andes, descartando avisos duplicados, publicaciones desactualizadas y datos cargados con errores. Sin datos limpios, cualquier estimación es humo.`,
     puntos: [
-      "324 propiedades relevadas en la ciudad.",
+      `${RELEVADAS_TOTAL_FMT} propiedades relevadas en la ciudad.`,
       "Limpieza de duplicados y avisos repetidos o vencidos.",
       "Se actualiza para seguir el pulso del mercado.",
     ],
