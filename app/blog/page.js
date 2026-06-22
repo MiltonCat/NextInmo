@@ -33,6 +33,16 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "credito-hipotecario-neuquen-2026",
+    title: "Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa",
+    excerpt: "La provincia lanzó créditos propios (plan Neuquén Habita) para construir, ampliar o refaccionar tu vivienda: tasa 2%, hasta el 100% de la obra y hasta $150 millones. Requisitos, montos y por qué alcanza a San Martín de los Andes y Villa la Angostura.",
+    category: "Guía de Crédito",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "7 min",
+    image: "/hipotecario.jpeg",
+  },
+  {
     id: "cuanto-cuesta-una-casa-en-san-martin-de-los-andes",
     title: "¿Cuánto cuesta una casa en San Martín de los Andes? (2026)",
     excerpt: "Qué define el precio de una casa: zona, superficie, estado y vista. Cómo estimarlo con datos reales del m² por zona, por qué el precio publicado no es el valor real y cómo saber el precio justo de una propiedad puntual.",
