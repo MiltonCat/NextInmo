@@ -3,8 +3,8 @@ import PrecioM2Chart from "@/components/PrecioM2Chart";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
-  title: "Precio del m² en San Martín de los Andes 2026 | Catalán Propiedades",
-  description: "Consultá el precio del metro cuadrado en San Martín de los Andes por zona y tipo de propiedad. Evolución histórica 2021–2026 basada en 324 propiedades relevadas.",
+  title: "Precio del m² en San Martín de los Andes 2026 | Por zona y tipo",
+  description: "¿Cuánto vale el m² en San Martín de los Andes? De USD 1.750 en Las Marías a USD 3.400 en Chapelco Golf. Precios por zona y tipo de propiedad, con evolución 2021–2026.",
   openGraph: {
     title: "Precio del m² en San Martín de los Andes 2026 — Catalán Propiedades",
     description: "Evolución del precio del metro cuadrado 2021–2026 por zona y tipo de propiedad en la Patagonia Argentina.",

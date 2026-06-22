@@ -524,6 +524,40 @@ export default function CreditosHipotecariosUVAPage() {
           </p>
         </div>
 
+        {/* Posts relacionados */}
+        <section className="not-prose border-t border-gray-100 pt-10 mt-12">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
+          <div className="space-y-3">
+            <a href="/blog/credito-hipotecario-neuquen-2026" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
+              <img src="/hipotecario.jpeg" alt="Crédito hipotecario de Neuquén 2026" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
+              <div>
+                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Crédito</p>
+                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
+                  Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa
+                </p>
+              </div>
+            </a>
+            <a href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
+              <img src="/hero-montana.jpg" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
+              <div>
+                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
+                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
+                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
+                </p>
+              </div>
+            </a>
+            <a href="/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
+              <img src="/muelle.jpg" alt="Comprar en San Martín de los Andes desde Buenos Aires" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
+              <div>
+                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía para Compradores</p>
+                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
+                  Cómo comprar en San Martín de los Andes desde Buenos Aires
+                </p>
+              </div>
+            </a>
+          </div>
+        </section>
+
       </div>
     </article>
     </>

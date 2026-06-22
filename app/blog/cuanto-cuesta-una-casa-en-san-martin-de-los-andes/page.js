@@ -348,18 +348,29 @@ export default function CuantoCuestaUnaCasaPage() {
           </Link>
         </section>
 
-        {/* Post relacionado */}
+        {/* Posts relacionados */}
         <section className="border-t border-gray-100 pt-10">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <Link href="/blog/como-tasamos-tu-propiedad-con-datos" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-            <img src="/portada.jpg" alt="Cómo tasamos con datos" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-            <div>
-              <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Tasación con Datos</p>
-              <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                Cómo tasamos tu propiedad con datos (y por qué te damos un rango)
-              </p>
-            </div>
-          </Link>
+          <div className="space-y-3">
+            <Link href="/blog/como-tasamos-tu-propiedad-con-datos" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
+              <img src="/portada.jpg" alt="Cómo tasamos con datos" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
+              <div>
+                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Tasación con Datos</p>
+                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
+                  Cómo tasamos tu propiedad con datos (y por qué te damos un rango)
+                </p>
+              </div>
+            </Link>
+            <Link href="/blog/donde-vivir-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
+              <img src="/sanmartin.jpeg" alt="Dónde vivir en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
+              <div>
+                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Barrios</p>
+                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
+                  ¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026
+                </p>
+              </div>
+            </Link>
+          </div>
         </section>
 
       </article>
