@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { canonicalUrl } from "@/config";
+import { canonicalUrl, CONTACT_EMAIL } from "@/config";
 
 export const metadata = {
   title: "Términos de Servicio | Catalán Propiedades",
@@ -91,7 +91,7 @@ Es tu responsabilidad revisar periódicamente estos términos. El uso continuado
     title: "Contacto",
     content: `Para consultas sobre estos términos:
 
-Email: info@catalanpropiedades.com
+Email: ${CONTACT_EMAIL}
 Teléfono: +54 9 2972 XXXXXX
 Dirección: San Martín de los Andes, Neuquén, Argentina
 
@@ -153,6 +153,14 @@ export default function TerminosPage() {
               <div className="text-gray-600 leading-relaxed whitespace-pre-line">
                 {section.content}
               </div>
+              {section.id === "privacidad" && (
+                <Link
+                  href="/privacidad"
+                  className="inline-block mt-4 text-rose-600 font-medium hover:text-rose-500 transition-colors"
+                >
+                  Leer la Política de Privacidad →
+                </Link>
+              )}
             </div>
           ))}
         </div>
