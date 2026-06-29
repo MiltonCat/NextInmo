@@ -190,6 +190,26 @@ const domGuardScript = `(function(){
     if (referenceNode && referenceNode.parentNode !== this) { return newNode; }
     return ib.apply(this, arguments);
   };
+
+  // Cuando el padre del nodo ya es null (caso típico de traductores/extensiones
+  // que reescriben el DOM), React llama parent.removeChild y tira
+  // "Cannot read properties of null (reading 'removeChild')". No se puede parchear
+  // un null, así que silenciamos SOLO ese mensaje exacto para que no rompa la
+  // página ni dispare el overlay de Next. Cualquier otro error se muestra normal.
+  var BENIGN = /Cannot read properties of null \\(reading '(removeChild|insertBefore|replaceChild)'\\)/;
+  window.addEventListener("error", function(e){
+    if (e && e.message && BENIGN.test(e.message)) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }
+  }, true);
+  window.addEventListener("unhandledrejection", function(e){
+    var msg = e && e.reason && (e.reason.message || String(e.reason));
+    if (msg && BENIGN.test(msg)) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }
+  }, true);
 })();`;
 
 // Guard de Analytics: corre síncrono en el <head>, antes de que cargue gtag.js,
@@ -217,31 +237,4 @@ export default function RootLayout({ children }) {
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
         <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
         <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />
-        <link rel="canonical" href={canonicalUrl("/")} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-        />
-      </head>
-      <body className={`flex flex-col min-h-screen ${plusJakarta.variable} ${dmSans.variable}`}>
-        <Navbar />
-        <main className="flex-grow pt-[104px] pb-20 md:pt-[120px] md:pb-0">
-          {children}
-        </main>
-        <Footer />
-        <ClientShell />
-        <SpeedInsights />
-        <Analytics />
-        <Script id="animated-favicon" strategy="afterInteractive">{animatedFaviconScript}</Script>
-        {/* Google Analytics: excluye /admin y los dispositivos con "no contarme". */}
-        <GoogleAnalytics />
-      </body>
-    </html>
-  );
-}
-
-
+   

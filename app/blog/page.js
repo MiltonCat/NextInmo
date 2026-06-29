@@ -34,6 +34,28 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "cuanto-rinde-alquiler-temporario-san-martin-de-los-andes",
+    title: "Cuánto rinde un alquiler temporario en San Martín de los Andes",
+    excerpt:
+      "Todos hablan de la rentabilidad del alquiler turístico, pero pocos ponen números. Cuánto factura y cuánto deja realmente un temporario en San Martín de los Andes: ocupación por temporada, precio por noche, costos de gestión y comparación con el alquiler permanente, con datos reales.",
+    category: "Inversión",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "8 min",
+    image: "/patagon.jpg",
+  },
+  {
+    id: "score-de-inversion-san-martin-de-los-andes",
+    title: "Score de inversión: cómo leer una propiedad como un activo",
+    excerpt:
+      "El marco que usamos para evaluar una propiedad de San Martín de los Andes como un activo financiero: ubicación, revalorización, rentabilidad, liquidez y riesgo, con datos reales del mercado patagónico.",
+    category: "Inversión",
+    date: "Junio 2026",
+    dateTime: "2026-06",
+    readTime: "9 min",
+    image: "/patagonia-activo.jpg",
+  },
+  {
     id: "credito-hipotecario-neuquen-2026",
     title: "Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa",
     excerpt: "La provincia lanzó créditos propios (plan Neuquén Habita) para construir, ampliar o refaccionar tu vivienda: tasa 2%, hasta el 100% de la obra y hasta $150 millones. Requisitos, montos y por qué alcanza a San Martín de los Andes y Villa la Angostura.",
@@ -192,18 +214,4 @@ export default function BlogPage() {
               <p className="text-rose-100 text-sm leading-relaxed">
                 Evolución del precio del m², guías de compra, oportunidades de inversión y mucho más.
               </p>
-            </div>
-            <div className="flex flex-wrap gap-3 mt-8">
-              <Link href="/inversiones" className="bg-white hover:bg-rose-50 text-rose-600 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
-                Ver análisis de mercado
-              </Link>
-              <Link href="/precio-m2" className="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors border border-white/20">
-                Precio del m²
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+          
