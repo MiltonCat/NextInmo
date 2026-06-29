@@ -214,4 +214,18 @@ export default function BlogPage() {
               <p className="text-rose-100 text-sm leading-relaxed">
                 Evolución del precio del m², guías de compra, oportunidades de inversión y mucho más.
               </p>
-          
+            </div>
+            <div className="flex flex-wrap gap-3 mt-8">
+              <Link href="/inversiones" className="bg-white hover:bg-rose-50 text-rose-600 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
+                Ver análisis de mercado
+              </Link>
+              <Link href="/precio-m2" className="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors border border-white/20">
+                Precio del m²
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

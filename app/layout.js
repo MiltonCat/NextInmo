@@ -237,4 +237,31 @@ export default function RootLayout({ children }) {
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
         <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
         <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />
-   
+        <link rel="canonical" href={canonicalUrl("/")} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      </head>
+      <body className={`flex flex-col min-h-screen ${plusJakarta.variable} ${dmSans.variable}`}>
+        <Navbar />
+        <main className="flex-grow pt-[104px] pb-20 md:pt-[120px] md:pb-0">
+          {children}
+        </main>
+        <Footer />
+        <ClientShell />
+        <SpeedInsights />
+        <Analytics />
+        <Script id="animated-favicon" strategy="afterInteractive">{animatedFaviconScript}</Script>
+        {/* Google Analytics: excluye /admin y los dispositivos con "no contarme". */}
+        <GoogleAnalytics />
+      </body>
+    </html>
+  );
+}
+
+
