@@ -9,6 +9,10 @@ import {
   dispositivoES,
   eventoES,
 } from "@/lib/analytics";
+import {
+  isSearchConsoleConfigured,
+  getSearchConsoleOverview,
+} from "@/lib/searchConsole";
 import TrendChart from "./TrendChart";
 import NoTrackToggle from "@/components/NoTrackToggle";
 
@@ -59,6 +63,123 @@ function KpiCard({ label, value, pct, lowerIsBetter = false, prev }) {
         <Delta pct={pct} lowerIsBetter={lowerIsBetter} />
       </div>
       <p className="mt-1 text-xs text-gray-400">Antes: {prev}</p>
+    </div>
+  );
+}
+
+// CTR llega como fracción (0..1) y la posición como número (1 = primero).
+const formatCtr = (n) => `${((n || 0) * 100).toFixed(1)}%`;
+const formatPos = (n) => (n ? n.toFixed(1) : "—");
+
+// Tarjeta de KPI compacta para Search Console (acepta valores ya formateados).
+function GscKpiCard({ label, value, pct, lowerIsBetter = false, prev, hint }) {
+  return (
+    <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-wide text-indigo-500">{label}</p>
+      <div className="mt-2 flex items-end justify-between gap-2">
+        <span className="text-3xl font-black text-gray-900">{value}</span>
+        <Delta pct={pct} lowerIsBetter={lowerIsBetter} />
+      </div>
+      <p className="mt-1 text-xs text-gray-400">
+        {hint ? hint : `Antes: ${prev}`}
+      </p>
+    </div>
+  );
+}
+
+// Sección completa de Google Search Console: visibilidad real en Google.
+function SearchConsoleSection({ data, error, configured }) {
+  const Title = (
+    <div className="flex items-center gap-2">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-xs font-black text-white">G</span>
+      <div>
+        <p className="text-sm font-semibold text-gray-900">Visibilidad en Google (Search Console)</p>
+        <p className="text-xs text-gray-400">
+          Cuánta gente te VE y te busca en Google — incluye a quienes los bloqueadores ocultan a GA4.
+        </p>
+      </div>
+    </div>
+  );
+
+  if (!configured) {
+    return (
+      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5">
+        {Title}
+        <p className="mt-3 text-sm text-indigo-900">
+          Falta una variable para leer Search Console. Agregá <code>GSC_SITE_URL</code> (ej.{" "}
+          <code>sc-domain:catalanpropiedades.com.ar</code>) en <code>.env.local</code> y en Vercel, y
+          dale acceso de <strong>Lector</strong> al email de la cuenta de servicio dentro de Search
+          Console (Configuración → Usuarios y permisos). Usa las mismas credenciales que GA4.
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+        {Title}
+        <p className="mt-3 text-sm text-rose-900">
+          Google rechazó la consulta de Search Console. Verificá que la cuenta de servicio tenga
+          acceso a la propiedad y que <code>GSC_SITE_URL</code> coincida exactamente con la propiedad
+          (dominio vs. URL).
+        </p>
+        <pre className="mt-3 overflow-x-auto rounded-lg bg-white/60 p-3 text-xs text-rose-800">{error}</pre>
+      </div>
+    );
+  }
+
+  const { kpis, queries, pages } = data;
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">{Title}</div>
+
+      {/* KPIs de búsqueda */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <GscKpiCard label="Impresiones" value={formatNum(kpis.impressions.current)} pct={kpis.impressions.changePct} prev={formatNum(kpis.impressions.previous)} />
+        <GscKpiCard label="Clics" value={formatNum(kpis.clicks.current)} pct={kpis.clicks.changePct} prev={formatNum(kpis.clicks.previous)} />
+        <GscKpiCard label="CTR" value={formatCtr(kpis.ctr.current)} pct={kpis.ctr.changePct} prev={formatCtr(kpis.ctr.previous)} />
+        <GscKpiCard label="Posición media" value={formatPos(kpis.position.current)} pct={kpis.position.changePct} lowerIsBetter hint={`Antes: ${formatPos(kpis.position.previous)} · más bajo = mejor`} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Top búsquedas */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <p className="mb-1 text-sm font-semibold text-gray-900">Qué busca la gente para encontrarte</p>
+          <p className="mb-3 text-xs text-gray-400">Términos con más clics desde Google</p>
+          <div className="space-y-2">
+            {queries.map((q) => (
+              <div key={q.query} className="flex items-center gap-3 text-sm">
+                <span className="min-w-0 flex-1 truncate text-gray-700" title={q.query}>{q.query}</span>
+                <span className="w-16 text-right tabular-nums text-gray-400" title="Impresiones">{formatNum(q.impressions)}</span>
+                <span className="w-12 text-right tabular-nums font-semibold text-gray-900" title="Clics">{formatNum(q.clicks)}</span>
+                <span className="w-12 text-right tabular-nums text-indigo-600" title="Posición media">{formatPos(q.position)}</span>
+              </div>
+            ))}
+            {queries.length === 0 && <p className="text-sm text-gray-400">Sin datos todavía.</p>}
+          </div>
+          <p className="mt-3 text-[11px] text-gray-400">Columnas: impresiones · clics · posición</p>
+        </div>
+
+        {/* Top páginas en búsqueda */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <p className="mb-1 text-sm font-semibold text-gray-900">Páginas que más entran por Google</p>
+          <p className="mb-3 text-xs text-gray-400">Tus páginas mejor posicionadas</p>
+          <div className="space-y-2">
+            {pages.map((p) => (
+              <div key={p.page} className="flex items-center gap-3 text-sm">
+                <span className="min-w-0 flex-1 truncate text-gray-700" title={p.page}>{p.page}</span>
+                <span className="w-16 text-right tabular-nums text-gray-400" title="Impresiones">{formatNum(p.impressions)}</span>
+                <span className="w-12 text-right tabular-nums font-semibold text-gray-900" title="Clics">{formatNum(p.clicks)}</span>
+                <span className="w-12 text-right tabular-nums text-indigo-600" title="Posición media">{formatPos(p.position)}</span>
+              </div>
+            ))}
+            {pages.length === 0 && <p className="text-sm text-gray-400">Sin datos todavía.</p>}
+          </div>
+          <p className="mt-3 text-[11px] text-gray-400">Columnas: impresiones · clics · posición</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -142,6 +263,19 @@ export default async function AnalyticsPage({ searchParams }) {
     );
   }
 
+  // Search Console: carga independiente y NO fatal. Si falla o no está
+  // configurado, el panel de GA4 se muestra igual y la sección avisa qué pasó.
+  const gscConfigured = isSearchConsoleConfigured();
+  let gsc = null;
+  let gscError = null;
+  if (gscConfigured) {
+    try {
+      gsc = await getSearchConsoleOverview(range);
+    } catch (err) {
+      gscError = String(err?.message || err);
+    }
+  }
+
   const { kpis, series, topPages, channels, devices, conversions } = overview;
   const causas = summarizeCauses(overview);
   const totalPageViews = topPages.reduce((acc, p) => acc + p.views, 0) || 1;
@@ -214,6 +348,9 @@ export default async function AnalyticsPage({ searchParams }) {
             ))}
           </div>
         </div>
+
+        {/* Visibilidad en Google (Search Console) */}
+        <SearchConsoleSection data={gsc} error={gscError} configured={gscConfigured} />
 
         {/* Gráfico de tendencia */}
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
