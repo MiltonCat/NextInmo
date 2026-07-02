@@ -14,6 +14,7 @@ export default async function sitemap() {
     { url: canonicalUrl("/inversiones"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/precio-m2"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/tasacion"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: canonicalUrl("/simulador-credito"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/vender"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/nosotros"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: canonicalUrl("/blog"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },

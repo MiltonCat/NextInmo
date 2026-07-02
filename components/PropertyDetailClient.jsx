@@ -5,6 +5,7 @@ import Lightbox from "@/components/Lightbox";
 import VisitScheduler from "@/components/VisitScheduler";
 import PropertyInquiry from "@/components/PropertyInquiry";
 import PropertySheet from "@/components/PropertySheet";
+import SimuladorCuota from "@/components/SimuladorCuota";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { WA_NUMBER } from "@/config";
@@ -382,6 +383,12 @@ export default function PropertyDetailClient({ property }) {
                   ))}
                 </ul>
               </section>
+
+              {!isAlquiler && !property.alquilada && property.price > 0 && (
+                <section className="mb-8 pb-8 border-b border-gray-100">
+                  <SimuladorCuota propertyPrice={property.price} propertyTitle={property.title} compact />
+                </section>
+              )}
 
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="border border-gray-200 rounded-xl p-6 flex items-center gap-4">

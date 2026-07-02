@@ -88,30 +88,55 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Tasador predictivo */}
+      {/* Herramientas: tasador (vendedores) + simulador de crédito (compradores) */}
       <section className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8">
-        <TrackedLink
-          event="tasador_click"
-          eventParams={{ source: "home" }}
-          href={TASADOR_URL}
-          className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
-        >
-          <div className="flex-1">
-            <p className="text-rose-400 text-[11px] font-bold tracking-widest uppercase mb-1.5">Nuevo · Resultado al instante</p>
-            <p className="text-white text-lg font-bold leading-snug mb-1">
-              ¿Cuánto vale tu propiedad? Descubrilo con el tasador predictivo
-            </p>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes, más un informe PDF gratis.
-            </p>
-          </div>
-          <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap flex-shrink-0">
-            Tasar al instante
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </span>
-        </TrackedLink>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <TrackedLink
+            event="tasador_click"
+            eventParams={{ source: "home" }}
+            href={TASADOR_URL}
+            className="group flex flex-col justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
+          >
+            <div>
+              <p className="text-rose-400 text-[11px] font-bold tracking-widest uppercase mb-1.5">¿Vendés? · Resultado al instante</p>
+              <p className="text-white text-lg font-bold leading-snug mb-1">
+                ¿Cuánto vale tu propiedad? Descubrilo con el tasador predictivo
+              </p>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes, más un informe PDF gratis.
+              </p>
+            </div>
+            <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap self-start">
+              Tasar al instante
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
+          </TrackedLink>
+
+          <TrackedLink
+            event="simulador_click"
+            eventParams={{ source: "home" }}
+            href="/simulador-credito"
+            className="group flex flex-col justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-rose-300 transition-all"
+          >
+            <div>
+              <p className="text-rose-600 text-[11px] font-bold tracking-widest uppercase mb-1.5">¿Comprás? · Crédito hipotecario UVA</p>
+              <p className="text-gray-900 text-lg font-bold leading-snug mb-1">
+                ¿Cuánto pagarías por mes? Simulá tu crédito en 30 segundos
+              </p>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Calculá la cuota inicial, el ingreso mínimo que piden los bancos y cuánto necesitás de anticipo. Gratis, sin registrarte.
+              </p>
+            </div>
+            <span className="inline-flex items-center justify-center gap-2 bg-gray-900 group-hover:bg-gray-800 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap self-start">
+              Simular mi cuota
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
+          </TrackedLink>
+        </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
