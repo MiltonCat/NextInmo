@@ -239,4 +239,14 @@ export default function SimuladorCuota({ propertyPrice = 0, propertyTitle = "", 
         es orientativa y varía según banco y perfil. Consultá la{" "}
         <a
           href="https://www.argentina.gob.ar/lista-comparativa-de-los-prestamos-hipotecarios-uva"
-         
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-600"
+        >
+          comparativa oficial del BCRA
+        </a>
+        , actualizada todos los meses.
+      </p>
+    </div>
+  );
+}
