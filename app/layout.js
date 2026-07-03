@@ -159,7 +159,52 @@ const realEstateAgentJsonLd = {
   founder: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
 };
 
-const animatedFaviconScript = "(() => {\n  const frames = [\n    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 0 },\n    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 45 },\n    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 90 },\n    { y: 15, s: 1.16, pulse: 27, shadow: 0.25, angle: 135 },\n    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 180 },\n    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 225 },\n    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 270 },\n    { y: 37, s: 0.92, pulse: 17, shadow: 1.15, angle: 315 },\n  ];\n\n  const ball = (y, scale, angle) => '<g transform=\"translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')\"><circle cx=\"0\" cy=\"0\" r=\"14\" fill=\"#fff\"/><path fill=\"#111827\" d=\"M0-9l8 6-3 9H-5l-3-9 8-6Z\"/><path fill=\"none\" stroke=\"#111827\" stroke-width=\"2.2\" stroke-linecap=\"round\" d=\"M-5 6l-7 6M5 6l7 6M-8-3l-8-3M8-3l8-3M0-9V-14\"/><path fill=\"none\" stroke=\"#e11d48\" stroke-width=\"3\" stroke-linecap=\"round\" d=\"M-10-9c6-4 14-4 20 0\"/><path fill=\"none\" stroke=\"#16a34a\" stroke-width=\"3\" stroke-linecap=\"round\" d=\"M-10 11c6 4 14 4 20 0\"/><circle cx=\"0\" cy=\"0\" r=\"14\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/></g>';\n\n  const drawFrame = (frame) => '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><rect width=\"64\" height=\"64\" rx=\"12\" fill=\"#ffffff\"/><circle cx=\"32\" cy=\"32\" r=\"' + frame.pulse + '\" fill=\"#e11d48\" opacity=\"0.18\"/><path d=\"M8 49h48\" stroke=\"#16a34a\" stroke-width=\"7\" stroke-linecap=\"round\"/><ellipse cx=\"32\" cy=\"48\" rx=\"' + (15 * frame.shadow) + '\" ry=\"3\" fill=\"#111827\" opacity=\"0.25\"/>' + ball(frame.y, frame.s, frame.angle) + '</svg>';\n\n  const setIcon = (frame) => {\n    const href = 'data:image/svg+xml,' + encodeURIComponent(drawFrame(frame));\n    document.querySelectorAll('link[rel*=\"icon\"]').forEach((node) => {\n      if (node.id !== 'favicon') node.remove();\n    });\n    let link = document.querySelector('link#favicon');\n    if (!link) {\n      link = document.createElement('link');\n      link.id = 'favicon';\n      document.head.appendChild(link);\n    }\n    link.rel = 'icon';\n    link.type = 'image/svg+xml';\n    link.href = href;\n  };\n\n  let index = 0;\n  setIcon(frames[index]);\n  window.setInterval(() => {\n    index = (index + 1) % frames.length;\n    setIcon(frames[index]);\n  }, 120);\n})();";
+// Favicon animado (pelotita que rebota). IMPORTANTE: este script NO debe tocar
+// los <link> de icono que renderiza React (metadata.icons / head del layout).
+// La versión anterior los borraba con node.remove() cada 120 ms; en la próxima
+// navegación React intentaba reconciliar nodos que ya no existían, tiraba
+// "Cannot read properties of null (reading 'removeChild')" y la navegación
+// moría en silencio → había que tocar/clickear dos veces para cambiar de página.
+// Ahora crea SU PROPIO <link id="animated-favicon-link"> al final del <head>
+// (los navegadores priorizan el último icono declarado) y solo actualiza su href.
+const animatedFaviconScript = `(() => {
+  const frames = [
+    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 0 },
+    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 45 },
+    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 90 },
+    { y: 15, s: 1.16, pulse: 27, shadow: 0.25, angle: 135 },
+    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 180 },
+    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 225 },
+    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 270 },
+    { y: 37, s: 0.92, pulse: 17, shadow: 1.15, angle: 315 },
+  ];
+
+  const ball = (y, scale, angle) => '<g transform="translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')"><circle cx="0" cy="0" r="14" fill="#fff"/><path fill="#111827" d="M0-9l8 6-3 9H-5l-3-9 8-6Z"/><path fill="none" stroke="#111827" stroke-width="2.2" stroke-linecap="round" d="M-5 6l-7 6M5 6l7 6M-8-3l-8-3M8-3l8-3M0-9V-14"/><path fill="none" stroke="#e11d48" stroke-width="3" stroke-linecap="round" d="M-10-9c6-4 14-4 20 0"/><path fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" d="M-10 11c6 4 14 4 20 0"/><circle cx="0" cy="0" r="14" fill="none" stroke="#111827" stroke-width="2"/></g>';
+
+  const drawFrame = (frame) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#ffffff"/><circle cx="32" cy="32" r="' + frame.pulse + '" fill="#e11d48" opacity="0.18"/><path d="M8 49h48" stroke="#16a34a" stroke-width="7" stroke-linecap="round"/><ellipse cx="32" cy="48" rx="' + (15 * frame.shadow) + '" ry="3" fill="#111827" opacity="0.25"/>' + ball(frame.y, frame.s, frame.angle) + '</svg>';
+
+  let link = null;
+  const setIcon = (frame) => {
+    if (!link || !link.isConnected) {
+      link = document.getElementById('animated-favicon-link');
+      if (!link) {
+        link = document.createElement('link');
+        link.id = 'animated-favicon-link';
+        link.rel = 'icon';
+        link.type = 'image/svg+xml';
+        document.head.appendChild(link);
+      }
+    }
+    link.href = 'data:image/svg+xml,' + encodeURIComponent(drawFrame(frame));
+  };
+
+  let index = 0;
+  setIcon(frames[index]);
+  window.setInterval(() => {
+    index = (index + 1) % frames.length;
+    setIcon(frames[index]);
+  }, 120);
+})();`;
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -190,26 +235,12 @@ const domGuardScript = `(function(){
     if (referenceNode && referenceNode.parentNode !== this) { return newNode; }
     return ib.apply(this, arguments);
   };
-
-  // Cuando el padre del nodo ya es null (caso típico de traductores/extensiones
-  // que reescriben el DOM), React llama parent.removeChild y tira
-  // "Cannot read properties of null (reading 'removeChild')". No se puede parchear
-  // un null, así que silenciamos SOLO ese mensaje exacto para que no rompa la
-  // página ni dispare el overlay de Next. Cualquier otro error se muestra normal.
-  var BENIGN = /Cannot read properties of null \\(reading '(removeChild|insertBefore|replaceChild)'\\)/;
-  window.addEventListener("error", function(e){
-    if (e && e.message && BENIGN.test(e.message)) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-    }
-  }, true);
-  window.addEventListener("unhandledrejection", function(e){
-    var msg = e && e.reason && (e.reason.message || String(e.reason));
-    if (msg && BENIGN.test(msg)) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-    }
-  }, true);
+  // NOTA: acá había un silenciador global de errores "Cannot read properties of
+  // null (reading 'removeChild')". Se quitó a propósito: la causa real era el
+  // script del favicon animado borrando <link> administrados por React (ya
+  // corregido), y silenciar esos errores escondía navegaciones rotas — el
+  // síntoma del "doble tap/click". Si reaparece ese error, es una regresión
+  // que hay que arreglar de raíz, no taparla.
 })();`;
 
 // Guard de Analytics: corre síncrono en el <head>, antes de que cargue gtag.js,
