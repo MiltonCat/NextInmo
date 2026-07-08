@@ -92,7 +92,10 @@ const colorMap = {
   },
 };
 
-export default function InvestorQuiz() {
+// onResultado(perfilKey) se dispara al completar el test, para que la página
+// pueda reaccionar (resaltar la card recomendada, preconfigurar el simulador).
+// onVerSimulador muestra un CTA extra en el resultado que lleva al simulador.
+export default function InvestorQuiz({ onResultado, onVerSimulador }) {
   const [paso, setPaso] = useState(0);
   const [respuestas, setRespuestas] = useState([]);
   const [seleccion, setSeleccion] = useState(null);
@@ -119,6 +122,7 @@ export default function InvestorQuiz() {
         setPaso(paso + 1);
       } else {
         setPaso(5);
+        onResultado?.(calcularPerfil(nuevas));
       }
     }, 350);
   };
@@ -297,6 +301,14 @@ export default function InvestorQuiz() {
                   <div className="text-xs text-gray-500 mt-0.5">Nivel de riesgo</div>
                 </div>
               </div>
+              {onVerSimulador && (
+                <button
+                  onClick={onVerSimulador}
+                  className="w-full mt-4 text-center text-gray-300 hover:text-white bg-gray-900 border border-gray-700 hover:border-gray-500 font-medium py-3 rounded-xl transition-colors text-sm"
+                >
+                  Simulá cuánto podrías ganar con este perfil →
+                </button>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">

@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 const InversionesClient = dynamic(() => import("./InversionesClient"));
-import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_API_URL } from "@/config";
 
 export const metadata = {
   title: "Inversión inmobiliaria en San Martín de los Andes 2026 | Catalán Propiedades",
@@ -47,7 +47,7 @@ const faqJsonLd = {
       name: "¿Cuál es el ROI promedio de una propiedad en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "El ROI promedio gestionado por Catalán Propiedades es de +18% anual, combinando valorización del capital y rentabilidad por alquiler. Los resultados varían según el tipo de propiedad, zona y modalidad de alquiler (temporario o permanente).",
+        text: "La rentabilidad estimada depende del tipo de inversión: un alquiler permanente ronda el 6-8% anual, el alquiler turístico puede alcanzar el 12% y las operaciones de compra y reventa, hasta el 15%. A eso se suma la valorización del m², que creció más de 50% en dólares entre 2021 y 2026. Los resultados varían según la zona, la propiedad y la gestión.",
       },
     },
     {
@@ -69,14 +69,30 @@ const faqJsonLd = {
   ],
 };
 
-export default function InversionesPage() {
+// Resumen de mercado calculado por el modelo predictivo (se reentrena cada semana).
+// Si la API no responde (Render dormido, sin red), la página usa sus datos estáticos.
+async function getMercado() {
+  try {
+    const res = await fetch(`${TASADOR_API_URL}/mercado?ciudad=sma`, {
+      next: { revalidate: 21600 }, // 6 hs
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export default async function InversionesPage() {
+  const mercado = await getMercado();
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <InversionesClient />
+      <InversionesClient mercado={mercado} />
     </>
   );
 }

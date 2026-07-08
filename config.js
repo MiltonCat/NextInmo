@@ -6,6 +6,9 @@ export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "ventascat
 export const LOCATION_DISPLAY = "San Martín de los Andes, Patagonia";
 // Cambiar a https://tasador.catalanpropiedades.com.ar cuando exista el registro DNS en WNPower.
 export const TASADOR_URL = process.env.NEXT_PUBLIC_TASADOR_URL ?? "https://tasador-sma.vercel.app";
+// API del modelo predictivo (repo modelo-predictivo-m2, deploy en Render).
+// Se consume solo del lado del servidor (ISR), por eso no lleva NEXT_PUBLIC_.
+export const TASADOR_API_URL = process.env.TASADOR_API_URL ?? "https://modelo-predictivo-api.onrender.com";
 export const BUSINESS_HOURS = "Lun–Vie: 9:30 a 19:00 · Sáb: 10:00 a 13:00";
 
 // Code de verificación de Google Search Console.

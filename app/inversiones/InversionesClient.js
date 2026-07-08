@@ -83,7 +83,7 @@ function calcularScore(factores) {
 
 const SCORE_DATA = [
   {
-    tipo: 'Depto turístico', riesgo: 'Agresivo',
+    tipo: 'Depto turístico', riesgo: 'Dinámico',
     riesgoColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     acento: 'from-amber-500 to-orange-400',
     factores: [
@@ -92,7 +92,7 @@ const SCORE_DATA = [
       { nombre: 'Revalorización', valor: 85, fuente: '+57.7% en 5 años (2021–2026) · Argenprop / Diario Andino' },
       { nombre: 'Estabilidad', valor: 60, fuente: 'Ingresos estacionales: pico en ski (jul) y trekking (ene)' },
     ],
-    descripcion: 'Máximo retorno en temporada alta. Ideal para inversores con tolerancia al riesgo estacional.',
+    descripcion: 'Es lo que más rinde, pero el ingreso varía: fuerte en temporada de ski y verano, más flojo el resto del año.',
   },
   {
     tipo: 'Casa alquiler', riesgo: 'Moderado',
@@ -104,7 +104,7 @@ const SCORE_DATA = [
       { nombre: 'Revalorización', valor: 80, fuente: '+57.7% en 5 años (2021–2026) · Neuquén +4.93% anual · Zonaprop' },
       { nombre: 'Estabilidad', valor: 82, fuente: 'Alquiler residencial USD · ingreso mensual predecible (USD 1.200+)' },
     ],
-    descripcion: 'Flujo de caja estable con buena apreciación a largo plazo.',
+    descripcion: 'Cobrás alquiler todos los meses y la propiedad sube de valor con los años. La opción más tranquila para empezar.',
   },
   {
     tipo: 'Terreno', riesgo: 'Conservador',
@@ -116,7 +116,7 @@ const SCORE_DATA = [
       { nombre: 'Revalorización', valor: 78, fuente: 'USD 15–200+/m² según zona · premium en Chapelco y lakefront' },
       { nombre: 'Estabilidad', valor: 88, fuente: 'Sin exposición a vacancia ni ciclo de alquiler · reserva de valor' },
     ],
-    descripcion: 'Reserva de valor sólida. Baja liquidez, alta apreciación en zonas premium.',
+    descripcion: 'Tu plata queda resguardada en un bien que se valoriza, pero venderlo puede llevar tiempo. No genera ingreso mensual.',
   },
   {
     tipo: 'Local comercial', riesgo: 'Moderado',
@@ -128,7 +128,7 @@ const SCORE_DATA = [
       { nombre: 'Revalorización', valor: 88, fuente: '+21.8% vs ene 2025 · USD 2.640/m² (ene 2026) · Zonaprop' },
       { nombre: 'Estabilidad', valor: 70, fuente: 'Depende del ciclo económico · sostenido por turismo en SMA' },
     ],
-    descripcion: 'Mayor revalorización medida del mercado. Rentabilidad sujeta al ciclo económico local.',
+    descripcion: 'Es lo que más subió de precio en el último año. La renta depende de cómo venga la economía y el turismo local.',
   },
 ];
 
@@ -140,12 +140,42 @@ const MATRIX_DATA = [
   { nombre: 'Depto turístico', riesgo: 7.5, retorno: 18, color: '#f97316' },
 ];
 
+// Conecta el resultado del quiz con el resto de la página:
+// qué card de la comparativa resaltar y con qué tipo preconfigurar el simulador.
+// El simulador no tiene opción "terreno", por eso el perfil conservador no lo preconfigura.
+const PERFIL_MAP = {
+  conservador: { card: "Terreno", calc: null, label: "Conservador" },
+  moderado: { card: "Casa alquiler", calc: "alquiler", label: "Moderado" },
+  agresivo: { card: "Depto turístico", calc: "turistico", label: "Dinámico" },
+};
+
 const gridStyle = {
   backgroundImage: `linear-gradient(rgba(232,50,90,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(232,50,90,0.12) 1px, transparent 1px)`,
   backgroundSize: "48px 48px",
 };
 
-export default function InversionesClient() {
+// --- Supuestos del simulador (se muestran también al usuario, al pie de la calculadora) ---
+const GASTOS_VACANCIA = 0.2;      // descuento sobre la renta bruta: gastos, gestión y vacancia
+const RENTA_BRUTA_TURISTICO = 12; // % anual bruto estimado para alquiler turístico bien gestionado
+const MARGEN_REVENTA = [4, 10];   // puntos sobre la valorización de mercado por comprar bien y mejorar
+const TASA_PLAZO_FIJO = 0.01;     // plazo fijo en dólares en bancos argentinos (~0,5–2% anual)
+
+const fmtPct = (v) => v.toLocaleString("es-AR", { maximumFractionDigits: 1 });
+
+const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+// "2026-07-03" → "3 Julio 2026". Sin new Date() a propósito: el parseo por zona
+// horaria puede correr un día entre servidor y cliente y romper la hidratación.
+function formatearFechaISO(iso) {
+  const [anio, mes, dia] = (iso || "").split("-").map(Number);
+  if (!anio || !mes || !dia) return null;
+  return `${dia} ${MESES[mes - 1]} ${anio}`;
+}
+
+// `mercado` viene del endpoint /mercado de la API del modelo predictivo
+// (fetch con ISR en page.js). Puede ser null si la API no respondió:
+// todos los usos deben caer a los datos estáticos de ZONA_DATA.
+export default function InversionesClient({ mercado = null }) {
   const [activeTab, setActiveTab] = useState("zonas");
   const [calcMonto, setCalcMonto] = useState(150000);
   const [calcPlazo, setCalcPlazo] = useState(5);
@@ -153,9 +183,84 @@ export default function InversionesClient() {
   const [leadName, setLeadName] = useState("");
   const [leadWa, setLeadWa] = useState("");
   const [leadSent, setLeadSent] = useState(false);
+  const [perfilQuiz, setPerfilQuiz] = useState(null);
   const { trackEvent, trackWhatsAppClick } = useAnalytics();
 
-  const roiAnual = calcTipo === "alquiler" ? 0.065 : calcTipo === "turistico" ? 0.12 : 0.15;
+  const handleQuizResultado = (perfilKey) => {
+    const mapa = PERFIL_MAP[perfilKey];
+    if (!mapa) return;
+    setPerfilQuiz(perfilKey);
+    if (mapa.calc) setCalcTipo(mapa.calc);
+  };
+
+  const handleVerSimulador = () => {
+    document.getElementById("calculadora")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const cardRecomendada = perfilQuiz ? PERFIL_MAP[perfilQuiz].card : null;
+
+  const fechaDatos = formatearFechaISO(mercado?.actualizado) ?? ZONA_DATA.update;
+  const totalPropiedades = mercado?.n_propiedades
+    ? mercado.n_propiedades.toLocaleString("es-AR")
+    : RELEVADAS_TOTAL_FMT;
+
+  // Serie histórica estática, con el punto actual pisado por la mediana viva del modelo.
+  const evolucion = useMemo(() => {
+    if (!mercado?.valor_m2_general_usd) return ZONA_DATA.evolucionHistorica;
+    const serie = ZONA_DATA.evolucionHistorica.map((p) => ({ ...p }));
+    const ultimo = serie[serie.length - 1];
+    const previo = serie[serie.length - 2];
+    ultimo.precio = mercado.valor_m2_general_usd;
+    if (previo) ultimo.variacion = Math.round((ultimo.precio / previo.precio - 1) * 1000) / 10;
+    ultimo.fuente = "Modelo predictivo propio";
+    return serie;
+  }, [mercado]);
+  const primerPunto = evolucion[0];
+  const ultimoPunto = evolucion[evolucion.length - 1];
+  const crecimientoPct = Math.round((ultimoPunto.precio / primerPunto.precio - 1) * 1000) / 10;
+
+  // Motor del simulador: separa renta (sale de los valores reales de alquiler
+  // de ZONA_DATA.rentals, según el tramo de precio) y valorización (promedio
+  // compuesto de los últimos 2 años de la serie del m², vivo si hay `mercado`).
+  const sim = useMemo(() => {
+    let rentaBruta = 0;
+    if (calcTipo === "alquiler") {
+      const cercana = ZONA_DATA.rentals.reduce((a, b) =>
+        Math.abs(b.precioVenta - calcMonto) < Math.abs(a.precioVenta - calcMonto) ? b : a
+      );
+      rentaBruta = cercana.rentabilidad;
+    } else if (calcTipo === "turistico") {
+      rentaBruta = RENTA_BRUTA_TURISTICO;
+    }
+    const rentaNeta = rentaBruta * (1 - GASTOS_VACANCIA);
+
+    const n = evolucion.length;
+    const valorizacion = (Math.pow(evolucion[n - 1].precio / evolucion[n - 3].precio, 1 / 2) - 1) * 100;
+
+    const esReventa = calcTipo === "reventa";
+    const totalAnual = esReventa
+      ? valorizacion + (MARGEN_REVENTA[0] + MARGEN_REVENTA[1]) / 2
+      : rentaNeta + valorizacion;
+    const rangoMin = esReventa ? valorizacion + MARGEN_REVENTA[0] : Math.max(0, totalAnual - 2);
+    const rangoMax = esReventa ? valorizacion + MARGEN_REVENTA[1] : totalAnual + 2;
+
+    // Proyección: valorización compuesta; renta constante, sin reinversión.
+    const gananciaValorizacion = esReventa
+      ? calcMonto * (Math.pow(1 + totalAnual / 100, calcPlazo) - 1)
+      : calcMonto * (Math.pow(1 + valorizacion / 100, calcPlazo) - 1);
+    const rentaAcumulada = esReventa ? 0 : calcMonto * (rentaNeta / 100) * calcPlazo;
+    const ganancia = gananciaValorizacion + rentaAcumulada;
+    const mensual = calcMonto * (rentaNeta / 100) / 12;
+
+    const m2Ref = mercado?.valor_m2_general_usd ?? ZONA_DATA.promedioGeneral;
+
+    return {
+      esReventa, rentaBruta, rentaNeta, valorizacion, totalAnual, rangoMin, rangoMax,
+      gananciaValorizacion, rentaAcumulada, ganancia, total: calcMonto + ganancia, mensual,
+      m2Ref, m2Comprables: Math.round(calcMonto / m2Ref),
+      plazoFijoTotal: calcMonto * Math.pow(1 + TASA_PLAZO_FIJO, calcPlazo),
+    };
+  }, [calcTipo, calcMonto, calcPlazo, evolucion, mercado]);
 
   const handleLeadSubmit = (e) => {
     e.preventDefault();
@@ -164,11 +269,12 @@ export default function InversionesClient() {
     const msg = encodeURIComponent(
       `Hola Milton, soy ${leadName.trim()}. Usé la calculadora de inversiones y quiero recibir una propuesta personalizada.\n\n` +
       `📊 Mi simulación:\n` +
-      `• Monto: USD ${calcMonto.toLocaleString()}\n` +
+      `• Monto: USD ${calcMonto.toLocaleString("es-AR")}\n` +
       `• Tipo: ${tipoLabel}\n` +
       `• Plazo: ${calcPlazo} año${calcPlazo > 1 ? "s" : ""}\n` +
-      `• ROI anual estimado: ${roiAnual * 100}%\n` +
-      `• Ganancia total estimada: USD ${Math.round(calcMonto * roiAnual * calcPlazo).toLocaleString()}\n\n` +
+      `• Retorno total estimado: ${fmtPct(sim.totalAnual)}% anual (rango ${fmtPct(sim.rangoMin)}–${fmtPct(sim.rangoMax)}%)\n` +
+      (sim.esReventa ? "" : `• Renta neta mensual estimada: USD ${Math.round(sim.mensual).toLocaleString("es-AR")}\n`) +
+      `• Ganancia total estimada: USD ${Math.round(sim.ganancia).toLocaleString("es-AR")}\n\n` +
       `Mi WhatsApp: ${leadWa.trim()}`
     );
     trackEvent("generate_lead", {
@@ -180,6 +286,7 @@ export default function InversionesClient() {
     window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
     setLeadSent(true);
   };
+
   const scoredAssets = useMemo(
     () => SCORE_DATA.map((activo) => ({ ...activo, score: calcularScore(activo.factores) })).sort((a, b) => b.score - a.score),
     []
@@ -188,7 +295,13 @@ export default function InversionesClient() {
 
   const downloadReportTxt = () => {
     const currentDate = new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" });
-    const dataText = `VALORES POR M² - SAN MARTÍN DE LOS ANDES\n${"=".repeat(45)}\nFecha: ${currentDate}\n\n${ZONA_DATA.zonas.map((zona) => `${zona.nombre} | ${zona.tipo} | $${zona.precioM2}`).join("\n")}\n\nEVOLUCIÓN HISTÓRICA (USD/m²)\n${"=".repeat(45)}\n${ZONA_DATA.evolucionHistorica.map((item) => `${item.anio}: $${item.precio}/m² ${item.variacion ? `(+${item.variacion}%)` : ""} - ${item.contexto}`).join("\n")}\n\nFuentes: Diario 7 Lagos, Argenprop, Zonaprop, Properati`.trim();
+    const filasZonas = mercado?.por_barrio?.length
+      ? mercado.por_barrio.map((z) => `${z.barrio} | ${z.tipo} | $${z.mediana_m2_usd}/m² (mediana sobre ${z.n} propiedades)`)
+      : ZONA_DATA.zonas.map((zona) => `${zona.nombre} | ${zona.tipo} | $${zona.precioM2}`);
+    const fuentes = mercado
+      ? `Fuente: modelo predictivo propio (datos al ${fechaDatos}) · Portales relevados: Zonaprop, Argenprop, MercadoLibre`
+      : "Fuentes: Diario 7 Lagos, Argenprop, Zonaprop, Properati";
+    const dataText = `VALORES POR M² - SAN MARTÍN DE LOS ANDES\n${"=".repeat(45)}\nFecha: ${currentDate}\n\n${filasZonas.join("\n")}\n\nEVOLUCIÓN HISTÓRICA (USD/m²)\n${"=".repeat(45)}\n${evolucion.map((item) => `${item.anio}: $${item.precio}/m² ${item.variacion ? `(+${item.variacion}%)` : ""} - ${item.contexto}`).join("\n")}\n\n${fuentes}`.trim();
     const blob = new Blob([dataText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -213,7 +326,7 @@ export default function InversionesClient() {
               <p className="text-gray-400 text-sm sm:text-base mt-3 max-w-xl">No solo publicamos propiedades. Analizamos el mercado para ayudarte a tomar mejores decisiones de inversión.</p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
-                <span className="text-gray-500 text-xs">Análisis basado en {RELEVADAS_TOTAL_FMT} propiedades relevadas en San Martín de los Andes · 2026</span>
+                <span className="text-gray-500 text-xs">Análisis basado en {totalPropiedades} propiedades relevadas en San Martín de los Andes · 2026</span>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -221,7 +334,7 @@ export default function InversionesClient() {
                 <svg className="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-sm text-gray-400 font-medium">{ZONA_DATA.update}</span>
+                <span className="text-sm text-gray-400 font-medium">{fechaDatos}</span>
               </div>
               <button
                 onClick={downloadReportTxt}
@@ -258,8 +371,10 @@ export default function InversionesClient() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { valor: RELEVADAS_TOTAL_FMT, label: "Propiedades analizadas", desc: "Datos del mercado local" },
-                  { valor: "2026", label: "Datos actualizados", desc: "Relevamiento continuo" },
+                  { valor: totalPropiedades, label: "Propiedades analizadas", desc: "Datos del mercado local" },
+                  mercado
+                    ? { valor: "Semanal", label: "Modelo reentrenado", desc: "Con datos nuevos del mercado" }
+                    : { valor: "2026", label: "Datos actualizados", desc: "Relevamiento continuo" },
                   { valor: "SMA", label: "Mercado focalizado", desc: "Sin promedios nacionales" },
                 ].map((item) => (
                   <div key={item.label} className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
@@ -274,7 +389,7 @@ export default function InversionesClient() {
 
           {/* Test de perfil inversor */}
           <div className="mb-8">
-            <InvestorQuiz />
+            <InvestorQuiz onResultado={handleQuizResultado} onVerSimulador={handleVerSimulador} />
           </div>
 
           {/* ¿Qué conviene comprar? */}
@@ -315,9 +430,10 @@ export default function InversionesClient() {
               {SCORE_DATA.map((activo) => {
                 const score = calcularScore(activo.factores);
                 return (
-                  <div key={activo.tipo} className={`group relative rounded-2xl p-6 transition-all duration-300 flex flex-col ${score === bestAsset.score ? "bg-gray-900 border border-primary-500/40 shadow-md ring-1 ring-primary-500/20" : "bg-gray-950/60 border border-gray-800 hover:border-gray-700 hover:shadow-md"}`}>
+                  <div key={activo.tipo} className={`group relative rounded-2xl p-6 transition-all duration-300 flex flex-col ${score === bestAsset.score ? "bg-gray-900 border border-primary-500/40 shadow-md ring-1 ring-primary-500/20" : "bg-gray-950/60 border border-gray-800 hover:border-gray-700 hover:shadow-md"} ${activo.tipo === cardRecomendada ? "ring-2 ring-green-500/40" : ""}`}>
                     <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${activo.acento} opacity-70 rounded-t-2xl`} />
                     {score === bestAsset.score && <div className="absolute -top-3 right-4 px-2.5 py-1 rounded-full bg-primary-600 text-white text-[10px] font-bold shadow">Mejor posicionado</div>}
+                    {activo.tipo === cardRecomendada && <div className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-green-600 text-white text-[10px] font-bold shadow">Para tu perfil</div>}
 
                     {/* Título y puntaje */}
                     <div className="flex items-start justify-between mb-2">
@@ -374,9 +490,17 @@ export default function InversionesClient() {
           {/* Datos del mercado */}
           <div className="bg-[#111118] rounded-xl border border-gray-800 p-4 sm:p-6 mb-8">
             <div className="mb-4 sm:mb-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-900 mb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-                <span className="text-gray-400 text-xs font-semibold tracking-widest uppercase">Datos del mercado · San Martín de los Andes</span>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-900">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                  <span className="text-gray-400 text-xs font-semibold tracking-widest uppercase">Datos del mercado · San Martín de los Andes</span>
+                </div>
+                {mercado && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                    <span className="text-green-400 text-xs font-semibold">Modelo predictivo · actualizado al {fechaDatos}</span>
+                  </div>
+                )}
               </div>
               <p className="text-gray-600 text-[11px]">Información orientativa basada en análisis interno · No constituye tasación profesional</p>
             </div>
@@ -395,11 +519,11 @@ export default function InversionesClient() {
             {activeTab === "zonas" && (
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Evolución del precio del m² (USD)</h3>
-                <InversionesEvolucionChart data={ZONA_DATA.evolucionHistorica} />
+                <InversionesEvolucionChart data={evolucion} />
                 <div className="mt-3 sm:mt-4 flex justify-between text-xs sm:text-sm text-gray-500">
-                  <span>2021: $1.680/m²</span>
-                  <span className="text-green-400 font-semibold">+57.7% en 5 años</span>
-                  <span>2026: $2.650/m²</span>
+                  <span>{primerPunto.anio}: ${primerPunto.precio.toLocaleString("es-AR")}/m²</span>
+                  <span className="text-green-400 font-semibold">{crecimientoPct >= 0 ? "+" : ""}{crecimientoPct}% en {ultimoPunto.anio - primerPunto.anio} años</span>
+                  <span>{ultimoPunto.anio}: ${ultimoPunto.precio.toLocaleString("es-AR")}/m²</span>
                 </div>
               </div>
             )}
@@ -407,6 +531,11 @@ export default function InversionesClient() {
             {activeTab === "rentabilidad" && (
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Estimación de rentabilidad por alquiler</h3>
+                <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-4">
+                  <p className="text-gray-300 text-sm leading-relaxed">
+                    <span className="text-white font-semibold">¿Cómo leer esto?</span> El porcentaje muestra cuánto recuperás por año solo con el alquiler: un 8% significa que por cada USD 100 invertidos, te vuelven USD 8 al año. No incluye la suba de valor de la propiedad.
+                  </p>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {ZONA_DATA.rentals.map((item) => (
                     <div key={`${item.tipo}-${item.precioVenta}`} className="bg-green-950/20 rounded-xl p-4 border border-green-900/30">
@@ -415,11 +544,11 @@ export default function InversionesClient() {
                         <span className="text-2xl font-bold text-green-400">{item.rentabilidad}%</span>
                       </div>
                       <div className="text-sm text-gray-400 space-y-1">
-                        <div className="flex justify-between"><span>Precio referencia:</span><span className="font-medium text-gray-300">USD {item.precioVenta.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span>Precio referencia:</span><span className="font-medium text-gray-300">USD {item.precioVenta.toLocaleString("es-AR")}</span></div>
                         <div className="flex justify-between"><span>Alquiler estimado:</span><span className="font-medium text-gray-300">USD {item.alquiler}/mes</span></div>
                       </div>
                       <div className="mt-3 pt-3 border-t border-green-900/30">
-                        <div className="text-xs text-green-400">Renta anual estimada: USD {(item.alquiler * 12).toLocaleString()}</div>
+                        <div className="text-xs text-green-400">Renta anual estimada: USD {(item.alquiler * 12).toLocaleString("es-AR")}</div>
                       </div>
                     </div>
                   ))}
@@ -438,6 +567,11 @@ export default function InversionesClient() {
               </div>
               <h2 className="text-2xl font-black text-white">¿Cuánto riesgo vale el retorno?</h2>
               <p className="text-gray-500 text-sm mt-1">Posicionamiento orientativo de cada tipo de activo según riesgo y retorno estimado anual</p>
+            </div>
+            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-6">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                <span className="text-white font-semibold">¿Cómo leer esto?</span> Cuanto más arriba está el punto, más gana por año ese tipo de propiedad. Cuanto más a la derecha, más pueden variar sus resultados de un año a otro. Lo ideal está arriba a la izquierda: buena ganancia con pocas sorpresas.
+              </p>
             </div>
             <div className="relative h-80">
               <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
@@ -480,6 +614,13 @@ export default function InversionesClient() {
               <span className="bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full self-start">Interactiva</span>
             </div>
 
+            {perfilQuiz && PERFIL_MAP[perfilQuiz].calc === calcTipo && (
+              <div className="flex items-center gap-2 mb-4 sm:mb-6 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                <p className="text-green-400 text-xs font-medium">Preconfigurada con el tipo de inversión recomendado para tu perfil {PERFIL_MAP[perfilQuiz].label}</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
               {[
                 { label: "Monto (USD)", value: calcMonto, setter: (v) => setCalcMonto(Number(v)), options: [
@@ -501,34 +642,72 @@ export default function InversionesClient() {
               ))}
             </div>
 
+            <div className="flex items-center gap-2 mb-4 sm:mb-6 bg-gray-900/60 border border-gray-800 rounded-lg px-3 py-2.5">
+              <svg className="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+              <p className="text-gray-400 text-xs sm:text-sm">
+                Con <span className="text-white font-semibold">USD {calcMonto.toLocaleString("es-AR")}</span> comprás ≈ <span className="text-white font-semibold">{sim.m2Comprables} m²</span> al valor mediano actual (USD {sim.m2Ref.toLocaleString("es-AR")}/m²{mercado ? ", según nuestro modelo" : ""})
+              </p>
+            </div>
+
             <div className="rounded-xl p-3 sm:p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
                 <div className="text-center p-2 sm:p-4 bg-primary-500/10 rounded-lg sm:rounded-xl border border-primary-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-primary-500">{`${roiAnual * 100}%`}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500">ROI Anual</div>
+                  <div className="text-lg sm:text-2xl font-bold text-primary-500">{fmtPct(sim.totalAnual)}%</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Retorno total anual</div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">rango estimado {fmtPct(sim.rangoMin)}–{fmtPct(sim.rangoMax)}%</div>
                 </div>
                 <div className="text-center p-2 sm:p-4 bg-green-500/10 rounded-lg sm:rounded-xl border border-green-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-green-400">USD {Math.round(calcMonto * roiAnual * calcPlazo).toLocaleString()}</div>
-                  <div className="text-xs text-gray-500">Ganancia Total</div>
+                  <div className="text-lg sm:text-2xl font-bold text-green-400">{sim.esReventa ? "—" : `USD ${Math.round(sim.mensual).toLocaleString("es-AR")}`}</div>
+                  <div className="text-xs text-gray-500">Renta neta mensual</div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">{sim.esReventa ? "la reventa no genera renta" : "gastos y vacancia descontados"}</div>
                 </div>
                 <div className="text-center p-2 sm:p-4 bg-purple-500/10 rounded-lg sm:rounded-xl border border-purple-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-purple-400">USD {Math.round(calcMonto * (1 + roiAnual * calcPlazo)).toLocaleString()}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500">Total Final</div>
+                  <div className="text-lg sm:text-2xl font-bold text-purple-400">+{fmtPct(sim.valorizacion)}%</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Valorización anual</div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">evolución reciente del m² en SMA</div>
                 </div>
                 <div className="text-center p-2 sm:p-4 bg-orange-500/10 rounded-lg sm:rounded-xl border border-orange-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-orange-400">~{Math.ceil(1 / roiAnual)} años</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500">Para recuperar</div>
+                  <div className="text-lg sm:text-2xl font-bold text-orange-400">USD {Math.round(sim.total).toLocaleString("es-AR")}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Total final</div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">inversión + ganancia en {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 p-3 sm:p-4 bg-gray-900 rounded-xl border border-gray-800">
-                <div>
-                  <div className="text-xs sm:text-sm text-gray-400">Ingreso mensual estimado</div>
-                  <div className="text-xs text-gray-500">Promedio en {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-base sm:text-xl font-bold text-green-400">USD {Math.round((calcMonto * roiAnual) / 12).toLocaleString()}/mes</div>
-                  <div className="text-xs text-green-500">estimado</div>
+              <div className="mb-4 sm:mb-6 bg-primary-500/5 border border-primary-500/15 rounded-xl p-4">
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  <span className="text-white font-semibold">En resumen:</span> si invertís{" "}
+                  <span className="text-white font-semibold">USD {calcMonto.toLocaleString("es-AR")}</span> en{" "}
+                  {calcTipo === "alquiler" ? "una propiedad para alquiler permanente" : calcTipo === "turistico" ? "alquiler turístico" : "compra y reventa"}, en {calcPlazo} año{calcPlazo > 1 ? "s" : ""} terminarías con unos{" "}
+                  <span className="text-green-400 font-semibold">USD {Math.round(sim.total).toLocaleString("es-AR")}</span>.{" "}
+                  {sim.esReventa ? (
+                    <>La ganancia viene de comprar bien, mejorar y revender: entre {fmtPct(sim.rangoMin)}% y {fmtPct(sim.rangoMax)}% anual según la operación. No genera renta mensual.</>
+                  ) : (
+                    <>
+                      La ganancia sale de dos lados: unos <span className="text-white font-semibold">USD {Math.round(sim.mensual).toLocaleString("es-AR")} por mes</span> de renta neta (ya descontados gastos y vacancia) más la suba de valor de la propiedad.
+                    </>
+                  )}
+                </p>
+              </div>
+
+              <div className="p-3 sm:p-4 bg-gray-900 rounded-xl border border-gray-800">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">De dónde sale la ganancia</p>
+                <div className="space-y-2">
+                  {!sim.esReventa && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Renta neta acumulada en {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</span>
+                      <span className="text-green-400 font-semibold">USD {Math.round(sim.rentaAcumulada).toLocaleString("es-AR")}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">{sim.esReventa ? "Comprar bien, mejorar y revender" : "Valorización de la propiedad"}</span>
+                    <span className="text-purple-400 font-semibold">USD {Math.round(sim.gananciaValorizacion).toLocaleString("es-AR")}</span>
+                  </div>
+                  <div className="flex justify-between text-sm border-t border-gray-800 pt-2">
+                    <span className="text-gray-300 font-medium">Ganancia total estimada</span>
+                    <span className="text-white font-bold">USD {Math.round(sim.ganancia).toLocaleString("es-AR")}</span>
+                  </div>
                 </div>
               </div>
 
@@ -536,20 +715,27 @@ export default function InversionesClient() {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Comparativa a {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-gray-800 rounded-lg text-center border border-gray-700">
-                    <div className="text-xs text-gray-500 mb-1">Plazo fijo bancario</div>
-                    <div className="text-base font-bold text-gray-300">USD {Math.round(calcMonto * (1 + 0.03 * calcPlazo)).toLocaleString()}</div>
-                    <div className="text-xs text-gray-600">~3% anual</div>
+                    <div className="text-xs text-gray-500 mb-1">Plazo fijo en dólares</div>
+                    <div className="text-base font-bold text-gray-300">USD {Math.round(sim.plazoFijoTotal).toLocaleString("es-AR")}</div>
+                    <div className="text-xs text-gray-600">~{TASA_PLAZO_FIJO * 100}% anual (bancos argentinos: 0,5–2%)</div>
                   </div>
                   <div className="p-3 bg-green-500/10 rounded-lg text-center border border-green-500/20">
                     <div className="text-xs text-gray-500 mb-1">Inversión inmobiliaria</div>
-                    <div className="text-base font-bold text-green-400">USD {Math.round(calcMonto * (1 + roiAnual * calcPlazo)).toLocaleString()}</div>
-                    <div className="text-xs text-green-500">{roiAnual * 100}% anual</div>
+                    <div className="text-base font-bold text-green-400">USD {Math.round(sim.total).toLocaleString("es-AR")}</div>
+                    <div className="text-xs text-green-500">~{fmtPct(sim.totalAnual)}% anual estimado</div>
                   </div>
                 </div>
                 <p className="text-xs text-center text-gray-600 mt-2">
-                  Diferencia: <span className="font-semibold text-green-400">+USD {Math.round(calcMonto * ((roiAnual - 0.03) * calcPlazo)).toLocaleString()}</span> a favor del inmueble
+                  Diferencia: <span className="font-semibold text-green-400">+USD {Math.round(sim.total - sim.plazoFijoTotal).toLocaleString("es-AR")}</span> a favor del inmueble
+                </p>
+                <p className="text-[11px] text-gray-600 mt-3 pt-3 border-t border-gray-800 leading-relaxed">
+                  ¿Y el plazo fijo en pesos? Paga más en términos nominales (~15–19% TNA), pero está expuesto a la devaluación: medido en dólares, su resultado a varios años es impredecible y muchas veces negativo. Por eso comparamos contra la alternativa real en la misma moneda.
                 </p>
               </div>
+
+              <p className="text-gray-600 text-[11px] mt-4 leading-relaxed">
+                Supuestos: renta bruta según valores actuales de alquiler en SMA{!sim.esReventa && sim.rentaBruta ? ` (${fmtPct(sim.rentaBruta)}% anual para este tramo de precio)` : ""}, menos {GASTOS_VACANCIA * 100}% por gastos, gestión y vacancia · valorización = promedio de los últimos 2 años del m² en SMA · renta constante, sin reinversión. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
+              </p>
             </div>
 
             <div className="mt-5 border-t border-gray-800 pt-5">
