@@ -52,6 +52,7 @@ async function buildRowFromForm(formData) {
     disponibleDesde: str(formData.get("disponibleDesde")),
     mesesMinimos: num(formData.get("mesesMinimos")),
     condiciones: str(formData.get("condiciones")),
+    vendida: bool(formData.get("vendida")),
     alquilada: bool(formData.get("alquilada")),
     reservada: bool(formData.get("reservada")),
   };

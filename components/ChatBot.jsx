@@ -9,6 +9,7 @@ const WHATSAPP_URL = WA_URL;
 
 function filterProps(filters, list) {
   return list.filter((p) => {
+    if (p.vendida) return false;
     if (filters.types?.length && !filters.types.some((t) => p.type.toLowerCase().includes(t.toLowerCase()))) return false;
     if (filters.minPrice && p.price < filters.minPrice) return false;
     if (filters.maxPrice && p.price > filters.maxPrice) return false;
