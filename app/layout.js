@@ -263,8 +263,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es-AR">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: domGuardScript }} />
-        <script dangerouslySetInnerHTML={{ __html: gaGuardScript }} />
+        <Script id="dom-guard" strategy="beforeInteractive">
+          {domGuardScript}
+        </Script>
+        <Script id="ga-guard" strategy="beforeInteractive">
+          {gaGuardScript}
+        </Script>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
         <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
         <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />

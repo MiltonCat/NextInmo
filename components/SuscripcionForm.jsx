@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 const INTERESES = [
@@ -11,13 +11,46 @@ const INTERESES = [
   { value: "mirar", label: "Solo mirando" },
 ];
 
-export default function SuscripcionForm() {
+export default function SuscripcionForm({ placement = "home" }) {
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [interes, setInteres] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [estado, setEstado] = useState("idle"); // idle | enviando | ok | error
-  const { trackNewsletterSignup } = useAnalytics();
+  const containerRef = useRef(null);
+  const startedRef = useRef(false);
+  const viewedRef = useRef(false);
+  const {
+    trackNewsletterSignup,
+    trackRadarView,
+    trackRadarSignupStart,
+    trackRadarSignupComplete,
+  } = useAnalytics();
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !viewedRef.current) {
+          viewedRef.current = true;
+          trackRadarView(placement);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [placement, trackRadarView]);
+
+  function markStarted() {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    trackRadarSignupStart(placement);
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -31,7 +64,10 @@ export default function SuscripcionForm() {
       });
       const data = await res.json().catch(() => ({}));
       const ok = res.ok && data.ok;
-      if (ok) trackNewsletterSignup(interes || "no_indicado");
+      if (ok) {
+        trackNewsletterSignup(interes || "no_indicado");
+        trackRadarSignupComplete(placement, interes || "no_indicado");
+      }
       setEstado(ok ? "ok" : "error");
     } catch {
       setEstado("error");
@@ -40,7 +76,7 @@ export default function SuscripcionForm() {
 
   if (estado === "ok") {
     return (
-      <div className="text-center space-y-2 py-2">
+      <div ref={containerRef} className="text-center space-y-2 py-2">
         <div className="text-4xl">✅</div>
         <p className="text-lg font-bold text-white">¡Listo, {nombre || "te anotamos"}!</p>
         <p className="text-sm text-white/80">
@@ -51,7 +87,7 @@ export default function SuscripcionForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <form ref={containerRef} onSubmit={onSubmit} onFocus={markStarted} className="space-y-3">
       {/* Honeypot anti-spam: invisible para personas, tentador para bots. */}
       <input
         type="text"
