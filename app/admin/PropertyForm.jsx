@@ -119,6 +119,9 @@ export default function PropertyForm({ action, property = null }) {
         </div>
 
         <div className="flex gap-6 pt-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-red-700">
+            <input type="checkbox" name="vendida" defaultChecked={!!p.vendida} /> Vendida
+          </label>
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input type="checkbox" name="reservada" defaultChecked={!!p.reservada} /> Reservada
           </label>

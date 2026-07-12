@@ -30,10 +30,11 @@ const TIPO_MAP = {
 export async function generateStaticParams() {
   const properties = await getProperties();
   // Slug descriptivo (canónico) de cada propiedad.
-  const slugParams = properties.map((p) => ({ slug: getPropertySlug(p) }));
+  const publicProperties = properties.filter((p) => !p.vendida);
+  const slugParams = publicProperties.map((p) => ({ slug: getPropertySlug(p) }));
   // Id numérico como respaldo: mantiene vivas las URLs viejas ya indexadas
   // (su canonical apunta al slug descriptivo, así que no hay contenido duplicado).
-  const idParams = properties.map((p) => ({ slug: String(p.id) }));
+  const idParams = publicProperties.map((p) => ({ slug: String(p.id) }));
   const tipoParams = Object.keys(TIPO_MAP).map((tipo) => ({ slug: tipo }));
   return [...slugParams, ...idParams, ...tipoParams];
 }
@@ -68,7 +69,12 @@ export async function generateMetadata({ params }) {
 
   // Página de detalle de propiedad
   const property = await getPropertyById(idFromSlug(slug));
-  if (!property) return { title: "Propiedad no encontrada | Catalán Propiedades" };
+  if (!property || property.vendida) {
+    return {
+      title: "Propiedad no disponible | Catalán Propiedades",
+      robots: { index: false, follow: false },
+    };
+  }
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const priceText = isAlquiler
@@ -132,7 +138,7 @@ export default async function PropiedadesSlugPage({ params }) {
 
   // Página de detalle de propiedad — acepta tanto slug descriptivo como ID numérico.
   const property = await getPropertyById(idFromSlug(slug));
-  if (!property) notFound();
+  if (!property || property.vendida) notFound();
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const canonical = canonicalUrl(`/propiedades/${getPropertySlug(property)}`);

@@ -121,6 +121,7 @@ export const properties = [
   },
   {
     id: 19,
+    vendida: true,
     reservada: true,
     title: "Hermosa cabaña en el barrio Chapelco – San Martín de los Andes",
     image: "/imgs/Imgs22/foto1.webp",

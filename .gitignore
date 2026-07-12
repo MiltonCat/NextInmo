@@ -33,6 +33,7 @@ devserver.log
 # logs descartables de ejecuciones locales
 codex_*.log
 srv_*.log
+next_dev_*.log
 
 # claude code (config local)
 .claude/
