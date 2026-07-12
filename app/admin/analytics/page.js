@@ -276,7 +276,7 @@ export default async function AnalyticsPage({ searchParams }) {
     }
   }
 
-  const { kpis, series, topPages, channels, devices, conversions } = overview;
+  const { kpis, series, topPages, channels, devices, conversions, radarFunnel } = overview;
   const causas = summarizeCauses(overview);
   const totalPageViews = topPages.reduce((acc, p) => acc + p.views, 0) || 1;
   // Total de contactos "fuertes" (todo menos suscripciones al newsletter).
@@ -347,6 +347,27 @@ export default async function AnalyticsPage({ searchParams }) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Embudo específico de Radar SMA. Se separa de los contactos comerciales
+            para no contar una vista o un inicio como si fuera un lead. */}
+        <div className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
+          <div className="mb-3">
+            <p className="text-sm font-semibold text-gray-900">Embudo de Radar SMA</p>
+            <p className="text-xs text-gray-400">Cuántas personas lo ven, empiezan y completan la suscripción</p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {radarFunnel.map((c) => (
+              <div key={c.event} className="rounded-xl border border-rose-100 bg-rose-50/50 p-4">
+                <p className="text-2xl font-black text-gray-900">{formatNum(c.count)}</p>
+                <p className="mt-0.5 text-xs font-medium text-gray-600">{eventoES(c.event)}</p>
+                <div className="mt-2"><Delta pct={c.changePct} /></div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-gray-400">
+            La tasa vista → suscripción será representativa después de acumular al menos 200 vistas del Radar.
+          </p>
         </div>
 
         {/* Visibilidad en Google (Search Console) */}

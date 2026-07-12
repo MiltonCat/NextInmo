@@ -41,6 +41,34 @@ export const useAnalytics = () => {
     });
   };
 
+  // Atribución liviana para entender desde qué campaña y ubicación interna
+  // llega cada interacción con Radar SMA. Los parámetros solo se envían a GA4;
+  // no incluyen datos personales ni se guardan en la base de suscriptores.
+  const radarContext = (placement, interest = null) => {
+    if (typeof window === 'undefined') return { placement };
+    const params = new URLSearchParams(window.location.search);
+    return {
+      placement,
+      page_path: window.location.pathname,
+      source: params.get('utm_source') || 'direct',
+      medium: params.get('utm_medium') || 'none',
+      campaign: params.get('utm_campaign') || 'none',
+      ...(interest && { interest }),
+    };
+  };
+
+  const trackRadarView = (placement = 'unknown') => {
+    trackEvent('radar_view', radarContext(placement));
+  };
+
+  const trackRadarSignupStart = (placement = 'unknown') => {
+    trackEvent('radar_signup_start', radarContext(placement));
+  };
+
+  const trackRadarSignupComplete = (placement = 'unknown', interest = null) => {
+    trackEvent('radar_signup_complete', radarContext(placement, interest));
+  };
+
   const trackContactSubmit = () => {
     trackEvent('contact_submit', {});
   };
@@ -94,6 +122,9 @@ export const useAnalytics = () => {
     trackPropertyInquiry,
     trackWhatsAppClick,
     trackNewsletterSignup,
+    trackRadarView,
+    trackRadarSignupStart,
+    trackRadarSignupComplete,
     trackContactSubmit,
     trackTasacionSubmit,
     trackFavoriteToggle,
