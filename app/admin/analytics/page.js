@@ -12,6 +12,7 @@ import {
 import {
   isSearchConsoleConfigured,
   getSearchConsoleOverview,
+  getSeoRadar,
 } from "@/lib/searchConsole";
 import TrendChart from "./TrendChart";
 import NoTrackToggle from "@/components/NoTrackToggle";
@@ -184,6 +185,75 @@ function SearchConsoleSection({ data, error, configured }) {
   );
 }
 
+function SeoRadarSection({ data, error, configured }) {
+  if (!configured) return null;
+
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+        <p className="font-semibold">Radar SEO temporalmente no disponible</p>
+        <p className="mt-1 text-xs">El resto de Search Console sigue funcionando. Volvé a intentar más tarde.</p>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  return (
+    <section className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600 text-xs font-black text-white">SEO</span>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Radar automático de oportunidades</h2>
+              <p className="text-xs text-gray-400">Cruza página + búsqueda y prioriza CTR, posición e intención comercial.</p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-gray-500">
+            Analizó {formatNum(data.analyzedRows)} combinaciones de los últimos {data.rangeDays} días. Las sugerencias requieren revisión antes de modificar la web.
+          </p>
+        </div>
+        <div className="rounded-xl bg-violet-50 px-4 py-3 text-right">
+          <p className="text-2xl font-black text-violet-700">{formatNum(data.highPriorityCount)}</p>
+          <p className="text-xs text-violet-600">prioridad alta</p>
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        {data.opportunities.map((item) => {
+          const priorityClass = item.priority === "alta"
+            ? "bg-rose-50 text-rose-700"
+            : item.priority === "media"
+              ? "bg-amber-50 text-amber-700"
+              : "bg-gray-100 text-gray-600";
+          return (
+            <article key={`${item.page}-${item.query}`} className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase ${priorityClass}`}>{item.priority}</span>
+                <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-bold text-violet-700">puntaje {item.score}</span>
+                <Link href={item.page} className="min-w-0 truncate text-xs font-semibold text-gray-500 hover:text-violet-700" title={item.page}>{item.page}</Link>
+              </div>
+              <p className="mt-2 text-sm font-bold text-gray-900">“{item.query}”</p>
+              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-500">
+                <span><strong className="text-gray-800">{formatNum(item.impressions)}</strong> impresiones</span>
+                <span><strong className="text-gray-800">{formatNum(item.clicks)}</strong> clics</span>
+                <span>CTR <strong className="text-gray-800">{formatCtr(item.ctr)}</strong></span>
+                <span>posición <strong className="text-gray-800">{formatPos(item.position)}</strong></span>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-gray-700"><strong>Recomendación:</strong> {item.recommendation}</p>
+            </article>
+          );
+        })}
+        {data.opportunities.length === 0 && (
+          <p className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">No hay oportunidades críticas con suficiente información en este período.</p>
+        )}
+      </div>
+      <p className="mt-4 text-[11px] text-gray-400">Ejecución automática: lunes 09:00 de Argentina · el horario puede variar según el plan de Vercel.</p>
+    </section>
+  );
+}
+
 // Tarjeta que se muestra cuando aún no hay credenciales de GA4 configuradas.
 function SetupCard() {
   return (
@@ -268,12 +338,17 @@ export default async function AnalyticsPage({ searchParams }) {
   const gscConfigured = isSearchConsoleConfigured();
   let gsc = null;
   let gscError = null;
+  let seoRadar = null;
+  let seoRadarError = null;
   if (gscConfigured) {
-    try {
-      gsc = await getSearchConsoleOverview(range);
-    } catch (err) {
-      gscError = String(err?.message || err);
-    }
+    const [gscResult, radarResult] = await Promise.allSettled([
+      getSearchConsoleOverview(range),
+      getSeoRadar(28),
+    ]);
+    if (gscResult.status === "fulfilled") gsc = gscResult.value;
+    else gscError = String(gscResult.reason?.message || gscResult.reason);
+    if (radarResult.status === "fulfilled") seoRadar = radarResult.value;
+    else seoRadarError = String(radarResult.reason?.message || radarResult.reason);
   }
 
   const { kpis, series, topPages, channels, devices, conversions, radarFunnel, homeIntents, whatsappSources } = overview;
@@ -412,6 +487,9 @@ export default async function AnalyticsPage({ searchParams }) {
 
         {/* Visibilidad en Google (Search Console) */}
         <SearchConsoleSection data={gsc} error={gscError} configured={gscConfigured} />
+
+        {/* Priorización automática: solo recomienda, nunca modifica contenido. */}
+        <SeoRadarSection data={seoRadar} error={seoRadarError} configured={gscConfigured} />
 
         {/* Gráfico de tendencia */}
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
