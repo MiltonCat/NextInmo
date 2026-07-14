@@ -6,8 +6,8 @@ const AlquileresClient = dynamic(() => import("./AlquileresClient"));
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Alquileres permanentes en San Martín de los Andes | Catalán Propiedades",
-  description: "Propiedades en alquiler permanente en San Martín de los Andes, Patagonia. Encontrá tu hogar con asesoría personalizada, contratos transparentes y atención directa del propietario.",
+  title: "Alquileres en San Martín de los Andes",
+  description: "Encontrá propiedades en alquiler permanente en San Martín de los Andes. Consultá disponibilidad y recibí asesoramiento local para elegir tu próximo hogar.",
   openGraph: {
     title: "Alquileres permanentes en San Martín de los Andes — Catalán Propiedades",
     description: "Propiedades en alquiler permanente en la Patagonia Argentina.",

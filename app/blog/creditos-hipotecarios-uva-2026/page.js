@@ -1,12 +1,12 @@
 import { SITE_URL, canonicalUrl } from "@/config";
 
 export const metadata = {
-  title: "Créditos Hipotecarios UVA 2026: La Llave para tu Casa Propia en la Patagonia | Catalán Propiedades",
-  description: "Descubrí cómo los créditos hipotecarios UVA te abren la puerta a comprar una propiedad en San Martín de los Andes. Requisitos, bancos, simulaciones y guía paso a paso.",
+  title: "Créditos hipotecarios UVA 2026: tasas y bancos",
+  description: "Compará bancos, tasas referenciales, requisitos y financiación de créditos hipotecarios UVA 2026 para comprar una propiedad en San Martín de los Andes.",
   keywords: "credito hipotecario uva 2026, hipoteca uva argentina, comprar casa san martin andes, credito para propiedad patagonia, banco nacion hipoteca, primera vivienda argentina",
   openGraph: {
-    title: "Créditos Hipotecarios UVA 2026: Tu Casa Propia en la Patagonia",
-    description: "Guía completa para acceder a tu primera propiedad en San Martín de los Andes usando crédito hipotecario UVA.",
+    title: "Créditos hipotecarios UVA 2026: tasas, bancos y requisitos",
+    description: "Comparativa y guía para financiar una propiedad en San Martín de los Andes con un crédito hipotecario UVA.",
     url: canonicalUrl("/blog/creditos-hipotecarios-uva-2026"),
     type: "article",
     publishedTime: "2026-05-26T00:00:00Z",
@@ -22,8 +22,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Créditos Hipotecarios UVA 2026: Tu Casa Propia en la Patagonia",
-    description: "Guía completa para acceder a tu primera propiedad en San Martín de los Andes usando crédito hipotecario UVA.",
+    title: "Créditos hipotecarios UVA 2026: tasas y bancos",
+    description: "Compará bancos, requisitos y financiación para comprar con un crédito hipotecario UVA.",
     images: [`${SITE_URL}/hipotecario.jpeg`],
   },
   alternates: {
