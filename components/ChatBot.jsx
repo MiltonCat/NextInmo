@@ -3,9 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { properties as fallbackProperties, getPropertySlug } from "@/data/properties";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
-import { WA_URL } from "@/config";
-
-const WHATSAPP_URL = WA_URL;
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { whatsappUrl } from "@/lib/whatsapp";
 
 function filterProps(filters, list) {
   return list.filter((p) => {
@@ -74,9 +73,26 @@ export default function ChatBot() {
   ]);
   const [activeStep, setActiveStep] = useState("welcome");
   const [filters, setFilters] = useState({});
+  const [lastSearchFilters, setLastSearchFilters] = useState({});
   // Arranca con el array estático de respaldo y se actualiza con datos frescos de la base.
   const [dataset, setDataset] = useState(fallbackProperties);
   const messagesEndRef = useRef(null);
+  const { trackEvent, trackWhatsAppClick } = useAnalytics();
+
+  const advisorMessage = (searchFilters = {}) => {
+    const details = [
+      searchFilters.types?.length ? `Tipo: ${searchFilters.types.join(", ")}` : "",
+      searchFilters.minPrice ? `Presupuesto mínimo: USD ${searchFilters.minPrice.toLocaleString("es-AR")}` : "",
+      searchFilters.maxPrice ? `Presupuesto máximo: USD ${searchFilters.maxPrice.toLocaleString("es-AR")}` : "",
+      searchFilters.minBedrooms !== undefined ? `Dormitorios desde: ${searchFilters.minBedrooms}` : "",
+      searchFilters.maxBedrooms !== undefined ? `Dormitorios hasta: ${searchFilters.maxBedrooms}` : "",
+    ].filter(Boolean);
+
+    return whatsappUrl(
+      `Hola Milton, usé el asistente de búsqueda de la web y quisiera que me ayudes a encontrar una propiedad.` +
+      (details.length ? `\n\nMi búsqueda:\n${details.map((item) => `• ${item}`).join("\n")}` : "")
+    );
+  };
 
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -98,11 +114,14 @@ export default function ChatBot() {
     const userMsg = { role: "user", text: opt.label };
 
     if (opt.next === "whatsapp") {
-      window.open(WHATSAPP_URL, "_blank");
+      const searchContext = Object.keys(currentFilters || {}).length ? currentFilters : lastSearchFilters;
+      trackWhatsAppClick(null, "chatbot");
+      trackEvent("chatbot_whatsapp", { has_search_filters: Object.keys(searchContext).length > 0 });
+      window.open(advisorMessage(searchContext), "_blank");
       setMessages((prev) => [
         ...prev,
         userMsg,
-        { role: "bot", text: "Te abrí WhatsApp. ¡Lucía y el equipo de PropIA te van a atender enseguida! 😊", stepKey: "after_results" },
+        { role: "bot", text: "Te abrí WhatsApp con los datos de tu búsqueda. Milton te va a responder personalmente.", stepKey: "after_results" },
       ]);
       setActiveStep("after_results");
       setFilters({});
@@ -113,6 +132,7 @@ export default function ChatBot() {
 
     if (opt.next === "results") {
       const found = filterProps(merged, dataset);
+      setLastSearchFilters(merged);
       const botText =
         found.length === 0
           ? "No encontré propiedades con esos filtros exactos. Te recomiendo hablar con un asesor para explorar más opciones."
@@ -225,9 +245,13 @@ export default function ChatBot() {
 
           <div className="px-3 pt-2 pb-3 bg-white" style={{ flexShrink: 0 }}>
             <a
-              href={WHATSAPP_URL}
+              href={advisorMessage(lastSearchFilters)}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                trackWhatsAppClick(null, "chatbot_footer");
+                trackEvent("chatbot_whatsapp", { has_search_filters: Object.keys(lastSearchFilters).length > 0 });
+              }}
               className="flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium transition"
             >
               <WhatsAppIcon />

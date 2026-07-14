@@ -1,10 +1,15 @@
 "use client";
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
-import { WA_URL, CONTACT_EMAIL, PHONE_DISPLAY, LOCATION_DISPLAY, BUSINESS_HOURS } from "@/config";
+import { CONTACT_EMAIL, PHONE_DISPLAY, LOCATION_DISPLAY, BUSINESS_HOURS } from "@/config";
 import { registrarConsulta } from "@/lib/registrarConsulta";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import { whatsappUrl } from "@/lib/whatsapp";
+
+const CONTACT_WA_URL = whatsappUrl(
+  "Hola Milton, estoy en la página de contacto de Catalán Propiedades y quisiera contarte qué propiedad o asesoramiento estoy buscando."
+);
 
 const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "", website: "" };
 
@@ -159,7 +164,7 @@ export default function ContactoClient() {
                     ),
                     label: "WhatsApp",
                     value: PHONE_DISPLAY,
-                    href: WA_URL,
+                    href: CONTACT_WA_URL,
                   },
                   {
                     icon: (
@@ -192,7 +197,7 @@ export default function ContactoClient() {
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={item.href === WA_URL ? () => trackWhatsAppClick(null, "contacto_info") : undefined}
+                          onClick={item.href === CONTACT_WA_URL ? () => trackWhatsAppClick(null, "contacto_info") : undefined}
                           className="text-primary-600 hover:text-primary-500 text-sm transition"
                         >
                           {item.value}
@@ -244,7 +249,7 @@ export default function ContactoClient() {
                       Escribime directamente a{" "}
                       <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>{" "}
                       o por{" "}
-                      <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="underline">WhatsApp</a>.
+                      <a href={CONTACT_WA_URL} target="_blank" rel="noopener noreferrer" className="underline">WhatsApp</a>.
                     </p>
                   </div>
                 </div>
@@ -381,7 +386,7 @@ export default function ContactoClient() {
                 </div>
 
                 <a
-                  href={WA_URL}
+                  href={CONTACT_WA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackWhatsAppClick(null, "contacto_form")}

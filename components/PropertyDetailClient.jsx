@@ -8,11 +8,10 @@ import PropertySheet from "@/components/PropertySheet";
 import SimuladorCuota from "@/components/SimuladorCuota";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { WA_NUMBER } from "@/config";
+import { propertyWhatsappMessage, whatsappUrl } from "@/lib/whatsapp";
 
-function waLink(propertyTitle, message = "") {
-  const text = message || `Hola! Me interesa la propiedad: "${propertyTitle}". Podemos hablar?`;
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+function waLink(property, message = "") {
+  return whatsappUrl(message || propertyWhatsappMessage(property));
 }
 
 export default function PropertyDetailClient({ property }) {
@@ -71,24 +70,20 @@ export default function PropertyDetailClient({ property }) {
   };
 
   const handleInquiry = () => {
-    const msg = inquiry.trim()
-      ? `Hola! Me interesa la propiedad: "${property.title}".\n\n${inquiry}`
-      : `Hola! Me interesa la propiedad: "${property.title}". Podemos hablar?`;
+    const msg = propertyWhatsappMessage(property, {
+      note: inquiry,
+      url: window.location.href,
+    });
     
     trackPropertyInquiry(property, 'whatsapp');
     trackWhatsAppClick(property, 'property_detail');
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
+    window.open(whatsappUrl(msg), "_blank");
   };
 
   const openGallery = (index = 0) => {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
-
-  const scheduleVisitUrl = waLink(
-    property.title,
-    `Hola! Quiero agendar una visita para la propiedad: "${property.title}". Que horarios tienen disponibles?`
-  );
 
   const mobilePriceLabel = isAlquiler
     ? `$ ${property.precioAlquilerARS?.toLocaleString("es-AR") || "-"}`
@@ -103,14 +98,14 @@ export default function PropertyDetailClient({ property }) {
 
   const handleMobilePrimaryAction = () => {
     if (isAlquiler || property.alquilada || property.reservada) {
-      const message = property.alquilada
-        ? `Hola! Vi la propiedad "${property.title}" (alquilada) y me interesa algo similar. ¿Tienen disponibilidad?`
-        : property.reservada
-          ? `Hola! Vi la propiedad "${property.title}" (reservada) y me interesa. ¿Sigue disponible o tienen algo similar?`
-          : `Hola! Me interesa alquilar la propiedad: "${property.title}". Podemos hablar?`;
+      const message = propertyWhatsappMessage(property, {
+        action: property.alquilada || property.reservada ? "similar" : "consultar",
+        note: property.reservada ? "¿Sigue disponible o tenés algo similar?" : "",
+        url: window.location.href,
+      });
       trackPropertyInquiry(property, "whatsapp");
       trackWhatsAppClick(property, "property_detail_mobile");
-      window.open(waLink(property.title, message), "_blank");
+      window.open(waLink(property, message), "_blank");
       return;
     }
     handleInquiry();
@@ -285,27 +280,42 @@ export default function PropertyDetailClient({ property }) {
                       )}
                       {property.alquilada ? (
                         <a
-                          href={waLink(property.title, `Hola! Vi la cabaña en la Cascada (alquilada) y me interesa algo similar. ¿Tienen disponibilidad?`)}
+                          href={waLink(property, propertyWhatsappMessage(property, { action: "similar" }))}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => {
+                            trackPropertyInquiry(property, "whatsapp");
+                            trackWhatsAppClick(property, "property_detail_similar");
+                          }}
                           className="block w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl text-center transition"
                         >
                           Consultar por opciones similares
                         </a>
                       ) : property.reservada ? (
                         <a
-                          href={waLink(property.title, `Hola! Vi la propiedad "${property.title}" (reservada) y me interesa. ¿Sigue disponible o tienen algo similar?`)}
+                          href={waLink(property, propertyWhatsappMessage(property, {
+                            action: "similar",
+                            note: "¿Sigue disponible o tenés algo similar?",
+                          }))}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => {
+                            trackPropertyInquiry(property, "whatsapp");
+                            trackWhatsAppClick(property, "property_detail_reserved");
+                          }}
                           className="block w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 rounded-xl text-center transition"
                         >
                           Consultar disponibilidad
                         </a>
                       ) : (
                         <a
-                          href={waLink(property.title, `Hola! Me interesa alquilar la propiedad: "${property.title}". Podemos hablar?`)}
+                          href={waLink(property)}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => {
+                            trackPropertyInquiry(property, "whatsapp");
+                            trackWhatsAppClick(property, "property_detail_rental");
+                          }}
                           className="block w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-xl text-center transition"
                         >
                           Consultar disponibilidad

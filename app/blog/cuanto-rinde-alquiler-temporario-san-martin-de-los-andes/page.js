@@ -1,5 +1,10 @@
 import { SITE_URL, canonicalUrl, TASADOR_URL, WA_URL } from "@/config";
 import mercado, { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import TrackedLink from "@/components/TrackedLink";
+
+const WA_TEMPORARIO_URL = `${WA_URL}?text=${encodeURIComponent(
+  "Hola Milton, leí el análisis sobre alquiler temporario y quisiera evaluar una propiedad según mi presupuesto, costos y rentabilidad esperada."
+)}`;
 
 export const metadata = {
   title:
@@ -533,12 +538,16 @@ export default function AlquilerTemporarioPage() {
                 compromiso.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
-                <a
-                  href={WA_URL}
+                <TrackedLink
+                  event="whatsapp_click"
+                  eventParams={{ location: "blog_alquiler_temporario_cta" }}
+                  href={WA_TEMPORARIO_URL}
                   className="inline-block bg-white text-rose-600 font-bold px-8 py-4 rounded-xl hover:bg-rose-50 transition-colors shadow-lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Consultar por WhatsApp →
-                </a>
+                </TrackedLink>
                 <a
                   href={TASADOR_URL}
                   className="inline-block bg-white/10 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/20 transition-colors border border-white/20"

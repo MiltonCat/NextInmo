@@ -1,7 +1,7 @@
 "use client";
-import { WA_URL } from "@/config";
 import { usePathname } from "next/navigation";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
 
 export default function WhatsAppFloat() {
   const { trackWhatsAppClick } = useAnalytics();
@@ -12,9 +12,11 @@ export default function WhatsAppFloat() {
   const isPropertyDetail = /^\/propiedades\/[^/]+$/.test(pathname || "");
   if (isPropertyDetail) return null;
 
+  const href = whatsappUrl(contextualPageMessage(pathname));
+
   return (
     <a
-      href={WA_URL}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackWhatsAppClick(null, "float_button")}

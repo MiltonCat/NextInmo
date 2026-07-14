@@ -50,6 +50,91 @@ export default async function Home() {
     <div>
       <Hero />
 
+      {/* Entrada guiada: orienta cada visita hacia el recorrido que necesita. */}
+      <section className="border-b border-gray-100 bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+          <div className="mx-auto mb-7 max-w-2xl text-center">
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-rose-600">
+              Empezá por acá
+            </p>
+            <h2 className="text-2xl font-black leading-tight text-gray-900 sm:text-3xl">
+              ¿Qué querés hacer en San Martín de los Andes?
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-gray-500 sm:text-base">
+              Elegí tu objetivo y te llevamos directo a la información y las herramientas que necesitás.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                event: "home_intent_buy",
+                intent: "buy",
+                href: "/propiedades",
+                number: "01",
+                title: "Quiero comprar",
+                description: "Explorá propiedades disponibles y encontrá opciones según tu búsqueda.",
+                action: "Ver propiedades",
+              },
+              {
+                event: "home_intent_sell",
+                intent: "sell",
+                href: "/vender",
+                number: "02",
+                title: "Quiero vender o tasar",
+                description: "Conocé el valor de tu propiedad y cómo te acompañamos para venderla.",
+                action: "Empezar mi tasación",
+              },
+              {
+                event: "home_intent_invest",
+                intent: "invest",
+                href: "/inversiones",
+                number: "03",
+                title: "Quiero invertir",
+                description: "Analizá oportunidades, zonas y escenarios con datos del mercado local.",
+                action: "Analizar inversiones",
+              },
+              {
+                event: "home_intent_market",
+                intent: "market",
+                href: "/precio-m2",
+                number: "04",
+                title: "Quiero conocer el mercado",
+                description: "Compará precios por metro cuadrado y entendé mejor cada zona.",
+                action: "Ver precios y zonas",
+              },
+            ].map((option) => (
+              <TrackedLink
+                key={option.intent}
+                event={option.event}
+                eventParams={{
+                  intent: option.intent,
+                  placement: "home_guided_entry",
+                  page_path: "/",
+                }}
+                href={option.href}
+                className="group flex min-h-52 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-rose-200 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+              >
+                <div className="mb-5 flex items-center justify-between">
+                  <span className="text-xs font-black tracking-widest text-rose-600">{option.number}</span>
+                  <span
+                    aria-hidden="true"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors group-hover:bg-rose-600 group-hover:text-white"
+                  >
+                    →
+                  </span>
+                </div>
+                <h3 className="text-lg font-black leading-snug text-gray-900">{option.title}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-gray-500">{option.description}</p>
+                <span className="mt-5 text-sm font-bold text-rose-600 group-hover:text-rose-500">
+                  {option.action} →
+                </span>
+              </TrackedLink>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Bloque diferencial */}
       <section className="border-b border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
