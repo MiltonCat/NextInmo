@@ -249,7 +249,16 @@ export default function AlquilerTemporarioPage() {
             <p className="text-lg leading-relaxed text-gray-700">
               La contracara es la <strong>estacionalidad</strong>: no es lo mismo una
               semana de julio que un martes de mayo. Por eso el número que importa no
-              es la mejor noche del año, sino el promedio de los 365 días.
+              es la mejor noche del año, sino el promedio de los 365 días. Además, el
+              mercado se volvió más competitivo: en{" "}
+              <a
+                href="/blog/airbnb-facil-san-martin-de-los-andes-2026"
+                className="text-rose-600 font-semibold hover:text-rose-700"
+              >
+                ¿se terminó el Airbnb fácil en San Martín de los Andes?
+              </a>{" "}
+              analizamos los datos 2026 de oferta, ocupación y tarifas, y los nuevos
+              controles municipales.
             </p>
           </section>
 
@@ -605,6 +614,26 @@ export default function AlquilerTemporarioPage() {
             </p>
             <div className="space-y-3">
               <a
+                href="/blog/airbnb-facil-san-martin-de-los-andes-2026"
+                className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
+              >
+                <img
+                  src="/chapelco-invierno-sma-2026.webp"
+                  alt="¿Se terminó el Airbnb fácil en San Martín de los Andes?"
+                  className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">
+                    Mercado
+                  </p>
+                  <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
+                    ¿Se terminó el Airbnb fácil en San Martín de los Andes?
+                  </p>
+                </div>
+              </a>
+              <a
                 href="/blog/score-de-inversion-san-martin-de-los-andes"
                 className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
               >
@@ -629,7 +658,7 @@ export default function AlquilerTemporarioPage() {
                 className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
               >
                 <img
-                  src="/hero-montana.jpg"
+                  src="/cartel-san-martin-de-los-andes.webp"
                   alt="Cuánto cuesta una casa en San Martín de los Andes"
                   className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
                   loading="lazy"

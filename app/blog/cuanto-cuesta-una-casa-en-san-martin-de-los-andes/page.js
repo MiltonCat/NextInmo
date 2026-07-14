@@ -16,14 +16,14 @@ export const metadata = {
     type: "article",
     publishedTime: "2026-06-16T00:00:00Z",
     authors: ["Milton Catalán"],
-    images: [{ url: `${SITE_URL}/hero-montana.jpg`, width: 1200, height: 630, alt: "Casas y propiedades en San Martín de los Andes" }],
+    images: [{ url: `${SITE_URL}/cartel-san-martin-de-los-andes.webp`, width: 1024, height: 683, alt: "Cartel de San Martín de los Andes en la costanera del lago Lácar" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "¿Cuánto cuesta una casa en San Martín de los Andes? (2026)",
     description:
       "De qué depende el precio, cómo estimarlo con datos reales del m² por zona y cómo saber el precio justo de una casa.",
-    images: [`${SITE_URL}/hero-montana.jpg`],
+    images: [`${SITE_URL}/cartel-san-martin-de-los-andes.webp`],
   },
   alternates: {
     canonical: canonicalUrl("/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes"),
@@ -36,7 +36,7 @@ const articleJsonLd = {
   headline: "¿Cuánto cuesta una casa en San Martín de los Andes? (2026)",
   description:
     "Qué define el precio de una casa en San Martín de los Andes y cómo estimarlo con datos reales del valor del m² por zona, en vez de copiar el precio publicado.",
-  image: `${SITE_URL}/hero-montana.jpg`,
+  image: `${SITE_URL}/cartel-san-martin-de-los-andes.webp`,
   datePublished: "2026-06-16",
   dateModified: "2026-06-16",
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },

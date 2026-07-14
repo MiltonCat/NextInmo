@@ -34,6 +34,17 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "airbnb-facil-san-martin-de-los-andes-2026",
+    title: "¿Se terminó el Airbnb fácil en San Martín de los Andes?",
+    excerpt:
+      "La oferta crece, la ocupación mejora, pero las tarifas y los ingresos promedio retroceden. Qué cambian los nuevos controles con datos para propietarios e inversores en 2026.",
+    category: "Mercado",
+    date: "Julio 2026",
+    dateTime: "2026-07-14",
+    readTime: "9 min",
+    image: "/chapelco-invierno-sma-2026.webp",
+  },
+  {
     id: "cuanto-rinde-alquiler-temporario-san-martin-de-los-andes",
     title: "Cuánto rinde un alquiler temporario en San Martín de los Andes",
     excerpt:
@@ -73,7 +84,7 @@ const blogPosts = [
     date: "Junio 2026",
     dateTime: "2026-06",
     readTime: "7 min",
-    image: "/hero-montana.jpg",
+    image: "/cartel-san-martin-de-los-andes.webp",
   },
   {
     id: "como-tasamos-tu-propiedad-con-datos",
@@ -224,8 +235,4 @@ export default function BlogPage() {
               </Link>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+        </div
