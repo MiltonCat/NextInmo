@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
 
 const slug = "/blog/airbnb-facil-san-martin-de-los-andes-2026";
@@ -400,14 +401,16 @@ export default function AirbnbFacilPage() {
                 Analizamos el precio de compra, el segmento, los costos y un escenario
                 conservador de ingresos antes de que tomes la decisión.
               </p>
-              <a
+              <TrackedLink
+                event="whatsapp_click"
+                eventParams={{ location: "blog_airbnb_facil_cta" }}
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-white text-rose-600 font-bold px-8 py-4 rounded-xl hover:bg-rose-50 transition-colors shadow-lg"
               >
                 Analizar una propiedad →
-              </a>
+              </TrackedLink>
             </div>
           </section>
 

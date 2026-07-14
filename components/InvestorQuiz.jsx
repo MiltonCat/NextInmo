@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { WA_NUMBER } from "@/config";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { whatsappUrl } from "@/lib/whatsapp";
 
 const QUESTIONS = [
   {
@@ -102,6 +103,7 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
   const [email, setEmail] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [errorEmail, setErrorEmail] = useState(false);
+  const { trackEvent, trackWhatsAppClick } = useAnalytics();
 
   const preguntaActual = QUESTIONS[paso - 1];
 
@@ -165,7 +167,12 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
   const progreso = paso >= 1 && paso <= 4 ? (paso / QUESTIONS.length) * 100 : 0;
 
   const waLink = perfil
-    ? `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola! Hice el test de perfil inversor en la web y me salió perfil ${perfil.label}. Me gustaría recibir una propuesta personalizada.`)}`
+    ? whatsappUrl(
+        `Hola Milton, hice el test de perfil inversor en la web y mi resultado fue ${perfil.label}.\n\n` +
+        `Estrategia sugerida: ${perfil.recomendacion}\n` +
+        `Objetivo orientativo: ${perfil.roi}\n\n` +
+        `Quisiera recibir una propuesta personalizada según mi presupuesto.`
+      )
     : "#";
 
   return (
@@ -316,6 +323,10 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  trackWhatsAppClick(null, "investor_quiz_result");
+                  trackEvent("investor_quiz_whatsapp", { profile: calcularPerfil(respuestas) });
+                }}
                 className={`flex-1 text-center text-white font-semibold py-3 rounded-xl transition-colors text-sm ${colores.btn}`}
               >
                 Quiero que me asesoren sobre esto →

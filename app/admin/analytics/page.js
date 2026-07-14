@@ -276,7 +276,7 @@ export default async function AnalyticsPage({ searchParams }) {
     }
   }
 
-  const { kpis, series, topPages, channels, devices, conversions, radarFunnel } = overview;
+  const { kpis, series, topPages, channels, devices, conversions, radarFunnel, homeIntents, whatsappSources } = overview;
   const causas = summarizeCauses(overview);
   const totalPageViews = topPages.reduce((acc, p) => acc + p.views, 0) || 1;
   // Total de contactos "fuertes" (todo menos suscripciones al newsletter).
@@ -347,6 +347,46 @@ export default async function AnalyticsPage({ searchParams }) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Contenido que genera conversaciones por WhatsApp. */}
+        <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+          <div className="mb-3">
+            <p className="text-sm font-semibold text-gray-900">Qué páginas generan WhatsApp</p>
+            <p className="text-xs text-gray-400">Origen de los clics para identificar qué contenido convierte mejor</p>
+          </div>
+          <div className="space-y-2">
+            {whatsappSources.map((source) => (
+              <div key={source.path} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm">
+                <span className="min-w-0 flex-1 truncate text-gray-700" title={source.path}>{source.path}</span>
+                <span className="font-black tabular-nums text-emerald-600">{formatNum(source.count)}</span>
+                <span className="w-16 text-right"><Delta pct={source.changePct} /></span>
+              </div>
+            ))}
+            {whatsappSources.length === 0 && (
+              <p className="text-sm text-gray-400">Todavía no hay clics registrados en este período.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Intereses elegidos en la entrada guiada de la página de inicio. */}
+        <div className="rounded-2xl border border-sky-100 bg-white p-5 shadow-sm">
+          <div className="mb-3">
+            <p className="text-sm font-semibold text-gray-900">Qué busca la gente desde el inicio</p>
+            <p className="text-xs text-gray-400">Elecciones realizadas en la nueva entrada guiada</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {homeIntents.map((item) => (
+              <div key={item.event} className="rounded-xl border border-sky-100 bg-sky-50/50 p-4">
+                <p className="text-2xl font-black text-gray-900">{formatNum(item.count)}</p>
+                <p className="mt-0.5 text-xs font-medium text-gray-600">{eventoES(item.event)}</p>
+                <div className="mt-2"><Delta pct={item.changePct} /></div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-gray-400">
+            Estas elecciones muestran la intención inicial; no se cuentan como contactos hasta que la persona consulta o completa un formulario.
+          </p>
         </div>
 
         {/* Embudo específico de Radar SMA. Se separa de los contactos comerciales
