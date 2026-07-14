@@ -1,0 +1,19 @@
+
+> nextjs@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env.local
+✓ Ready in 5.4s
+- Experiments (use with caution):
+  · optimizePackageImports
+  · serverActions
+
+ GET / 200 in 3.2s (next.js: 2.1s, application-code: 1096ms)
+ GET / 200 in 1457ms (next.js: 34ms, application-code: 1423ms)
+○ Compiling /propiedades/[slug] ...
+ GET /propiedades/hermosa-cabana-en-el-barrio-chapelco-san-martin-de-los-andes-19/ 404 in 8.1s (next.js: 7.3s, proxy.ts: 180ms, generate-params: 1679ms, application-code: 622ms)
+○ Compiling /propiedades ...
+ GET /propiedades/ 200 in 4.4s (next.js: 3.3s, proxy.ts: 9ms, application-cod

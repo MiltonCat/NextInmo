@@ -1,0 +1,27 @@
+
+<--- Last few GCs --->
+
+[5616:000001D7528DD990]  1817645 ms: Scavenge 3707.9 (3799.2) -> 3699.8 (3799.2) MB, 19.28 / 0.00 ms  (average mu = 0.198, current mu = 0.195) allocation failure; 
+[5616:000001D7528DD990]  1817929 ms: Scavenge 3709.7 (3800.1) -> 3704.7 (3802.8) MB, 121.67 / 0.00 ms  (average mu = 0.198, current mu = 0.195) allocation failure; 
+
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF6B5DFC23B node::SetCppgcReference+19883
+ 2: 00007FF6B5D6B1B8 v8::base::CPU::num_virtual_address_bits+93912
+ 3: 00007FF6B67E51D1 v8::Isolate::ReportExternalAllocationLimitReached+65
+ 4: 00007FF6B67CE858 v8::Function::Experimental_IsNopFunction+1336
+ 5: 00007FF6B6630490 v8::Platform::SystemClockTimeMillis+659696
+ 6: 00007FF6B663C6B3 v8::Platform::SystemClockTimeMillis+709395
+ 7: 00007FF6B663A014 v8::Platform::SystemClockTimeMillis+699508
+ 8: 00007FF6B662D1B0 v8::Platform::SystemClockTimeMillis+646672
+ 9: 00007FF6B66427CA v8::Platform::SystemClockTimeMillis+734250
+10: 00007FF6B6643047 v8::Platform::SystemClockTimeMillis+736423
+11: 00007FF6B665193F v8::Platform::SystemClockTimeMillis+796063
+12: 00007FF6B6311F95 v8::CodeEvent::GetFunctionName+117093
+13: 00007FF6B689065E v8::PropertyDescriptor::writable+652286
+14: 00007FF6B68F1B26 v8::PropertyDescriptor::writable+1050822
+15: 00007FF6567C976F 
