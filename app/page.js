@@ -15,11 +15,11 @@ import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
-  description: "Venta de propiedades, alquileres permanentes y asesoría en inversiones inmobiliarias en San Martín de los Andes, Patagonia. +10 años de experiencia.",
+  title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
+  description: "Propiedades en venta y alquiler permanente en San Martín de los Andes. Casas, departamentos y lotes con asesoría local y datos del mercado.",
   openGraph: {
-    title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
-    description: "Venta de propiedades, alquileres permanentes y asesoría en inversiones inmobiliarias en San Martín de los Andes, Patagonia. +10 años de experiencia.",
+    title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
+    description: "Propiedades en venta y alquiler permanente en San Martín de los Andes, con asesoría local y datos del mercado.",
     url: canonicalUrl("/"),
     type: "website",
     images: [
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Catalán Propiedades | Inmobiliaria en San Martín de los Andes",
-    description: "Venta de propiedades, alquileres permanentes y asesoría en inversiones inmobiliarias en la Patagonia.",
+    title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
+    description: "Propiedades en venta y alquiler permanente en San Martín de los Andes, con asesoría local.",
     images: [DEFAULT_OG_IMAGE],
   },
   alternates: {

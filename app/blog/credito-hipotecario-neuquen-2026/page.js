@@ -3,15 +3,15 @@ import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
 
 export const metadata = {
-  title: "Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa | Catalán Propiedades",
+  title: "Crédito Neuquén Habita 2026: requisitos y montos",
   description:
-    "Guía completa del crédito hipotecario provincial de Neuquén (plan Neuquén Habita) para construir, ampliar o refaccionar tu vivienda. Requisitos, montos, tasa y cómo inscribirte. Cubre San Martín de los Andes y Villa la Angostura.",
+    "Conocé los requisitos, montos, tasa e inscripción de Neuquén Habita 2026 para construir o refaccionar en San Martín de los Andes y Villa la Angostura.",
   keywords:
     "credito hipotecario neuquen 2026, neuquen habita, credito vivienda san martin de los andes, ruprovi, credito construccion villa la angostura, credito refaccion neuquen, simulador credito vivienda neuquen",
   openGraph: {
-    title: "Crédito hipotecario de Neuquén 2026: la oportunidad para construir tu casa",
+    title: "Crédito Neuquén Habita 2026: requisitos, montos e inscripción",
     description:
-      "Tasa 2%, hasta el 100% de la obra y hasta $150 millones para construir, ampliar o refaccionar. Cómo accede un vecino de San Martín de los Andes o Villa la Angostura.",
+      "Guía del programa para construir, ampliar o refaccionar en San Martín de los Andes y Villa la Angostura.",
     url: canonicalUrl("/blog/credito-hipotecario-neuquen-2026"),
     type: "article",
     publishedTime: "2026-06-22T00:00:00Z",
@@ -20,9 +20,9 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa",
+    title: "Crédito Neuquén Habita 2026: requisitos y montos",
     description:
-      "Tasa 2%, hasta el 100% de la obra y hasta $150 millones. Cubre San Martín de los Andes y Villa la Angostura. Requisitos y cómo inscribirte.",
+      "Requisitos, montos e inscripción para construir o refaccionar en San Martín de los Andes y Villa la Angostura.",
     images: [`${SITE_URL}/hipotecario.jpeg`],
   },
   alternates: {
