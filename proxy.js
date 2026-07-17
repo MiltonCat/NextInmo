@@ -41,39 +41,65 @@ async function updateAdminSession(request) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, responseHeaders) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
+          );
+          Object.entries(responseHeaders).forEach(([name, value]) =>
+            response.headers.set(name, value)
           );
         },
       },
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let isAuthenticated = false;
+
+  try {
+    const { data, error } = await supabase.auth.getClaims();
+    isAuthenticated = !error && Boolean(data?.claims?.sub);
+  } catch {
+    // Una sesión corrupta o un fallo de Auth se trata como sesión ausente.
+    // Supabase elimina las cookies inválidas mediante setAll cuando corresponde.
+    isAuthenticated = false;
+  }
 
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname.startsWith("/admin/login");
 
   // Sin sesión y fuera del login → mandar al login.
-  if (!user && !isLoginPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
-    return NextResponse.redirect(url);
+  if (!isAuthenticated && !isLoginPage) {
+    return redirectWithAuthState(request, "/admin/login", response);
   }
 
   // Con sesión y en el login → mandar al panel.
-  if (user && isLoginPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin";
-    return NextResponse.redirect(url);
+  if (isAuthenticated && isLoginPage) {
+    return redirectWithAuthState(request, "/admin", response);
   }
 
   return response;
+}
+
+function redirectWithAuthState(request, pathname, authResponse) {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+
+  const redirectResponse = NextResponse.redirect(url);
+
+  // Conserva tokens renovados o cookies eliminadas por Supabase. Sin esto,
+  // una redirección puede volver a enviar el refresh token inválido anterior.
+  authResponse.cookies.getAll().forEach((cookie) =>
+    redirectResponse.cookies.set(cookie)
+  );
+
+  ["cache-control", "expires", "pragma"].forEach((header) => {
+    const value = authResponse.headers.get(header);
+    if (value) redirectResponse.headers.set(header, value);
+  });
+
+  return redirectResponse;
 }
 
 export const config = {
