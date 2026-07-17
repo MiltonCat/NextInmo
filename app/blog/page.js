@@ -42,7 +42,7 @@ const blogPosts = [
     date: "Julio 2026",
     dateTime: "2026-07",
     readTime: "10 min",
-    image: "/volcan-lanin.png",
+    image: "/volcan-lanin-card.jpg",
   },
   {
     id: "airbnb-facil-san-martin-de-los-andes-2026",
