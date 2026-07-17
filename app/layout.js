@@ -224,7 +224,7 @@ const websiteJsonLd = {
 // lógica, replicala en components/GoogleAnalytics.jsx (shouldDisable).
 const gaGuardScript = `(function(){
   try {
-    var id = ${JSON.stringify(process.env.NEXT_PUBLIC_GA_ID || "")};
+    var id = ${JSON.stringify(process.env.NEXT_PUBLIC_GA_ID || "G-MSK4D75GPY")};
     if (!id) return;
     var admin = location.pathname.indexOf("/admin") === 0;
     var optout = false;

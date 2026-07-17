@@ -17,7 +17,10 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+// El ID de medición es público (aparece en el HTML), así que se deja un
+// respaldo hardcodeado: si falta la variable de entorno en Vercel, GA sigue
+// funcionando igual en vez de apagarse en silencio (pasó el 12/07/2026).
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-MSK4D75GPY";
 
 // Mantener esta lógica en sincronía con el guard del <head> en layout.js.
 function shouldDisable(pathname) {
