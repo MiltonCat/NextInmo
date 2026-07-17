@@ -34,6 +34,17 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "alquileres-san-martin-de-los-andes-2026",
+    title: "Alquileres en San Martín de los Andes 2026: qué revisar antes de firmar",
+    excerpt:
+      "Una guía jurídica para revisar contratos de alquiler permanente y temporario: plazo, actualización, reparaciones, gastos, devolución de llaves y garantías, con artículos del Código Civil y Comercial y jurisprudencia real de Neuquén.",
+    category: "Guía legal",
+    date: "Julio 2026",
+    dateTime: "2026-07",
+    readTime: "10 min",
+    image: "/volcan-lanin.png",
+  },
+  {
     id: "airbnb-facil-san-martin-de-los-andes-2026",
     title: "¿Se terminó el Airbnb fácil en San Martín de los Andes?",
     excerpt:

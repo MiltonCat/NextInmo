@@ -18,6 +18,7 @@ export default async function sitemap() {
     { url: canonicalUrl("/vender"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/nosotros"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: canonicalUrl("/blog"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: canonicalUrl("/blog/alquileres-san-martin-de-los-andes-2026"), lastModified: new Date("2026-07-17"), changeFrequency: "monthly", priority: 0.9 },
     { url: canonicalUrl("/blog/airbnb-facil-san-martin-de-los-andes-2026"), lastModified: new Date("2026-07-14"), changeFrequency: "monthly", priority: 0.9 },
     { url: canonicalUrl("/blog/credito-hipotecario-neuquen-2026"), lastModified: new Date("2026-06-22"), changeFrequency: "monthly", priority: 0.9 },
     { url: canonicalUrl("/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes"), lastModified: new Date("2026-06-16"), changeFrequency: "monthly", priority: 0.9 },
