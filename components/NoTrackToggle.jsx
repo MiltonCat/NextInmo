@@ -4,34 +4,46 @@
 // silenciar gtag.js. Es por-dispositivo: el dueño lo activa una vez en su
 // celular y otra en su PC. Solo afecta la web pública (el panel /admin ya nunca
 // se mide). Se muestra dentro del panel de analítica.
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const NO_TRACK_EVENT = "cp-no-track-changed";
+const NO_TRACK_KEY = "cp-no-track";
+
+function getNoTrackSnapshot() {
+  try {
+    return localStorage.getItem(NO_TRACK_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function subscribeToNoTrack(onStoreChange) {
+  const onStorage = (event) => {
+    if (!event.key || event.key === NO_TRACK_KEY) onStoreChange();
+  };
+
+  window.addEventListener(NO_TRACK_EVENT, onStoreChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(NO_TRACK_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
 
 export default function NoTrackToggle() {
-  // null mientras no se leyó localStorage, para no parpadear en la hidratación.
-  const [excluido, setExcluido] = useState(null);
-
-  useEffect(() => {
-    try {
-      setExcluido(localStorage.getItem("cp-no-track") === "1");
-    } catch {
-      setExcluido(false);
-    }
-  }, []);
+  const excluido = useSyncExternalStore(subscribeToNoTrack, getNoTrackSnapshot, () => false);
 
   function toggle() {
     const nuevo = !excluido;
     try {
-      if (nuevo) localStorage.setItem("cp-no-track", "1");
-      else localStorage.removeItem("cp-no-track");
+      if (nuevo) localStorage.setItem(NO_TRACK_KEY, "1");
+      else localStorage.removeItem(NO_TRACK_KEY);
     } catch {}
     // Efecto inmediato en este dispositivo, sin esperar a recargar.
     if (GA_ID) window[`ga-disable-${GA_ID}`] = nuevo;
-    setExcluido(nuevo);
+    window.dispatchEvent(new Event(NO_TRACK_EVENT));
   }
-
-  if (excluido === null) return null;
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">

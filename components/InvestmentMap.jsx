@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 
 const leafletFix = `
@@ -60,17 +60,12 @@ const ZONES = [
 ];
 
 export default function InvestmentMap() {
-  const [isClient, setIsClient] = useState(false);
   const [activeZone, setActiveZone] = useState(null);
 
   const rankedZones = [...ZONES].sort((a, b) => b.score - a.score);
   const featuredZone = activeZone ?? rankedZones[0];
   const rentaZone = ZONES.find((z) => z.verdict === "Renta inmediata");
   const plusvaliaZone = ZONES.find((z) => z.verdict === "Plusvalia");
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   return (
     <section className="bg-white py-10" style={{ isolation: "isolate" }}>
@@ -105,32 +100,28 @@ export default function InvestmentMap() {
             </div>
 
             <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style={{ height: "360px", position: "relative", zIndex: 0 }}>
-              {isClient ? (
-                <MapContainer center={[-40.1900, -71.0100]} zoom={11} style={{ height: "100%", width: "100%" }} zoomControl={true} scrollWheelZoom={false}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://carto.com/">CARTO</a>' />
-                  {ZONES.map((zone) => (
-                    <CircleMarker
-                      key={zone.name}
-                      center={zone.coords}
-                      radius={featuredZone.name === zone.name ? 16 : 11}
-                      pathOptions={{
-                        color: "#FF5A5F",
-                        fillColor: "#FF5A5F",
-                        fillOpacity: featuredZone.name === zone.name ? 0.9 : 0.6,
-                        weight: 2,
-                      }}
-                      eventHandlers={{ click: () => setActiveZone(zone) }}
-                    >
-                      <Popup>
-                        <div className="text-sm font-semibold">{zone.name}</div>
-                        <div className="text-xs text-gray-600">{zone.tipo}</div>
-                      </Popup>
-                    </CircleMarker>
-                  ))}
-                </MapContainer>
-              ) : (
-                <div className="w-full h-full bg-gray-100 animate-pulse" />
-              )}
+              <MapContainer center={[-40.1900, -71.0100]} zoom={11} style={{ height: "100%", width: "100%" }} zoomControl={true} scrollWheelZoom={false}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://carto.com/">CARTO</a>' />
+                {ZONES.map((zone) => (
+                  <CircleMarker
+                    key={zone.name}
+                    center={zone.coords}
+                    radius={featuredZone.name === zone.name ? 16 : 11}
+                    pathOptions={{
+                      color: "#FF5A5F",
+                      fillColor: "#FF5A5F",
+                      fillOpacity: featuredZone.name === zone.name ? 0.9 : 0.6,
+                      weight: 2,
+                    }}
+                    eventHandlers={{ click: () => setActiveZone(zone) }}
+                  >
+                    <Popup>
+                      <div className="text-sm font-semibold">{zone.name}</div>
+                      <div className="text-xs text-gray-600">{zone.tipo}</div>
+                    </Popup>
+                  </CircleMarker>
+                ))}
+              </MapContainer>
             </div>
           </div>
 

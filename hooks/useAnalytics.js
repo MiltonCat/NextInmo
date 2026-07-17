@@ -1,4 +1,6 @@
-export const useAnalytics = () => {
+import { useMemo } from "react";
+
+export const useAnalytics = () => useMemo(() => {
   const trackEvent = (eventName, eventParams = {}) => {
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', eventName, eventParams);
@@ -133,4 +135,4 @@ export const useAnalytics = () => {
     trackFilterUse,
     trackMapInteraction,
   };
-};
+}, []);

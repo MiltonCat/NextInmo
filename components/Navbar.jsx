@@ -58,10 +58,11 @@ const PROP_TYPES = [
   },
 ];
 
+const CONFETTI_COLORS = ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"];
+
 export default function Navbar() {
   const [scrolled, setScrolled]         = useState(false);
-  const [menuOpen, setMenuOpen]         = useState(false);
-  const [searchOpen, setSearchOpen]     = useState(false);
+  const [openState, setOpenState]       = useState({ pathname: null, menu: false, search: false });
   const [selectedType, setSelectedType] = useState("");
   const [confetti, setConfetti]         = useState([]);
 
@@ -72,7 +73,19 @@ export default function Navbar() {
   const searchRef  = useRef(null);
   const heartNavRef = useRef(null);
 
-  const CONFETTI_COLORS = ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"];
+  const currentOpenState = openState.pathname === pathname
+    ? openState
+    : { pathname, menu: false, search: false };
+  const menuOpen = currentOpenState.menu;
+  const searchOpen = currentOpenState.search;
+  const setMenuOpen = (menu) => setOpenState((previous) => ({
+    ...(previous.pathname === pathname ? previous : { pathname, menu: false, search: false }),
+    menu,
+  }));
+  const setSearchOpen = (search) => setOpenState((previous) => ({
+    ...(previous.pathname === pathname ? previous : { pathname, menu: false, search: false }),
+    search,
+  }));
 
   useEffect(() => {
     const handler = () => {
@@ -107,17 +120,19 @@ export default function Navbar() {
 
   useEffect(() => {
     const onOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target))   setMenuOpen(false);
-      if (searchRef.current && !searchRef.current.contains(e.target)) setSearchOpen(false);
+      const closeMenu = menuRef.current && !menuRef.current.contains(e.target);
+      const closeSearch = searchRef.current && !searchRef.current.contains(e.target);
+      if (closeMenu || closeSearch) {
+        setOpenState((previous) => ({
+          ...previous,
+          ...(closeMenu && { menu: false }),
+          ...(closeSearch && { search: false }),
+        }));
+      }
     };
     document.addEventListener("mousedown", onOutside);
     return () => document.removeEventListener("mousedown", onOutside);
   }, []);
-
-  useEffect(() => {
-    setMenuOpen(false);
-    setSearchOpen(false);
-  }, [pathname]);
 
   const selectType = (type) => {
     setSelectedType(type);

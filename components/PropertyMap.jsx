@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Link from "next/link";
 import L from "leaflet";
@@ -15,14 +14,18 @@ L.Icon.Default.mergeOptions({
 const defaultCenter = [-40.1579, -70.9698];
 const defaultZoom = 12;
 
-export default function PropertyMap({ properties, selectedId }) {
-  const [isClient, setIsClient] = useState(false);
+function getStableOffset(propertyId, axis) {
+  const seed = `${propertyId ?? "property"}-${axis}`;
+  let hash = 0;
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  }
 
-  if (!isClient) return null;
+  return ((hash % 1000) / 1000 - 0.5) * 0.02;
+}
+
+export default function PropertyMap({ properties }) {
 
   return (
     <MapContainer
@@ -36,8 +39,8 @@ export default function PropertyMap({ properties, selectedId }) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {properties.map((property) => {
-        const lat = property.lat || defaultCenter[0] + (Math.random() - 0.5) * 0.02;
-        const lng = property.lng || defaultCenter[1] + (Math.random() - 0.5) * 0.02;
+        const lat = property.lat ?? defaultCenter[0] + getStableOffset(property.id, "lat");
+        const lng = property.lng ?? defaultCenter[1] + getStableOffset(property.id, "lng");
 
         return (
           <Marker key={property.id} position={[lat, lng]}>

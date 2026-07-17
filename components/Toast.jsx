@@ -1,9 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Toast({ message, linkText, link, onClose, delay = 5000 }) {
   const [isVisible, setIsVisible] = useState(false);
+
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(onClose, 300);
+  }, [onClose]);
 
   useEffect(() => {
     const showTimer = setTimeout(() => setIsVisible(true), 2000);
@@ -12,12 +17,7 @@ export default function Toast({ message, linkText, link, onClose, delay = 5000 }
       clearTimeout(showTimer);
       clearTimeout(closeTimer);
     };
-  }, [delay]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 300);
-  };
+  }, [delay, handleClose]);
 
   if (!isVisible && !message) return null;
 

@@ -30,7 +30,7 @@ export default function PropertyDetailClient({ property }) {
     if (property) {
       trackPropertyView(property);
     }
-  }, [property?.id]);
+  }, [property, trackPropertyView]);
 
   if (!property) {
     return (

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -26,21 +26,23 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const paramsKey = searchParams.toString();
+  const paramFilter = searchParams.get("type") || "Todos";
+  const paramSearchQuery = searchParams.get("search") || "";
 
-  const [filter, setFilter] = useState("Todos");
+  const [filterState, setFilterState] = useState({ paramsKey, value: paramFilter });
   const [priceRange, setPriceRange] = useState("Todos");
   const [viewMode, setViewMode] = useState("list");
   const [sortBy, setSortBy] = useState("default");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchState, setSearchState] = useState({ paramsKey, value: paramSearchQuery });
   const [modalidadTab, setModalidadTab] = useState(
     pathname === "/alquileres" ? "alquiler_permanente" : "venta"
   );
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setFilter(params.get("type") || "Todos");
-    setSearchQuery(params.get("search") || "");
-  }, [pathname, searchParams]);
+  const filter = filterState.paramsKey === paramsKey ? filterState.value : paramFilter;
+  const searchQuery = searchState.paramsKey === paramsKey ? searchState.value : paramSearchQuery;
+  const setFilter = (value) => setFilterState({ paramsKey, value });
+  const setSearchQuery = (value) => setSearchState({ paramsKey, value });
 
   const filteredProperties = properties.filter((property) => {
     if (tipoFiltro && !tipoFiltro.includes(property.type)) return false;
@@ -260,7 +262,7 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
               {filteredProperties.length === 0
                 ? "Sin resultados"
                 : `${filteredProperties.length} propiedad${filteredProperties.length !== 1 ? "es" : ""}`}
-              {searchQuery && <span> para <strong>"{searchQuery}"</strong></span>}
+              {searchQuery && <span> para <strong>“{searchQuery}”</strong></span>}
               {filter !== "Todos" && <span> · Tipo: <strong>{filter}</strong></span>}
             </span>
             <button onClick={clearFilters} className="text-xs text-rose-500 hover:text-rose-700 font-semibold whitespace-nowrap">

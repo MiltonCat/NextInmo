@@ -46,6 +46,9 @@ const RELACION = [
   "Conozco bien la zona",
 ];
 
+const PHONE_STEP_DURATIONS = [3500, 3000, 2500, 4000, 2000, 3000];
+const PHONE_COMMENT = "La tranquilidad del lago y los vecinos son increíbles...";
+
 const GUIDE_QUESTIONS = [
   {
     q: "¿Qué es lo mejor de tu barrio?",
@@ -504,17 +507,38 @@ function PhoneHomeBar() {
   );
 }
 
+function PhoneTypedComment() {
+  const [typed, setTyped] = useState("");
+
+  useEffect(() => {
+    let interval;
+    let index = 0;
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        index += 1;
+        setTyped(PHONE_COMMENT.slice(0, index));
+        if (index >= PHONE_COMMENT.length) clearInterval(interval);
+      }, 55);
+    }, 900);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, []);
+
+  return <>{typed}<span style={{ borderRight: "1.5px solid #4338ca", animation: "phone-blink 1s step-end infinite" }}>&nbsp;</span></>;
+}
+
 function PhoneAnimation() {
   const [currentStep, setCurrentStep] = useState(0);
   const [prevStep, setPrevStep] = useState(null);
-  const [typed, setTyped] = useState("");
-  const DURATIONS = [3500, 3000, 2500, 4000, 2000, 3000];
 
   useEffect(() => {
     const t = setTimeout(() => {
       setPrevStep(currentStep);
       setCurrentStep((s) => (s + 1) % 6);
-    }, DURATIONS[currentStep]);
+    }, PHONE_STEP_DURATIONS[currentStep]);
     return () => clearTimeout(t);
   }, [currentStep]);
 
@@ -523,17 +547,6 @@ function PhoneAnimation() {
     const t = setTimeout(() => setPrevStep(null), 600);
     return () => clearTimeout(t);
   }, [prevStep]);
-
-  useEffect(() => {
-    if (currentStep !== 3) { setTyped(""); return; }
-    const text = "La tranquilidad del lago y los vecinos son increíbles...";
-    let i = 0;
-    const t = setTimeout(() => {
-      const iv = setInterval(() => { i++; setTyped(text.slice(0, i)); if (i >= text.length) clearInterval(iv); }, 55);
-      return () => clearInterval(iv);
-    }, 900);
-    return () => clearTimeout(t);
-  }, [currentStep]);
 
   const inputBase = { width: "100%", height: 34, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 10, display: "flex", alignItems: "center", padding: "0 10px", fontSize: 10.5, color: "#374151", boxSizing: "border-box" };
   const lbl = { fontSize: 8.5, fontWeight: 700, color: "#9ca3af", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5, display: "block" };
@@ -680,7 +693,7 @@ function PhoneAnimation() {
           <div>
             <span style={lbl}>¿Qué es lo mejor del barrio? <span style={{ color: "#E8325A" }}>*</span></span>
             <div style={{ minHeight: 56, background: "#f9fafb", border: "1.5px solid #818cf8", borderRadius: 10, padding: "8px 10px", fontSize: 10.5, color: "#374151", lineHeight: 1.55 }}>
-              {typed}<span style={{ borderRight: "1.5px solid #4338ca", animation: "phone-blink 1s step-end infinite" }}>&nbsp;</span>
+              <PhoneTypedComment />
             </div>
           </div>
         </div>
