@@ -229,7 +229,7 @@ export default function ComoTasamosConDatosPage() {
             Cómo tasamos tu propiedad con datos (y por qué te damos un rango, no un número mágico)
           </h1>
           <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-6">
-            La pregunta que más me hacen es "¿cuánto vale mi propiedad?". Casi todos la responden a ojo o copiando el precio del vecino. Nosotros la respondemos con un modelo entrenado con datos reales de San Martín de los Andes. Acá te muestro cómo funciona, sin tecnicismos.
+            La pregunta que más me hacen es “¿cuánto vale mi propiedad?”. Casi todos la responden a ojo o copiando el precio del vecino. Nosotros la respondemos con un modelo entrenado con datos reales de San Martín de los Andes. Acá te muestro cómo funciona, sin tecnicismos.
           </p>
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 border-t border-b border-gray-100 py-4">
             <img src="/Milton.webp" alt="Milton Catalán" className="w-9 h-9 rounded-full object-cover flex-shrink-0" loading="lazy" decoding="async" />
@@ -299,7 +299,7 @@ export default function ComoTasamosConDatosPage() {
         <section className="mb-14 bg-gray-50 rounded-2xl p-8 border border-gray-200">
           <h2 className="text-2xl font-black text-gray-900 mb-4">Por qué te damos un rango y no un número exacto</h2>
           <p className="text-gray-600 leading-relaxed mb-4">
-            Esta es, para mí, la parte más importante. Sería fácil mostrarte un número redondo y vendértelo como "el valor" de tu propiedad. Pero eso sería marketing, no honestidad. <strong className="text-gray-900">Ninguna tasación seria es un número exacto:</strong> el valor real siempre se mueve dentro de una franja.
+            Esta es, para mí, la parte más importante. Sería fácil mostrarte un número redondo y vendértelo como “el valor” de tu propiedad. Pero eso sería marketing, no honestidad. <strong className="text-gray-900">Ninguna tasación seria es un número exacto:</strong> el valor real siempre se mueve dentro de una franja.
           </p>
           <p className="text-gray-600 leading-relaxed mb-4">
             Por eso el tasador te muestra un valor de referencia <em>y</em> un rango. Y no es un rango puesto al azar: lo calibramos para que el valor real caiga dentro de él <strong className="text-gray-900">aproximadamente 9 de cada 10 veces</strong>. Ese rango también te dice algo: cuando es angosto, el mercado para tu tipo de propiedad es claro; cuando es ancho, hay más incertidumbre y conviene afinar con una mirada experta.
@@ -307,7 +307,7 @@ export default function ComoTasamosConDatosPage() {
           <div className="flex gap-3 items-start bg-white border border-gray-200 rounded-xl px-5 py-4">
             <span className="text-xl flex-shrink-0">🎯</span>
             <p className="text-gray-600 text-sm leading-relaxed">
-              <strong className="text-gray-900">En criollo:</strong> preferimos decirte "tu propiedad vale entre X e Y, y lo más probable es que esté cerca de Z" antes que inventarte una precisión que no existe. La credibilidad vale más que un número lindo.
+              <strong className="text-gray-900">En criollo:</strong> preferimos decirte “tu propiedad vale entre X e Y, y lo más probable es que esté cerca de Z” antes que inventarte una precisión que no existe. La credibilidad vale más que un número lindo.
             </p>
           </div>
         </section>

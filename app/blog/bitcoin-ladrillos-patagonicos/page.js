@@ -1,4 +1,5 @@
 import { SITE_URL, canonicalUrl } from "@/config";
+import Link from "next/link";
 
 export const metadata = {
   title: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
@@ -118,7 +119,7 @@ export default function BitcoinLadrillosPage() {
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
             Imaginate que podés comprar una propiedad como si compraras acciones de una empresa. 
-            En el caso de una propiedad de 94 m² en San Martín de los Andes, cada 0,1 m² funciona como un "token" 
+            En el caso de una propiedad de 94 m² en San Martín de los Andes, cada 0,1 m² funciona como un “token”
             que podés adquirir a <strong>USD 165</strong> (Q1 2026, con la obra al 65% de ejecución).
           </p>
           
@@ -128,24 +129,24 @@ export default function BitcoinLadrillosPage() {
               <strong>Market Cap de la Propiedad:</strong> 94 m² × 10 tokens/m² × USD 165/token = <strong>USD 155.000</strong>
             </p>
             <p className="text-rose-700 text-sm mt-2">
-              Este valor refleja el precio en "preventa" antes de la entrega final de la obra.
+              Este valor refleja el precio en “preventa” antes de la entrega final de la obra.
             </p>
           </div>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4 mt-8">
-            El Descuento por "Riesgo de Ejecución"
+            El Descuento por “Riesgo de Ejecución”
           </h3>
           <p className="text-lg leading-relaxed text-gray-700">
             ¿Por qué USD 165 y no más? Simple: estás asumiendo el <strong>riesgo de construcción</strong>. 
             La obra está al 65%, y aunque el proyecto avanza según lo planificado, existe la incertidumbre natural 
-            de cualquier desarrollo inmobiliario. Este "descuento por riesgo" es lo que genera la oportunidad de inversión.
+            de cualquier desarrollo inmobiliario. Este “descuento por riesgo” es lo que genera la oportunidad de inversión.
           </p>
         </section>
 
         {/* El Salto Cuántico */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            El "Mainnet Launch": De USD 165 a USD 235
+            El “Mainnet Launch”: De USD 165 a USD 235
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
             Aquí es donde la analogía con crypto cobra sentido. Cuando un proyecto blockchain pasa de testnet a mainnet, 
@@ -219,11 +220,11 @@ export default function BitcoinLadrillosPage() {
         {/* Staking Inmobiliario */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            "Staking" de Ladrillos: Generando Renta Pasiva
+            “Staking” de Ladrillos: Generando Renta Pasiva
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
             En crypto, haces staking de tus tokens para generar rendimientos. En San Martín de los Andes, 
-            hacés "staking" de tus metros cuadrados alquilándolos para turismo.
+            hacés “staking” de tus metros cuadrados alquilándolos para turismo.
           </p>
 
           <div className="bg-blue-50 rounded-xl p-6 my-8 border border-blue-200">
@@ -258,7 +259,7 @@ export default function BitcoinLadrillosPage() {
         {/* Respaldo Físico */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            El "Protocolo Físico": Tierra que No Se Puede Imprimir
+            El “Protocolo Físico”: Tierra que No Se Puede Imprimir
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
             Bitcoin tiene un supply máximo de 21 millones de monedas. San Martín de los Andes tiene algo mejor: 
@@ -269,7 +270,7 @@ export default function BitcoinLadrillosPage() {
             <li className="flex items-start gap-3">
               <span className="text-rose-600 font-bold">✓</span>
               <span className="text-gray-700">
-                <strong>Escasez geográfica:</strong> No podés "mintear" más terrenos frente al lago
+                <strong>Escasez geográfica:</strong> No podés “mintear” más terrenos frente al lago
               </span>
             </li>
             <li className="flex items-start gap-3">
@@ -293,7 +294,7 @@ export default function BitcoinLadrillosPage() {
           </ul>
 
           <p className="text-lg leading-relaxed text-gray-700">
-            Este "piso" de valor basado en costos de reposición actúa como un <strong>soporte técnico natural</strong> 
+            Este “piso” de valor basado en costos de reposición actúa como un <strong>soporte técnico natural</strong>
             que históricamente ha demostrado recuperación incluso durante crisis económicas argentinas.
           </p>
         </section>
@@ -301,7 +302,7 @@ export default function BitcoinLadrillosPage() {
         {/* Riesgos */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Los "Bear Markets" del Ladrillo Patagónico
+            Los “Bear Markets” del Ladrillo Patagónico
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
             Como toda inversión, existen riesgos que debés considerar:
@@ -332,7 +333,7 @@ export default function BitcoinLadrillosPage() {
           </h2>
           <p className="text-lg leading-relaxed text-gray-700 mb-4">
             Los <strong>USD 165 del Q1 2026</strong> representan lo que en crypto llamaríamos 
-            "comprar en la fase de construcción del protocolo". Es el momento donde:
+            “comprar en la fase de construcción del protocolo”. Es el momento donde:
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 my-8">
@@ -368,12 +369,12 @@ export default function BitcoinLadrillosPage() {
               Explorá propiedades disponibles en San Martín de los Andes y empezá a construir 
               tu portfolio inmobiliario con la misma visión estratégica que usarías en crypto.
             </p>
-            <a 
-              href="/propiedades" 
+            <Link
+              href="/propiedades"
               className="inline-block bg-white text-rose-600 font-bold px-8 py-4 rounded-xl hover:bg-rose-50 transition-colors shadow-lg"
             >
               Ver Propiedades Disponibles →
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -386,10 +387,10 @@ export default function BitcoinLadrillosPage() {
           <div className="space-y-6">
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                ¿Realmente puedo "tokenizar" una propiedad física?
+                ¿Realmente puedo “tokenizar” una propiedad física?
               </h3>
               <p className="text-gray-700">
-                La "tokenización" que mencionamos es una analogía didáctica. En la práctica, comprás metros cuadrados reales 
+                La “tokenización” que mencionamos es una analogía didáctica. En la práctica, comprás metros cuadrados reales
                 mediante escritura tradicional. No hay blockchain involucrado, pero el concepto de fraccionar el activo 
                 y proyectar su valorización funciona de manera similar.
               </p>
@@ -407,7 +408,7 @@ export default function BitcoinLadrillosPage() {
 
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                ¿Cómo funciona el "staking" (alquiler turístico)?
+                ¿Cómo funciona el “staking” (alquiler turístico)?
               </h3>
               <p className="text-gray-700">
                 Podés gestionar el alquiler vos mismo o contratar una administradora local. Las temporadas altas 

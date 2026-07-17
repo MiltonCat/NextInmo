@@ -568,7 +568,7 @@ export default function DondeVivirPage() {
         {/* Intro */}
         <section className="mb-12">
           <p className="text-gray-600 text-lg leading-relaxed mb-4">
-            La pregunta más frecuente que recibo es: <strong className="text-gray-900">"¿En qué barrio conviene vivir?"</strong>. La respuesta honesta es que depende de para qué. San Martín tiene zonas muy distintas entre sí — en precio, calidad de servicios, acceso en invierno y estilo de vida.
+            La pregunta más frecuente que recibo es: <strong className="text-gray-900">“¿En qué barrio conviene vivir?”</strong>. La respuesta honesta es que depende de para qué. San Martín tiene zonas muy distintas entre sí — en precio, calidad de servicios, acceso en invierno y estilo de vida.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Esta guía cruza datos reales de portales inmobiliarios, COTESMA, el municipio y fuentes abiertas. No es marketing: es lo que le diría a un amigo antes de comprar.

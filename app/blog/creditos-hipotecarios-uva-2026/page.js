@@ -1,4 +1,5 @@
 import { SITE_URL, canonicalUrl } from "@/config";
+import Link from "next/link";
 
 export const metadata = {
   title: "Créditos hipotecarios UVA 2026: tasas y bancos",
@@ -439,12 +440,12 @@ export default function CreditosHipotecariosUVAPage() {
             >
               Consultar sin compromiso →
             </a>
-            <a
+            <Link
               href="/propiedades"
               className="inline-block bg-rose-700 text-white font-bold px-5 py-4 sm:px-8 rounded-xl hover:bg-rose-800 transition-colors shadow-lg border border-rose-500"
             >
               Ver propiedades disponibles
-            </a>
+            </Link>
           </div>
         </div>
 

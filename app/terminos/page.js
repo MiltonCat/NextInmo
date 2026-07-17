@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { canonicalUrl, CONTACT_EMAIL } from "@/config";
+import { canonicalUrl, CONTACT_EMAIL, PHONE_DISPLAY } from "@/config";
 
 export const metadata = {
   title: "Términos de Servicio | Catalán Propiedades",
@@ -92,7 +92,7 @@ Es tu responsabilidad revisar periódicamente estos términos. El uso continuado
     content: `Para consultas sobre estos términos:
 
 Email: ${CONTACT_EMAIL}
-Teléfono: +54 9 2972 XXXXXX
+Teléfono: ${PHONE_DISPLAY}
 Dirección: San Martín de los Andes, Neuquén, Argentina
 
 Responderemos dentro de las 48 horas hábiles.`,

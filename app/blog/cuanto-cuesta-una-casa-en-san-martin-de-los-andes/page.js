@@ -156,7 +156,7 @@ export default function CuantoCuestaUnaCasaPage() {
         {/* Intro */}
         <section className="mb-12">
           <p className="text-gray-600 text-lg leading-relaxed mb-4">
-            Cualquiera que te tire un número redondo —"una casa acá sale tanto"— te está vendiendo humo. <strong className="text-gray-900">No hay un precio único</strong> de "casa en San Martín de los Andes": una casa céntrica con vista al lago y una en un loteo más alejado pueden valer varias veces distinto, aunque tengan los mismos metros.
+            Cualquiera que te tire un número redondo —“una casa acá sale tanto”— te está vendiendo humo. <strong className="text-gray-900">No hay un precio único</strong> de “casa en San Martín de los Andes”: una casa céntrica con vista al lago y una en un loteo más alejado pueden valer varias veces distinto, aunque tengan los mismos metros.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Lo que sí se puede hacer —y es lo serio— es entender <strong className="text-gray-900">de qué depende</strong> el precio y estimarlo con el valor real del m² de cada zona. Eso es lo que vas a poder hacer vos mismo al terminar de leer.
@@ -230,7 +230,7 @@ export default function CuantoCuestaUnaCasaPage() {
         <div className="mb-14 flex gap-3 items-start bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4">
           <span className="text-xl flex-shrink-0">🎯</span>
           <div>
-            <p className="font-bold text-blue-900 text-sm">¿Querés el número de una casa concreta, no de "la zona"?</p>
+            <p className="font-bold text-blue-900 text-sm">¿Querés el número de una casa concreta, no de “la zona”?</p>
             <p className="text-blue-700 text-sm mt-1">
               El{" "}
               <TrackedLink

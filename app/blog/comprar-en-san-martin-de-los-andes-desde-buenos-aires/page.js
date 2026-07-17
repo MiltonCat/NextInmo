@@ -273,7 +273,7 @@ export default function ComprarDesdeBuenosAiresPage() {
             La mayoría de las personas que compran en San Martín de los Andes <strong className="text-gray-900">no vive acá</strong>. Llegan desde Buenos Aires, Neuquén capital, Córdoba o el exterior, atraídas por el entorno, la calidad de vida o el potencial de inversión de la Patagonia.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Y casi todos arrancan con el mismo miedo: <em>"¿cómo compro algo que está tan lejos sin que me pase nada?"</em>. La respuesta es que se puede, con un proceso ordenado y un asesor local de confianza. Acá te muestro exactamente cómo, sin vueltas.
+            Y casi todos arrancan con el mismo miedo: <em>“¿cómo compro algo que está tan lejos sin que me pase nada?”</em>. La respuesta es que se puede, con un proceso ordenado y un asesor local de confianza. Acá te muestro exactamente cómo, sin vueltas.
           </p>
         </section>
 
