@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { isAdminUser } from "@/lib/adminAccess";
 
 // Inicia sesión con email y contraseña. Devuelve { error } si falla;
 // si tiene éxito, redirige al panel.
@@ -14,9 +15,10 @@ export async function signIn(prevState, formData) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
+  if (error || !isAdminUser(data?.user)) {
+    if (data?.user) await supabase.auth.signOut();
     return { error: "Email o contraseña incorrectos." };
   }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { properties, getPropertySlug } from "@/data/properties";
+import { isAdminUserId } from "@/lib/adminAccess";
 
 // Next.js 16: este archivo era "middleware.js" y ahora se llama "proxy.js".
 // Hace dos cosas, según la ruta:
@@ -59,7 +60,7 @@ async function updateAdminSession(request) {
 
   try {
     const { data, error } = await supabase.auth.getClaims();
-    isAuthenticated = !error && Boolean(data?.claims?.sub);
+    isAuthenticated = !error && isAdminUserId(data?.claims?.sub);
   } catch {
     // Una sesión corrupta o un fallo de Auth se trata como sesión ausente.
     // Supabase elimina las cookies inválidas mediante setAll cuando corresponde.
