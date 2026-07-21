@@ -42,15 +42,18 @@ const ZONA_DATA = {
     { nombre: "Las Pendientes", tipo: "Casa", precioM2: 2950, variacion: 5.5, rentabilidad: 4.5 },
     { nombre: "Las Pendientes", tipo: "Terreno", precioM2: 72, variacion: 3.5, rentabilidad: null },
   ],
-  promedioGeneral: 2650,
+  promedioGeneral: 2600,
   promedioReferencia: 2520,
+  // Curva coherente con el dato verificado de 2022 (USD 2.520) y el promedio
+  // verificado de 2026. Refleja un mercado maduro: precios altos y estables.
+  // Debe mantenerse alineada con la de app/precio-m2/page.js.
   evolucionHistorica: [
-    { anio: 2021, precio: 1680, variacion: null, contexto: "Post-pandemia - Recuperación del mercado", fuente: "Diario 7 Lagos" },
-    { anio: 2022, precio: 1950, variacion: 16.1, contexto: "San Martín de los Andes lidera precios en Argentina", fuente: "Diario 7 Lagos" },
-    { anio: 2023, precio: 2180, variacion: 11.8, contexto: "Aumento de demanda turística e inversionista", fuente: "Estimado" },
-    { anio: 2024, precio: 2450, variacion: 12.4, contexto: "Crecimiento sostenido - boom de construcciones", fuente: "Estimado" },
-    { anio: 2025, precio: 2590, variacion: 5.7, contexto: "Estabilización de precios - mercado maduro", fuente: "Estimado" },
-    { anio: 2026, precio: 2650, variacion: 2.3, contexto: "Consolidación - demanda internacional", fuente: "Argenprop/Zonaprop" },
+    { anio: 2021, precio: 2350, variacion: null, contexto: "Salida de pandemia — precios ya entre los más altos del país", fuente: "Estimación propia" },
+    { anio: 2022, precio: 2520, variacion: 7.2, contexto: "San Martín, el m² más caro de Argentina", fuente: "Verificado · Diario 7 Lagos / DiarioAndino" },
+    { anio: 2023, precio: 2545, variacion: 1.0, contexto: "Mercado maduro — precios estables en dólares", fuente: "Estimación propia" },
+    { anio: 2024, precio: 2570, variacion: 1.0, contexto: "Demanda turística e inversora sostenida", fuente: "Estimación propia" },
+    { anio: 2025, precio: 2590, variacion: 0.8, contexto: "Estabilización — mercado consolidado", fuente: "Estimación propia" },
+    { anio: 2026, precio: 2600, variacion: 0.4, contexto: "Sigue entre los más caros del país", fuente: "Verificado · Argenprop / Zonaprop" },
   ],
   rentals: [
     { tipo: "Depto 1 dorm (40m²)", precioVenta: 95000, precioM2: 2375, alquiler: 650, rentabilidad: 8.2 },
@@ -89,7 +92,7 @@ const SCORE_DATA = [
     factores: [
       { nombre: 'Demanda', valor: 90, fuente: 'Airbnb SMA: rating 4.9/5 · alta ocupación en temporadas' },
       { nombre: 'Liquidez', valor: 75, fuente: 'Mercado de alquiler turístico activo · salida vía plataformas' },
-      { nombre: 'Revalorización', valor: 85, fuente: '+57.7% en 5 años (2021–2026) · Argenprop / Diario Andino' },
+      { nombre: 'Revalorización', valor: 85, fuente: 'Precios en USD entre los más altos del país · mercado maduro y estable · Argenprop / Diario Andino' },
       { nombre: 'Estabilidad', valor: 60, fuente: 'Ingresos estacionales: pico en ski (jul) y trekking (ene)' },
     ],
     descripcion: 'Es lo que más rinde, pero el ingreso varía: fuerte en temporada de ski y verano, más flojo el resto del año.',
@@ -101,7 +104,7 @@ const SCORE_DATA = [
     factores: [
       { nombre: 'Demanda', valor: 75, fuente: 'Solo 49 propiedades en alquiler en Argenprop · oferta muy limitada' },
       { nombre: 'Liquidez', valor: 55, fuente: 'Mercado de reventa moderado · stock disponible reducido' },
-      { nombre: 'Revalorización', valor: 80, fuente: '+57.7% en 5 años (2021–2026) · Neuquén +4.93% anual · Zonaprop' },
+      { nombre: 'Revalorización', valor: 80, fuente: 'Valor en USD sostenido · San Martín, el m² más caro del país · Zonaprop' },
       { nombre: 'Estabilidad', valor: 82, fuente: 'Alquiler residencial USD · ingreso mensual predecible (USD 1.200+)' },
     ],
     descripcion: 'Cobrás alquiler todos los meses y la propiedad sube de valor con los años. La opción más tranquila para empezar.',
@@ -153,6 +156,23 @@ const gridStyle = {
   backgroundImage: `linear-gradient(rgba(232,50,90,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(232,50,90,0.12) 1px, transparent 1px)`,
   backgroundSize: "48px 48px",
 };
+
+// Etiquetas de confianza de los datos (versión para fondo oscuro).
+// Coherente con las de app/precio-m2/page.js.
+const BADGES = {
+  verificado: { label: "Verificado", cls: "text-green-400 bg-green-500/10 border-green-500/30", dot: "bg-green-400" },
+  estimado: { label: "Estimación propia", cls: "text-amber-400 bg-amber-500/10 border-amber-500/30", dot: "bg-amber-400" },
+};
+
+function Badge({ tipo, className = "" }) {
+  const b = BADGES[tipo];
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wide ${b.cls} ${className}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${b.dot}`} />
+      {b.label}
+    </span>
+  );
+}
 
 // --- Supuestos del simulador (se muestran también al usuario, al pie de la calculadora) ---
 const GASTOS_VACANCIA = 0.2;      // descuento sobre la renta bruta: gastos, gestión y vacancia
@@ -525,12 +545,22 @@ export default function InversionesClient({ mercado = null }) {
                   <span className="text-green-400 font-semibold">{crecimientoPct >= 0 ? "+" : ""}{crecimientoPct}% en {ultimoPunto.anio - primerPunto.anio} años</span>
                   <span>{ultimoPunto.anio}: ${ultimoPunto.precio.toLocaleString("es-AR")}/m²</span>
                 </div>
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <Badge tipo="verificado" />
+                  <Badge tipo="estimado" />
+                  <p className="text-gray-600 text-[11px] leading-relaxed flex-1 min-w-[220px]">
+                    El año <span className="text-gray-400 font-medium">2022</span> está verificado con fuentes públicas (USD 2.520/m², el más caro del país). Los años intermedios son estimaciones nuestras y el valor más reciente proviene de nuestro modelo cuando está disponible. San Martín es un mercado maduro: precios altos y estables, sin grandes saltos.
+                  </p>
+                </div>
               </div>
             )}
 
             {activeTab === "rentabilidad" && (
               <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Estimación de rentabilidad por alquiler</h3>
+                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-100">Estimación de rentabilidad por alquiler</h3>
+                  <Badge tipo="estimado" />
+                </div>
                 <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-4">
                   <p className="text-gray-300 text-sm leading-relaxed">
                     <span className="text-white font-semibold">¿Cómo leer esto?</span> El porcentaje muestra cuánto recuperás por año solo con el alquiler: un 8% significa que por cada USD 100 invertidos, te vuelven USD 8 al año. No incluye la suba de valor de la propiedad.

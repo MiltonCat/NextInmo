@@ -394,42 +394,42 @@
     "serie": [
       {
         "anio": 2021,
-        "usd_m2": 1680,
+        "usd_m2": 2350,
         "variacion_pct": null,
-        "descripcion": "Post-pandemia - Recuperacion del mercado"
+        "descripcion": "Salida de pandemia - precios ya entre los mas altos del pais"
       },
       {
         "anio": 2022,
-        "usd_m2": 1950,
-        "variacion_pct": 16.1,
-        "descripcion": "San Martin de los Andes lidera precios en Argentina"
+        "usd_m2": 2520,
+        "variacion_pct": 7.2,
+        "descripcion": "San Martin, el m2 mas caro de Argentina (verificado)"
       },
       {
         "anio": 2023,
-        "usd_m2": 2180,
-        "variacion_pct": 11.8,
-        "descripcion": "Aumento de demanda turistica e inversionista"
+        "usd_m2": 2545,
+        "variacion_pct": 1.0,
+        "descripcion": "Mercado maduro - precios estables en dolares"
       },
       {
         "anio": 2024,
-        "usd_m2": 2450,
-        "variacion_pct": 12.4,
-        "descripcion": "Crecimiento sostenido - boom de construcciones"
+        "usd_m2": 2570,
+        "variacion_pct": 1.0,
+        "descripcion": "Demanda turistica e inversora sostenida"
       },
       {
         "anio": 2025,
         "usd_m2": 2590,
-        "variacion_pct": 5.7,
-        "descripcion": "Estabilizacion de precios - mercado maduro"
+        "variacion_pct": 0.8,
+        "descripcion": "Estabilizacion - mercado consolidado"
       },
       {
         "anio": 2026,
-        "usd_m2": 2650,
-        "variacion_pct": 2.3,
-        "descripcion": "Consolidacion - demanda internacional"
+        "usd_m2": 2600,
+        "variacion_pct": 0.4,
+        "descripcion": "Sigue entre los mas caros del pais (verificado)"
       }
     ],
-    "variacion_total_pct": 57.7
+    "variacion_total_pct": 10.6
   },
   "rentabilidad_alquiler": {
     "_origen": "referencia_curada",
