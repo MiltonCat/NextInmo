@@ -47,7 +47,7 @@ const faqJsonLd = {
       name: "¿Cuál es el ROI promedio de una propiedad en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "La rentabilidad estimada depende del tipo de inversión: un alquiler permanente ronda el 6-8% anual, el alquiler turístico puede alcanzar el 12% y las operaciones de compra y reventa, hasta el 15%. A eso se suma la valorización del m², que creció más de 50% en dólares entre 2021 y 2026. Los resultados varían según la zona, la propiedad y la gestión.",
+        text: "La rentabilidad estimada depende del tipo de inversión: un alquiler permanente ronda el 6-8% anual, el alquiler turístico puede alcanzar el 12% y las operaciones de compra y reventa, hasta el 15%. A eso se suma la valorización del m² en dólares: San Martín es un mercado maduro, con precios entre los más altos del país y estables en el tiempo, más que de subas fuertes año a año. Estos valores son estimaciones orientativas y los resultados varían según la zona, la propiedad y la gestión.",
       },
     },
     {
