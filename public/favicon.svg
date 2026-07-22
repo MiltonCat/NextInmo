@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Pelota mundial Catalan Propiedades">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Copo de nieve de invierno Catalan Propiedades">
   <style>
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .ball { animation: spin 0.9s linear infinite; transform-origin: 32px 32px; }
+    @keyframes winter-drift {
+      0% { transform: translateY(-6px) rotate(0deg) scale(.9); }
+      50% { transform: translateY(6px) rotate(180deg) scale(1.06); }
+      100% { transform: translateY(-6px) rotate(360deg) scale(.9); }
+    }
+    .snowflake { animation: winter-drift 4.8s ease-in-out infinite; transform-origin: 32px 32px; }
   </style>
-  <rect width="64" height="64" fill="transparent"/>
-  <g class="ball">
-    <circle cx="32" cy="32" r="29" fill="#ffffff"/>
-    <path fill="#111827" d="M32 13l9 7-3.5 10.5h-11L23 20l9-7Z"/>
-    <path fill="#111827" d="M12 26l9-5 6 9-4 10H12a29 29 0 0 1 0-14Z"/>
-    <path fill="#111827" d="M52 26l-9-5-6 9 4 10h11a29 29 0 0 0 0-14Z"/>
-    <path fill="#111827" d="M23 42h18l4 11a29 29 0 0 1-26 0l4-11Z"/>
-    <path fill="none" stroke="#111827" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" d="M26.5 30.5 23 40m14.5-9.5L41 40M23 20l-11 6m29-6 11 6M23 42h18M32 13V4"/>
-    <path fill="none" stroke="#e11d48" stroke-width="5" stroke-linecap="round" d="M10 17c7-8 17-12 28-11"/>
-    <path fill="none" stroke="#16a34a" stroke-width="5" stroke-linecap="round" d="M54 47c-7 8-17 12-28 11"/>
-    <circle cx="32" cy="32" r="29" fill="none" stroke="#111827" stroke-width="3"/>
+  <rect width="64" height="64" rx="14" fill="#eff9ff"/>
+  <circle cx="32" cy="32" r="25" fill="#dff4ff" stroke="#7dd3fc" stroke-width="2"/>
+  <g class="snowflake" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 10v44M13 21l38 22M13 43l38-22"/>
+    <path d="M26 15l6 6 6-6M26 49l6-6 6 6M17 20l2 8-8 2M47 44l-2-8 8-2M11 34l8 2-2 8M53 30l-8-2 2-8"/>
   </g>
+  <circle cx="32" cy="32" r="4" fill="#ffffff" stroke="#0284c7" stroke-width="2"/>
+  <circle class="snowflake" cx="42" cy="17" r="3" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5"/>
 </svg>

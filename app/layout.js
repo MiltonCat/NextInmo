@@ -95,11 +95,11 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.svg?v=bounce-ball-v2", type: "image/svg+xml" },
-      { url: "/icon.png?v=bounce-ball-v2", type: "image/png" },
+      { url: "/favicon.svg?v=winter-snowflake-v1", type: "image/svg+xml" },
+      { url: "/icon.png?v=winter-snowflake-v1", type: "image/png" },
     ],
-    shortcut: "/favicon.ico?v=bounce-ball-v2",
-    apple: "/icon.png?v=bounce-ball-v2",
+    shortcut: "/favicon.ico?v=winter-snowflake-v1",
+    apple: "/icon.png?v=winter-snowflake-v1",
   },
 };
 
@@ -152,7 +152,8 @@ const realEstateAgentJsonLd = {
   founder: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
 };
 
-// Favicon animado (pelotita que rebota). IMPORTANTE: este script NO debe tocar
+// Favicon estacional de invierno (copo que gira y flota suavemente). IMPORTANTE:
+// este script NO debe tocar
 // los <link> de icono que renderiza React (metadata.icons / head del layout).
 // La versión anterior los borraba con node.remove() cada 120 ms; en la próxima
 // navegación React intentaba reconciliar nodos que ya no existían, tiraba
@@ -161,20 +162,15 @@ const realEstateAgentJsonLd = {
 // Ahora crea SU PROPIO <link id="animated-favicon-link"> al final del <head>
 // (los navegadores priorizan el último icono declarado) y solo actualiza su href.
 const animatedFaviconScript = `(() => {
-  const frames = [
-    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 0 },
-    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 45 },
-    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 90 },
-    { y: 15, s: 1.16, pulse: 27, shadow: 0.25, angle: 135 },
-    { y: 20, s: 1.12, pulse: 25, shadow: 0.45, angle: 180 },
-    { y: 27, s: 1.06, pulse: 22, shadow: 0.75, angle: 225 },
-    { y: 34, s: 1.0, pulse: 19, shadow: 1.0, angle: 270 },
-    { y: 37, s: 0.92, pulse: 17, shadow: 1.15, angle: 315 },
-  ];
+  const frames = Array.from({ length: 24 }, (_, index) => ({
+    y: 32 + Math.sin((index / 24) * Math.PI * 2) * 6,
+    scale: 0.9 + ((Math.sin((index / 24) * Math.PI * 2) + 1) * 0.08),
+    angle: index * 15,
+  }));
 
-  const ball = (y, scale, angle) => '<g transform="translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')"><circle cx="0" cy="0" r="14" fill="#fff"/><path fill="#111827" d="M0-9l8 6-3 9H-5l-3-9 8-6Z"/><path fill="none" stroke="#111827" stroke-width="2.2" stroke-linecap="round" d="M-5 6l-7 6M5 6l7 6M-8-3l-8-3M8-3l8-3M0-9V-14"/><path fill="none" stroke="#e11d48" stroke-width="3" stroke-linecap="round" d="M-10-9c6-4 14-4 20 0"/><path fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" d="M-10 11c6 4 14 4 20 0"/><circle cx="0" cy="0" r="14" fill="none" stroke="#111827" stroke-width="2"/></g>';
+  const snowflake = (y, scale, angle) => '<g transform="translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M0-22V22M-19-11L19 11M-19 11L19-11"/><path d="M-6-17L0-11 6-17M-6 17L0 11 6 17M-15-12L-13-4-21-2M15 12L13 4 21 2M-21 2L-13 4-15 12M21-2L13-4 15-12"/><circle cx="0" cy="0" r="4" fill="#fff" stroke="#0284c7" stroke-width="2"/><circle cx="10" cy="-15" r="3" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5"/></g>';
 
-  const drawFrame = (frame) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#ffffff"/><circle cx="32" cy="32" r="' + frame.pulse + '" fill="#e11d48" opacity="0.18"/><path d="M8 49h48" stroke="#16a34a" stroke-width="7" stroke-linecap="round"/><ellipse cx="32" cy="48" rx="' + (15 * frame.shadow) + '" ry="3" fill="#111827" opacity="0.25"/>' + ball(frame.y, frame.s, frame.angle) + '</svg>';
+  const drawFrame = (frame) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#eff9ff"/><circle cx="32" cy="32" r="25" fill="#dff4ff" stroke="#7dd3fc" stroke-width="2"/>' + snowflake(frame.y, frame.scale, frame.angle) + '</svg>';
 
   let link = null;
   const setIcon = (frame) => {
@@ -196,7 +192,7 @@ const animatedFaviconScript = `(() => {
   window.setInterval(() => {
     index = (index + 1) % frames.length;
     setIcon(frames[index]);
-  }, 120);
+  }, 160);
 })();`;
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -233,9 +229,9 @@ export default function RootLayout({ children }) {
         <Script id="ga-guard" strategy="beforeInteractive">
           {gaGuardScript}
         </Script>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bounce-ball-v2" id="favicon" />
-        <link rel="alternate icon" type="image/png" href="/icon.png?v=bounce-ball-v2" />
-        <link rel="shortcut icon" href="/favicon.ico?v=bounce-ball-v2" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-snowflake-v1" id="favicon" />
+        <link rel="alternate icon" type="image/png" href="/icon.png?v=winter-snowflake-v1" />
+        <link rel="shortcut icon" href="/favicon.ico?v=winter-snowflake-v1" />
         <link rel="canonical" href={canonicalUrl("/")} />
         <script
           type="application/ld+json"
