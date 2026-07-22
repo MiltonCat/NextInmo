@@ -65,20 +65,16 @@ const PROP_TYPES = [
   },
 ];
 
-const CONFETTI_COLORS = ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"];
-
 export default function Navbar() {
   const [scrolled, setScrolled]         = useState(false);
   const [openState, setOpenState]       = useState({ pathname: null, menu: false, search: false });
   const [selectedType, setSelectedType] = useState("");
-  const [confetti, setConfetti]         = useState([]);
 
   const router   = useRouter();
   const pathname = usePathname();
   const { favorites } = useFavorites();
   const menuRef    = useRef(null);
   const searchRef  = useRef(null);
-  const heartNavRef = useRef(null);
 
   const currentOpenState = openState.pathname === pathname
     ? openState
@@ -93,29 +89,6 @@ export default function Navbar() {
     ...(previous.pathname === pathname ? previous : { pathname, menu: false, search: false }),
     search,
   }));
-
-  useEffect(() => {
-    const handler = () => {
-      const rect = heartNavRef.current?.getBoundingClientRect();
-      const ox = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
-      const oy = rect ? rect.top + rect.height / 2 : 32;
-      const pieces = Array.from({ length: 18 }, (_, i) => ({
-        id: Date.now() + i,
-        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-        ox,
-        oy,
-        dx: `${(Math.random() - 0.5) * 180}px`,
-        dy: `${(Math.random() - 0.6) * 160}px`,
-        rot: `${(Math.random() - 0.5) * 720}deg`,
-        size: `${Math.random() * 7 + 5}px`,
-        isCircle: i % 2 === 0,
-      }));
-      setConfetti(pieces);
-      setTimeout(() => setConfetti([]), 950);
-    };
-    window.addEventListener("favorite-added", handler);
-    return () => window.removeEventListener("favorite-added", handler);
-  }, []);
 
   const activeTab = TABS.find(t => pathname.startsWith(t.href)) ?? TABS[0];
 
