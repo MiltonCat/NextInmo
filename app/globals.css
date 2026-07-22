@@ -337,3 +337,42 @@ form:hover .nav-icon-search {
   35%  { transform: scale(0.97); }
   100% { transform: scale(0.98); }
 }
+
+/* Bienvenida estacional: nevada breve alrededor de la marca del encabezado. */
+.winter-brand-snow {
+  position: absolute;
+  inset: -12px -18px -10px;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.winter-brand-flake {
+  position: absolute;
+  top: -10px;
+  left: var(--flake-left);
+  color: #38bdf8;
+  font-size: var(--flake-size);
+  line-height: 1;
+  opacity: 0;
+  filter: drop-shadow(0 1px 1px rgb(7 89 133 / 18%));
+  animation: winter-brand-fall var(--flake-duration) ease-in forwards;
+  animation-delay: var(--flake-delay);
+}
+
+@keyframes winter-brand-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) rotate(0deg) scale(0.8);
+  }
+  18% { opacity: 0.8; }
+  72% { opacity: 0.65; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--flake-drift), 58px, 0) rotate(190deg) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .winter-brand-snow { display: none; }
+}

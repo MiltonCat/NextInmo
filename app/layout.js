@@ -94,12 +94,9 @@ export const metadata = {
     google: GOOGLE_SITE_VERIFICATION,
   },
   icons: {
-    icon: [
-      { url: "/favicon.svg?v=winter-snowflake-v2", type: "image/svg+xml" },
-      { url: "/icon.png?v=winter-snowflake-v2", type: "image/png" },
-    ],
-    shortcut: "/favicon.ico?v=winter-snowflake-v2",
-    apple: "/icon.png?v=winter-snowflake-v2",
+    icon: [{ url: "/favicon.svg?v=winter-brand-v2", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg?v=winter-brand-v2",
+    apple: "/icon.png",
   },
 };
 
@@ -152,53 +149,6 @@ const realEstateAgentJsonLd = {
   founder: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
 };
 
-// Favicon estacional de invierno (copo que gira y flota suavemente). IMPORTANTE:
-// este script NO debe tocar
-// los <link> de icono que renderiza React (metadata.icons / head del layout).
-// La versión anterior los borraba con node.remove() cada 120 ms; en la próxima
-// navegación React intentaba reconciliar nodos que ya no existían, tiraba
-// "Cannot read properties of null (reading 'removeChild')" y la navegación
-// moría en silencio → había que tocar/clickear dos veces para cambiar de página.
-// Ahora crea SU PROPIO <link id="animated-favicon-link"> al final del <head>
-// (los navegadores priorizan el último icono declarado) y solo actualiza su href.
-const animatedFaviconScript = `(() => {
-  const frames = [
-    { y: 17, scale: 0.82, angle: 0, shadow: 0.35 },
-    { y: 22, scale: 0.9, angle: 20, shadow: 0.48 },
-    { y: 29, scale: 0.98, angle: 40, shadow: 0.65 },
-    { y: 37, scale: 1.06, angle: 60, shadow: 0.85 },
-    { y: 42, scale: 1.12, angle: 80, shadow: 1 },
-    { y: 37, scale: 1.06, angle: 100, shadow: 0.85 },
-    { y: 29, scale: 0.98, angle: 120, shadow: 0.65 },
-    { y: 22, scale: 0.9, angle: 140, shadow: 0.48 },
-  ];
-
-  const snowflake = (y, scale, angle) => '<g transform="translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')" fill="none" stroke="#0284c7" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M0-14V14M-12-7L12 7M-12 7L12-7"/><path d="M-4-11L0-7 4-11M-4 11L0 7 4 11M-10-8L-8-3-13-2M10 8L8 3 13 2M-13 2L-8 3-10 8M13-2L8-3 10-8"/><circle cx="0" cy="0" r="3" fill="#fff" stroke="#0284c7" stroke-width="1.5"/><circle cx="7" cy="-10" r="2.2" fill="#ffffff" stroke="#38bdf8" stroke-width="1.2"/></g>';
-
-  const drawFrame = (frame) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#eff9ff"/><path d="M9 52h46" stroke="#bae6fd" stroke-width="5" stroke-linecap="round"/><ellipse cx="32" cy="49" rx="' + (12 * frame.shadow) + '" ry="2.5" fill="#075985" opacity="0.22"/>' + snowflake(frame.y, frame.scale, frame.angle) + '</svg>';
-
-  let link = null;
-  const setIcon = (frame) => {
-    if (!link || !link.isConnected) {
-      link = document.getElementById('animated-favicon-link');
-      if (!link) {
-        link = document.createElement('link');
-        link.id = 'animated-favicon-link';
-        link.rel = 'icon';
-        link.type = 'image/svg+xml';
-        document.head.appendChild(link);
-      }
-    }
-    link.href = 'data:image/svg+xml,' + encodeURIComponent(drawFrame(frame));
-  };
-
-  let index = 0;
-  setIcon(frames[index]);
-  window.setInterval(() => {
-    index = (index + 1) % frames.length;
-    setIcon(frames[index]);
-  }, 140);
-})();`;
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -234,9 +184,8 @@ export default function RootLayout({ children }) {
         <Script id="ga-guard" strategy="beforeInteractive">
           {gaGuardScript}
         </Script>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-snowflake-v2" id="favicon" />
-        <link rel="alternate icon" type="image/png" href="/icon.png?v=winter-snowflake-v2" />
-        <link rel="shortcut icon" href="/favicon.ico?v=winter-snowflake-v2" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-brand-v2" id="favicon" />
+        <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=winter-brand-v2" />
         <link rel="canonical" href={canonicalUrl("/")} />
         <script
           type="application/ld+json"
@@ -256,7 +205,6 @@ export default function RootLayout({ children }) {
         <ClientShell />
         <SpeedInsights />
         <Analytics />
-        <Script id="animated-favicon" strategy="afterInteractive">{animatedFaviconScript}</Script>
         {/* Google Analytics: excluye /admin y los dispositivos con "no contarme". */}
         <GoogleAnalytics />
       </body>

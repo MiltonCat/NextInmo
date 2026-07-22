@@ -60,6 +60,48 @@ const PROP_TYPES = [
 
 const CONFETTI_COLORS = ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"];
 
+const WINTER_FLAKES = [
+  { left: "4%", delay: "0ms", duration: "1700ms", drift: "9px", size: "9px" },
+  { left: "15%", delay: "180ms", duration: "1850ms", drift: "-7px", size: "6px" },
+  { left: "28%", delay: "60ms", duration: "1950ms", drift: "12px", size: "8px" },
+  { left: "41%", delay: "310ms", duration: "1650ms", drift: "-10px", size: "5px" },
+  { left: "54%", delay: "120ms", duration: "1800ms", drift: "7px", size: "7px" },
+  { left: "67%", delay: "390ms", duration: "1600ms", drift: "-5px", size: "6px" },
+  { left: "78%", delay: "220ms", duration: "1900ms", drift: "10px", size: "9px" },
+  { left: "91%", delay: "30ms", duration: "1750ms", drift: "-8px", size: "6px" },
+];
+
+function WinterBrandEffect() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setVisible(false), 2300);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <span className="winter-brand-snow" aria-hidden="true">
+      {WINTER_FLAKES.map((flake, index) => (
+        <span
+          key={index}
+          className="winter-brand-flake"
+          style={{
+            "--flake-left": flake.left,
+            "--flake-delay": flake.delay,
+            "--flake-duration": flake.duration,
+            "--flake-drift": flake.drift,
+            "--flake-size": flake.size,
+          }}
+        >
+          ❄
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled]         = useState(false);
   const [openState, setOpenState]       = useState({ pathname: null, menu: false, search: false });
@@ -155,8 +197,9 @@ export default function Navbar() {
         <div className="flex items-center h-14 md:h-16 gap-3 md:gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
+          <Link href="/" className="relative flex-shrink-0 isolate">
             <img src="/marca1.png" alt="Catalán Propiedades" className="h-8 md:h-9 w-auto" />
+            <WinterBrandEffect />
           </Link>
 
           {/* Tabs — desktop */}
