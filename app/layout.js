@@ -95,11 +95,11 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.svg?v=winter-snowflake-v1", type: "image/svg+xml" },
-      { url: "/icon.png?v=winter-snowflake-v1", type: "image/png" },
+      { url: "/favicon.svg?v=winter-snowflake-v2", type: "image/svg+xml" },
+      { url: "/icon.png?v=winter-snowflake-v2", type: "image/png" },
     ],
-    shortcut: "/favicon.ico?v=winter-snowflake-v1",
-    apple: "/icon.png?v=winter-snowflake-v1",
+    shortcut: "/favicon.ico?v=winter-snowflake-v2",
+    apple: "/icon.png?v=winter-snowflake-v2",
   },
 };
 
@@ -162,15 +162,20 @@ const realEstateAgentJsonLd = {
 // Ahora crea SU PROPIO <link id="animated-favicon-link"> al final del <head>
 // (los navegadores priorizan el último icono declarado) y solo actualiza su href.
 const animatedFaviconScript = `(() => {
-  const frames = Array.from({ length: 24 }, (_, index) => ({
-    y: 32 + Math.sin((index / 24) * Math.PI * 2) * 6,
-    scale: 0.9 + ((Math.sin((index / 24) * Math.PI * 2) + 1) * 0.08),
-    angle: index * 15,
-  }));
+  const frames = [
+    { y: 17, scale: 0.82, angle: 0, shadow: 0.35 },
+    { y: 22, scale: 0.9, angle: 20, shadow: 0.48 },
+    { y: 29, scale: 0.98, angle: 40, shadow: 0.65 },
+    { y: 37, scale: 1.06, angle: 60, shadow: 0.85 },
+    { y: 42, scale: 1.12, angle: 80, shadow: 1 },
+    { y: 37, scale: 1.06, angle: 100, shadow: 0.85 },
+    { y: 29, scale: 0.98, angle: 120, shadow: 0.65 },
+    { y: 22, scale: 0.9, angle: 140, shadow: 0.48 },
+  ];
 
-  const snowflake = (y, scale, angle) => '<g transform="translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M0-22V22M-19-11L19 11M-19 11L19-11"/><path d="M-6-17L0-11 6-17M-6 17L0 11 6 17M-15-12L-13-4-21-2M15 12L13 4 21 2M-21 2L-13 4-15 12M21-2L13-4 15-12"/><circle cx="0" cy="0" r="4" fill="#fff" stroke="#0284c7" stroke-width="2"/><circle cx="10" cy="-15" r="3" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5"/></g>';
+  const snowflake = (y, scale, angle) => '<g transform="translate(32 ' + y + ') rotate(' + angle + ') scale(' + scale + ')" fill="none" stroke="#0284c7" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M0-14V14M-12-7L12 7M-12 7L12-7"/><path d="M-4-11L0-7 4-11M-4 11L0 7 4 11M-10-8L-8-3-13-2M10 8L8 3 13 2M-13 2L-8 3-10 8M13-2L8-3 10-8"/><circle cx="0" cy="0" r="3" fill="#fff" stroke="#0284c7" stroke-width="1.5"/><circle cx="7" cy="-10" r="2.2" fill="#ffffff" stroke="#38bdf8" stroke-width="1.2"/></g>';
 
-  const drawFrame = (frame) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#eff9ff"/><circle cx="32" cy="32" r="25" fill="#dff4ff" stroke="#7dd3fc" stroke-width="2"/>' + snowflake(frame.y, frame.scale, frame.angle) + '</svg>';
+  const drawFrame = (frame) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#eff9ff"/><path d="M9 52h46" stroke="#bae6fd" stroke-width="5" stroke-linecap="round"/><ellipse cx="32" cy="49" rx="' + (12 * frame.shadow) + '" ry="2.5" fill="#075985" opacity="0.22"/>' + snowflake(frame.y, frame.scale, frame.angle) + '</svg>';
 
   let link = null;
   const setIcon = (frame) => {
@@ -192,7 +197,7 @@ const animatedFaviconScript = `(() => {
   window.setInterval(() => {
     index = (index + 1) % frames.length;
     setIcon(frames[index]);
-  }, 160);
+  }, 140);
 })();`;
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -229,9 +234,9 @@ export default function RootLayout({ children }) {
         <Script id="ga-guard" strategy="beforeInteractive">
           {gaGuardScript}
         </Script>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-snowflake-v1" id="favicon" />
-        <link rel="alternate icon" type="image/png" href="/icon.png?v=winter-snowflake-v1" />
-        <link rel="shortcut icon" href="/favicon.ico?v=winter-snowflake-v1" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-snowflake-v2" id="favicon" />
+        <link rel="alternate icon" type="image/png" href="/icon.png?v=winter-snowflake-v2" />
+        <link rel="shortcut icon" href="/favicon.ico?v=winter-snowflake-v2" />
         <link rel="canonical" href={canonicalUrl("/")} />
         <script
           type="application/ld+json"
