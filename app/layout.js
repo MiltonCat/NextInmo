@@ -231,20 +231,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es-AR">
       <head>
-        <Script id="ga-guard" strategy="beforeInteractive">
-          {gaGuardScript}
-        </Script>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-snowflake-v2" id="favicon" />
         <link rel="alternate icon" type="image/png" href="/icon.png?v=winter-snowflake-v2" />
         <link rel="shortcut icon" href="/favicon.ico?v=winter-snowflake-v2" />
         <link rel="canonical" href={canonicalUrl("/")} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd).replace(/</g, "\\u003c") }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }}
         />
       </head>
       <body className={`flex flex-col min-h-screen antialiased ${plusJakarta.variable}`}>

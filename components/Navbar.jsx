@@ -69,12 +69,14 @@ export default function Navbar() {
   const [scrolled, setScrolled]         = useState(false);
   const [openState, setOpenState]       = useState({ pathname: null, menu: false, search: false });
   const [selectedType, setSelectedType] = useState("");
+  const [confetti, setConfetti]         = useState([]);
 
   const router   = useRouter();
   const pathname = usePathname();
   const { favorites } = useFavorites();
   const menuRef    = useRef(null);
   const searchRef  = useRef(null);
+  const heartNavRef = useRef(null);
 
   const currentOpenState = openState.pathname === pathname
     ? openState
@@ -112,6 +114,29 @@ export default function Navbar() {
     };
     document.addEventListener("mousedown", onOutside);
     return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      const rect = heartNavRef.current?.getBoundingClientRect();
+      const ox = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+      const oy = rect ? rect.top + rect.height / 2 : 32;
+      const pieces = Array.from({ length: 18 }, (_, i) => ({
+        id: Date.now() + i,
+        color: ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"][i % 6],
+        ox,
+        oy,
+        dx: `${(Math.random() - 0.5) * 180}px`,
+        dy: `${(Math.random() - 0.6) * 160}px`,
+        rot: `${(Math.random() - 0.5) * 720}deg`,
+        size: `${Math.random() * 7 + 5}px`,
+        isCircle: i % 2 === 0,
+      }));
+      setConfetti(pieces);
+      setTimeout(() => setConfetti([]), 950);
+    };
+    window.addEventListener("favorite-added", handler);
+    return () => window.removeEventListener("favorite-added", handler);
   }, []);
 
   const clearType = (e) => {
@@ -369,6 +394,7 @@ export default function Navbar() {
         }}
       />
     ))}
+
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
       <div className="grid grid-cols-4 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5">
         {TABS.map(({ href, label, icon }) => {

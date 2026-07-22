@@ -1,6 +1,7 @@
 "use client";
 import { useRef } from "react";
 import { WA_URL, PHONE_DISPLAY, CONTACT_EMAIL } from "@/config";
+import { buildPropertyDescriptionHtml } from "@/lib/propertyDescription";
 
 function buildWAMessage(property, priceDisplay) {
   const url = typeof window !== "undefined" ? window.location.href : "";
@@ -44,7 +45,7 @@ export default function PropertySheet({ property, onClose }) {
         <title>Ficha — ${property.title}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; background: #fff; }
+           body { font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; background: #fff; }
 
           .sheet { max-width: 800px; margin: 0 auto; padding: 40px; }
 
@@ -78,7 +79,10 @@ export default function PropertySheet({ property, onClose }) {
           /* Sections */
           .section { margin-bottom: 24px; }
           .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #999; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f3f4f6; }
-          .description { font-size: 13px; line-height: 1.7; color: #444; }
+           .description-wrap { display: grid; gap: 12px; }
+           .desc-paragraph { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; background: #fff7f8; border: 1px solid #ffe4e6; border-radius: 12px; padding: 14px 16px; }
+           .desc-emoji { font-size: 16px; line-height: 1; margin-top: 2px; }
+           .desc-paragraph p { font-size: 13px; line-height: 1.8; color: #444; text-align: justify; }
 
           /* Features */
           .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -139,7 +143,9 @@ export default function PropertySheet({ property, onClose }) {
           ${property.description ? `
           <div class="section">
             <div class="section-title">Descripción</div>
-            <p class="description">${property.description}</p>
+            <div class="description-wrap">
+              ${buildPropertyDescriptionHtml(property.description, property.type)}
+            </div>
           </div>` : ""}
 
           ${property.features?.length > 0 ? `

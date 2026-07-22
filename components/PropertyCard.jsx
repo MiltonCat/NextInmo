@@ -39,7 +39,11 @@ function PropertyCard({ property }) {
   const handleToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    const wasFavorite = fav;
     toggle(property.id);
+    if (!wasFavorite) {
+      window.dispatchEvent(new CustomEvent("favorite-added"));
+    }
   };
 
   const cardClass = "group bg-white rounded-lg shadow-md overflow-hidden transition-shadow block";
