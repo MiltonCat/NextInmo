@@ -4,7 +4,7 @@ import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL, WA_URL } from "@/config";
 import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 export const metadata = {
-  title: "Vendé tu propiedad en San Martín de los Andes | Catalán Propiedades",
+  title: "Vendé tu propiedad en San Martín de los Andes",
   description:
     "Vendé tu casa, departamento o lote en San Martín de los Andes al precio correcto. Tasación gratuita con datos reales del mercado, difusión en todos los portales y acompañamiento hasta la escritura.",
   openGraph: {

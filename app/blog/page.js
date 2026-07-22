@@ -5,7 +5,7 @@ import { RELEVADAS_MODELO_FMT } from "@/lib/mercado";
 
 
 export const metadata = {
-  title: "Blog | Catalán Propiedades",
+  title: "Blog",
   description: "Artículos sobre inversión inmobiliaria, mercado en la Patagonia y guías para comprar o alquilar en San Martín de los Andes.",
   openGraph: {
     title: "Blog de inversión inmobiliaria — Catalán Propiedades",

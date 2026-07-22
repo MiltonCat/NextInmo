@@ -3,7 +3,7 @@ import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 const ContactoClient = dynamic(() => import("./ContactoClient"));
 
 export const metadata = {
-  title: "Contacto | Catalán Propiedades — San Martín de los Andes",
+  title: "Contacto — San Martín de los Andes",
   description: "Contactate con Catalán Propiedades. Respuesta en menos de 48 horas. Asesoría inmobiliaria personalizada en San Martín de los Andes, Patagonia Argentina.",
   openGraph: {
     title: "Contacto — Catalán Propiedades",

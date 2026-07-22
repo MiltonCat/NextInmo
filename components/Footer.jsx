@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-7 sm:px-6 sm:py-12 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8">
           <div className="col-span-2">
             <img src="/marca1.png" alt="Catalan Propiedades" className="h-9 w-auto mb-4" />
             <p className="text-sm text-gray-500 mb-6 font-dm max-w-xs">
@@ -29,6 +29,17 @@ export default function Footer() {
               <Link href="/precio-m2" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Precio del m²</Link>
               <Link href="/tasacion" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Tasar mi propiedad</Link>
               <Link href="/vender" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Vender mi propiedad</Link>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-gray-900 text-sm mb-4 font-jakarta">Por tipo</h4>
+            <div className="flex flex-col gap-3">
+              <Link href="/propiedades/casas" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Casas</Link>
+              <Link href="/propiedades/departamentos" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Departamentos</Link>
+              <Link href="/propiedades/monoambientes" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Monoambientes</Link>
+              <Link href="/propiedades/lotes" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Lotes</Link>
+              <Link href="/propiedades/cabanas" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Cabañas</Link>
             </div>
           </div>
 

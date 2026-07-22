@@ -20,7 +20,7 @@ function idFromSlug(slug) {
 
 const TIPO_MAP = {
   casas:         { tipos: ["Casa"],               label: "Casas",         labelSingular: "casa" },
-  departamentos: { tipos: ["Departamento"],        label: "Departamentos", labelSingular: "departamento" },
+  departamentos: { tipos: ["Departamento", "Monoambiente"], label: "Departamentos", labelSingular: "departamento" },
   cabanas:       { tipos: ["Cabaña", "Cabañas"],   label: "Cabañas",       labelSingular: "cabaña" },
   lotes:         { tipos: ["Lote"],               label: "Lotes",         labelSingular: "lote" },
   monoambientes: { tipos: ["Monoambiente"],        label: "Monoambientes", labelSingular: "monoambiente" },
@@ -30,7 +30,7 @@ const TIPO_MAP = {
 export async function generateStaticParams() {
   const properties = await getProperties();
   // Slug descriptivo (canónico) de cada propiedad.
-  const publicProperties = properties.filter((p) => !p.vendida);
+  const publicProperties = properties.filter((p) => !p.vendida && !p.noDisponible && p.status !== "no_disponible");
   const slugParams = publicProperties.map((p) => ({ slug: getPropertySlug(p) }));
   // Id numérico como respaldo: mantiene vivas las URLs viejas ya indexadas
   // (su canonical apunta al slug descriptivo, así que no hay contenido duplicado).
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }) {
     const properties = await getProperties();
     const count = properties.filter((p) => tipoConfig.tipos.includes(p.type)).length;
     return {
-      title: `${tipoConfig.label} en venta en San Martín de los Andes | Catalán Propiedades`,
+      title: `${tipoConfig.label} en venta en San Martín de los Andes`,
       description: `${count} ${tipoConfig.label.toLowerCase()} en venta en San Martín de los Andes, Patagonia. Asesoría personalizada y datos reales del mercado local.`,
       openGraph: {
         title: `${tipoConfig.label} en venta en San Martín de los Andes — Catalán Propiedades`,
@@ -69,9 +69,9 @@ export async function generateMetadata({ params }) {
 
   // Página de detalle de propiedad
   const property = await getPropertyById(idFromSlug(slug));
-  if (!property || property.vendida) {
+  if (!property || property.vendida || property.noDisponible || property.status === "no_disponible") {
     return {
-      title: "Propiedad no disponible | Catalán Propiedades",
+      title: "Propiedad no disponible",
       robots: { index: false, follow: false },
     };
   }
@@ -85,7 +85,7 @@ export async function generateMetadata({ params }) {
   const areaText = property.area > 0 ? `${property.area} m²` : "";
   const specs = [bedroomText, areaText, property.location].filter(Boolean).join(" · ");
 
-  const seoTitle = `${property.title} - ${priceText} | Catalán Propiedades`;
+  const seoTitle = `${property.title} - ${priceText}`;
   const seoDescription = `${property.type} en ${property.location}. ${specs}${property.description ? `. ${property.description.slice(0, 120)}...` : "."}`;
   const ogImage = property.image?.startsWith("http") ? property.image : `${SITE_URL}${property.image}`;
   // El canónico siempre apunta al slug descriptivo, aunque la URL actual venga del ID numérico.
@@ -138,7 +138,7 @@ export default async function PropiedadesSlugPage({ params }) {
 
   // Página de detalle de propiedad — acepta tanto slug descriptivo como ID numérico.
   const property = await getPropertyById(idFromSlug(slug));
-  if (!property || property.vendida) notFound();
+  if (!property || property.vendida || property.noDisponible || property.status === "no_disponible") notFound();
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const canonical = canonicalUrl(`/propiedades/${getPropertySlug(property)}`);

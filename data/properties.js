@@ -101,6 +101,7 @@ export const properties = [
   },
   {
     id: 17,
+    noDisponible: true,
     title: "Departamento a estrenar en el centro de San Martín de los Andes",
     image: "/imgs/Imgs18/foto3.webp",
     image1: "/imgs/Imgs18/foto4.webp",

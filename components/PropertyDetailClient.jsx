@@ -9,6 +9,7 @@ import SimuladorCuota from "@/components/SimuladorCuota";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { propertyWhatsappMessage, whatsappUrl } from "@/lib/whatsapp";
+import { getPropertyDescriptionEmoji, splitPropertyDescription } from "@/lib/propertyDescription";
 
 function waLink(property, message = "") {
   return whatsappUrl(message || propertyWhatsappMessage(property));
@@ -48,6 +49,7 @@ export default function PropertyDetailClient({ property }) {
   const allImages = [property.image, property.image1, property.image2, property.image3, property.image4].filter(Boolean);
   const fav = isFavorite(property.id);
   const isAlquiler = property.modalidad === "alquiler_permanente";
+  const isLot = /lote|terreno/i.test(property.type || "");
 
   const operationLabel = {
     venta: "Venta",
@@ -95,6 +97,8 @@ export default function PropertyDetailClient({ property }) {
       : isAlquiler
         ? "Consultar"
         : "Me interesa";
+  const descriptionText = property.description || "";
+  const descriptionParagraphs = splitPropertyDescription(descriptionText);
 
   const handleMobilePrimaryAction = () => {
     if (isAlquiler || property.alquilada || property.reservada) {
@@ -231,14 +235,14 @@ export default function PropertyDetailClient({ property }) {
           <div className="lg:grid lg:grid-cols-3 lg:gap-10 lg:items-start">
 
             {/* Sticky sidebar */}
-            <div className="lg:col-span-1 lg:order-last mb-8 lg:mb-0">
-              <div className="sticky top-24">
-                <div className="border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className="lg:col-span-1 lg:order-last mb-8 lg:mb-0 lg:mt-6 lg:sticky lg:top-[96px] lg:self-start lg:h-fit">
+              <div className="border border-gray-200 rounded-2xl p-6 shadow-sm">
                   {isAlquiler ? (
                     <div className="flex flex-col gap-4">
-                      <div>
-                        <p className="text-3xl font-bold text-gray-900">$ {property.precioAlquilerARS?.toLocaleString("es-AR")}</p>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">por mes</p>
+                      <div className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 shadow-sm">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-rose-500">Alquiler mensual</p>
+                        <p className="mt-1 text-3xl font-black text-gray-900 leading-none">$ {property.precioAlquilerARS?.toLocaleString("es-AR")}</p>
+                        <p className="text-xs font-medium text-rose-700/80 mt-1">Acompaña la lectura de la ficha</p>
                       </div>
                       <div className="flex flex-col divide-y divide-gray-100 text-sm">
                         <div className="flex justify-between py-2.5">
@@ -324,9 +328,10 @@ export default function PropertyDetailClient({ property }) {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-4">
-                      <div>
-                        <p className="text-3xl font-bold text-gray-900">USD {property.price?.toLocaleString()}</p>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Precio de venta</p>
+                      <div className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 shadow-sm">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-rose-500">Precio</p>
+                        <p className="mt-1 text-3xl font-black text-gray-900 leading-none">USD {property.price?.toLocaleString("es-AR")}</p>
+                        <p className="text-xs font-medium text-rose-700/80 mt-1">Acompaña la lectura de la ficha</p>
                       </div>
                       {property.roi && (
                         <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-xl px-4 py-3">
@@ -372,14 +377,32 @@ export default function PropertyDetailClient({ property }) {
                     </div>
                   )}
                 </div>
-              </div>
             </div>
 
             {/* Main content */}
             <div className="lg:col-span-2">
               <section className="mb-8 pb-8 border-b border-gray-100">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3">Descripción</h2>
-                <p className="text-gray-600 leading-relaxed">{property.description}</p>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h2 className="text-lg font-semibold text-gray-800">Descripción</h2>
+                  <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-rose-700">
+                    ✦ Lectura rápida
+                  </span>
+                </div>
+                <div className="space-y-3 font-[family-name:var(--font-plus-jakarta)]">
+                  {(descriptionParagraphs.length > 0 ? descriptionParagraphs : [descriptionText]).map((paragraph, index) => (
+                    <div
+                      key={`${index}-${paragraph.slice(0, 24)}`}
+                      className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/80 via-white to-white p-4 sm:p-5 shadow-sm"
+                    >
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.25em] text-rose-500">
+                        {getPropertyDescriptionEmoji(paragraph, property.type)}
+                      </p>
+                      <p className="text-[15px] leading-8 text-gray-700 sm:text-justify text-left text-pretty">
+                        {paragraph}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </section>
 
               <section className="mb-8 pb-8 border-b border-gray-100">
@@ -394,7 +417,7 @@ export default function PropertyDetailClient({ property }) {
                 </ul>
               </section>
 
-              {!isAlquiler && !property.alquilada && property.price > 0 && (
+              {!isAlquiler && !isLot && !property.alquilada && property.price > 0 && (
                 <section className="mb-8 pb-8 border-b border-gray-100">
                   <SimuladorCuota propertyPrice={property.price} propertyTitle={property.title} compact />
                 </section>

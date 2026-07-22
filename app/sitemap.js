@@ -44,7 +44,7 @@ export default async function sitemap() {
   // Para evitar duplicados en el índice, sólo emitimos el slug descriptivo (canónico).
   // El ID numérico sigue existiendo como fallback de URLs viejas, pero su <link rel="canonical">
   // apunta al slug, así Google lo consolida sin necesidad de listarlo en el sitemap.
-  const propertyRoutes = properties.filter((property) => !property.vendida).map((property) => ({
+  const propertyRoutes = properties.filter((property) => !property.vendida && !property.noDisponible && property.status !== "no_disponible").map((property) => ({
     url: canonicalUrl(`/propiedades/${getPropertySlug(property)}`),
     lastModified: now,
     changeFrequency: "weekly",

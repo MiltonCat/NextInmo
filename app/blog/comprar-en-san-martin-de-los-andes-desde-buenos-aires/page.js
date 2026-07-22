@@ -3,7 +3,7 @@ import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
 
 export const metadata = {
-  title: "Cómo comprar una propiedad en San Martín de los Andes desde Buenos Aires | Catalán Propiedades",
+  title: "Cómo comprar una propiedad en San Martín de los Andes desde Buenos Aires",
   description:
     "Guía paso a paso para comprar una casa, departamento o lote en San Martín de los Andes viviendo en Buenos Aires: cuántas veces viajar, gastos reales de la operación, cómo transferir el dinero en dólares y cómo evitar estafas.",
   keywords:

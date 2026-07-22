@@ -16,7 +16,7 @@ export const revalidate = 300;
 
 export const metadata = {
   title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
-  description: "Propiedades en venta y alquiler permanente en San Martín de los Andes. Casas, departamentos y lotes con asesoría local y datos del mercado.",
+  description: "Inmobiliaria en San Martín de los Andes con +10 años de trayectoria y martillera matriculada. Casas, departamentos, monoambientes y lotes en venta y alquiler permanente, con asesoría local y datos reales del mercado.",
   openGraph: {
     title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
     description: "Propiedades en venta y alquiler permanente en San Martín de los Andes, con asesoría local y datos del mercado.",
