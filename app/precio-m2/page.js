@@ -1,7 +1,11 @@
 import Link from "next/link";
 import PrecioM2Chart from "@/components/PrecioM2Chart";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
-import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import mercado, {
+  MERCADO_GENERADO,
+  RELEVADAS_MODELO_FMT,
+  RELEVADAS_TOTAL_FMT,
+} from "@/lib/mercado";
 
 export const metadata = {
   title: "Precio m² San Martín de los Andes 2026",
@@ -31,36 +35,69 @@ export const metadata = {
   },
 };
 
-const EVOLUCION = [
-  { anio: 2021, precio: 1680, variacion: null, contexto: "Post-pandemia — Recuperación del mercado", fuente: "Diario 7 Lagos" },
-  { anio: 2022, precio: 1950, variacion: 16.1, contexto: "San Martín de los Andes lidera precios en Argentina", fuente: "Diario 7 Lagos" },
-  { anio: 2023, precio: 2180, variacion: 11.8, contexto: "Aumento de demanda turística e inversionista", fuente: "Estimado" },
-  { anio: 2024, precio: 2450, variacion: 12.4, contexto: "Crecimiento sostenido — boom de construcciones", fuente: "Estimado" },
-  { anio: 2025, precio: 2590, variacion: 5.7, contexto: "Estabilización de precios — mercado maduro", fuente: "Estimado" },
-  { anio: 2026, precio: 2650, variacion: 2.3, contexto: "Consolidación — demanda internacional", fuente: "Argenprop / Zonaprop" },
-];
+const numero = new Intl.NumberFormat("es-AR");
 
-const ZONAS = [
-  { nombre: "Centro", tipo: "Departamento", precioM2: 2735, variacion: 4.5 },
-  { nombre: "Centro", tipo: "Casa", precioM2: 2180, variacion: 4.2 },
-  { nombre: "Centro", tipo: "Terreno", precioM2: 560, variacion: 2.1 },
-  { nombre: "Centro", tipo: "Local comercial", precioM2: 2400, variacion: 3.5 },
-  { nombre: "Chapelco Golf", tipo: "Departamento", precioM2: 3400, variacion: 6.5 },
-  { nombre: "Chapelco Golf", tipo: "Casa", precioM2: 2950, variacion: 5.8 },
-  { nombre: "Chapelco Golf", tipo: "Terreno", precioM2: 380, variacion: 8.2 },
-  { nombre: "Costanera", tipo: "Departamento", precioM2: 2950, variacion: 5.5 },
-  { nombre: "Costanera", tipo: "Casa", precioM2: 2400, variacion: 4.8 },
-  { nombre: "Las Marías", tipo: "Casa", precioM2: 1750, variacion: 3.5 },
-  { nombre: "Las Marías", tipo: "Terreno", precioM2: 110, variacion: 2.8 },
-  { nombre: "Las Pendientes", tipo: "Casa", precioM2: 2950, variacion: 5.5 },
-  { nombre: "Las Pendientes", tipo: "Terreno", precioM2: 72, variacion: 3.5 },
+const fechaActualizacion = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+}).format(new Date(`${MERCADO_GENERADO}T12:00:00Z`));
+
+const CONTEXTO_EVOLUCION = {
+  2021: "Post-pandemia — recuperación del mercado",
+  2022: "San Martín de los Andes lidera precios en Argentina",
+  2023: "Aumento de demanda turística e inversionista",
+  2024: "Crecimiento sostenido — boom de construcciones",
+  2025: "Estabilización de precios — mercado maduro",
+  2026: "Consolidación — demanda internacional",
+};
+
+const NOMBRES_BARRIO = {
+  "Vega Maipu": "Vega Maipú",
+};
+
+const EVOLUCION = mercado.evolucion_precios.serie.map((item) => ({
+  anio: item.anio,
+  precio: item.usd_m2,
+  variacion: item.variacion_pct,
+  contexto: CONTEXTO_EVOLUCION[item.anio] ?? item.descripcion,
+  fuente: "Serie orientativa curada · No es un índice oficial",
+}));
+
+// Solo se publican barrios con una muestra utilizable de al menos 10 avisos.
+// Los barrios con menos casos siguen disponibles en el dataset, pero no se
+// muestran como una referencia suficientemente sólida para el visitante.
+const BARRIOS_CON_MUESTRA = mercado.valor_m2_usd.por_barrio.filter(
+  (barrio) => barrio.estado === "usable" && barrio.barrio !== "General" && barrio.n >= 10,
+);
+
+const METRICAS_RESIDENCIALES = [
+  {
+    valor: mercado.valor_m2_usd.referencia_general_casa_depto,
+    label: "Referencia residencial",
+    sub: `Casas + departamentos · ${RELEVADAS_MODELO_FMT} avisos utilizables`,
+  },
+  {
+    valor: mercado.valor_m2_usd.por_tipo.Departamento,
+    label: "Mediana departamentos",
+    sub: `${numero.format(mercado.relevadas.por_tipo.Departamento)} publicaciones relevadas`,
+  },
+  {
+    valor: mercado.valor_m2_usd.por_tipo.Casa,
+    label: "Mediana casas",
+    sub: `${numero.format(mercado.relevadas.por_tipo.Casa)} publicaciones relevadas`,
+  },
 ];
 
 const FUENTES = [
-  { nombre: "Diario 7 Lagos", dato: "USD 2.520/m² — ciudad más cara de Argentina (2022)" },
-  { nombre: "Argenprop", dato: "1.066 propiedades en venta relevadas (2026)" },
-  { nombre: "Zonaprop", dato: "202 terrenos y 66 locales analizados (2026)" },
-  { nombre: "Properati", dato: "Terrenos ~USD 86/m² promedio (enero 2026)" },
+  {
+    nombre: "Relevamiento propio",
+    dato: `${RELEVADAS_TOTAL_FMT} publicaciones consolidadas y depuradas · ${fechaActualizacion}`,
+  },
+  { nombre: "Argenprop", dato: "Publicaciones utilizadas como referencia de oferta", url: "https://www.argenprop.com/inmuebles/venta/san-martin-de-los-andes" },
+  { nombre: "Zonaprop", dato: "Publicaciones utilizadas como referencia de oferta", url: "https://www.zonaprop.com.ar" },
+  { nombre: "Properati", dato: "Publicaciones utilizadas como referencia complementaria", url: "https://www.properati.com.ar" },
 ];
 
 export default function PrecioM2Page() {
@@ -72,7 +109,7 @@ export default function PrecioM2Page() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-200 bg-green-50 text-green-700 text-xs font-semibold tracking-widest uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            Actualizado — Abril 2026
+            Actualizado — {fechaActualizacion}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
             Precio del m² en San Martín de los Andes 2026
@@ -90,23 +127,28 @@ export default function PrecioM2Page() {
 
         {/* Stat principal */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { valor: "USD 2.650", label: "Precio promedio del m²", sub: "Mercado general 2026", color: "text-rose-600" },
-            { valor: "+57,7%", label: "Revalorización en 5 años", sub: "2021 → 2026", color: "text-green-600" },
-            { valor: "USD 3.400", label: "Máximo por zona", sub: "Chapelco Golf · Departamentos", color: "text-gray-900" },
-          ].map((s) => (
+          {METRICAS_RESIDENCIALES.map((s) => (
             <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <p className={`text-2xl md:text-3xl font-black ${s.color} mb-1`}>{s.valor}</p>
+              <p className="text-2xl md:text-3xl font-black text-rose-600 mb-1">
+                USD {numero.format(s.valor)}
+              </p>
               <p className="text-sm font-semibold text-gray-700">{s.label}</p>
               <p className="text-xs text-gray-400 mt-0.5">{s.sub}</p>
             </div>
           ))}
         </div>
 
+        <div className="bg-rose-50 border border-rose-100 rounded-2xl p-5 sm:p-6">
+          <h2 className="text-base font-bold text-gray-900 mb-2">Cómo leer estos valores</h2>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Son medianas de precios publicados, no precios de operaciones cerradas. El relevamiento completo reúne {RELEVADAS_TOTAL_FMT} avisos de casas, departamentos, terrenos y otros inmuebles; la referencia residencial usa {RELEVADAS_MODELO_FMT} avisos utilizables de casas y departamentos después de limpiar y consolidar la base.
+          </p>
+        </div>
+
         {/* Gráfico de evolución */}
         <div>
-          <h2 className="text-2xl font-black text-gray-900 mb-1">Evolución histórica del precio del m² (USD)</h2>
-          <p className="text-gray-400 text-sm mb-6">San Martín de los Andes · 2021–2026</p>
+          <h2 className="text-2xl font-black text-gray-900 mb-1">Evolución orientativa del precio del m² (USD)</h2>
+          <p className="text-gray-400 text-sm mb-6">Serie de referencia curada · San Martín de los Andes · 2021–2026</p>
           <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-6">
             <PrecioM2Chart data={EVOLUCION} />
             <div className="mt-4 flex flex-wrap gap-4">
@@ -118,31 +160,36 @@ export default function PrecioM2Page() {
                 </div>
               ))}
             </div>
+            <p className="text-xs text-gray-500 leading-relaxed mt-5 pt-4 border-t border-gray-200">
+              Esta curva sirve como contexto general y no constituye un índice histórico oficial. La serie fue mantenida como referencia de mercado; el valor 2026 se contrasta con la mediana residencial del relevamiento vigente.
+            </p>
           </div>
         </div>
 
-        {/* Tabla por zona */}
+        {/* Tabla por barrio */}
         <div>
-          <h2 className="text-2xl font-black text-gray-900 mb-1">Precio del m² por zona y tipo de propiedad</h2>
-          <p className="text-gray-400 text-sm mb-6">Valores orientativos en USD · Actualizado abril 2026</p>
-          <div className="border border-gray-200 rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
+          <h2 className="text-2xl font-black text-gray-900 mb-1">Mediana publicada por barrio</h2>
+          <p className="text-gray-400 text-sm mb-6">Solo barrios con al menos 10 avisos utilizables · Actualizado {fechaActualizacion}</p>
+          <div className="border border-gray-200 rounded-2xl overflow-x-auto">
+            <table className="w-full min-w-[620px] text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Zona</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Tipo</th>
-                  <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">USD / m²</th>
-                  <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Var. anual</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Barrio</th>
+                  <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Avisos</th>
+                  <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Mediana USD / m²</th>
+                  <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Muestra</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {ZONAS.map((z, i) => (
-                  <tr key={i} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900">{z.nombre}</td>
-                    <td className="px-4 py-3 text-gray-500">{z.tipo}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">USD {z.precioM2.toLocaleString()}</td>
+                {BARRIOS_CON_MUESTRA.map((barrio) => (
+                  <tr key={barrio.barrio} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-gray-900">{NOMBRES_BARRIO[barrio.barrio] ?? barrio.barrio}</td>
+                    <td className="px-4 py-3 text-right text-gray-500">{numero.format(barrio.n)}</td>
+                    <td className="px-4 py-3 text-right font-bold text-rose-600">USD {numero.format(barrio.mediana_m2_usd)}</td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-green-600 font-medium">+{z.variacion}%</span>
+                      <span className={barrio.n >= 20 ? "text-green-600 font-medium" : "text-amber-600 font-medium"}>
+                        {barrio.n >= 20 ? "Sólida" : "Moderada"}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -150,7 +197,7 @@ export default function PrecioM2Page() {
             </table>
           </div>
           <p className="text-gray-400 text-xs mt-3">
-            Estimaciones orientativas basadas en análisis de listings públicos en San Martín de los Andes. Los valores reales varían según la propiedad, estado y negociación.
+            Medianas calculadas sobre precios de publicación. Se excluyen de esta tabla los barrios con menos de 10 casos; los valores reales varían según tipo, estado, ubicación exacta y negociación.
           </p>
         </div>
 
@@ -185,7 +232,13 @@ export default function PrecioM2Page() {
               <div key={f.nombre} className="flex gap-3 p-4 bg-white border border-gray-200 rounded-xl">
                 <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">{f.nombre}</p>
+                  {f.url ? (
+                    <a href={f.url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-gray-800 hover:text-rose-600 transition-colors">
+                      {f.nombre} ↗
+                    </a>
+                  ) : (
+                    <p className="text-sm font-semibold text-gray-800">{f.nombre}</p>
+                  )}
                   <p className="text-xs text-gray-400 mt-0.5">{f.dato}</p>
                 </div>
               </div>

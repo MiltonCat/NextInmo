@@ -2,7 +2,7 @@ import { SITE_URL, canonicalUrl } from "@/config";
 import Link from "next/link";
 
 export const metadata = {
-  title: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
+  title: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes",
   description: "Descubrí por qué invertir en propiedades en San Martín de los Andes es como comprar Bitcoin en 2013. Análisis de tokenización inmobiliaria, ROI proyectado y oportunidades de inversión en la Patagonia.",
   keywords: "invertir san martin andes, inversion inmobiliaria patagonia, propiedades san martin andes, roi inmobiliario, tokenizacion inmobiliaria",
   openGraph: {

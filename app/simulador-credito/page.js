@@ -3,7 +3,7 @@ import SimuladorCuota from "@/components/SimuladorCuota";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
-  title: "Simulador de crédito hipotecario UVA | Catalán Propiedades",
+  title: "Simulador de crédito hipotecario UVA",
   description:
     "Calculá la cuota inicial de un crédito hipotecario UVA para comprar en San Martín de los Andes: anticipo, plazo, tasa e ingreso mínimo requerido. Gratis y al instante.",
   openGraph: {

@@ -2,7 +2,7 @@ import ExperienciaBarrioPage from "@/components/ExperienciaBarrioPage";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
-  title: "Guía de Barrios San Martín de los Andes | Catalán Propiedades",
+  title: "Guía de Barrios San Martín de los Andes",
   description: "¿Cómo es vivir en Centro, Chapelco, Las Marías o Costanera? Experiencias reales de vecinos para ayudarte a elegir dónde comprar o invertir en San Martín de los Andes.",
   openGraph: {
     title: "Guía de Barrios — San Martín de los Andes · Catalán Propiedades",

@@ -69,7 +69,7 @@ export default function Hero() {
         }}
       >
         <h1 className="text-gray-900 text-[1.7rem] sm:text-4xl font-bold mb-2 drop-shadow-lg leading-tight max-w-[19rem] sm:max-w-none">
-          Propiedades en San Martín de los Andes
+          Inmobiliaria en San Martín de los Andes
         </h1>
         <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-5 max-w-[18rem] sm:max-w-xl leading-snug">
           Compra, alquiler e inversión con asesoría local.

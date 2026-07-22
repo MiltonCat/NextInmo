@@ -4,7 +4,7 @@ import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
 import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 export const metadata = {
-  title: "Tasación de propiedades en San Martín de los Andes | Catalán Propiedades",
+  title: "Tasación de propiedades en San Martín de los Andes",
   description: "Solicitá una tasación orientativa gratuita de tu propiedad en San Martín de los Andes. Respuesta en menos de 48 hs con datos reales del mercado local.",
   openGraph: {
     title: "Tasación gratuita en San Martín de los Andes — Catalán Propiedades",

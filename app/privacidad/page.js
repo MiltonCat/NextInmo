@@ -2,7 +2,7 @@ import Link from "next/link";
 import { canonicalUrl, CONTACT_EMAIL } from "@/config";
 
 export const metadata = {
-  title: "Política de Privacidad | Catalán Propiedades",
+  title: "Política de Privacidad",
   description:
     "Cómo Catalán Propiedades recopila, usa y protege tus datos personales, incluido el uso de Google Analytics y cookies.",
   alternates: {

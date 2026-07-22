@@ -48,6 +48,7 @@ export default function PropertyDetailClient({ property }) {
   const allImages = [property.image, property.image1, property.image2, property.image3, property.image4].filter(Boolean);
   const fav = isFavorite(property.id);
   const isAlquiler = property.modalidad === "alquiler_permanente";
+  const isLot = /lote|terreno/i.test(property.type || "");
 
   const operationLabel = {
     venta: "Venta",
@@ -394,7 +395,7 @@ export default function PropertyDetailClient({ property }) {
                 </ul>
               </section>
 
-              {!isAlquiler && !property.alquilada && property.price > 0 && (
+              {!isAlquiler && !isLot && !property.alquilada && property.price > 0 && (
                 <section className="mb-8 pb-8 border-b border-gray-100">
                   <SimuladorCuota propertyPrice={property.price} propertyTitle={property.title} compact />
                 </section>

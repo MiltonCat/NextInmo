@@ -11,6 +11,7 @@ function PropertyCard({ property }) {
   const [celebrating, setCelebrating] = useState(false);
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
+  const isFeatured = [5, 6, 107, 108, 109].includes(Number(property.id));
 
   const operationLabel = {
     venta: "Venta",
@@ -61,18 +62,27 @@ function PropertyCard({ property }) {
           <span className="absolute inset-0 flex items-center justify-center text-xl font-black tracking-[0.2em] text-white bg-black/25">
             VENDIDA
           </span>
-        ) : property.alquilada ? (
-          <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded bg-gray-800 text-white tracking-wide">
-            ALQUILADA
-          </span>
-        ) : property.reservada ? (
-          <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded bg-gray-600 text-white tracking-wide">
-            RESERVADA
-          </span>
         ) : (
-          <span className={`absolute top-2 left-2 text-xs font-semibold px-2 py-1 rounded ${operationColor[property.operation]}`}>
-            {operationLabel[property.operation]}
-          </span>
+          <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
+            {isFeatured && (
+              <span className="inline-flex items-center rounded-full bg-rose-600 px-2 py-1 text-[11px] font-bold tracking-wide text-white shadow-sm">
+                DESTACADA
+              </span>
+            )}
+            {property.alquilada ? (
+              <span className="text-xs font-bold px-2 py-1 rounded bg-gray-800 text-white tracking-wide">
+                ALQUILADA
+              </span>
+            ) : property.reservada ? (
+              <span className="text-xs font-bold px-2 py-1 rounded bg-gray-600 text-white tracking-wide">
+                RESERVADA
+              </span>
+            ) : (
+              <span className={`text-xs font-semibold px-2 py-1 rounded ${operationColor[property.operation]}`}>
+                {operationLabel[property.operation]}
+              </span>
+            )}
+          </div>
         )}
         {property.roi && (
           <span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded-full shadow text-green-700">

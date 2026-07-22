@@ -4,7 +4,7 @@ import { SITE_URL, WA_URL, canonicalUrl, TASADOR_URL } from "@/config";
 import { RELEVADAS_TOTAL_FMT, RELEVADAS_MODELO_FMT } from "@/lib/mercado";
 
 export const metadata = {
-  title: "Cómo tasamos tu propiedad con datos en San Martín de los Andes | Catalán Propiedades",
+  title: "Cómo tasamos tu propiedad con datos en San Martín de los Andes",
   description:
     `Te explicamos cómo funciona nuestro tasador: un modelo predictivo entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.`,
   keywords:

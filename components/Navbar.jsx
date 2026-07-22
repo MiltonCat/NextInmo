@@ -19,9 +19,13 @@ const SECONDARY_LINKS = [
   { href: "/experiencia-barrio", label: "Compartí tu barrio" },
 ];
 
+// `slug` apunta a la página de categoría SEO (/propiedades/<slug>), una URL
+// rastreable e indexable, en lugar del filtro por query param (?type=) que Google
+// consolida en /propiedades y no rankea por separado.
 const PROP_TYPES = [
   {
     type: "Casa",
+    slug: "casas",
     label: "Casa",
     emoji: "🏡",
     bg: "from-rose-100 to-pink-200",
@@ -31,6 +35,7 @@ const PROP_TYPES = [
   },
   {
     type: "Departamento",
+    slug: "departamentos",
     label: "Depto / Mono",
     emoji: "🏢",
     bg: "from-violet-100 to-purple-200",
@@ -40,6 +45,7 @@ const PROP_TYPES = [
   },
   {
     type: "Lote",
+    slug: "lotes",
     label: "Lote",
     emoji: "🏔️",
     bg: "from-emerald-100 to-green-200",
@@ -49,6 +55,7 @@ const PROP_TYPES = [
   },
   {
     type: "Cabaña",
+    slug: "cabanas",
     label: "Cabaña",
     emoji: "🏕️",
     bg: "from-amber-100 to-orange-200",
@@ -133,12 +140,6 @@ export default function Navbar() {
     document.addEventListener("mousedown", onOutside);
     return () => document.removeEventListener("mousedown", onOutside);
   }, []);
-
-  const selectType = (type) => {
-    setSelectedType(type);
-    setSearchOpen(false);
-    router.push(`/propiedades?type=${encodeURIComponent(type)}`);
-  };
 
   const clearType = (e) => {
     e?.stopPropagation();
@@ -340,12 +341,13 @@ export default function Navbar() {
             <div className="p-4">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">¿Qué tipo de propiedad buscás?</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {PROP_TYPES.map(({ type, label, emoji, ring }) => {
+                {PROP_TYPES.map(({ type, slug, label, emoji, ring }) => {
                   const active = selectedType === type;
                   return (
-                    <button
+                    <Link
                       key={type}
-                      onMouseDown={() => selectType(type)}
+                      href={`/propiedades/${slug}`}
+                      onClick={() => { setSelectedType(type); setSearchOpen(false); }}
                       className={`flex flex-col items-center justify-center gap-2 rounded-2xl h-24 sm:h-28 bg-white border-2 transition-all duration-200 hover:scale-[1.05] hover:shadow-md ${
                         active
                           ? `ring-2 ${ring} border-transparent scale-[1.04] shadow-md`
@@ -354,7 +356,7 @@ export default function Navbar() {
                     >
                       <span className="text-3xl sm:text-4xl leading-none select-none">{emoji}</span>
                       <span className={`text-xs font-bold leading-tight text-center px-1 ${active ? "text-gray-900" : "text-gray-600"}`}>{label}</span>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>

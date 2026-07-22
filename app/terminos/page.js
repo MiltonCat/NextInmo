@@ -2,7 +2,7 @@ import Link from "next/link";
 import { canonicalUrl, CONTACT_EMAIL, PHONE_DISPLAY } from "@/config";
 
 export const metadata = {
-  title: "Términos de Servicio | Catalán Propiedades",
+  title: "Términos de Servicio",
   description: "Términos y condiciones de uso del sitio web de Catalán Propiedades.",
   alternates: {
     canonical: canonicalUrl("/terminos"),

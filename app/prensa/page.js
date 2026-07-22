@@ -2,7 +2,7 @@ import Link from "next/link";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 
 export const metadata = {
-  title: "Prensa | Catalán Propiedades",
+  title: "Prensa",
   description: "Catalán Propiedades en los medios. Coberturas, entrevistas y apariciones de Milton Catalán y la firma en la prensa argentina.",
   openGraph: {
     title: "Prensa — Catalán Propiedades",

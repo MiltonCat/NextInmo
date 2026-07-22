@@ -3,7 +3,7 @@ import { SITE_URL, canonicalUrl } from "@/config";
 const NosotrosClient = dynamic(() => import("./NosotrosClient"));
 
 export const metadata = {
-  title: "Nosotros | Catalán Propiedades — San Martín de los Andes",
+  title: "Nosotros — San Martín de los Andes",
   description: "Conocé a Milton Catalán, asesor inmobiliario con más de 10 años de experiencia en San Martín de los Andes. Criterio financiero y datos reales para decisiones inmobiliarias en la Patagonia.",
   openGraph: {
     title: "Sobre Catalán Propiedades — Milton Catalán",
