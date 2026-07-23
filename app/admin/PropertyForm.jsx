@@ -2,14 +2,8 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-
-const IMAGE_FIELDS = [
-  { name: "image", label: "Foto principal" },
-  { name: "image1", label: "Foto 2" },
-  { name: "image2", label: "Foto 3" },
-  { name: "image3", label: "Foto 4" },
-  { name: "image4", label: "Foto 5" },
-];
+import ImagesManager from "./ImagesManager";
+import { normalizeImages } from "@/lib/photoImages";
 
 const field = "w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-gray-900 focus:outline-none";
 const label = "block text-sm font-medium text-gray-700 mb-1";
@@ -18,6 +12,10 @@ const label = "block text-sm font-medium text-gray-700 mb-1";
 export default function PropertyForm({ action, property = null }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const p = property || {};
+  // property acá viene de getPropertyByIdAdmin (fila cruda de Supabase), no
+  // pasó por lib/properties.js, así que normalizamos acá también: soporta
+  // el array nuevo ({url,category}), el viejo (strings) o los 5 campos legacy.
+  const initialImages = normalizeImages(p.images, [p.image, p.image1, p.image2, p.image3, p.image4]);
 
   return (
     <form action={formAction} className="space-y-8">
@@ -135,23 +133,10 @@ export default function PropertyForm({ action, property = null }) {
       <section className="bg-white rounded-xl shadow-sm p-6 space-y-4">
         <h2 className="font-semibold text-gray-900">Fotos</h2>
         <p className="text-sm text-gray-500">
-          Subí hasta 5 fotos. Si dejás un casillero vacío al editar, se conserva la foto actual.
+          Sin límite de cantidad. La primera foto de la lista es la portada. Podés reordenar
+          las fotos ya guardadas con las flechas, y las nuevas se agregan al final.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {IMAGE_FIELDS.map(({ name, label: lbl }) => (
-            <div key={name} className="border border-gray-200 rounded-lg p-3">
-              <span className={label}>{lbl}</span>
-              {p[name] && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p[name]} alt="" className="w-full h-32 object-cover rounded-md mb-2 bg-gray-100" />
-                  <input type="hidden" name={`${name}_current`} value={p[name]} />
-                </>
-              )}
-              <input type="file" name={name} accept="image/*" className="text-sm" />
-            </div>
-          ))}
-        </div>
+        <ImagesManager initialImages={initialImages} />
       </section>
 
       {/* --- Datos de alquiler --- */}

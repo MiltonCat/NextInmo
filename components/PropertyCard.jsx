@@ -11,7 +11,7 @@ function PropertyCard({ property }) {
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const isUnavailable = property.vendida || property.noDisponible || property.status === "no_disponible";
-  const isFeatured = [5, 6, 107, 108, 109].includes(Number(property.id));
+  const isFeatured = [5, 6, 107, 108, 109, 110, 111].includes(Number(property.id));
 
   const operationLabel = {
     venta: "Venta",
