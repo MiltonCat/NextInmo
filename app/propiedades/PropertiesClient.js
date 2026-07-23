@@ -118,17 +118,17 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
     <div className="min-h-screen bg-white">
       <section className="bg-white relative overflow-hidden pt-8 pb-10 md:pt-24 md:pb-12">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-center lg:pt-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:pt-4">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
                 <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Propiedades</span>
               </div>
-              <h1 className="text-3xl md:text-5xl font-black text-gray-900 font-jakarta leading-tight md:leading-[1.1]">
-                {tipoLabel ? `${tipoLabel} en San Martín de los Andes` : <>Encontrá tu lugar<br />en el sur</>}
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 font-jakarta leading-snug">
+                {tipoLabel ? `${tipoLabel} en San Martín de los Andes` : "Encontrá tu próxima propiedad en San Martín de los Andes"}
               </h1>
               <p className="text-gray-500 text-base mt-3 max-w-md leading-relaxed">
-                {tipoLabel ? `Asesoría personalizada y datos reales del mercado local` : "Del centro a la montaña · De la primera casa a la inversión soñada"}
+                {tipoLabel ? `Asesoría personalizada y datos reales del mercado local` : "Del centro a la montaña, para cada etapa de tu vida"}
               </p>
             </div>
 
