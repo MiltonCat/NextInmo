@@ -60,7 +60,9 @@ const PROP_TYPES = [
 
 const CONFETTI_COLORS = ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"];
 
+// Tres tandas escalonadas para que la nevada dure ~6s en vez de ~2.3s.
 const WINTER_FLAKES = [
+  // Tanda 1
   { left: "4%", delay: "0ms", duration: "1700ms", drift: "9px", size: "9px" },
   { left: "15%", delay: "180ms", duration: "1850ms", drift: "-7px", size: "6px" },
   { left: "28%", delay: "60ms", duration: "1950ms", drift: "12px", size: "8px" },
@@ -69,13 +71,31 @@ const WINTER_FLAKES = [
   { left: "67%", delay: "390ms", duration: "1600ms", drift: "-5px", size: "6px" },
   { left: "78%", delay: "220ms", duration: "1900ms", drift: "10px", size: "9px" },
   { left: "91%", delay: "30ms", duration: "1750ms", drift: "-8px", size: "6px" },
+  // Tanda 2 (~2s despues)
+  { left: "9%", delay: "1900ms", duration: "1800ms", drift: "-8px", size: "7px" },
+  { left: "22%", delay: "2100ms", duration: "1650ms", drift: "10px", size: "6px" },
+  { left: "36%", delay: "1950ms", duration: "1900ms", drift: "-6px", size: "8px" },
+  { left: "49%", delay: "2250ms", duration: "1700ms", drift: "9px", size: "5px" },
+  { left: "62%", delay: "2050ms", duration: "1850ms", drift: "-11px", size: "7px" },
+  { left: "73%", delay: "2300ms", duration: "1600ms", drift: "6px", size: "6px" },
+  { left: "85%", delay: "1980ms", duration: "1950ms", drift: "-9px", size: "9px" },
+  { left: "95%", delay: "2150ms", duration: "1750ms", drift: "8px", size: "6px" },
+  // Tanda 3 (~4s despues)
+  { left: "6%", delay: "3900ms", duration: "1750ms", drift: "8px", size: "6px" },
+  { left: "19%", delay: "4100ms", duration: "1600ms", drift: "-9px", size: "9px" },
+  { left: "33%", delay: "3950ms", duration: "1850ms", drift: "11px", size: "6px" },
+  { left: "46%", delay: "4250ms", duration: "1900ms", drift: "-7px", size: "8px" },
+  { left: "58%", delay: "4050ms", duration: "1650ms", drift: "9px", size: "5px" },
+  { left: "70%", delay: "4300ms", duration: "1800ms", drift: "-10px", size: "7px" },
+  { left: "82%", delay: "3980ms", duration: "1950ms", drift: "6px", size: "6px" },
+  { left: "93%", delay: "4150ms", duration: "1700ms", drift: "-8px", size: "9px" },
 ];
 
 function WinterBrandEffect() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setVisible(false), 2300);
+    const timer = window.setTimeout(() => setVisible(false), 6300);
     return () => window.clearTimeout(timer);
   }, []);
 
