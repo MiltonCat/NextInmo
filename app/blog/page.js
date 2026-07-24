@@ -34,6 +34,17 @@ export const metadata = {
 
 const blogPosts = [
   {
+    id: "cuando-el-plano-no-coincide-con-la-casa",
+    title: "Cuando el plano no coincide con la casa: el problema que aparece siempre al vender",
+    excerpt:
+      "Certificado catastral, Ley 26.209 y Ley provincial 2217: por qué una construcción no declarada frena la escrituración, los tres tipos de discrepancia y cómo resolverla antes de firmar el boleto.",
+    category: "Guía legal",
+    date: "Julio 2026",
+    dateTime: "2026-07-24",
+    readTime: "8 min",
+    image: "/eme1.jpg",
+  },
+  {
     id: "alquileres-san-martin-de-los-andes-2026",
     title: "Alquileres en San Martín de los Andes 2026: qué revisar antes de firmar",
     excerpt:
