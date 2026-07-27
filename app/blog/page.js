@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
-import { RELEVADAS_MODELO_FMT } from "@/lib/mercado";
+import { blogPosts } from "@/lib/blogPosts";
 
 
 export const metadata = {
@@ -31,134 +31,6 @@ export const metadata = {
     canonical: canonicalUrl("/blog"),
   },
 };
-
-const blogPosts = [
-  {
-    id: "cuando-el-plano-no-coincide-con-la-casa",
-    title: "Cuando el plano no coincide con la casa: el problema que aparece siempre al vender",
-    excerpt:
-      "Certificado catastral, Ley 26.209 y Ley provincial 2217: por qué una construcción no declarada frena la escrituración, los tres tipos de discrepancia y cómo resolverla antes de firmar el boleto.",
-    category: "Guía legal",
-    date: "Julio 2026",
-    dateTime: "2026-07-24",
-    readTime: "8 min",
-    image: "/eme1.jpg",
-  },
-  {
-    id: "alquileres-san-martin-de-los-andes-2026",
-    title: "Alquileres en San Martín de los Andes 2026: qué revisar antes de firmar",
-    excerpt:
-      "Una guía jurídica para revisar contratos de alquiler permanente y temporario: plazo, actualización, reparaciones, gastos, devolución de llaves y garantías, con artículos del Código Civil y Comercial y jurisprudencia real de Neuquén.",
-    category: "Guía legal",
-    date: "Julio 2026",
-    dateTime: "2026-07",
-    readTime: "10 min",
-    image: "/volcan-lanin-card.jpg",
-  },
-  {
-    id: "airbnb-facil-san-martin-de-los-andes-2026",
-    title: "¿Se terminó el Airbnb fácil en San Martín de los Andes?",
-    excerpt:
-      "La oferta crece, la ocupación mejora, pero las tarifas y los ingresos promedio retroceden. Qué cambian los nuevos controles con datos para propietarios e inversores en 2026.",
-    category: "Mercado",
-    date: "Julio 2026",
-    dateTime: "2026-07-14",
-    readTime: "9 min",
-    image: "/chapelco-invierno-sma-2026.webp",
-  },
-  {
-    id: "cuanto-rinde-alquiler-temporario-san-martin-de-los-andes",
-    title: "Cuánto rinde un alquiler temporario en San Martín de los Andes",
-    excerpt:
-      "Todos hablan de la rentabilidad del alquiler turístico, pero pocos ponen números. Cuánto factura y cuánto deja realmente un temporario en San Martín de los Andes: ocupación por temporada, precio por noche, costos de gestión y comparación con el alquiler permanente, con datos reales.",
-    category: "Inversión",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "8 min",
-    image: "/patagon.jpg",
-  },
-  {
-    id: "score-de-inversion-san-martin-de-los-andes",
-    title: "Score de inversión: cómo leer una propiedad como un activo",
-    excerpt:
-      "El marco que usamos para evaluar una propiedad de San Martín de los Andes como un activo financiero: ubicación, revalorización, rentabilidad, liquidez y riesgo, con datos reales del mercado patagónico.",
-    category: "Inversión",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "9 min",
-    image: "/patagonia-activo.jpg",
-  },
-  {
-    id: "credito-hipotecario-neuquen-2026",
-    title: "Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa",
-    excerpt: "La provincia lanzó créditos propios (plan Neuquén Habita) para construir, ampliar o refaccionar tu vivienda: tasa 2%, hasta el 100% de la obra y hasta $150 millones. Requisitos, montos y por qué alcanza a San Martín de los Andes y Villa la Angostura.",
-    category: "Guía de Crédito",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "7 min",
-    image: "/hipotecario.jpeg",
-  },
-  {
-    id: "cuanto-cuesta-una-casa-en-san-martin-de-los-andes",
-    title: "¿Cuánto cuesta una casa en San Martín de los Andes? (2026)",
-    excerpt: "Qué define el precio de una casa: zona, superficie, estado y vista. Cómo estimarlo con datos reales del m² por zona, por qué el precio publicado no es el valor real y cómo saber el precio justo de una propiedad puntual.",
-    category: "Precios",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "7 min",
-    image: "/cartel-san-martin-de-los-andes.webp",
-  },
-  {
-    id: "como-tasamos-tu-propiedad-con-datos",
-    title: "Cómo tasamos tu propiedad con datos (y por qué te damos un rango)",
-    excerpt: `Cómo funciona nuestro tasador por dentro: un modelo entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.`,
-    category: "Tasación con Datos",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "8 min",
-    image: "/portada.jpg",
-  },
-  {
-    id: "comprar-en-san-martin-de-los-andes-desde-buenos-aires",
-    title: "Cómo comprar en San Martín de los Andes desde Buenos Aires",
-    excerpt: "Guía paso a paso para comprar a distancia: cuántas veces viajar, los gastos reales de la operación, cómo se transfiere el dinero en dólares y cómo evitar estafas. Lo que le explico a cada comprador de otra provincia.",
-    category: "Guía para Compradores",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "9 min",
-    image: "/muelle.jpg",
-  },
-  {
-    id: "donde-vivir-san-martin-de-los-andes",
-    title: "¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026",
-    excerpt: "Análisis real de cada barrio: precio del m², tranquilidad, servicios y potencial de inversión. Lo que le diría a un amigo que me pregunta dónde comprar o mudarse.",
-    category: "Guía de Barrios",
-    date: "Junio 2026",
-    dateTime: "2026-06",
-    readTime: "7 min",
-    image: "/sanmartin.jpeg",
-  },
-  {
-    id: "creditos-hipotecarios-uva-2026",
-    title: "Créditos Hipotecarios UVA: La Llave para tu Casa Propia en la Patagonia",
-    excerpt: "El crédito hipotecario volvió a Argentina. Descubrí cómo los créditos UVA te abren la puerta a comprar una propiedad en San Martín de los Andes: requisitos, bancos y guía paso a paso.",
-    category: "Guía de Compra",
-    date: "Mayo 2026",
-    dateTime: "2026-05",
-    readTime: "9 min",
-    image: "/hipotecario.jpeg",
-  },
-  {
-    id: "bitcoin-ladrillos-patagonicos",
-    title: "El Bitcoin de los Ladrillos Patagónicos",
-    excerpt: "¿Por qué invertir en propiedades en San Martín de los Andes es como comprar Bitcoin en 2013? Descubrí la tokenización del mercado inmobiliario patagónico.",
-    category: "Inversión",
-    date: "Mayo 2026",
-    dateTime: "2026-05",
-    readTime: "8 min",
-    image: "/fintech.jpeg",
-  },
-];
 
 export default function BlogPage() {
   return (
@@ -192,6 +64,17 @@ export default function BlogPage() {
                     {post.category}
                   </span>
                 </div>
+                {/* Se puede escuchar: solo en los posts con audio registrado. */}
+                {post.audio && (
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-flex items-center gap-1.5 bg-white/95 text-gray-800 text-xs font-bold px-2.5 py-1.5 rounded-full shadow-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                      </svg>
+                      Escuchar
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">

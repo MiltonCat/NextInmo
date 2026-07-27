@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const ARTICLE_PATH = "/blog/alquileres-san-martin-de-los-andes-2026";
 const ARTICLE_URL = canonicalUrl(ARTICLE_PATH);
@@ -207,6 +208,11 @@ export default function AlquileresGuiaLegalPage() {
             </div>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
+          <PodcastPlayer slug="alquileres-san-martin-de-los-andes-2026" />
+        </div>
 
         <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6">
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-slate-950 sm:aspect-[16/10]">

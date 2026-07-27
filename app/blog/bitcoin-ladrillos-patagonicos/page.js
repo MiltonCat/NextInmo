@@ -1,5 +1,6 @@
 import { SITE_URL, canonicalUrl } from "@/config";
 import Link from "next/link";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
   title: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes",
@@ -57,6 +58,15 @@ const articleJsonLd = {
     "@type": "WebPage",
     "@id": canonicalUrl("/blog/bitcoin-ladrillos-patagonicos"),
   },
+  // Versión escuchada del artículo (ver components/PodcastPlayer).
+  audio: {
+    "@type": "AudioObject",
+    name: "El Bitcoin de los Ladrillos Patagónicos — versión en audio",
+    contentUrl: `${SITE_URL}/podcast/bitcoin-ladrillos-patagonicos.mp3`,
+    encodingFormat: "audio/mpeg",
+    duration: "PT21M39S",
+    inLanguage: "es-AR",
+  },
 };
 
 export default function BitcoinLadrillosPage() {
@@ -95,6 +105,9 @@ export default function BitcoinLadrillosPage() {
           </div>
         </div>
       </header>
+
+      {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+      <PodcastPlayer slug="bitcoin-ladrillos-patagonicos" />
 
       {/* Contenido */}
       <div className="prose prose-lg max-w-none">

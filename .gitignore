@@ -58,3 +58,6 @@ out.zip
 *.zip
 out.zip
 *.zip
+
+# audios crudos del TTS: se comprimen a public/podcast/ y no se versionan
+/audios-nuevos/

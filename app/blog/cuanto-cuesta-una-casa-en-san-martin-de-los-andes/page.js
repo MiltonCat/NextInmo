@@ -1,6 +1,7 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl, TASADOR_URL } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
   title: "¿Cuánto cuesta una casa en San Martín de los Andes? Precios 2026",
@@ -152,6 +153,9 @@ export default function CuantoCuestaUnaCasaPage() {
             <span className="ml-auto text-xs text-gray-400 flex-shrink-0">Junio 2026 · 7 min</span>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="cuanto-cuesta-una-casa-en-san-martin-de-los-andes" />
 
         {/* Intro */}
         <section className="mb-12">

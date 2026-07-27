@@ -1,6 +1,7 @@
 import { SITE_URL, canonicalUrl, TASADOR_URL, WA_URL } from "@/config";
 import mercado, { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 import TrackedLink from "@/components/TrackedLink";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const WA_TEMPORARIO_URL = `${WA_URL}?text=${encodeURIComponent(
   "Hola Milton, leí el análisis sobre alquiler temporario y quisiera evaluar una propiedad según mi presupuesto, costos y rentabilidad esperada."
@@ -216,6 +217,9 @@ export default function AlquilerTemporarioPage() {
             </div>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="cuanto-rinde-alquiler-temporario-san-martin-de-los-andes" />
 
         {/* Contenido */}
         <div className="prose prose-lg max-w-none">

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const ARTICLE_PATH = "/blog/cuando-el-plano-no-coincide-con-la-casa";
 const ARTICLE_URL = canonicalUrl(ARTICLE_PATH);
@@ -72,6 +73,15 @@ const articleJsonLd = {
     logo: { "@type": "ImageObject", url: `${SITE_URL}/logoMC.webp` },
   },
   mainEntityOfPage: { "@type": "WebPage", "@id": ARTICLE_URL },
+  // Versión escuchada del artículo (ver components/PodcastPlayer).
+  audio: {
+    "@type": "AudioObject",
+    name: "Cuando el plano no coincide con la casa — versión en audio",
+    contentUrl: `${SITE_URL}/podcast/cuando-el-plano-no-coincide-con-la-casa.mp3`,
+    encodingFormat: "audio/mpeg",
+    duration: "PT17M49S",
+    inLanguage: "es-AR",
+  },
 };
 
 const faqItems = [
@@ -203,6 +213,11 @@ export default function CuandoElPlanoNoCoincideConLaCasaPage() {
             </div>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
+          <PodcastPlayer slug="cuando-el-plano-no-coincide-con-la-casa" />
+        </div>
 
         <div className="mx-auto max-w-2xl px-4 pt-8 sm:px-6">
           <div className="relative aspect-[16/10] overflow-hidden rounded-3xl">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
   title: "Cómo comprar una propiedad en San Martín de los Andes desde Buenos Aires",
@@ -266,6 +267,9 @@ export default function ComprarDesdeBuenosAiresPage() {
             <span className="ml-auto text-xs text-gray-400 flex-shrink-0">Junio 2026 · 9 min</span>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="comprar-en-san-martin-de-los-andes-desde-buenos-aires" />
 
         {/* Intro */}
         <section className="mb-12">

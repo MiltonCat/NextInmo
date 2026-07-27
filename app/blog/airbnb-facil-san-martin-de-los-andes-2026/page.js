@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const slug = "/blog/airbnb-facil-san-martin-de-los-andes-2026";
 const coverImage = SITE_URL + "/chapelco-invierno-sma-2026.webp";
@@ -190,6 +191,9 @@ export default function AirbnbFacilPage() {
             competencia, la gestión y la formalización.
           </p>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="airbnb-facil-san-martin-de-los-andes-2026" />
 
         <div className="prose prose-lg max-w-none">
           <section className="mb-12">

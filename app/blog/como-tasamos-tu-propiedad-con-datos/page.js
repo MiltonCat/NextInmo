@@ -2,6 +2,7 @@ import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl, TASADOR_URL } from "@/config";
 import { RELEVADAS_TOTAL_FMT, RELEVADAS_MODELO_FMT } from "@/lib/mercado";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
   title: "Cómo tasamos tu propiedad con datos en San Martín de los Andes",
@@ -240,6 +241,9 @@ export default function ComoTasamosConDatosPage() {
             <span className="ml-auto text-xs text-gray-400 flex-shrink-0">Junio 2026 · 8 min</span>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="como-tasamos-tu-propiedad-con-datos" />
 
         {/* Intro */}
         <section className="mb-12">

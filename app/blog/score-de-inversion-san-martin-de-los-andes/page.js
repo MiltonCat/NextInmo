@@ -1,6 +1,7 @@
 import { SITE_URL, canonicalUrl, TASADOR_URL, WA_URL } from "@/config";
 import mercado, { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 import TrackedLink from "@/components/TrackedLink";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const WA_SCORE_URL = `${WA_URL}?text=${encodeURIComponent(
   "Hola Milton, leí la guía sobre el Score de Inversión y quisiera analizar una propiedad o una oportunidad según mi presupuesto."
@@ -229,6 +230,9 @@ export default function ScoreInversionPage() {
             </div>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="score-de-inversion-san-martin-de-los-andes" />
 
         {/* Contenido */}
         <div className="prose prose-lg max-w-none">

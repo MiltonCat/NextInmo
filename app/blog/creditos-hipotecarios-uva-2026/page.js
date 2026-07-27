@@ -1,5 +1,6 @@
 import { SITE_URL, canonicalUrl } from "@/config";
 import Link from "next/link";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
   title: "Créditos hipotecarios UVA 2026: tasas y bancos",
@@ -144,6 +145,9 @@ export default function CreditosHipotecariosUVAPage() {
           </div>
         </div>
       </header>
+
+      {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+      <PodcastPlayer slug="creditos-hipotecarios-uva-2026" />
 
       {/* Contenido */}
       <div className="prose prose-base sm:prose-lg max-w-none [hyphens:none] [overflow-wrap:normal]">

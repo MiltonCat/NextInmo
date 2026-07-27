@@ -1,6 +1,7 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
   title: "Crédito Neuquén Habita 2026: requisitos y montos",
@@ -177,6 +178,9 @@ export default function CreditoHipotecarioNeuquenPage() {
             <span className="ml-auto text-xs text-gray-400 flex-shrink-0">Junio 2026 · 7 min</span>
           </div>
         </header>
+
+        {/* Versión escuchada — no se muestra si el post no tiene audio registrado */}
+        <PodcastPlayer slug="credito-hipotecario-neuquen-2026" />
 
         {/* Intro */}
         <section className="mb-12">
