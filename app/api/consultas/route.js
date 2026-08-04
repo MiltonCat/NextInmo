@@ -5,6 +5,7 @@
 // largo máximo por campo (payloads basura).
 import { NextResponse } from "next/server";
 import { insertInquiry } from "@/lib/crm";
+import { getSessionUser } from "@/lib/auth";
 import { rateLimit, getClientIp, clamp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -33,6 +34,10 @@ export async function POST(request) {
     let detalle = body.detalle && typeof body.detalle === "object" ? body.detalle : {};
     if (JSON.stringify(detalle).length > 10_000) detalle = {};
 
+    // La asociación se deriva de la cookie verificada en servidor. Cualquier
+    // user_id enviado en el body se ignora; sin sesión el flujo sigue anónimo.
+    const sessionUser = await getSessionUser();
+
     await insertInquiry({
       tipo: body.tipo,
       nombre: clamp(body.nombre, 200),
@@ -43,6 +48,7 @@ export async function POST(request) {
         ? Number(body.property_id) : null,
       property_title: clamp(body.property_title, 300),
       detalle,
+      user_id: sessionUser?.id ?? null,
     });
 
     return NextResponse.json({ ok: true });
