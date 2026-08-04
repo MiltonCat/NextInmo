@@ -61,3 +61,12 @@ out.zip
 
 # audios crudos del TTS: se comprimen a public/podcast/ y no se versionan
 /audios-nuevos/
+
+# Datos de la revision diaria de analitica (se regeneran, no van al repo)
+revision-web.json
+
+# Notas de trabajo y archivos temporales de sesion (ver _ARCHIVOS_SUELTOS.md)
+_ARCHIVOS_SUELTOS.md
+_prueba
+_admin_check.png
+*.log
