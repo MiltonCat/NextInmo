@@ -2,6 +2,8 @@ export const revalidate = 3600;
 import { getPropertySlug } from "@/data/properties";
 import { getProperties } from "@/lib/properties";
 import { canonicalUrl } from "@/config";
+import { blogPosts } from "@/lib/blogPosts";
+import { barriosConPerfil } from "@/lib/barrios";
 
 export default async function sitemap() {
   const properties = await getProperties();
@@ -18,21 +20,32 @@ export default async function sitemap() {
     { url: canonicalUrl("/vender"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/nosotros"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: canonicalUrl("/blog"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: canonicalUrl("/blog/alquileres-san-martin-de-los-andes-2026"), lastModified: new Date("2026-07-17"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/airbnb-facil-san-martin-de-los-andes-2026"), lastModified: new Date("2026-07-14"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/credito-hipotecario-neuquen-2026"), lastModified: new Date("2026-06-22"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes"), lastModified: new Date("2026-06-16"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/como-tasamos-tu-propiedad-con-datos"), lastModified: new Date("2026-06-16"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires"), lastModified: new Date("2026-06-12"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/donde-vivir-san-martin-de-los-andes"), lastModified: new Date("2026-06-02"), changeFrequency: "monthly", priority: 0.9 },
-    { url: canonicalUrl("/blog/creditos-hipotecarios-uva-2026"), lastModified: new Date("2026-05-26"), changeFrequency: "monthly", priority: 0.8 },
-    { url: canonicalUrl("/blog/bitcoin-ladrillos-patagonicos"), lastModified: new Date("2026-05-26"), changeFrequency: "monthly", priority: 0.7 },
+    { url: canonicalUrl("/barrios"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: canonicalUrl("/experiencia-barrio"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: canonicalUrl("/contacto"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: canonicalUrl("/prensa"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: canonicalUrl("/centro-ayuda"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: canonicalUrl("/terminos"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
+
+  // Los posts salen de `lib/blogPosts.js`, la misma lista que renderiza /blog.
+  // Antes esta lista estaba duplicada acá y se desincronizó: tres posts
+  // publicados nunca entraron al sitemap. Si agregás un post allá, entra solo.
+  const blogRoutes = blogPosts.map((post) => ({
+    url: canonicalUrl(`/blog/${post.id}`),
+    lastModified: new Date(post.updated || post.dateTime),
+    changeFrequency: "monthly",
+    priority: post.sitemapPriority ?? 0.9,
+  }));
+
+  // Solo los barrios con ficha publicada (`perfilCompleto`). Los demás no tienen
+  // página propia todavía: listarlos acá sería mandar a Google a un 404.
+  const barrioRoutes = barriosConPerfil().map((barrio) => ({
+    url: canonicalUrl(`/barrios/${barrio.slug}`),
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
 
   const tipoRoutes = ["casas", "departamentos", "cabanas", "lotes", "monoambientes", "ph"].map((tipo) => ({
     url: canonicalUrl(`/propiedades/${tipo}`),
@@ -51,5 +64,5 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...tipoRoutes, ...propertyRoutes];
+  return [...staticRoutes, ...blogRoutes, ...barrioRoutes, ...tipoRoutes, ...propertyRoutes];
 }
