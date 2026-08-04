@@ -2,6 +2,11 @@ import Link from "next/link";
 import PrecioM2Chart from "@/components/PrecioM2Chart";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+// Compartido con las fichas /barrios/[slug].
+import { ZONAS } from "@/lib/precioZonas";
+import { barriosConPerfil } from "@/lib/barrios";
+
+const BARRIOS_CON_FICHA = new Set(barriosConPerfil().map((b) => b.slug));
 
 export const metadata = {
   title: "Precio m² San Martín de los Andes 2026",
@@ -59,21 +64,6 @@ const EVOLUCION = [
   { anio: 2026, precio: 2600, variacion: 0.4, contexto: "Sigue entre los más caros del país", fuente: "Verificado · Argenprop / Zonaprop" },
 ];
 
-const ZONAS = [
-  { nombre: "Centro", tipo: "Departamento", precioM2: 2735, variacion: 4.5 },
-  { nombre: "Centro", tipo: "Casa", precioM2: 2180, variacion: 4.2 },
-  { nombre: "Centro", tipo: "Terreno", precioM2: 560, variacion: 2.1 },
-  { nombre: "Centro", tipo: "Local comercial", precioM2: 2400, variacion: 3.5 },
-  { nombre: "Chapelco Golf", tipo: "Departamento", precioM2: 3400, variacion: 6.5 },
-  { nombre: "Chapelco Golf", tipo: "Casa", precioM2: 2950, variacion: 5.8 },
-  { nombre: "Chapelco Golf", tipo: "Terreno", precioM2: 380, variacion: 8.2 },
-  { nombre: "Costanera", tipo: "Departamento", precioM2: 2950, variacion: 5.5 },
-  { nombre: "Costanera", tipo: "Casa", precioM2: 2400, variacion: 4.8 },
-  { nombre: "Las Marías", tipo: "Casa", precioM2: 1750, variacion: 3.5 },
-  { nombre: "Las Marías", tipo: "Terreno", precioM2: 110, variacion: 2.8 },
-  { nombre: "Las Pendientes", tipo: "Casa", precioM2: 2950, variacion: 5.5 },
-  { nombre: "Las Pendientes", tipo: "Terreno", precioM2: 72, variacion: 3.5 },
-];
 
 const FUENTES = [
   { nombre: "Diario 7 Lagos", dato: "USD 2.520/m² — ciudad más cara de Argentina (2022)" },
@@ -197,7 +187,17 @@ export default function PrecioM2Page() {
               <tbody className="divide-y divide-gray-100">
                 {ZONAS.map((z, i) => (
                   <tr key={i} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900">{z.nombre}</td>
+                    <td className="px-4 py-3 font-medium text-gray-900">
+                      {/* Solo los barrios con ficha publicada son link; el resto
+                          quedaría apuntando a un 404. */}
+                      {BARRIOS_CON_FICHA.has(z.slug) ? (
+                        <Link href={`/barrios/${z.slug}`} className="hover:text-rose-600 hover:underline">
+                          {z.nombre}
+                        </Link>
+                      ) : (
+                        z.nombre
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-gray-500">{z.tipo}</td>
                     <td className="px-4 py-3 text-right font-semibold text-gray-900">USD {z.precioM2.toLocaleString()}</td>
                     <td className="px-4 py-3 text-right">

@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { CONTACT_EMAIL } from "@/config";
+import EncuestaBarrioDrawer from "./EncuestaBarrioDrawer";
 
 // ─── TODO: reemplazar los youtubeId con los IDs reales de YouTube ──────────────
 // Para obtener el ID: en youtube.com/watch?v=ESTE_ES_EL_ID
@@ -25,26 +27,6 @@ const BARRIO_VIDEOS = [
   },
 ];
 
-const BARRIOS = [
-  "Centro",
-  "Chapelco Golf",
-  "Las Marías",
-  "Costanera",
-  "Las Pendientes",
-  "Vía Blanca",
-  "Arrayán",
-  "Lacar",
-  "Patagonia Norte",
-  "Otro (especificá en el comentario)",
-];
-
-const RELACION = [
-  "Vivo aquí actualmente",
-  "Viví aquí antes",
-  "Trabajo o tengo un negocio en la zona",
-  "Tengo una propiedad ahí",
-  "Conozco bien la zona",
-];
 
 const PHONE_STEP_DURATIONS = [3500, 3000, 2500, 4000, 2000, 3000];
 const PHONE_COMMENT = "La tranquilidad del lago y los vecinos son increíbles...";
@@ -106,20 +88,6 @@ const GUIDE_QUESTIONS = [
   },
 ];
 
-const EMPTY_FORM = {
-  nombre: "",
-  email: "",
-  barrio: "",
-  relacion: "",
-  mejor_del_barrio: "",
-  que_tener_en_cuenta: "",
-  recomienda_vivir: "",
-  recomienda_invertir: "",
-  comentario: "",
-  autorizo: false,
-  website: "",
-};
-
 // ─── Card de barrio — retrato con escalonado ──────────────────────────────────
 function VideoCard({ youtubeId, titulo, descripcion, imagen }) {
   const [playing, setPlaying] = useState(false);
@@ -167,302 +135,37 @@ function VideoCard({ youtubeId, titulo, descripcion, imagen }) {
   );
 }
 
-// ─── Drawer de la encuesta ────────────────────────────────────────────────────
-function EncuestaDrawer({ open, onClose }) {
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [status, setStatus] = useState("idle"); // idle | loading | success | error
-  const [errorDetail, setErrorDetail] = useState("");
-
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (form.website) return;
-    if (!form.autorizo) return;
-    setStatus("loading");
-    setErrorDetail("");
-    try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY,
-          subject: `Nueva experiencia de barrio — ${form.barrio || "Sin especificar"} · Catalán Propiedades`,
-          from_name: "Guía de Barrios · Catalán Propiedades",
-          nombre: form.nombre || "Anónimo",
-          email: form.email || "No proporcionado",
-          barrio: form.barrio,
-          relacion: form.relacion,
-          mejor_del_barrio: form.mejor_del_barrio,
-          que_tener_en_cuenta: form.que_tener_en_cuenta,
-          recomienda_vivir: form.recomienda_vivir,
-          recomienda_invertir: form.recomienda_invertir,
-          comentario: form.comentario,
-        }),
-      });
-      const data = await res.json();
-      if (!data.success) {
-        setErrorDetail(data.message ?? `HTTP ${res.status}`);
-        throw new Error();
-      }
-      setStatus("success");
-      setForm(EMPTY_FORM);
-    } catch (err) {
-      if (!errorDetail) setErrorDetail(err.message || "fetch falló (posible CORS o red)");
-      setStatus("error");
-    }
-  };
-
-  const inputCls = "w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition";
-  const labelCls = "block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2";
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-      />
-
-      {/* Drawer */}
-      <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
-          <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Guía de Barrios</p>
-            <h2 className="text-lg font-black text-gray-900 font-jakarta">Compartí tu experiencia</h2>
-          </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Contenido */}
-        <div className="flex-1 overflow-y-auto">
-          {status === "success" ? (
-            <div className="flex flex-col items-center justify-center h-full px-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 font-jakarta mb-3">¡Gracias por compartir!</h3>
-              <p className="text-gray-500 leading-relaxed mb-8">
-                Recibimos tu experiencia. El equipo de Catalán Propiedades la va a revisar antes de considerarla para la Guía de Barrios.
-              </p>
-              <button
-                onClick={() => { setStatus("idle"); onClose(); }}
-                className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-xl text-sm hover:bg-gray-800 transition-colors"
-              >
-                Cerrar
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
-              {/* Honeypot — invisible para humanos, los bots lo completan */}
-              <div style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
-                <input
-                  type="text"
-                  name="website"
-                  value={form.website}
-                  onChange={(e) => set("website", e.target.value)}
-                  tabIndex={-1}
-                  autoComplete="off"
-                />
-              </div>
-
-              {/* Nombre */}
-              <div>
-                <label className={labelCls}>Nombre <span className="text-gray-300 normal-case font-normal">(opcional)</span></label>
-                <input
-                  type="text"
-                  value={form.nombre}
-                  onChange={(e) => set("nombre", e.target.value)}
-                  placeholder="Podés dejarlo en blanco para ser anónimo"
-                  className={inputCls}
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className={labelCls}>
-                  Email <span className="text-gray-300 normal-case font-normal">(opcional)</span>
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => set("email", e.target.value)}
-                  placeholder="Para recibir el informe de precio del m² por zona"
-                  className={inputCls}
-                />
-                <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                  Te avisamos cuando actualicemos el análisis de precio del m² por barrio
-                </p>
-              </div>
-
-              {/* Barrio */}
-              <div>
-                <label className={labelCls}>Barrio <span className="text-red-400">*</span></label>
-                <select
-                  required
-                  value={form.barrio}
-                  onChange={(e) => set("barrio", e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">Seleccioná un barrio…</option>
-                  {BARRIOS.map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-
-              {/* Relación */}
-              <div>
-                <label className={labelCls}>¿Cuál es tu relación con esa zona? <span className="text-red-400">*</span></label>
-                <select
-                  required
-                  value={form.relacion}
-                  onChange={(e) => set("relacion", e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">Seleccioná una opción…</option>
-                  {RELACION.map((r) => <option key={r} value={r}>{r}</option>)}
-                </select>
-              </div>
-
-              {/* Mejor del barrio */}
-              <div>
-                <label className={labelCls}>¿Qué es lo mejor del barrio? <span className="text-red-400">*</span></label>
-                <textarea
-                  required
-                  rows={3}
-                  value={form.mejor_del_barrio}
-                  onChange={(e) => set("mejor_del_barrio", e.target.value)}
-                  placeholder="Contanos qué destacarías de vivir o estar en esa zona…"
-                  className={`${inputCls} resize-none`}
-                />
-              </div>
-
-              {/* Qué tener en cuenta */}
-              <div>
-                <label className={labelCls}>¿Qué debería saber alguien que quiere comprar ahí?</label>
-                <textarea
-                  rows={3}
-                  value={form.que_tener_en_cuenta}
-                  onChange={(e) => set("que_tener_en_cuenta", e.target.value)}
-                  placeholder="Accesos en invierno, servicios, particularidades de la zona…"
-                  className={`${inputCls} resize-none`}
-                />
-              </div>
-
-              {/* Recomendaciones */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>¿Para vivir?</label>
-                  {["Sí", "Tal vez", "No"].map((v) => (
-                    <label key={v} className="flex items-center gap-2.5 py-2 cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="recomienda_vivir"
-                        value={v}
-                        checked={form.recomienda_vivir === v}
-                        onChange={() => set("recomienda_vivir", v)}
-                        className="accent-primary-600 w-4 h-4"
-                      />
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900">{v}</span>
-                    </label>
-                  ))}
-                </div>
-                <div>
-                  <label className={labelCls}>¿Para invertir?</label>
-                  {["Sí", "Tal vez", "No"].map((v) => (
-                    <label key={v} className="flex items-center gap-2.5 py-2 cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="recomienda_invertir"
-                        value={v}
-                        checked={form.recomienda_invertir === v}
-                        onChange={() => set("recomienda_invertir", v)}
-                        className="accent-primary-600 w-4 h-4"
-                      />
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900">{v}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Comentario publicable */}
-              <div>
-                <label className={labelCls}>Comentario breve <span className="text-gray-300 normal-case font-normal">(podría publicarse)</span></label>
-                <textarea
-                  rows={3}
-                  maxLength={280}
-                  value={form.comentario}
-                  onChange={(e) => set("comentario", e.target.value)}
-                  placeholder="Una frase que resuma tu experiencia en el barrio…"
-                  className={`${inputCls} resize-none`}
-                />
-                <p className="text-xs text-gray-400 mt-1 text-right">{form.comentario.length}/280</p>
-              </div>
-
-              {/* Autorización */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  required
-                  type="checkbox"
-                  checked={form.autorizo}
-                  onChange={(e) => set("autorizo", e.target.checked)}
-                  className="mt-0.5 accent-primary-600 w-4 h-4 flex-shrink-0"
-                />
-                <span className="text-xs text-gray-500 leading-relaxed group-hover:text-gray-700">
-                  Autorizo a Catalán Propiedades a usar fragmentos de mis respuestas de forma <strong className="text-gray-700">anónima y moderada</strong> como referencia orientativa en la Guía de Barrios.
-                </span>
-              </label>
-
-              {status === "error" && (
-                <div className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-xl space-y-1">
-                  <p>Hubo un error al enviar. Intentá de nuevo o escribinos a{" "}
-                  <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a></p>
-                  {errorDetail && <p className="text-xs text-red-400 font-mono break-all">{errorDetail}</p>}
-                </div>
-              )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={status === "loading" || !form.autorizo}
-                className="w-full py-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 text-white font-semibold rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
-              >
-                {status === "loading" ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Enviando…
-                  </>
-                ) : (
-                  "Enviar mi experiencia"
-                )}
-              </button>
-              <p className="text-xs text-gray-400 text-center pb-2">
-                Anónimo · Sin spam · Revisado antes de publicar
-              </p>
-            </form>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
 // ─── Phone Animation Premium ──────────────────────────────────────────────────
 const EASE_SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
+
+// Avatar generado localmente (sin dependencias externas)
+function PhoneAvatar({ initials, from = "#cbd5e1", to = "#94a3b8", size = 32, style }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: `linear-gradient(135deg, ${from}, ${to})`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "white",
+        fontWeight: 700,
+        fontSize: Math.round(size * 0.36),
+        letterSpacing: "-0.02em",
+        ...style,
+      }}
+    >
+      {initials ?? (
+        <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="white">
+          <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z" />
+        </svg>
+      )}
+    </div>
+  );
+}
 
 function PhoneStatusBar() {
   return (
@@ -568,11 +271,11 @@ function PhoneAnimation() {
         {/* Testimonios con fotos */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
           {[
-            { img: 32, name: "Lucía M.", barrio: "Centro", text: "El lago a 5 minutos y todo cerca. No cambiaría nada." },
-            { img: 45, name: "Martín S.", barrio: "Chapelco", text: "La mejor inversión que hice en años." },
+            { initials: "LM", from: "#f472b6", to: "#E8325A", name: "Lucía M.", barrio: "Centro", text: "El lago a 5 minutos y todo cerca. No cambiaría nada." },
+            { initials: "MS", from: "#60a5fa", to: "#4338ca", name: "Martín S.", barrio: "Chapelco", text: "La mejor inversión que hice en años." },
           ].map((t, i) => (
             <div key={i} style={{ background: "#f9fafb", borderRadius: 12, padding: "8px 10px", display: "flex", alignItems: "flex-start", gap: 8, animation: `phone-fade-up 0.4s ease ${0.1 + i * 0.15}s both` }}>
-              <img src={`https://i.pravatar.cc/60?img=${t.img}`} alt="" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+              <PhoneAvatar initials={t.initials} from={t.from} to={t.to} size={28} />
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
                   <span style={{ fontSize: 9.5, fontWeight: 700, color: "#0f172a" }}>{t.name}</span>
@@ -607,7 +310,7 @@ function PhoneAnimation() {
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
-            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <PhoneAvatar size={32} />
             <div>
               <div style={drawerHeader}>Guía de Barrios</div>
               <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
@@ -640,7 +343,7 @@ function PhoneAnimation() {
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
-            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <PhoneAvatar size={32} />
             <div>
               <div style={drawerHeader}>Guía de Barrios</div>
               <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
@@ -678,7 +381,7 @@ function PhoneAnimation() {
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
-            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <PhoneAvatar size={32} />
             <div>
               <div style={drawerHeader}>Guía de Barrios</div>
               <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
@@ -713,7 +416,7 @@ function PhoneAnimation() {
         <div style={handle} />
         <div style={{ padding: "0 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
-            <img src="https://i.pravatar.cc/60?img=32" alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <PhoneAvatar size={32} />
             <div>
               <div style={drawerHeader}>Guía de Barrios</div>
               <div style={{ ...drawerTitle, marginBottom: 0 }}>Compartí tu experiencia</div>
@@ -745,15 +448,7 @@ function PhoneAnimation() {
       <div style={{ flex: 1 }} />
       <div style={overlay} />
       <div style={{ ...drawerBase, padding: "20px 16px 16px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-        <div style={{ width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, marginBottom: 16 }} />
-
-        {/* Community avatars */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12, animation: "phone-fade-up 0.4s ease 0.05s both" }}>
-          {[32, 45, 18, 7].map((n, i) => (
-            <img key={n} src={`https://i.pravatar.cc/60?img=${n}`} alt="" style={{ width: 32, height: 32, borderRadius: "50%", border: "2.5px solid white", marginLeft: i === 0 ? 0 : -10, objectFit: "cover", boxShadow: "0 2px 6px rgba(0,0,0,0.12)" }} />
-          ))}
-          <div style={{ width: 32, height: 32, borderRadius: "50%", border: "2.5px solid white", marginLeft: -10, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8.5, color: "#6b7280", fontWeight: 700, boxShadow: "0 2px 6px rgba(0,0,0,0.08)" }}>+43</div>
-        </div>
+        <div style={{ width: 32, height: 4, background: "#e5e7eb", borderRadius: 2, marginBottom: 20 }} />
 
         <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10, animation: "phone-success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both" }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -761,7 +456,7 @@ function PhoneAnimation() {
           </svg>
         </div>
         <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", marginBottom: 7, letterSpacing: "-0.03em", animation: "phone-fade-up 0.4s ease 0.25s both" }}>¡Gracias por compartir!</div>
-        <div style={{ fontSize: 9.5, color: "#6b7280", lineHeight: 1.65, maxWidth: 195, animation: "phone-fade-up 0.4s ease 0.38s both" }}>Te uniste a <strong style={{ color: "#0f172a" }}>+47 vecinos</strong> que construyen la guía más real de la Patagonia.</div>
+        <div style={{ fontSize: 9.5, color: "#6b7280", lineHeight: 1.65, maxWidth: 195, animation: "phone-fade-up 0.4s ease 0.38s both" }}>Sumás tu mirada a la guía de barrios más real de la Patagonia.</div>
         <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
           <div style={{ width: 100, height: 4, background: "#0f172a", borderRadius: 2, opacity: 0.12 }} />
         </div>
@@ -810,13 +505,15 @@ export default function ExperienciaBarrioPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <EncuestaDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <EncuestaBarrioDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       {/* ── HERO SPLIT ──────────────────────────── */}
       <section className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
 
         {/* Panel texto — fondo blanco */}
-        <div className="flex flex-col justify-center px-8 sm:px-14 lg:px-16 xl:px-20 py-32 lg:py-0 order-2 lg:order-1 bg-white">
+        {/* En mobile el texto va PRIMERO: antes se veían 55vh de animación del
+            teléfono antes de poder leer de qué se trata la página. */}
+        <div className="flex flex-col justify-center px-8 sm:px-14 lg:px-16 xl:px-20 py-20 lg:py-0 order-1 bg-white">
           <p className="text-xs font-bold tracking-[0.18em] uppercase text-gray-400 mb-6">
             Catalán Propiedades · Guía de Barrios
           </p>
@@ -824,14 +521,15 @@ export default function ExperienciaBarrioPage() {
             Conocé cada barrio desde la mirada de quienes lo viven.
           </h1>
           <p className="text-gray-500 text-lg leading-relaxed mb-6 max-w-md">
-            Compartí cómo es vivir en tu barrio y accedé al análisis actualizado de precio del m² por zona — datos que usamos para asesorar inversiones reales.
+            Lo que sabe quien vive en un barrio no está en ningún portal. Estamos juntando esa
+            información, barrio por barrio, para que el que compra deje de decidir a ciegas.
           </p>
           <div className="flex items-start gap-3 mb-8 p-4 bg-gray-50 border border-gray-200 rounded-xl max-w-md">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Quienes comparten su experiencia reciben antes que nadie el <strong className="text-gray-900">informe de precio del m² por barrio</strong> cuando se actualiza.
+              Cuando tu barrio junte suficientes opiniones te mandamos <strong className="text-gray-900">el resumen de lo que dijeron los vecinos</strong> — algo que hoy no existe en ningún lado.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -851,24 +549,24 @@ export default function ExperienciaBarrioPage() {
               Conocer los barrios
             </a>
           </div>
-          <p className="text-gray-400 text-sm mt-5">Anónimo · Menos de 5 minutos · Sin registro</p>
+          <p className="text-gray-400 text-sm mt-5">Anónimo · 2 minutos · Sin registro</p>
         </div>
 
         {/* Panel animación — Phone mockup */}
-        <div className="order-1 lg:order-2 flex items-center justify-center bg-slate-50 min-h-[55vh] lg:min-h-0">
+        <div className="order-2 flex items-center justify-center bg-slate-50 min-h-[55vh] lg:min-h-0">
           <PhoneAnimation />
         </div>
 
       </section>
 
-      {/* ── BARRIOS EN VIDEO / VISUAL ───────────────── */}
+      {/* ── BARRIOS EN IMÁGENES / VISUAL ───────────────── */}
       <section id="barrios" className="py-20 sm:py-28 bg-white overflow-hidden">
         <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16">
 
           {/* Header centrado */}
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-xs font-bold tracking-[0.18em] uppercase text-gray-400 mb-4">
-              Recorridos por barrio
+              Los barrios en imágenes
             </p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 font-jakarta leading-[1.06] mb-5">
               Conocé los barrios<br className="hidden sm:block" /> desde adentro
@@ -883,6 +581,17 @@ export default function ExperienciaBarrioPage() {
             {BARRIO_VIDEOS.map((v) => (
               <VideoCard key={v.titulo} {...v} />
             ))}
+          </div>
+
+          {/* Salida hacia las fichas: esta página capta al vecino que aporta,
+              las fichas sirven al comprador que consulta. */}
+          <div className="text-center mt-12">
+            <Link
+              href="/barrios"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-rose-600 hover:underline"
+            >
+              Ver la ficha de cada barrio: precios, servicios y accesos →
+            </Link>
           </div>
 
         </div>
@@ -1029,7 +738,7 @@ export default function ExperienciaBarrioPage() {
                   Consultar por email
                 </a>
               </div>
-              <p className="text-gray-400 text-sm mt-5">Anónimo · Menos de 5 minutos · Sin registro</p>
+              <p className="text-gray-400 text-sm mt-5">Anónimo · 2 minutos · Sin registro</p>
             </div>
             <div className="relative rounded-3xl overflow-hidden aspect-[4/3]">
               <img src="/muelle.webp" alt="San Martín de los Andes" className="w-full h-full object-cover" />
