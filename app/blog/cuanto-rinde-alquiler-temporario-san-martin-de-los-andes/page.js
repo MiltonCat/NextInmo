@@ -76,6 +76,15 @@ const articleJsonLd = {
       "/blog/cuanto-rinde-alquiler-temporario-san-martin-de-los-andes"
     ),
   },
+  // Versión escuchada del artículo (ver components/PodcastPlayer).
+  audio: {
+    "@type": "AudioObject",
+    name: "Cuánto rinde un alquiler temporario en San Martín de los Andes — versión en audio",
+    contentUrl: `${SITE_URL}/podcast/cuanto-rinde-alquiler-temporario-san-martin-de-los-andes.mp3`,
+    encodingFormat: "audio/mpeg",
+    duration: "PT21M17S",
+    inLanguage: "es-AR",
+  },
 };
 
 const faqJsonLd = {

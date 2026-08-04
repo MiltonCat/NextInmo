@@ -61,6 +61,15 @@ const articleJsonLd = {
     logo: { "@type": "ImageObject", url: SITE_URL + "/logoMC.webp" },
   },
   mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl(slug) },
+  // Versión escuchada del artículo (ver components/PodcastPlayer).
+  audio: {
+    "@type": "AudioObject",
+    name: "¿Se terminó el Airbnb fácil en San Martín de los Andes? — versión en audio",
+    contentUrl: `${SITE_URL}/podcast/airbnb-facil-san-martin-de-los-andes-2026.mp3`,
+    encodingFormat: "audio/mpeg",
+    duration: "PT19M11S",
+    inLanguage: "es-AR",
+  },
 };
 
 const faqJsonLd = {
