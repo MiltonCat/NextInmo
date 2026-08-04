@@ -10,7 +10,8 @@
     "optimize-images": "node scripts/optimize-images.js",
     "comprimir-audio": "node scripts/comprimir-audio.mjs",
     "deploy": "next build && node scripts/zip-out.js",
-    "revision-web": "node --import ./scripts/resolve-next.mjs scripts/revision-web.mjs"
+    "revision-web": "node --import ./scripts/resolve-next.mjs scripts/revision-web.mjs",
+    "revision-web:datos": "node scripts/revision-web-datos.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
