@@ -11,6 +11,8 @@ import {
   uploadImage,
 } from "@/lib/adminDb";
 
+const IMAGE_FIELDS = ["image", "image1", "image2", "image3", "image4"];
+
 // --- helpers de parseo del formulario ---
 function num(v) {
   if (v === null || v === undefined || v === "") return null;
@@ -57,49 +59,16 @@ async function buildRowFromForm(formData) {
 
   row.modalidad = row.operation === "alquiler" ? "alquiler_permanente" : row.operation;
 
-  // Imágenes: cantidad libre, cada una con su categoría de ambiente (Cocina,
-  // Dormitorio, etc.) para armar el recorrido fotográfico agrupado.
-  // `existing_images` (JSON de {url,category}) trae las fotos ya guardadas
-  // en el orden final que eligió el admin (reordenadas/eliminadas/recategorizadas
-  // vía ImagesManager); `new_images` son los archivos nuevos, que se suben y
-  // se agregan al final con la categoría paralela de `new_images_categories`.
-  // `images[0]` es siempre la portada.
-  let existingImages = [];
-  try {
-    const parsed = JSON.parse(str(formData.get("existing_images")) || "[]");
-    existingImages = Array.isArray(parsed)
-      ? parsed.map((img) => ({ url: img?.url, category: img?.category || null })).filter((img) => img.url)
-      : [];
-  } catch {
-    existingImages = [];
+  // Imágenes: si se subió un archivo nuevo, se sube y se usa su URL;
+  // si no, se conserva la URL actual (campo oculto `<campo>_current`).
+  for (const field of IMAGE_FIELDS) {
+    const file = formData.get(field);
+    if (file && typeof file === "object" && typeof file.arrayBuffer === "function" && file.size > 0) {
+      row[field] = await uploadImage(file);
+    } else {
+      row[field] = str(formData.get(`${field}_current`));
+    }
   }
-
-  let newCategories = [];
-  try {
-    const parsed = JSON.parse(str(formData.get("new_images_categories")) || "[]");
-    newCategories = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    newCategories = [];
-  }
-
-  const newFiles = formData.getAll("new_images")
-    .filter((f) => f && typeof f === "object" && typeof f.arrayBuffer === "function" && f.size > 0);
-  const uploadedEntries = [];
-  for (let i = 0; i < newFiles.length; i++) {
-    const url = await uploadImage(newFiles[i]);
-    uploadedEntries.push({ url, category: newCategories[i] || null });
-  }
-
-  const images = [...existingImages, ...uploadedEntries].filter((img) => img.url);
-  row.images = images;
-  // Mirror de los primeros 5 (solo la url) en las columnas legacy, por
-  // compatibilidad con el resto del sitio (tarjetas, SEO, mapa) que todavía
-  // lee `image`/`image1..4`.
-  row.image = images[0]?.url ?? null;
-  row.image1 = images[1]?.url ?? null;
-  row.image2 = images[2]?.url ?? null;
-  row.image3 = images[3]?.url ?? null;
-  row.image4 = images[4]?.url ?? null;
 
   return row;
 }

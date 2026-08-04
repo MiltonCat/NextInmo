@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Lightbox from "@/components/Lightbox";
-import PhotoTour from "@/components/PhotoTour";
 import VisitScheduler from "@/components/VisitScheduler";
 import PropertyInquiry from "@/components/PropertyInquiry";
 import PropertySheet from "@/components/PropertySheet";
@@ -16,20 +15,7 @@ function waLink(property, message = "") {
   return whatsappUrl(message || propertyWhatsappMessage(property));
 }
 
-// Ícono de grilla 2x2, igual al que usa Airbnb en su botón "Mostrar todas las fotos".
-function GridIcon() {
-  return (
-    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
-      <rect x="0" y="0" width="6.5" height="6.5" rx="1" />
-      <rect x="9.5" y="0" width="6.5" height="6.5" rx="1" />
-      <rect x="0" y="9.5" width="6.5" height="6.5" rx="1" />
-      <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1" />
-    </svg>
-  );
-}
-
 export default function PropertyDetailClient({ property }) {
-  const [tourOpen, setTourOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -60,18 +46,7 @@ export default function PropertyDetailClient({ property }) {
     );
   }
 
-  // property.images ya viene armado por lib/properties.js (galería completa,
-  // sin límite, cada foto como { url, category }); se usan solo las primeras
-  // 5 como preview en la ficha.
-  const allImages = property.images?.length
-    ? property.images
-    : [property.image, property.image1, property.image2, property.image3, property.image4]
-        .filter(Boolean)
-        .map((url) => ({ url, category: null }));
-  const previewImages = allImages.slice(0, 5);
-  // Mismo texto y estilo (ícono de grilla + pill blanca) que el botón de
-  // Airbnb, sin el conteo entre paréntesis.
-  const galleryButtonLabel = "Ver todas las fotos";
+  const allImages = [property.image, property.image1, property.image2, property.image3, property.image4].filter(Boolean);
   const fav = isFavorite(property.id);
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const isLot = /lote|terreno/i.test(property.type || "");
@@ -107,12 +82,7 @@ export default function PropertyDetailClient({ property }) {
     window.open(whatsappUrl(msg), "_blank");
   };
 
-  // Etapa 2: grilla de preview → recorrido fotográfico agrupado por ambiente
-  // (estilo Airbnb). Etapa 3: dentro del recorrido, click en una foto → foto
-  // a pantalla completa una por una (el Lightbox de toda la vida).
-  const openTour = () => setTourOpen(true);
-
-  const openPhotoFromTour = (index) => {
+  const openGallery = (index = 0) => {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
@@ -225,41 +195,39 @@ export default function PropertyDetailClient({ property }) {
           {/* Gallery - desktop */}
           <div className="relative mb-8 hidden lg:grid grid-cols-4 grid-rows-2 gap-1 h-64 lg:h-80 overflow-hidden rounded-xl">
             <div className="col-span-2 row-span-2">
-              <img src={previewImages[0]?.url} alt={property.title} fetchPriority="high" decoding="async" className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" onClick={openTour} />
+              <img src={property.image} alt={property.title} fetchPriority="high" decoding="async" className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" onClick={() => openGallery(0)} />
             </div>
-            {previewImages.slice(1, 5).map((image, index) => (
+            {[property.image1, property.image2, property.image3, property.image4].map((image, index) => (
               <div key={index} className="col-span-1 row-span-1">
                 <img
-                  src={image?.url}
+                  src={image || property.image}
                   alt={`${property.title} - ${index + 2}`}
                   loading="lazy"
                   decoding="async"
                   className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
-                  onClick={openTour}
+                  onClick={() => openGallery(index + 1)}
                 />
               </div>
             ))}
             <button
-              onClick={openTour}
+              onClick={() => openGallery(0)}
               className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-lg bg-white/95 px-4 py-2 text-sm font-semibold text-gray-800 shadow-lg transition hover:bg-white"
             >
-              <GridIcon />
-              {galleryButtonLabel}
+              Ver {allImages.length} fotos
             </button>
           </div>
 
           {/* Gallery - mobile */}
           <div className="lg:hidden mb-6">
             <div className="overflow-x-auto flex gap-1 pb-2 snap-x snap-mandatory">
-              {previewImages.map((img, idx) => (
+              {allImages.map((img, idx) => (
                 <div key={idx} className="flex-shrink-0 w-full snap-center">
-                  <img src={img?.url} alt={`${property.title} - ${idx + 1}`} loading={idx > 0 ? "lazy" : "eager"} fetchPriority={idx === 0 ? "high" : "low"} decoding="async" className="w-full h-64 object-cover rounded-xl cursor-pointer" onClick={openTour} />
+                  <img src={img} alt={`${property.title} - ${idx + 1}`} loading={idx > 0 ? "lazy" : "eager"} fetchPriority={idx === 0 ? "high" : "low"} decoding="async" className="w-full h-64 object-cover rounded-xl cursor-pointer" onClick={() => openGallery(idx)} />
                 </div>
               ))}
             </div>
-            <button onClick={openTour} className="w-full mt-2 border border-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm inline-flex items-center justify-center gap-2">
-              <GridIcon />
-              {galleryButtonLabel}
+            <button onClick={() => openGallery(0)} className="w-full mt-2 border border-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm">
+              Ver {allImages.length} fotos
             </button>
           </div>
 
@@ -485,20 +453,7 @@ export default function PropertyDetailClient({ property }) {
             </div>
           </div>
 
-          <PhotoTour
-            images={allImages}
-            title={property.title}
-            isOpen={tourOpen}
-            onClose={() => setTourOpen(false)}
-            onOpenPhoto={openPhotoFromTour}
-          />
-          <Lightbox
-            images={allImages.map((img) => img.url)}
-            title={property.title}
-            isOpen={lightboxOpen}
-            onClose={() => setLightboxOpen(false)}
-            startIndex={lightboxIndex}
-          />
+          <Lightbox images={allImages} title={property.title} isOpen={lightboxOpen} onClose={() => setLightboxOpen(false)} startIndex={lightboxIndex} />
         </div>
       </div>
 
