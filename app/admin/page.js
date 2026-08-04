@@ -51,6 +51,12 @@ export default async function AdminPage() {
               Suscriptores
             </Link>
             <Link
+              href="/admin/barrios"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              Barrios
+            </Link>
+            <Link
               href="/admin/propiedades/nueva"
               className="rounded-lg bg-gray-900 text-white px-4 py-2 text-sm font-medium hover:bg-gray-800"
             >
