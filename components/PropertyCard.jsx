@@ -11,7 +11,7 @@ function PropertyCard({ property }) {
 
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const isUnavailable = property.vendida || property.noDisponible || property.status === "no_disponible";
-  const isFeatured = [5, 6, 107, 108, 109, 110, 111].includes(Number(property.id));
+  const isFeatured = [5, 6, 107, 108, 109].includes(Number(property.id));
 
   const operationLabel = {
     venta: "Venta",
@@ -92,39 +92,6 @@ function PropertyCard({ property }) {
             ROI ~{property.roi}%
           </span>
         )}
-        {!isUnavailable && (
-          <button
-            onClick={(e) => { e.preventDefault(); handleToggle(e); }}
-            aria-label={fav ? "Quitar de favoritos" : "Agregar a favoritos"}
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              background: "rgba(255,255,255,0.9)",
-              backdropFilter: "blur(4px)",
-              padding: 6,
-              borderRadius: "9999px",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
-              border: "none",
-              cursor: "pointer",
-              zIndex: 10,
-            }}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              style={{
-                width: 20,
-                height: 20,
-                display: "block",
-              }}
-              fill={fav ? "#E8325A" : "none"}
-              stroke={fav ? "#E8325A" : "#9ca3af"}
-              strokeWidth="2"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-            </svg>
-          </button>
-        )}
       </div>
 
       <div className="p-4">
@@ -185,10 +152,48 @@ function PropertyCard({ property }) {
     );
   }
 
+  // El corazón va FUERA del <Link>, no adentro. Anidado, Next 16 navega a la
+  // ficha antes de que el preventDefault del botón llegue a tiempo: el click
+  // abría la propiedad en vez de guardarla, y los favoritos no se guardaban.
+  // Como hermano del enlace, el botón recibe su propio click sin competencia.
   return (
-    <Link href={`/propiedades/${getPropertySlug(property)}`} className={`${cardClass} hover:shadow-xl`}>
-      {cardContent}
-    </Link>
+    <div className="relative h-full">
+      <Link href={`/propiedades/${getPropertySlug(property)}`} className={`${cardClass} h-full hover:shadow-xl`}>
+        {cardContent}
+      </Link>
+      <button
+        type="button"
+        onClick={handleToggle}
+        aria-label={fav ? "Quitar de favoritos" : "Agregar a favoritos"}
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          background: "rgba(255,255,255,0.9)",
+          backdropFilter: "blur(4px)",
+          padding: 6,
+          borderRadius: "9999px",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+          border: "none",
+          cursor: "pointer",
+          zIndex: 10,
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          style={{
+            width: 20,
+            height: 20,
+            display: "block",
+          }}
+          fill={fav ? "#E8325A" : "none"}
+          stroke={fav ? "#E8325A" : "#9ca3af"}
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+        </svg>
+      </button>
+    </div>
   );
 }
 
