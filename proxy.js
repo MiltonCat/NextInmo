@@ -4,9 +4,10 @@ import { properties, getPropertySlug } from "@/data/properties";
 import { isAdminUserId } from "@/lib/adminAccess";
 
 // Next.js 16: este archivo era "middleware.js" y ahora se llama "proxy.js".
-// Hace dos cosas, según la ruta:
+// Hace tres cosas, según la ruta:
 //   1. /propiedades/<id> → redirige 301 a la URL con slug (SEO).
 //   2. /admin/*          → refresca la sesión y bloquea el acceso sin login.
+//   3. /cuenta/*         → exige sesión, sin conceder permisos administrativos.
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
@@ -26,6 +27,11 @@ export async function proxy(request) {
   // --- 2) Zona privada /admin: refrescar sesión y proteger ---
   if (pathname.startsWith("/admin")) {
     return updateAdminSession(request);
+  }
+
+  // --- 3) Cuenta de clientes/propietarios: identidad, no rol admin ---
+  if (pathname.startsWith("/cuenta")) {
+    return updateClientSession(request);
   }
 
   return NextResponse.next();
@@ -83,6 +89,55 @@ async function updateAdminSession(request) {
   return response;
 }
 
+async function updateClientSession(request) {
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet, responseHeaders) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+          Object.entries(responseHeaders).forEach(([name, value]) =>
+            response.headers.set(name, value)
+          );
+        },
+      },
+    }
+  );
+
+  let isAuthenticated = false;
+  try {
+    const { data, error } = await supabase.auth.getClaims();
+    isAuthenticated = !error && Boolean(data?.claims?.sub);
+  } catch {
+    isAuthenticated = false;
+  }
+
+  const { pathname } = request.nextUrl;
+  const isLoginPage = pathname.startsWith("/cuenta/login");
+  const isRegistrationPage = pathname.startsWith("/cuenta/registro");
+  const isPublicAccountPage = isLoginPage || isRegistrationPage;
+
+  if (!isAuthenticated && !isPublicAccountPage) {
+    return redirectWithAuthState(request, "/cuenta/login", response);
+  }
+
+  if (isAuthenticated && isPublicAccountPage) {
+    return redirectWithAuthState(request, "/cuenta", response);
+  }
+
+  return response;
+}
+
 function redirectWithAuthState(request, pathname, authResponse) {
   const url = request.nextUrl.clone();
   url.pathname = pathname;
@@ -104,5 +159,5 @@ function redirectWithAuthState(request, pathname, authResponse) {
 }
 
 export const config = {
-  matcher: ["/propiedades/:path*", "/admin/:path*"],
+  matcher: ["/propiedades/:path*", "/admin/:path*", "/cuenta/:path*"],
 };
