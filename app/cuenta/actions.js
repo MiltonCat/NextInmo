@@ -60,9 +60,16 @@ const SENT_PATH = "/cuenta/codigo/";
 const PENDING_EMAIL_COOKIE = "cp_auth_email";
 const PENDING_EMAIL_MAX_AGE = 15 * 60;
 
-// Un código de seis dígitos son un millón de combinaciones: sin tope, alguien
-// puede probarlas todas. Cinco intentos por correo cada diez minutos deja
-// margen para equivocarse tipeando y hace inviable la fuerza bruta.
+// El largo del código lo decide Supabase (Authentication -> Sign In / Providers
+// -> Email OTP Length) y admite de 6 a 10 dígitos. Se acepta todo el rango en
+// vez de fijar un número: si algún día se cambia esa opción, el ingreso sigue
+// funcionando y nadie se queda afuera por una validación desactualizada.
+const CODE_MIN_LENGTH = 6;
+const CODE_MAX_LENGTH = 10;
+
+// Seis dígitos ya son un millón de combinaciones: sin tope, alguien puede
+// probarlas todas. Cinco intentos por correo cada diez minutos deja margen
+// para equivocarse tipeando y hace inviable la fuerza bruta.
 const CODE_ATTEMPTS = 5;
 const CODE_ATTEMPTS_WINDOW_MS = 10 * 60 * 1000;
 
@@ -230,7 +237,7 @@ export async function registerBuyerAccount(prevState, formData) {
 }
 
 /**
- * Canjea el código de seis dígitos por una sesión.
+ * Canjea el código del correo por una sesión.
  *
  * Este es el camino que reemplaza al enlace del correo. La diferencia que
  * importa: el código se escribe en la misma pestaña donde se pidió, así que no
@@ -249,8 +256,8 @@ export async function verifyAccountCode(prevState, formData) {
 
   // Solo dígitos: se limpian espacios y guiones que la gente copia del correo.
   const code = String(formData.get("code") || "").replace(/\D/g, "");
-  if (code.length !== 6) {
-    return { error: "El código tiene seis números." };
+  if (code.length < CODE_MIN_LENGTH || code.length > CODE_MAX_LENGTH) {
+    return { error: "Escribí el código completo, tal como figura en el correo." };
   }
 
   if (!rateLimit(`code-attempt:${email}`, { limit: CODE_ATTEMPTS, windowMs: CODE_ATTEMPTS_WINDOW_MS })) {

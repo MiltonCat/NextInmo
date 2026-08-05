@@ -68,7 +68,7 @@ export default function BuyerRegistrationPage() {
           <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Crear cuenta</p>
           <h2 className="mt-2 text-2xl font-bold text-gray-900">Empezá como comprador</h2>
           <p className="mt-2 text-sm leading-6 text-gray-500">
-            Ingresá tu correo y te enviamos un código de seis números para confirmar la cuenta. El alta inicial siempre será de comprador.
+            Ingresá tu correo y te enviamos un código para confirmar la cuenta. El alta inicial siempre será de comprador.
           </p>
 
           <form action={action} className="mt-7 space-y-5">

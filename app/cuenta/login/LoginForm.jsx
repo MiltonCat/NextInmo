@@ -14,7 +14,7 @@ export default function LoginForm({ authFailed = false, vencido = false }) {
       <div className="mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">
         <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Cuenta privada</p>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">Mi cuenta</h1>
-        <p className="mt-2 text-sm text-gray-500">Te mandamos un código de seis números a tu correo. Sin contraseña.</p>
+        <p className="mt-2 text-sm text-gray-500">Te mandamos un código a tu correo y lo escribís acá. Sin contraseña.</p>
 
         {/* El callback redirige acá con ?auth_error=1 cuando el enlace no sirve.
             Sin este aviso el usuario vuelve al formulario sin saber qué pasó y

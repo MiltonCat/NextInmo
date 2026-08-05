@@ -13,7 +13,7 @@ export default function CodigoForm({ correo }) {
         <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Revisá tu correo</p>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">Escribí el código</h1>
         <p className="mt-3 text-sm leading-6 text-gray-600">
-          Te mandamos un código de seis números a{" "}
+          Te mandamos un código a{" "}
           <span className="font-semibold text-gray-900">{correo}</span>. Escribilo acá y entrás.
         </p>
 
@@ -34,11 +34,11 @@ export default function CodigoForm({ correo }) {
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              maxLength={6}
+              maxLength={10}
               required
               autoFocus
-              placeholder="000000"
-              className="w-full rounded-xl border border-gray-300 px-3.5 py-3 text-center text-2xl font-semibold tracking-[0.4em] text-gray-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
+              placeholder="Código del correo"
+              className="w-full rounded-xl border border-gray-300 px-3.5 py-3 text-center text-2xl font-semibold tracking-[0.3em] text-gray-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
             />
           </div>
 
