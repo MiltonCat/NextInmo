@@ -7,7 +7,11 @@ import { ensureSubscriberFromAccount } from "@/lib/suscriptores";
 // sin ella Next agrega un 308 de normalización que se come el query string, y
 // `?auth_error=1` no llega nunca a la pantalla de ingreso.
 const NEXT_PATH = "/cuenta/";
-const ERROR_PATH = "/cuenta/login/?auth_error=1";
+
+// Motivos que entiende la pantalla de ingreso. Van por la URL, así que son
+// palabras cerradas y no texto libre: nadie puede inyectar un mensaje propio.
+const ERROR_VENCIDO = "/cuenta/login/?auth_error=vencido";
+const ERROR_GENERICO = "/cuenta/login/?auth_error=1";
 
 // Tipos de verificación por correo que admite Supabase. Se valida contra esta
 // lista porque el valor llega por la URL: cualquier otra cosa se descarta.
@@ -42,6 +46,25 @@ export async function GET(request) {
   const type = requestUrl.searchParams.get("type") || "email";
   const code = requestUrl.searchParams.get("code");
 
+  // Supabase rebota acá con ?error=...&error_code=... cuando rechaza el enlace,
+  // sin token ni code. Antes esos parámetros se ignoraban y la persona caía en
+  // el error genérico de casualidad, porque no había nada que canjear.
+  //
+  // `otp_expired` es el caso normal y cubre tanto el enlace vencido como el ya
+  // usado: Supabase devuelve el mismo código para los dos, así que el mensaje
+  // no los separa. Inventar la distinción sería mentirle al usuario.
+  const errorCode = requestUrl.searchParams.get("error_code");
+  const error = requestUrl.searchParams.get("error");
+
+  if (errorCode || error) {
+    console.error(
+      "Supabase rechazó el enlace de acceso:",
+      errorCode || error,
+      requestUrl.searchParams.get("error_description") || ""
+    );
+    return redirigirA(request, errorCode === "otp_expired" ? ERROR_VENCIDO : ERROR_GENERICO);
+  }
+
   if (tokenHash && ALLOWED_OTP_TYPES.has(type)) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
@@ -60,7 +83,7 @@ export async function GET(request) {
     console.error("No se pudo canjear el código de acceso:", error.code);
   }
 
-  return redirigirA(request, ERROR_PATH);
+  return redirigirA(request, ERROR_GENERICO);
 }
 
 /**

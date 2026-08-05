@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signInAccount } from "../actions";
 
-export default function LoginForm({ authFailed = false }) {
+export default function LoginForm({ authFailed = false, vencido = false }) {
   const [state, action, pending] = useActionState(signInAccount, undefined);
 
   // No hay pantalla de éxito acá: `signInAccount` redirige a
@@ -21,9 +21,13 @@ export default function LoginForm({ authFailed = false }) {
             vuelve a pedir otro enlace, gastando la cuota de correos. */}
         {authFailed && (
           <div role="alert" className="mt-5 rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-amber-200">
-            <p className="text-sm font-semibold text-amber-900">Ese enlace ya no sirve</p>
+            <p className="text-sm font-semibold text-amber-900">
+              {vencido ? "Ese enlace ya no sirve" : "No pudimos validar el enlace"}
+            </p>
             <p className="mt-1 text-xs leading-5 text-amber-800">
-              Los enlaces vencen y solo pueden usarse una vez. Pedí uno nuevo acá abajo.
+              {vencido
+                ? "Los enlaces vencen en una hora y solo pueden usarse una vez. Pedí uno nuevo acá abajo y usalo apenas te llegue."
+                : "Puede que el enlace esté cortado: algunos correos lo parten en dos renglones. Pedí uno nuevo acá abajo."}
             </p>
           </div>
         )}

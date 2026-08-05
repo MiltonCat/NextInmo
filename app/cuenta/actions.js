@@ -46,6 +46,17 @@ const RESEND_WINDOW_MS = 60_000;
 // nada, mientras que recargar el POST del formulario dispara otro correo.
 const SENT_PATH = "/cuenta/enlace-enviado/";
 
+// Lo que ve alguien cuando falta configuración del lado nuestro.
+//
+// Antes decía "el acceso por correo todavía no está configurado", que le
+// cuenta a un visitante un problema de infraestructura con palabras que no
+// significan nada para él y no le deja nada para hacer. Peor: el único que
+// puede resolverlo no se entera. Ahora el motivo real va al log del servidor
+// y la persona recibe una salida concreta.
+const ERROR_SIN_CONFIGURAR =
+  "No podemos enviarte el enlace en este momento. Escribinos por WhatsApp al " +
+  "2944 30-1470 y te damos acceso a mano.";
+
 // ¿Ya se le mandó un enlace a este correo hace menos de un minuto?
 function pidioEnlaceHaceUnMomento(email) {
   return !rateLimit(`auth-link:${email}`, { limit: 1, windowMs: RESEND_WINDOW_MS });
@@ -95,7 +106,8 @@ export async function signInAccount(prevState, formData) {
 
   const redirectUrl = getAccountAuthRedirectUrl();
   if (!redirectUrl) {
-    return { error: "El acceso por correo todavía no está configurado." };
+    console.error("Falta ACCOUNT_AUTH_REDIRECT_URL: nadie puede ingresar.");
+    return { error: ERROR_SIN_CONFIGURAR };
   }
 
   // Reenvío inmediato del mismo correo: se muestra la confirmación de siempre,
@@ -119,9 +131,8 @@ export async function signInAccount(prevState, formData) {
 
 export async function registerBuyerAccount(prevState, formData) {
   if (process.env.BUYER_SIGNUP_ENABLED !== "true") {
-    return {
-      error: "El registro estará disponible cuando terminemos de configurar el correo seguro.",
-    };
+    console.error("BUYER_SIGNUP_ENABLED no es \"true\": el alta está cerrada.");
+    return { error: ERROR_SIN_CONFIGURAR };
   }
 
   const reason = automationReason(formData);
@@ -150,7 +161,8 @@ export async function registerBuyerAccount(prevState, formData) {
 
   const redirectUrl = getAccountAuthRedirectUrl();
   if (!redirectUrl) {
-    return { error: "El registro por correo todavía no está configurado." };
+    console.error("Falta ACCOUNT_AUTH_REDIRECT_URL: nadie puede registrarse.");
+    return { error: ERROR_SIN_CONFIGURAR };
   }
 
   // Reenvío inmediato del mismo correo: no se pide otro enlace, pero se muestra
