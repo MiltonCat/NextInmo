@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { ensureSubscriberFromAccount } from "@/lib/suscriptores";
 
 // El callback nunca acepta destinos externos ni rutas elegidas libremente.
-const NEXT_PATH = "/cuenta";
+// Van con barra final porque `next.config.mjs` tiene `trailingSlash: true`:
+// sin ella Next agrega un 308 de normalización que se come el query string, y
+// `?auth_error=1` no llega nunca a la pantalla de ingreso.
+const NEXT_PATH = "/cuenta/";
+const ERROR_PATH = "/cuenta/login/?auth_error=1";
 
 // Tipos de verificación por correo que admite Supabase. Se valida contra esta
 // lista porque el valor llega por la URL: cualquier otra cosa se descarta.
@@ -39,21 +44,58 @@ export async function GET(request) {
 
   if (tokenHash && ALLOWED_OTP_TYPES.has(type)) {
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
 
     if (!error) {
-      return NextResponse.redirect(new URL(NEXT_PATH, requestUrl.origin));
+      return sesionIniciada(data?.user?.email, request);
     }
     console.error("No se pudo verificar el enlace de acceso:", error.code);
   } else if (code) {
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(new URL(NEXT_PATH, requestUrl.origin));
+      return sesionIniciada(data?.user?.email, request);
     }
     console.error("No se pudo canjear el código de acceso:", error.code);
   }
 
-  return NextResponse.redirect(new URL("/cuenta/login?auth_error=1", requestUrl.origin));
+  return redirigirA(request, ERROR_PATH);
+}
+
+/**
+ * Redirige a la cuenta y, después de responder, se asegura de que la persona
+ * figure en la lista de correo.
+ *
+ * Va en `after()` para no meter una consulta a Supabase en el medio del
+ * redirect: quien abre el enlace del correo tiene que entrar sin demora. El
+ * alta es idempotente, así que correrla en cada ingreso no duplica nada y de
+ * paso incorpora a las cuentas creadas antes de este cambio.
+ */
+function sesionIniciada(email, request) {
+  if (email) after(() => ensureSubscriberFromAccount(email));
+  return redirigirA(request, NEXT_PATH);
+}
+
+/**
+ * Redirige conservando el host por el que entró la persona.
+ *
+ * Ni `request.url` ni `request.nextUrl` sirven acá: dentro de un Route Handler
+ * ambos reportan el host con el que arrancó el servidor (`localhost`) aunque la
+ * petición haya entrado por `127.0.0.1`. Mandar al navegador al otro origen lo
+ * deja en un tarro de cookies distinto del que acaba de recibir la sesión, y la
+ * persona aterriza deslogueada. La cabecera `host` sí trae el host real.
+ *
+ * `x-forwarded-host` va primero porque es la que pone Vercel en producción.
+ */
+function redirigirA(request, destino) {
+  const host =
+    request.headers.get("x-forwarded-host") || request.headers.get("host");
+
+  if (!host) return NextResponse.redirect(new URL(destino, request.nextUrl.origin));
+
+  const protocolo =
+    request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "");
+
+  return NextResponse.redirect(new URL(destino, `${protocolo}://${host}`));
 }
