@@ -48,7 +48,13 @@
             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="background-color:#e11d48;border-radius:8px;">
-                  <a href="{{ .ConfirmationURL }}"
+                  <!-- NO cambiar por {{ .ConfirmationURL }}: ese enlace usa PKCE
+                       y solo abre en el mismo navegador que lo pidió, así que
+                       falla siempre si el correo se lee en el celular. El
+                       token_hash lo canjea el servidor y funciona en cualquier
+                       dispositivo. `.RedirectTo` ya trae "?next=/cuenta", por eso
+                       acá se concatena con "&". -->
+                  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email"
                      style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">
                     Ingresar a mi cuenta
                   </a>
