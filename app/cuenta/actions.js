@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
+import { after } from "next/server";
+import { ensureSubscriberFromAccount } from "@/lib/suscriptores";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSessionUser } from "@/lib/auth";
 import { getProperties } from "@/lib/properties";
@@ -41,10 +43,28 @@ const LOGIN_LIMIT_PER_HOUR = EN_PRODUCCION ? 10 : 50;
 // solo consumía una llamada y devolvía un error que el usuario no veía.
 const RESEND_WINDOW_MS = 60_000;
 
-// Página de confirmación. Es una URL propia y no un estado en memoria porque
-// así el "enlace enviado" sobrevive a la recarga: recargar un GET no reenvía
-// nada, mientras que recargar el POST del formulario dispara otro correo.
-const SENT_PATH = "/cuenta/enlace-enviado/";
+// Pantalla donde se escribe el código. Es una URL propia y no un estado en
+// memoria porque así sobrevive a la recarga: recargar un GET no reenvía nada,
+// mientras que recargar el POST del formulario dispara otro correo.
+const SENT_PATH = "/cuenta/codigo/";
+
+// A quién se le mandó el código, mientras lo escribe.
+//
+// Va en una cookie del servidor y no en la URL: el correo es un dato personal
+// y no tiene por qué quedar en el historial del navegador, en los logs ni en
+// el `Referer` que se manda a terceros. `httpOnly` impide que cualquier script
+// de la página lo lea.
+//
+// Quince minutos alcanza de sobra para ir a la casilla y volver, y limita la
+// ventana en que una sesión abandonada sigue apuntando a un correo ajeno.
+const PENDING_EMAIL_COOKIE = "cp_auth_email";
+const PENDING_EMAIL_MAX_AGE = 15 * 60;
+
+// Un código de seis dígitos son un millón de combinaciones: sin tope, alguien
+// puede probarlas todas. Cinco intentos por correo cada diez minutos deja
+// margen para equivocarse tipeando y hace inviable la fuerza bruta.
+const CODE_ATTEMPTS = 5;
+const CODE_ATTEMPTS_WINDOW_MS = 10 * 60 * 1000;
 
 // Lo que ve alguien cuando falta configuración del lado nuestro.
 //
@@ -57,9 +77,30 @@ const ERROR_SIN_CONFIGURAR =
   "No podemos enviarte el enlace en este momento. Escribinos por WhatsApp al " +
   "2944 30-1470 y te damos acceso a mano.";
 
-// ¿Ya se le mandó un enlace a este correo hace menos de un minuto?
+// ¿Ya se le mandó un código a este correo hace menos de un minuto?
 function pidioEnlaceHaceUnMomento(email) {
   return !rateLimit(`auth-link:${email}`, { limit: 1, windowMs: RESEND_WINDOW_MS });
+}
+
+async function recordarCorreoPendiente(email) {
+  const store = await cookies();
+  store.set(PENDING_EMAIL_COOKIE, email, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/cuenta",
+    maxAge: PENDING_EMAIL_MAX_AGE,
+  });
+}
+
+export async function getPendingAuthEmail() {
+  const store = await cookies();
+  return store.get(PENDING_EMAIL_COOKIE)?.value || null;
+}
+
+async function olvidarCorreoPendiente() {
+  const store = await cookies();
+  store.delete({ name: PENDING_EMAIL_COOKIE, path: "/cuenta" });
 }
 
 // Server Action = endpoint HTTP público. Se puede invocar con curl sin abrir
@@ -126,6 +167,7 @@ export async function signInAccount(prevState, formData) {
     if (error) console.error("No se pudo solicitar el acceso de cuenta:", error.code);
   }
 
+  await recordarCorreoPendiente(email);
   redirect(SENT_PATH);
 }
 
@@ -179,11 +221,57 @@ export async function registerBuyerAccount(prevState, formData) {
 
     if (error) {
       console.error("No se pudo solicitar el alta de comprador:", error.code);
-      return { error: "No pudimos enviar el enlace. Esperá unos minutos e intentá nuevamente." };
+      return { error: "No pudimos enviar el código. Esperá unos minutos e intentá nuevamente." };
     }
   }
 
+  await recordarCorreoPendiente(email);
   redirect(SENT_PATH);
+}
+
+/**
+ * Canjea el código de seis dígitos por una sesión.
+ *
+ * Este es el camino que reemplaza al enlace del correo. La diferencia que
+ * importa: el código se escribe en la misma pestaña donde se pidió, así que no
+ * hay nada que dependa de en qué dispositivo se lea el mail. Con tres cuartas
+ * partes del tráfico en el celular, ese era el agujero más caro.
+ *
+ * El correo sale de la cookie, nunca del formulario: si viniera del cliente,
+ * cualquiera podría pedir un código para su propia casilla y después canjearlo
+ * declarando el correo de otra persona.
+ */
+export async function verifyAccountCode(prevState, formData) {
+  const email = await getPendingAuthEmail();
+  if (!email) {
+    return { error: "Se venció el tiempo para escribir el código. Pedí uno nuevo." };
+  }
+
+  // Solo dígitos: se limpian espacios y guiones que la gente copia del correo.
+  const code = String(formData.get("code") || "").replace(/\D/g, "");
+  if (code.length !== 6) {
+    return { error: "El código tiene seis números." };
+  }
+
+  if (!rateLimit(`code-attempt:${email}`, { limit: CODE_ATTEMPTS, windowMs: CODE_ATTEMPTS_WINDOW_MS })) {
+    return { error: "Demasiados intentos. Pedí un código nuevo dentro de unos minutos." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+
+  if (error) {
+    console.error("Código de acceso rechazado:", error.code);
+    return { error: "Ese código no es correcto o ya venció. Revisá el correo o pedí uno nuevo." };
+  }
+
+  // Mismo alta en la lista de correo que hace el callback del enlace, para que
+  // las dos puertas de entrada dejen a la persona en el mismo estado.
+  const correo = data?.user?.email;
+  if (correo) after(() => ensureSubscriberFromAccount(correo));
+
+  await olvidarCorreoPendiente();
+  redirect("/cuenta/");
 }
 
 export async function signOutAccount() {

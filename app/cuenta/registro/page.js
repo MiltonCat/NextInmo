@@ -63,12 +63,12 @@ export default function BuyerRegistrationPage() {
         </section>
 
         {/* No hay pantalla de éxito acá: `registerBuyerAccount` redirige a
-            /cuenta/enlace-enviado/. El estado solo transporta errores. */}
+            /cuenta/codigo/. El estado solo transporta errores. */}
         <section className="p-7 md:p-10 lg:p-12">
           <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Crear cuenta</p>
           <h2 className="mt-2 text-2xl font-bold text-gray-900">Empezá como comprador</h2>
           <p className="mt-2 text-sm leading-6 text-gray-500">
-            Ingresá tu correo y te enviaremos un enlace seguro para confirmar la cuenta. El alta inicial siempre será de comprador.
+            Ingresá tu correo y te enviamos un código de seis números para confirmar la cuenta. El alta inicial siempre será de comprador.
           </p>
 
           <form action={action} className="mt-7 space-y-5">

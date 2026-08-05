@@ -8,13 +8,13 @@ export default function LoginForm({ authFailed = false, vencido = false }) {
   const [state, action, pending] = useActionState(signInAccount, undefined);
 
   // No hay pantalla de éxito acá: `signInAccount` redirige a
-  // /cuenta/enlace-enviado/. El estado solo transporta errores.
+  // /cuenta/codigo/. El estado solo transporta errores.
   return (
     <main className="min-h-[70vh] bg-gray-50 px-4 py-16">
       <div className="mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">
         <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Cuenta privada</p>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">Mi cuenta</h1>
-        <p className="mt-2 text-sm text-gray-500">Ingresá con un enlace seguro enviado a tu correo.</p>
+        <p className="mt-2 text-sm text-gray-500">Te mandamos un código de seis números a tu correo. Sin contraseña.</p>
 
         {/* El callback redirige acá con ?auth_error=1 cuando el enlace no sirve.
             Sin este aviso el usuario vuelve al formulario sin saber qué pasó y
@@ -22,12 +22,12 @@ export default function LoginForm({ authFailed = false, vencido = false }) {
         {authFailed && (
           <div role="alert" className="mt-5 rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-amber-200">
             <p className="text-sm font-semibold text-amber-900">
-              {vencido ? "Ese enlace ya no sirve" : "No pudimos validar el enlace"}
+              {vencido ? "Ese código ya no sirve" : "No pudimos validar el acceso"}
             </p>
             <p className="mt-1 text-xs leading-5 text-amber-800">
               {vencido
-                ? "Los enlaces vencen en una hora y solo pueden usarse una vez. Pedí uno nuevo acá abajo y usalo apenas te llegue."
-                : "Puede que el enlace esté cortado: algunos correos lo parten en dos renglones. Pedí uno nuevo acá abajo."}
+                ? "Los códigos vencen en una hora y solo pueden usarse una vez. Pedí uno nuevo acá abajo."
+                : "Pedí un código nuevo acá abajo y escribilo apenas te llegue."}
             </p>
           </div>
         )}
@@ -39,7 +39,7 @@ export default function LoginForm({ authFailed = false, vencido = false }) {
           </div>
           {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
           <button type="submit" disabled={pending} className="w-full rounded-xl bg-rose-600 py-2.5 font-semibold text-white transition hover:bg-rose-500 disabled:opacity-60">
-            {pending ? "Enviando…" : "Enviarme un enlace de acceso"}
+            {pending ? "Enviando…" : "Enviarme un código"}
           </button>
         </form>
 
