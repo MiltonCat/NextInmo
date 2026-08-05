@@ -7,23 +7,8 @@ import { signInAccount } from "../actions";
 export default function LoginForm({ authFailed = false }) {
   const [state, action, pending] = useActionState(signInAccount, undefined);
 
-  if (state?.success) {
-    return (
-      <main className="min-h-[70vh] bg-gray-50 px-4 py-16">
-        <div role="status" className="mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Enlace enviado</p>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">Revisá tu correo</h1>
-          <p className="mt-3 text-sm leading-6 text-gray-600">
-            Si el correo corresponde a una cuenta, recibirás un enlace seguro para ingresar. El enlace vence y solo puede usarse una vez.
-          </p>
-          <Link href="/" className="mt-6 block text-center text-sm font-medium text-rose-600 hover:text-rose-500">
-            Volver al sitio
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
+  // No hay pantalla de éxito acá: `signInAccount` redirige a
+  // /cuenta/enlace-enviado/. El estado solo transporta errores.
   return (
     <main className="min-h-[70vh] bg-gray-50 px-4 py-16">
       <div className="mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">

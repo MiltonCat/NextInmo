@@ -62,66 +62,47 @@ export default function BuyerRegistrationPage() {
           </div>
         </section>
 
+        {/* No hay pantalla de éxito acá: `registerBuyerAccount` redirige a
+            /cuenta/enlace-enviado/. El estado solo transporta errores. */}
         <section className="p-7 md:p-10 lg:p-12">
-          {state?.success ? (
-            <div role="status" className="flex min-h-full flex-col justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                <CheckIcon />
-              </div>
-              <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-600">Enlace enviado</p>
-              <h2 className="mt-2 text-2xl font-bold text-gray-900">Revisá tu correo</h2>
-              <p className="mt-3 text-sm leading-6 text-gray-600">
-                Te enviamos un enlace seguro para confirmar el correo e ingresar a tu cuenta. No necesitás crear ni recordar una contraseña.
-              </p>
-              <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-                El enlace vence y solo puede usarse una vez. Si no aparece, revisá la carpeta de correo no deseado.
-              </div>
-              <Link href="/cuenta/login" className="mt-4 text-center text-sm font-medium text-rose-600 hover:text-rose-500">
-                Ya tengo una cuenta
-              </Link>
+          <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Crear cuenta</p>
+          <h2 className="mt-2 text-2xl font-bold text-gray-900">Empezá como comprador</h2>
+          <p className="mt-2 text-sm leading-6 text-gray-500">
+            Ingresá tu correo y te enviaremos un enlace seguro para confirmar la cuenta. El alta inicial siempre será de comprador.
+          </p>
+
+          <form action={action} className="mt-7 space-y-5">
+            {/*
+              Defensas invisibles. No hay captcha: el campo "empresa" está
+              oculto y solo lo completa un bot, y "ts" delata los envíos
+              automáticos instantáneos. Una persona nunca los percibe.
+            */}
+            <div aria-hidden="true" className="absolute h-0 w-0 overflow-hidden opacity-0">
+              <label htmlFor="buyer-empresa">No completar este campo</label>
+              <input id="buyer-empresa" name="empresa" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
             </div>
-          ) : (
-            <>
-              <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Crear cuenta</p>
-              <h2 className="mt-2 text-2xl font-bold text-gray-900">Empezá como comprador</h2>
-              <p className="mt-2 text-sm leading-6 text-gray-500">
-                Ingresá tu correo y te enviaremos un enlace seguro para confirmar la cuenta. El alta inicial siempre será de comprador.
-              </p>
+            <input type="hidden" name="ts" value={renderedAt} readOnly />
 
-              <form action={action} className="mt-7 space-y-5">
-                {/*
-                  Defensas invisibles. No hay captcha: el campo "empresa" está
-                  oculto y solo lo completa un bot, y "ts" delata los envíos
-                  automáticos instantáneos. Una persona nunca los percibe.
-                */}
-                <div aria-hidden="true" className="absolute h-0 w-0 overflow-hidden opacity-0">
-                  <label htmlFor="buyer-empresa">No completar este campo</label>
-                  <input id="buyer-empresa" name="empresa" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
-                </div>
-                <input type="hidden" name="ts" value={renderedAt} readOnly />
+            <div>
+              <label htmlFor="buyer-email" className="mb-1.5 block text-sm font-medium text-gray-700">Correo electrónico</label>
+              <input id="buyer-email" name="email" type="email" autoComplete="email" required placeholder="nombre@correo.com" className="w-full rounded-xl border border-gray-300 px-3.5 py-3 text-gray-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-100" />
+            </div>
 
-                <div>
-                  <label htmlFor="buyer-email" className="mb-1.5 block text-sm font-medium text-gray-700">Correo electrónico</label>
-                  <input id="buyer-email" name="email" type="email" autoComplete="email" required placeholder="nombre@correo.com" className="w-full rounded-xl border border-gray-300 px-3.5 py-3 text-gray-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-100" />
-                </div>
+            {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 
-                {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+            <button type="submit" disabled={pending} className="w-full rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2 disabled:opacity-60">
+              {pending ? "Enviando…" : "Crear cuenta de comprador"}
+            </button>
+          </form>
 
-                <button type="submit" disabled={pending} className="w-full rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2 disabled:opacity-60">
-                  {pending ? "Enviando…" : "Crear cuenta de comprador"}
-                </button>
-              </form>
+          <div className="mt-5 rounded-xl bg-gray-50 p-4 text-xs leading-5 text-gray-500">
+            Nunca solicitamos un rol desde este formulario. Los permisos se asignan exclusivamente en el servidor y la cuenta comienza como comprador.
+          </div>
 
-              <div className="mt-5 rounded-xl bg-gray-50 p-4 text-xs leading-5 text-gray-500">
-                Nunca solicitamos un rol desde este formulario. Los permisos se asignan exclusivamente en el servidor y la cuenta comienza como comprador.
-              </div>
-
-              <p className="mt-6 text-center text-sm text-gray-500">
-                ¿Ya tenés acceso?{" "}
-                <Link href="/cuenta/login" className="font-semibold text-rose-600 hover:text-rose-500">Ingresar</Link>
-              </p>
-            </>
-          )}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            ¿Ya tenés acceso?{" "}
+            <Link href="/cuenta/login" className="font-semibold text-rose-600 hover:text-rose-500">Ingresar</Link>
+          </p>
         </section>
       </div>
     </main>

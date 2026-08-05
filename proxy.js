@@ -125,7 +125,10 @@ async function updateClientSession(request) {
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname.startsWith("/cuenta/login");
   const isRegistrationPage = pathname.startsWith("/cuenta/registro");
-  const isPublicAccountPage = isLoginPage || isRegistrationPage;
+  // "Te mandamos el enlace" tiene que ser pública: la ve alguien que todavía no
+  // inició sesión, justamente porque recién pidió el correo para poder hacerlo.
+  const isLinkSentPage = pathname.startsWith("/cuenta/enlace-enviado");
+  const isPublicAccountPage = isLoginPage || isRegistrationPage || isLinkSentPage;
 
   if (!isAuthenticated && !isPublicAccountPage) {
     return redirectWithAuthState(request, "/cuenta/login", response);

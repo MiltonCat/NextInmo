@@ -28,6 +28,29 @@ const EN_PRODUCCION = process.env.NODE_ENV === "production";
 const SIGNUP_LIMIT_PER_HOUR = EN_PRODUCCION ? 10 : 50;
 const LOGIN_LIMIT_PER_HOUR = EN_PRODUCCION ? 10 : 50;
 
+// Un enlace por correo por minuto, sin importar de dónde venga el pedido.
+//
+// El tope por IP no alcanza: no frena que el MISMO correo reciba diez enlaces
+// seguidos. Eso pasa cuando el navegador reenvía el POST al recargar, cuando
+// alguien hace doble clic, o cuando el formulario no confirma nada y la persona
+// insiste. El resultado es una bandeja con correos idénticos y la cuota de
+// Resend (30/hora) quemada.
+//
+// La ventana es de un minuto porque Supabase ya impone un mínimo de 60 s entre
+// correos por usuario: pedir de nuevo antes de eso nunca iba a mandar nada,
+// solo consumía una llamada y devolvía un error que el usuario no veía.
+const RESEND_WINDOW_MS = 60_000;
+
+// Página de confirmación. Es una URL propia y no un estado en memoria porque
+// así el "enlace enviado" sobrevive a la recarga: recargar un GET no reenvía
+// nada, mientras que recargar el POST del formulario dispara otro correo.
+const SENT_PATH = "/cuenta/enlace-enviado/";
+
+// ¿Ya se le mandó un enlace a este correo hace menos de un minuto?
+function pidioEnlaceHaceUnMomento(email) {
+  return !rateLimit(`auth-link:${email}`, { limit: 1, windowMs: RESEND_WINDOW_MS });
+}
+
 // Server Action = endpoint HTTP público. Se puede invocar con curl sin abrir
 // la página, así que la IP se lee acá y no se confía en nada del formulario.
 async function getRequestIp() {
@@ -75,18 +98,23 @@ export async function signInAccount(prevState, formData) {
     return { error: "El acceso por correo todavía no está configurado." };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: redirectUrl,
-      shouldCreateUser: false,
-    },
-  });
+  // Reenvío inmediato del mismo correo: se muestra la confirmación de siempre,
+  // pero no se pide otro enlace. El que ya salió sigue siendo válido.
+  if (!pidioEnlaceHaceUnMomento(email)) {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: redirectUrl,
+        shouldCreateUser: false,
+      },
+    });
 
-  // La respuesta no revela si el correo tiene una cuenta asociada.
-  if (error) console.error("No se pudo solicitar el acceso de cuenta:", error.code);
-  return { success: true };
+    // La respuesta no revela si el correo tiene una cuenta asociada.
+    if (error) console.error("No se pudo solicitar el acceso de cuenta:", error.code);
+  }
+
+  redirect(SENT_PATH);
 }
 
 export async function registerBuyerAccount(prevState, formData) {
@@ -104,7 +132,7 @@ export async function registerBuyerAccount(prevState, formData) {
     // Se descarta sin mandar correo. Responde igual que un alta exitosa para
     // que el bot no pueda deducir qué defensa lo frenó ni iterar contra ella.
     console.warn("Alta de comprador descartada:", reason);
-    return { success: true };
+    redirect(SENT_PATH);
   }
 
   const email = normalizeEmail(formData.get("email"));
@@ -125,21 +153,25 @@ export async function registerBuyerAccount(prevState, formData) {
     return { error: "El registro por correo todavía no está configurado." };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: redirectUrl,
-      shouldCreateUser: true,
-    },
-  });
+  // Reenvío inmediato del mismo correo: no se pide otro enlace, pero se muestra
+  // la misma confirmación. El enlace que ya salió sigue sirviendo.
+  if (!pidioEnlaceHaceUnMomento(email)) {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: redirectUrl,
+        shouldCreateUser: true,
+      },
+    });
 
-  if (error) {
-    console.error("No se pudo solicitar el alta de comprador:", error.code);
-    return { error: "No pudimos enviar el enlace. Esperá unos minutos e intentá nuevamente." };
+    if (error) {
+      console.error("No se pudo solicitar el alta de comprador:", error.code);
+      return { error: "No pudimos enviar el enlace. Esperá unos minutos e intentá nuevamente." };
+    }
   }
 
-  return { success: true };
+  redirect(SENT_PATH);
 }
 
 export async function signOutAccount() {
