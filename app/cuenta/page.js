@@ -20,8 +20,40 @@ function EmptyState({ children }) {
   return <p className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-sm text-gray-500">{children}</p>;
 }
 
+// La foto y el nombre los trae Google y quedan en `user_metadata`, que es el
+// lado del perfil que el propio usuario puede escribir. Sirve para MOSTRAR,
+// nunca para decidir permisos: eso sigue resolviéndose con `app_metadata` y
+// ADMIN_EMAILS en `isAdminUser()`.
+//
+// Aun así solo se acepta una URL https de los servidores de imágenes de Google.
+// Sin este filtro, cualquiera que lograra escribir su propio `avatar_url` haría
+// que la página cargue una imagen de un dominio arbitrario, que además vería la
+// IP de todo el que abra la cuenta.
+const AVATAR_HOST = /^lh\d+\.googleusercontent\.com$/;
+
+function avatarDeGoogle(user) {
+  const crudo = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  if (!crudo) return null;
+
+  try {
+    const url = new URL(String(crudo));
+    if (url.protocol !== "https:" || !AVATAR_HOST.test(url.hostname)) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function nombreVisible(user) {
+  const meta = user?.user_metadata || {};
+  const nombre = String(meta.full_name || meta.name || "").trim();
+  return nombre ? nombre.slice(0, 60) : null;
+}
+
 export default async function AccountPage() {
   const user = await requireAuthenticatedUser();
+  const avatar = avatarDeGoogle(user);
+  const nombre = nombreVisible(user);
   let data;
   let setupError = null;
 
@@ -42,10 +74,27 @@ export default async function AccountPage() {
     <main className="min-h-screen bg-gray-50">
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Área privada</p>
-            <h1 className="text-xl font-bold text-gray-900">Mi cuenta</h1>
-            <p className="text-xs text-gray-500">{user.email}</p>
+          <div className="flex items-center gap-3">
+            {/* next/image no aporta acá: es una miniatura de 44px que ya sirve
+                Google optimizada, y usarla obligaría a declarar el dominio en
+                next.config. `no-referrer` evita mandarle a Google la URL de la
+                página privada desde la que se pide la foto. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {avatar && (
+              <img
+                src={avatar}
+                alt=""
+                width={44}
+                height={44}
+                referrerPolicy="no-referrer"
+                className="h-11 w-11 flex-none rounded-full object-cover ring-1 ring-gray-200"
+              />
+            )}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-rose-600">Área privada</p>
+              <h1 className="text-xl font-bold text-gray-900">{nombre || "Mi cuenta"}</h1>
+              <p className="text-xs text-gray-500">{user.email}</p>
+            </div>
           </div>
           <form action={signOutAccount}>
             <button type="submit" className="text-sm font-medium text-gray-600 hover:text-gray-900">Cerrar sesión</button>

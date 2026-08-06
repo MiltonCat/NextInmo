@@ -281,6 +281,50 @@ export async function verifyAccountCode(prevState, formData) {
   redirect("/cuenta/");
 }
 
+/**
+ * Ingreso con Google.
+ *
+ * Va por Server Action y no desde el navegador porque este proyecto no tiene
+ * cliente de Supabase con sesión en el browser: toda la autenticación vive en
+ * el servidor, ligada a las cookies de la petición (`lib/supabaseServer.js`).
+ * `skipBrowserRedirect` hace que Supabase devuelva la URL de Google en vez de
+ * intentar navegar (cosa que el servidor no puede hacer) y redirigimos nosotros.
+ *
+ * El verificador PKCE queda en una cookie que escribe el cliente del servidor,
+ * y `app/auth/callback/route.js` ya sabe canjear el `code` que vuelve de Google.
+ * Por eso el callback no necesita ningún cambio.
+ *
+ * `prompt: "select_account"` evita el caso molesto de quien tiene dos cuentas de
+ * Google y entra siempre con la que menos usa, sin que se le ofrezca elegir.
+ */
+export async function signInWithGoogle() {
+  const redirectUrl = getAccountAuthRedirectUrl();
+  if (!redirectUrl) {
+    console.error("Falta ACCOUNT_AUTH_REDIRECT_URL: no se puede entrar con Google.");
+    redirect("/cuenta/login/?auth_error=1");
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: redirectUrl,
+      skipBrowserRedirect: true,
+      queryParams: { prompt: "select_account" },
+    },
+  });
+
+  // El motivo real va al log; al visitante se le muestra el aviso de siempre.
+  // Lo más probable acá es que el proveedor Google no esté habilitado todavía
+  // en Supabase, o que la URL de retorno no figure en la lista permitida.
+  if (error || !data?.url) {
+    console.error("No se pudo iniciar el ingreso con Google:", error?.code || "sin url");
+    redirect("/cuenta/login/?auth_error=1");
+  }
+
+  redirect(data.url);
+}
+
 export async function signOutAccount() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();

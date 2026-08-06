@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import GoogleSignIn from "@/components/GoogleSignIn";
 import { registerBuyerAccount } from "../actions";
 
 // Solo se listan beneficios que YA funcionan. "Tasaciones guardadas" y
@@ -76,7 +77,20 @@ export default function BuyerRegistrationPage() {
             Ingresá tu correo y te enviamos un código para confirmar la cuenta. El alta inicial siempre será de comprador.
           </p>
 
-          <form action={action} className="mt-7 space-y-5">
+          {/* Con Google no hay código, ni espera, ni casilla: es el camino más
+              corto para crear la cuenta. El alta por correo queda para quien no
+              tenga Gmail. */}
+          <div className="mt-7">
+            <GoogleSignIn label="Registrarme con Google" />
+          </div>
+
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-gray-200" />
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-400">o con tu correo</span>
+            <span className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          <form action={action} className="space-y-5">
             {/*
               Defensas invisibles. No hay captcha: el campo "empresa" está
               oculto y solo lo completa un bot, y "ts" delata los envíos

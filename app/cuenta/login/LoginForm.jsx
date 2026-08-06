@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import GoogleSignIn from "@/components/GoogleSignIn";
 import { signInAccount } from "../actions";
 
 export default function LoginForm({ authFailed = false, vencido = false }) {
@@ -32,7 +33,21 @@ export default function LoginForm({ authFailed = false, vencido = false }) {
           </div>
         )}
 
-        <form action={action} className="mt-6 space-y-4">
+        {/* Google va primero y el código queda como alternativa: entrar con
+            Google es un toque y sirve en cualquier dispositivo, mientras que el
+            código obliga a ir a la casilla. El correo sigue estando para quien
+            no usa Gmail. */}
+        <div className="mt-6">
+          <GoogleSignIn />
+        </div>
+
+        <div className="my-5 flex items-center gap-3">
+          <span className="h-px flex-1 bg-gray-200" />
+          <span className="text-xs font-medium uppercase tracking-wider text-gray-400">o con tu correo</span>
+          <span className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <form action={action} className="space-y-4">
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">Email</label>
             <input id="email" name="email" type="email" autoComplete="email" required className="w-full rounded-xl border border-gray-300 px-3 py-2 text-gray-900 outline-none focus:border-rose-500" />
