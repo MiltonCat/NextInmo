@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { isAdminUser } from "@/lib/adminAccess";
 import { getClientPortalData } from "@/lib/clientPortal";
+import { avatarDeGoogle, nombreVisible } from "@/lib/perfilVisitante";
 import { getPropertySlug } from "@/data/properties";
 import { signOutAccount } from "./actions";
 import FavoriteSync from "./FavoriteSync";
@@ -20,35 +21,6 @@ function EmptyState({ children }) {
   return <p className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-sm text-gray-500">{children}</p>;
 }
 
-// La foto y el nombre los trae Google y quedan en `user_metadata`, que es el
-// lado del perfil que el propio usuario puede escribir. Sirve para MOSTRAR,
-// nunca para decidir permisos: eso sigue resolviéndose con `app_metadata` y
-// ADMIN_EMAILS en `isAdminUser()`.
-//
-// Aun así solo se acepta una URL https de los servidores de imágenes de Google.
-// Sin este filtro, cualquiera que lograra escribir su propio `avatar_url` haría
-// que la página cargue una imagen de un dominio arbitrario, que además vería la
-// IP de todo el que abra la cuenta.
-const AVATAR_HOST = /^lh\d+\.googleusercontent\.com$/;
-
-function avatarDeGoogle(user) {
-  const crudo = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-  if (!crudo) return null;
-
-  try {
-    const url = new URL(String(crudo));
-    if (url.protocol !== "https:" || !AVATAR_HOST.test(url.hostname)) return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-function nombreVisible(user) {
-  const meta = user?.user_metadata || {};
-  const nombre = String(meta.full_name || meta.name || "").trim();
-  return nombre ? nombre.slice(0, 60) : null;
-}
 
 export default async function AccountPage() {
   const user = await requireAuthenticatedUser();

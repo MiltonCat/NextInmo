@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useFavorites } from "@/hooks/useFavorites";
+import { usePerfilVisitante } from "@/hooks/usePerfilVisitante";
 
 const TABS = [
   { href: "/propiedades", label: "Comprar",  icon: <TabBuyIcon /> },
@@ -112,6 +113,7 @@ export default function Navbar() {
   const router   = useRouter();
   const pathname = usePathname();
   const { favorites } = useFavorites();
+  const perfil = usePerfilVisitante();
   const menuRef    = useRef(null);
   const searchRef  = useRef(null);
   const heartNavRef = useRef(null);
@@ -282,8 +284,26 @@ export default function Navbar() {
                 className="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all"
               >
                 <BurgerIcon className="h-4 w-4 text-gray-600" />
-                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-500 text-white">
-                  <UserIcon className="h-5 w-5" />
+                {/* Tres estados, de mejor a peor: la foto de Google, la
+                    inicial de quien entró por código, y el ícono genérico de
+                    siempre para el visitante anónimo. Ver la propia cara acá
+                    es lo que hace que el sitio se sienta propio. */}
+                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-500 text-white overflow-hidden">
+                  {perfil.avatar ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={perfil.avatar}
+                      alt=""
+                      width={28}
+                      height={28}
+                      referrerPolicy="no-referrer"
+                      className="w-7 h-7 object-cover"
+                    />
+                  ) : perfil.inicial ? (
+                    <span className="text-xs font-bold leading-none">{perfil.inicial}</span>
+                  ) : (
+                    <UserIcon className="h-5 w-5" />
+                  )}
                 </span>
               </button>
 
@@ -326,7 +346,7 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
                     >
                       <UserIcon className="h-4 w-4" />
-                      Mi cuenta
+                      {perfil.nombre ? `Hola, ${perfil.nombre.split(" ")[0]}` : "Mi cuenta"}
                     </Link>
                   </div>
                 </div>
