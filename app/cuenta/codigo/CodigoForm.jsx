@@ -58,7 +58,7 @@ export default function CodigoForm({ correo }) {
         </form>
 
         <p className="mt-6 text-xs leading-5 text-gray-500">
-          El código vence en una hora. Si no llegó, revisá la carpeta de correo no deseado.
+          El código vence en 15 minutos. Si no llegó, revisá la carpeta de correo no deseado.
         </p>
 
         <Link

@@ -26,7 +26,7 @@ export default function LoginForm({ authFailed = false, vencido = false }) {
             </p>
             <p className="mt-1 text-xs leading-5 text-amber-800">
               {vencido
-                ? "Los códigos vencen en una hora y solo pueden usarse una vez. Pedí uno nuevo acá abajo."
+                ? "Los códigos vencen en 15 minutos y solo pueden usarse una vez. Pedí uno nuevo acá abajo."
                 : "Pedí un código nuevo acá abajo y escribilo apenas te llegue."}
             </p>
           </div>

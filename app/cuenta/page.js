@@ -87,10 +87,16 @@ export default async function AccountPage() {
               ) : <EmptyState>No tenés favoritos sincronizados todavía. Tus favoritos anónimos actuales siguen guardados en este dispositivo.</EmptyState>}
             </section>
 
-            <section>
-              <h2 className="text-lg font-bold text-gray-900">Tasaciones guardadas</h2>
-              <p className="mb-3 text-sm text-gray-500">Resultados que decidas conservar en tu cuenta.</p>
-              {data.valuations.length ? (
+            {/* Nada escribe en `saved_valuations` todavía: el tasador es otra
+                app (repo tasador-sma) y no está conectado a la cuenta. Mostrar
+                el encabezado con "no guardaste ninguna tasación" hacía parecer
+                que la función existe y que el usuario no la usó. Se dibuja solo
+                cuando hay algo real que mostrar; el día que el tasador guarde,
+                aparece sola sin tocar nada. */}
+            {data.valuations.length > 0 && (
+              <section>
+                <h2 className="text-lg font-bold text-gray-900">Tasaciones guardadas</h2>
+                <p className="mb-3 text-sm text-gray-500">Resultados que decidas conservar en tu cuenta.</p>
                 <div className="space-y-2">
                   {data.valuations.map((valuation) => (
                     <div key={valuation.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -99,8 +105,8 @@ export default async function AccountPage() {
                     </div>
                   ))}
                 </div>
-              ) : <EmptyState>No guardaste ninguna tasación en tu cuenta.</EmptyState>}
-            </section>
+              </section>
+            )}
 
             {showOwnerSections && (
             <>

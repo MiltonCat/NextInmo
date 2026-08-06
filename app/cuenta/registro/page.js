@@ -4,18 +4,23 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { registerBuyerAccount } from "../actions";
 
+// Solo se listan beneficios que YA funcionan. "Tasaciones guardadas" y
+// "Alertas que vos controlás" estaban acá antes de existir: la tabla
+// `saved_valuations` no la escribe nadie y `saved_searches` no existe en el
+// proyecto. Prometer lo que no se entrega es lo que vació "Compartí tu barrio".
+// Cuando esas piezas estén construidas, se agregan de nuevo.
 const BENEFITS = [
   {
     title: "Favoritos en todos tus dispositivos",
     description: "Guardá propiedades y recuperalas cuando vuelvas, sin depender de un solo navegador.",
   },
   {
-    title: "Tasaciones guardadas",
-    description: "Conservá tus solicitudes y resultados para seguirlos desde un único lugar.",
+    title: "No perdés lo que ya guardaste",
+    description: "Al entrar por primera vez, los favoritos de este dispositivo se suman a tu cuenta.",
   },
   {
-    title: "Alertas que vos controlás",
-    description: "Elegí si querés recibir novedades de propiedades que coincidan con tu búsqueda.",
+    title: "Sin contraseña",
+    description: "Entrás con un código que te llega por correo. No hay nada que recordar ni que se filtre.",
   },
 ];
 
@@ -44,7 +49,7 @@ export default function BuyerRegistrationPage() {
             Tu búsqueda, guardada en un solo lugar
           </h1>
           <p className="mt-4 max-w-lg text-sm leading-6 text-gray-300 md:text-base">
-            La cuenta de comprador estará pensada para organizar favoritos, tasaciones y alertas. No da acceso a publicaciones de propietarios ni a analíticas internas.
+            La cuenta de comprador guarda tus favoritos y los mantiene sincronizados entre la compu y el celular. No da acceso a publicaciones de propietarios ni a analíticas internas.
           </p>
 
           <div className="mt-8 space-y-5">
