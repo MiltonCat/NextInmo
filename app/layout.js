@@ -47,12 +47,10 @@ export const metadata = {
     "Milton Catalán",
   ],
   category: "real estate",
-  alternates: {
-    canonical: canonicalUrl("/"),
-    languages: {
-      "es-AR": canonicalUrl("/"),
-    },
-  },
+  // Sin `alternates` acá: los metadatos del layout raíz los heredan todas las
+  // páginas que no los pisen, así que un canónico a "/" en este nivel marcaba
+  // como duplicadas de la home a las páginas que no declaran el suyo. Cada
+  // página define su propio canónico (la home incluida, en app/page.js).
   openGraph: {
     siteName: "Catalán Propiedades",
     locale: "es_AR",
@@ -186,7 +184,14 @@ export default function RootLayout({ children }) {
         </Script>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-brand-v2" id="favicon" />
         <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=winter-brand-v2" />
-        <link rel="canonical" href={canonicalUrl("/")} />
+        {/* Acá NO va un <link rel="canonical">. Este layout envuelve todas las
+            páginas, así que un canónico fijo salía en todas apuntando a la home
+            y chocaba con el que cada página declara en su `alternates`. Google
+            veía dos canónicos contradictorios, descartaba los dos y dejaba las
+            páginas sin indexar (/tasacion, /inversiones, /terminos y
+            /experiencia-barrio, comprobado en Search Console el 7-ago-2026).
+            El canónico correcto lo emite Next desde el `alternates` de cada
+            página; no hay que escribirlo a mano. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
