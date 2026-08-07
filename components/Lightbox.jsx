@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function Lightbox({ images, title, isOpen, onClose, startIndex = 0 }) {
   if (!isOpen || images.length === 0) return null;
@@ -58,11 +59,16 @@ function LightboxDialog({ images, title, onClose, startIndex }) {
       >
         ‹
       </button>
-      <div className="max-w-4xl max-h-[80vh] px-16" onClick={(e) => e.stopPropagation()}>
-        <img
+      {/* La caja tiene alto fijo y la foto se centra adentro con object-contain:
+          se ve igual que antes, pero next/image la sirve en el tamaño justo. */}
+      <div className="relative w-full max-w-4xl h-[80vh] mx-16" onClick={(e) => e.stopPropagation()}>
+        <Image
           src={images[currentIndex]}
           alt={`${title} - ${currentIndex + 1}`}
-          className="max-w-full max-h-[80vh] object-contain rounded-lg"
+          fill
+          priority
+          sizes="(max-width: 896px) 100vw, 896px"
+          className="object-contain rounded-lg"
         />
       </div>
       <button

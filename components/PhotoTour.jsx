@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
+import Image from "next/image";
 import { PHOTO_CATEGORIES, UNCATEGORIZED } from "@/lib/photoImages";
 
 // "Recorrido fotográfico" estilo Airbnb: nav pegajoso con las categorías
@@ -54,12 +55,15 @@ export default function PhotoTour({ images, title, isOpen, onClose, onOpenPhoto 
                 onClick={() => scrollToSection(group.value)}
                 className="flex-shrink-0 text-left"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={group.photos[0].url}
-                  alt={group.label}
-                  className="mb-1.5 h-20 w-28 rounded-lg object-cover"
-                />
+                <div className="relative mb-1.5 h-20 w-28">
+                  <Image
+                    src={group.photos[0].url}
+                    alt={group.label}
+                    fill
+                    sizes="112px"
+                    className="rounded-lg object-cover"
+                  />
+                </div>
                 <span className="block w-28 truncate text-xs font-medium text-gray-700">{group.label}</span>
               </button>
             ))}
@@ -72,16 +76,16 @@ export default function PhotoTour({ images, title, isOpen, onClose, onOpenPhoto 
               <h3 className="mb-3 text-lg font-semibold text-gray-900">{group.label}</h3>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {group.photos.map((photo) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={photo.index}
-                    src={photo.url}
-                    alt={`${title} - ${group.label}`}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-48 w-full cursor-pointer rounded-lg object-cover transition hover:opacity-90 sm:h-64"
-                    onClick={() => onOpenPhoto(photo.index)}
-                  />
+                  <div key={photo.index} className="relative h-48 w-full sm:h-64">
+                    <Image
+                      src={photo.url}
+                      alt={`${title} - ${group.label}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 480px"
+                      className="cursor-pointer rounded-lg object-cover transition hover:opacity-90"
+                      onClick={() => onOpenPhoto(photo.index)}
+                    />
+                  </div>
                 ))}
               </div>
             </section>

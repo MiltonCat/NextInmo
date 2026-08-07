@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Lightbox from "@/components/Lightbox";
 import VisitScheduler from "@/components/VisitScheduler";
 import PropertyInquiry from "@/components/PropertyInquiry";
@@ -194,17 +195,25 @@ export default function PropertyDetailClient({ property }) {
 
           {/* Gallery - desktop */}
           <div className="relative mb-8 hidden lg:grid grid-cols-4 grid-rows-2 gap-1 h-64 lg:h-80 overflow-hidden rounded-xl">
-            <div className="col-span-2 row-span-2">
-              <img src={property.image} alt={property.title} fetchPriority="high" decoding="async" className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition" onClick={() => openGallery(0)} />
+            <div className="relative col-span-2 row-span-2">
+              <Image
+                src={property.image}
+                alt={property.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover cursor-pointer hover:opacity-95 transition"
+                onClick={() => openGallery(0)}
+              />
             </div>
             {[property.image1, property.image2, property.image3, property.image4].map((image, index) => (
-              <div key={index} className="col-span-1 row-span-1">
-                <img
+              <div key={index} className="relative col-span-1 row-span-1">
+                <Image
                   src={image || property.image}
                   alt={`${property.title} - ${index + 2}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
+                  fill
+                  sizes="25vw"
+                  className="object-cover cursor-pointer hover:opacity-95 transition"
                   onClick={() => openGallery(index + 1)}
                 />
               </div>
@@ -221,8 +230,16 @@ export default function PropertyDetailClient({ property }) {
           <div className="lg:hidden mb-6">
             <div className="overflow-x-auto flex gap-1 pb-2 snap-x snap-mandatory">
               {allImages.map((img, idx) => (
-                <div key={idx} className="flex-shrink-0 w-full snap-center">
-                  <img src={img} alt={`${property.title} - ${idx + 1}`} loading={idx > 0 ? "lazy" : "eager"} fetchPriority={idx === 0 ? "high" : "low"} decoding="async" className="w-full h-64 object-cover rounded-xl cursor-pointer" onClick={() => openGallery(idx)} />
+                <div key={idx} className="relative flex-shrink-0 w-full h-64 snap-center">
+                  <Image
+                    src={img}
+                    alt={`${property.title} - ${idx + 1}`}
+                    fill
+                    priority={idx === 0}
+                    sizes="100vw"
+                    className="object-cover rounded-xl cursor-pointer"
+                    onClick={() => openGallery(idx)}
+                  />
                 </div>
               ))}
             </div>
