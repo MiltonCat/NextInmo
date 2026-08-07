@@ -1,7 +1,7 @@
 import TasacionForm from "@/components/TasacionForm";
 import TrackedLink from "@/components/TrackedLink";
 import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
-import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import { RELEVADAS_TOTAL_FMT, VALOR_M2_CASA, VALOR_M2_DEPTO } from "@/lib/mercado";
 
 export const metadata = {
   title: "Tasación de propiedades en San Martín de los Andes",
@@ -78,15 +78,31 @@ export default function TasacionPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <section className="bg-gray-50 border-b border-gray-100 pt-8 pb-10 md:pt-24 md:pb-12">
+      <section className="bg-slate-900 pt-10 pb-10 md:pt-24 md:pb-14">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-rose-600 text-xs font-bold tracking-widest uppercase mb-3">Gratuito · Sin compromiso</p>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-3 leading-tight">
+          <span className="inline-flex items-center gap-2 bg-white/[0.07] border border-white/10 text-slate-300 text-[11px] font-medium tracking-wider uppercase px-3 py-1.5 rounded-full mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+            Gratis · sin compromiso
+          </span>
+          <h1 className="text-3xl md:text-[42px] font-bold text-white mb-4 leading-[1.15]">
             ¿Cuánto vale tu propiedad en San Martín de los Andes?
           </h1>
-          <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-xl">
-            Completá el formulario y Milton te envía una estimación orientativa basada en datos reales del mercado local. Sin turnos, sin costo, sin compromiso.
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-lg">
+            Completá los datos y Milton te responde con una estimación basada en el mercado real de la zona.
           </p>
+
+          <div className="grid grid-cols-3 gap-px bg-white/10 rounded-xl overflow-hidden mt-9">
+            {[
+              { valor: RELEVADAS_TOTAL_FMT, label: "propiedades relevadas" },
+              { valor: `USD ${VALOR_M2_CASA.toLocaleString("es-AR")}`, label: "el m² en casas" },
+              { valor: `USD ${VALOR_M2_DEPTO.toLocaleString("es-AR")}`, label: "el m² en departamentos" },
+            ].map((m) => (
+              <div key={m.label} className="bg-slate-900 px-4 py-4">
+                <p className="text-white text-lg md:text-xl font-bold tabular-nums leading-tight">{m.valor}</p>
+                <p className="text-slate-500 text-[11px] md:text-xs mt-1 leading-snug">{m.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -97,19 +113,21 @@ export default function TasacionPage() {
           event="tasador_click"
           eventParams={{ source: "tasacion" }}
           href={TASADOR_URL}
-          className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 mb-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
+          className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 mb-9 rounded-xl bg-rose-50 border border-rose-100 hover:border-rose-200 transition-colors"
         >
+          <span className="w-10 h-10 rounded-lg bg-rose-600 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </span>
           <div className="flex-1">
-            <p className="text-rose-400 text-[11px] font-bold tracking-widest uppercase mb-1.5">Nuevo · Resultado al instante</p>
-            <p className="text-white text-lg font-bold leading-snug mb-1">
-              ¿No querés esperar? Accedé al tasador predictivo
-            </p>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes, más un informe PDF gratis.
+            <p className="text-rose-900 font-semibold leading-snug">Tasador instantáneo</p>
+            <p className="text-rose-800/80 text-sm leading-relaxed mt-0.5">
+              Resultado en segundos con el modelo predictivo, más un informe PDF gratis.
             </p>
           </div>
-          <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap flex-shrink-0">
-            Tasar al instante
+          <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap flex-shrink-0">
+            Probar
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -122,25 +140,8 @@ export default function TasacionPage() {
           <span className="flex-1 h-px bg-gray-200" />
         </div>
 
-        {/* Beneficios */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          {[
-            { icon: "⏱", titulo: "Respuesta en 48 hs", desc: "Sin esperas largas ni burocracia" },
-            { icon: "📊", titulo: "Basado en datos reales", desc: `${RELEVADAS_TOTAL_FMT} propiedades relevadas en SMA` },
-            { icon: "🤝", titulo: "Sin compromiso", desc: "La tasación es orientativa y gratuita" },
-          ].map((b) => (
-            <div key={b.titulo} className="flex gap-3 p-4 bg-gray-50 border border-gray-100 rounded-xl">
-              <span className="text-xl mt-0.5">{b.icon}</span>
-              <div>
-                <p className="text-sm font-semibold text-gray-800">{b.titulo}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{b.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* Formulario */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8">
           <TasacionForm />
         </div>
 

@@ -1,7 +1,7 @@
 {
   "ciudad": "sma",
   "ciudad_display": "San Martín de los Andes",
-  "generado": "2026-06-22",
+  "generado": "2026-08-06",
   "fuente": "propiedades_limpias.csv",
   "_leyenda_origen": {
     "calculado": "Derivado del dataset del modelo (vigente).",
@@ -9,17 +9,17 @@
   },
   "relevadas": {
     "_origen": "calculado",
-    "total": 1753,
+    "total": 1597,
     "por_tipo": {
-      "Terreno": 595,
-      "Otro": 360,
-      "Departamento": 356,
-      "Casa": 348,
-      "Local Comercial": 53,
-      "Cabaña": 39,
+      "Casa": 512,
+      "Departamento": 505,
+      "Otro": 353,
+      "Terreno": 116,
+      "Local Comercial": 61,
+      "Cabaña": 48,
       "Oficina": 2
     },
-    "usables_modelo": 704,
+    "usables_modelo": 1017,
     "tipos_modelo": [
       "Casa",
       "Departamento"
@@ -27,117 +27,137 @@
   },
   "valor_m2_usd": {
     "_origen": "calculado",
-    "referencia_general_casa_depto": 2629,
+    "_nota_casas": "Se excluyeron 247 casas con `superficie_terreno == superficie_cubierta` (el portal cargó el lote como superficie cubierta), que hundían la mediana de Casa. Ver descartar_superficie_dudosa().",
+    "_nota_general": "referencia_general_casa_depto pondera las medianas por tipo con la composición real del mercado. Mezcla casas y departamentos, que difieren ~58%: preferir por_tipo para publicar.",
+    "referencia_general_casa_depto": 2684,
     "por_tipo": {
-      "Cabaña": 2786,
-      "Casa": 1588,
-      "Departamento": 3298,
-      "Local Comercial": 2950,
+      "Cabaña": 2695,
+      "Casa": 2085,
+      "Departamento": 3292,
+      "Local Comercial": 2900,
       "Oficina": 1713,
-      "Otro": 1000,
-      "Terreno": 487
+      "Otro": 752,
+      "Terreno": 478
+    },
+    "rango_por_tipo": {
+      "Casa": {
+        "p25": 1598,
+        "p75": 2620,
+        "n": 188
+      },
+      "Departamento": {
+        "p25": 2662,
+        "p75": 3923,
+        "n": 472
+      }
     },
     "por_barrio": [
       {
         "barrio": "Centro",
-        "n": 244,
-        "mediana_m2_usd": 3210,
+        "n": 281,
+        "mediana_m2_usd": 3400,
         "estado": "usable"
       },
       {
         "barrio": "General",
-        "n": 129,
+        "n": 173,
         "mediana_m2_usd": 3000,
         "estado": "usable"
       },
       {
         "barrio": "Chapelco Golf & Resort",
-        "n": 27,
-        "mediana_m2_usd": 2980,
+        "n": 23,
+        "mediana_m2_usd": 3025,
         "estado": "usable"
       },
       {
         "barrio": "Vega Maipu",
-        "n": 20,
-        "mediana_m2_usd": 2407,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Caleuche",
-        "n": 14,
-        "mediana_m2_usd": 1204,
+        "n": 18,
+        "mediana_m2_usd": 2508,
         "estado": "usable"
       },
       {
         "barrio": "Altos del Sol",
-        "n": 13,
-        "mediana_m2_usd": 1446,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Meliquina",
-        "n": 13,
-        "mediana_m2_usd": 1623,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Altos del Chapelco",
-        "n": 12,
-        "mediana_m2_usd": 958,
+        "n": 11,
+        "mediana_m2_usd": 2027,
         "estado": "usable"
       },
       {
         "barrio": "La Cascada",
         "n": 11,
-        "mediana_m2_usd": 2388,
+        "mediana_m2_usd": 2452,
         "estado": "usable"
       },
       {
         "barrio": "Las Pendientes Ski Village",
         "n": 11,
-        "mediana_m2_usd": 2955,
+        "mediana_m2_usd": 3537,
         "estado": "usable"
       },
       {
-        "barrio": "Los Faldeos de Chapelco",
-        "n": 11,
-        "mediana_m2_usd": 1255,
+        "barrio": "Altos del Chapelco",
+        "n": 10,
+        "mediana_m2_usd": 1962,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Caleuche",
+        "n": 9,
+        "mediana_m2_usd": 1263,
         "estado": "usable"
       },
       {
         "barrio": "Camino Lolog",
-        "n": 9,
-        "mediana_m2_usd": 2120,
+        "n": 8,
+        "mediana_m2_usd": 1863,
         "estado": "usable"
       },
       {
-        "barrio": "Alihuen Alto y Bajo",
-        "n": 7,
-        "mediana_m2_usd": 2304,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Callejon de Gin Gins",
-        "n": 7,
-        "mediana_m2_usd": 471,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Chacra 28",
-        "n": 6,
-        "mediana_m2_usd": 959,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Ruca Hue",
-        "n": 6,
-        "mediana_m2_usd": 292,
+        "barrio": "Las Marias del Valle Club de Campo",
+        "n": 8,
+        "mediana_m2_usd": 2154,
         "estado": "usable"
       },
       {
         "barrio": "El Arenal",
-        "n": 5,
+        "n": 6,
         "mediana_m2_usd": 2333,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Los Robles",
+        "n": 6,
+        "mediana_m2_usd": 1710,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Meliquina",
+        "n": 6,
+        "mediana_m2_usd": 2052,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Alihuen Alto y Bajo",
+        "n": 5,
+        "mediana_m2_usd": 2325,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Los Faldeos de Chapelco",
+        "n": 5,
+        "mediana_m2_usd": 1582,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Tierra de Sol",
+        "n": 5,
+        "mediana_m2_usd": 2000,
+        "estado": "usable"
+      },
+      {
+        "barrio": "Valle de Chapelco",
+        "n": 5,
+        "mediana_m2_usd": 2500,
         "estado": "usable"
       },
       {
@@ -147,27 +167,21 @@
         "estado": "usable"
       },
       {
-        "barrio": "El Oasis",
+        "barrio": "La Balconada",
         "n": 4,
-        "mediana_m2_usd": 3371,
+        "mediana_m2_usd": 2000,
         "estado": "usable"
       },
       {
-        "barrio": "Peñon De Lolog",
+        "barrio": "Lago Lolog",
         "n": 4,
-        "mediana_m2_usd": 2423,
+        "mediana_m2_usd": 2738,
         "estado": "usable"
       },
       {
-        "barrio": "Tierra de Sol",
+        "barrio": "Rio Hermoso",
         "n": 4,
-        "mediana_m2_usd": 2116,
-        "estado": "usable"
-      },
-      {
-        "barrio": "Tiro Federal",
-        "n": 4,
-        "mediana_m2_usd": 1734,
+        "mediana_m2_usd": 3208,
         "estado": "usable"
       },
       {
@@ -177,93 +191,57 @@
         "estado": "en_observacion"
       },
       {
-        "barrio": "El Portal",
+        "barrio": "Chacra 28",
         "n": 3,
-        "mediana_m2_usd": 342,
+        "mediana_m2_usd": 1328,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Handel",
+        "barrio": "El Oasis",
         "n": 3,
-        "mediana_m2_usd": 2433,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Las Marias del Valle Club de Campo",
-        "n": 3,
-        "mediana_m2_usd": 1667,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Valle de Chapelco",
-        "n": 3,
-        "mediana_m2_usd": 2500,
+        "mediana_m2_usd": 3409,
         "estado": "en_observacion"
       },
       {
         "barrio": "Estancia Los Nires",
-        "n": 2,
+        "n": 3,
         "mediana_m2_usd": 2719,
         "estado": "en_observacion"
       },
       {
-        "barrio": "La Balconada",
-        "n": 2,
-        "mediana_m2_usd": 2059,
+        "barrio": "Peñon De Lolog",
+        "n": 3,
+        "mediana_m2_usd": 2167,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Las Nalcas",
-        "n": 2,
-        "mediana_m2_usd": 1842,
+        "barrio": "Ruca Hue",
+        "n": 3,
+        "mediana_m2_usd": 2456,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Los Robles",
+        "barrio": "Callejon de Gin Gins",
         "n": 2,
-        "mediana_m2_usd": 1784,
+        "mediana_m2_usd": 1986,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Noregon",
+        "barrio": "Los Coirones",
         "n": 2,
-        "mediana_m2_usd": 2792,
+        "mediana_m2_usd": 1479,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Quila Quina",
+        "barrio": "Terrazas de Bellavista",
         "n": 2,
-        "mediana_m2_usd": 1625,
+        "mediana_m2_usd": 2126,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Quilquihue",
+        "barrio": "Tiro Federal",
         "n": 2,
-        "mediana_m2_usd": 1459,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Raitrai",
-        "n": 2,
-        "mediana_m2_usd": 3092,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Rio Hermoso",
-        "n": 2,
-        "mediana_m2_usd": 1021,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Santo Domingo",
-        "n": 2,
-        "mediana_m2_usd": 1059,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Valle Alto",
-        "n": 2,
-        "mediana_m2_usd": 906,
+        "mediana_m2_usd": 3128,
         "estado": "en_observacion"
       },
       {
@@ -273,15 +251,9 @@
         "estado": "en_observacion"
       },
       {
-        "barrio": "Balcones de la Vega",
+        "barrio": "Chacra 30",
         "n": 1,
-        "mediana_m2_usd": 480,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Callejon de Torres",
-        "n": 1,
-        "mediana_m2_usd": 294,
+        "mediana_m2_usd": 1900,
         "estado": "en_observacion"
       },
       {
@@ -291,21 +263,15 @@
         "estado": "en_observacion"
       },
       {
-        "barrio": "El Pegual",
+        "barrio": "Faldeos Del Chapelco",
         "n": 1,
-        "mediana_m2_usd": 2475,
+        "mediana_m2_usd": 1698,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Lago Lolog",
+        "barrio": "Handel",
         "n": 1,
-        "mediana_m2_usd": 406,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Las Moras",
-        "n": 1,
-        "mediana_m2_usd": 2984,
+        "mediana_m2_usd": 2578,
         "estado": "en_observacion"
       },
       {
@@ -315,15 +281,15 @@
         "estado": "en_observacion"
       },
       {
-        "barrio": "Los Coirones",
+        "barrio": "Los Manzanos",
         "n": 1,
-        "mediana_m2_usd": 345,
+        "mediana_m2_usd": 1484,
         "estado": "en_observacion"
       },
       {
-        "barrio": "Los Radales",
+        "barrio": "Los Nires",
         "n": 1,
-        "mediana_m2_usd": 568,
+        "mediana_m2_usd": 3292,
         "estado": "en_observacion"
       },
       {
@@ -333,15 +299,33 @@
         "estado": "en_observacion"
       },
       {
+        "barrio": "Potrero Alto",
+        "n": 1,
+        "mediana_m2_usd": 1685,
+        "estado": "en_observacion"
+      },
+      {
+        "barrio": "Quila Quina",
+        "n": 1,
+        "mediana_m2_usd": 1625,
+        "estado": "en_observacion"
+      },
+      {
+        "barrio": "Quilquihue",
+        "n": 1,
+        "mediana_m2_usd": 1311,
+        "estado": "en_observacion"
+      },
+      {
         "barrio": "San Fernando",
         "n": 1,
         "mediana_m2_usd": 2535,
         "estado": "en_observacion"
       },
       {
-        "barrio": "San Lorenzo",
+        "barrio": "Santo Domingo",
         "n": 1,
-        "mediana_m2_usd": 449,
+        "mediana_m2_usd": 1618,
         "estado": "en_observacion"
       },
       {
@@ -351,39 +335,15 @@
         "estado": "en_observacion"
       },
       {
-        "barrio": "Sigrand",
+        "barrio": "Valle Escondido",
         "n": 1,
-        "mediana_m2_usd": 600,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Vallescondido",
-        "n": 1,
-        "mediana_m2_usd": 1611,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Vega Chica",
-        "n": 1,
-        "mediana_m2_usd": 3113,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Villa Lolog",
-        "n": 1,
-        "mediana_m2_usd": 2000,
+        "mediana_m2_usd": 2115,
         "estado": "en_observacion"
       },
       {
         "barrio": "Villa Paur",
         "n": 1,
         "mediana_m2_usd": 996,
-        "estado": "en_observacion"
-      },
-      {
-        "barrio": "Villa Pirén",
-        "n": 1,
-        "mediana_m2_usd": 2867,
         "estado": "en_observacion"
       }
     ]
@@ -394,42 +354,42 @@
     "serie": [
       {
         "anio": 2021,
-        "usd_m2": 2350,
+        "usd_m2": 1680,
         "variacion_pct": null,
-        "descripcion": "Salida de pandemia - precios ya entre los mas altos del pais"
+        "descripcion": "Post-pandemia - Recuperacion del mercado"
       },
       {
         "anio": 2022,
-        "usd_m2": 2520,
-        "variacion_pct": 7.2,
-        "descripcion": "San Martin, el m2 mas caro de Argentina (verificado)"
+        "usd_m2": 1950,
+        "variacion_pct": 16.1,
+        "descripcion": "San Martin de los Andes lidera precios en Argentina"
       },
       {
         "anio": 2023,
-        "usd_m2": 2545,
-        "variacion_pct": 1.0,
-        "descripcion": "Mercado maduro - precios estables en dolares"
+        "usd_m2": 2180,
+        "variacion_pct": 11.8,
+        "descripcion": "Aumento de demanda turistica e inversionista"
       },
       {
         "anio": 2024,
-        "usd_m2": 2570,
-        "variacion_pct": 1.0,
-        "descripcion": "Demanda turistica e inversora sostenida"
+        "usd_m2": 2450,
+        "variacion_pct": 12.4,
+        "descripcion": "Crecimiento sostenido - boom de construcciones"
       },
       {
         "anio": 2025,
         "usd_m2": 2590,
-        "variacion_pct": 0.8,
-        "descripcion": "Estabilizacion - mercado consolidado"
+        "variacion_pct": 5.7,
+        "descripcion": "Estabilizacion de precios - mercado maduro"
       },
       {
         "anio": 2026,
-        "usd_m2": 2600,
-        "variacion_pct": 0.4,
-        "descripcion": "Sigue entre los mas caros del pais (verificado)"
+        "usd_m2": 2650,
+        "variacion_pct": 2.3,
+        "descripcion": "Consolidacion - demanda internacional"
       }
     ],
-    "variacion_total_pct": 10.6
+    "variacion_total_pct": 57.7
   },
   "rentabilidad_alquiler": {
     "_origen": "referencia_curada",
