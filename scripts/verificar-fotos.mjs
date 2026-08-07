@@ -25,8 +25,10 @@
 // Opcional: BASE=https://catalanpropiedades.com.ar node scripts/verificar-fotos.mjs
 // para verificar producción en vez del entorno local.
 
+// Se habla con Supabase por HTTP directo (PostgREST) y no con @supabase/supabase-js
+// a propósito: el cliente oficial levanta un canal de tiempo real que en Node 20
+// necesita WebSocket nativo y revienta. Para leer una tabla alcanza con un fetch.
 import { readFileSync, writeFileSync } from "node:fs";
-import { createClient } from "@supabase/supabase-js";
 
 const BASE = process.env.BASE || "http://localhost:3000";
 
@@ -55,54 +57,104 @@ if (!url || !key) {
   process.exit(1);
 }
 
-// Saca la lista de propiedades de la base: solo para saber qué páginas visitar.
-const client = createClient(url, key, { auth: { persistSession: false } });
-const { data: propiedades, error } = await client
-  .from("properties")
-  .select("id, title, image, image1, image2, image3, image4")
-  .order("sort_order", { ascending: true, nullsFirst: false });
+// Saca la lista de propiedades de la base: solo para saber qué páginas visitar
+// y con qué fotos comparar.
+// select=* a propósito: la tabla no tiene exactamente las mismas columnas que el
+// array de respaldo de data/properties.js (por ejemplo, "noDisponible" no existe
+// en la base). Pedirlas por nombre haría fallar el script cada vez que cambie el
+// esquema; pedir todo y leer lo que haya es más robusto para un verificador.
+const consulta = `${url}/rest/v1/properties?select=*&order=sort_order.asc.nullslast`;
 
-if (error) {
-  console.error("Error leyendo Supabase:", error.message);
+let propiedades;
+try {
+  const res = await fetch(consulta, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+  });
+  const texto = await res.text();
+  if (!res.ok) {
+    console.error(`Supabase respondió ${res.status}: ${texto}`);
+    process.exit(1);
+  }
+  propiedades = JSON.parse(texto);
+} catch (e) {
+  console.error("No se pudo consultar Supabase:", e.message);
   process.exit(1);
 }
-if (!propiedades || propiedades.length === 0) {
+
+if (!Array.isArray(propiedades) || propiedades.length === 0) {
   console.error("Supabase no devolvió propiedades. Abortado: un snapshot vacío no verifica nada.");
   process.exit(1);
 }
 
-// next/image sirve las fotos a través de /_next/image?url=<original>&w=...&q=...
-// Desenvolvemos ese formato para quedarnos siempre con la URL original.
-function urlOriginal(src) {
-  if (!src) return null;
-  const limpia = src.replace(/&amp;/g, "&");
-  const match = limpia.match(/\/_next\/image\?[^"']*?url=([^&"']+)/);
-  if (match) return decodeURIComponent(match[1]);
-  return limpia;
+// Índice global: qué propiedad es dueña de cada foto.
+// No alcanza con reconocer las fotos por dónde están alojadas. El catálogo tiene
+// dos generaciones conviviendo: las propiedades viejas guardan rutas locales
+// (/imgs/Imgs9/casa5.webp, archivos de public/) y las nuevas, cargadas desde el
+// panel, guardan URLs de Supabase. La única definición sólida de "foto del
+// catálogo" es: una URL que la base le asigna a alguna propiedad.
+const CAMPOS_FOTO = ["image", "image1", "image2", "image3", "image4"];
+const duenoDeLaFoto = new Map();
+for (const p of propiedades) {
+  for (const campo of CAMPOS_FOTO) {
+    if (p[campo] && !duenoDeLaFoto.has(p[campo])) duenoDeLaFoto.set(p[campo], p.id);
+  }
 }
 
-// Extrae los src de todas las etiquetas <img> del HTML, en orden de aparición.
-// (next/image también termina renderizando un <img> en el HTML final.)
-function fotosDelHtml(html) {
+// Una foto puede aparecer en el HTML de dos formas:
+//   1. cruda:          /imgs/Imgs9/casa5.webp   o   https://...supabase.co/...
+//   2. por next/image: /_next/image/?url=<la misma URL, codificada>&w=...&q=...
+// Las dos apuntan a la misma foto. Normalizamos siempre a la forma cruda, así el
+// resultado de antes y después de la migración es directamente comparable.
+//
+// Ojo con la barra antes del "?": el proyecto tiene trailingSlash:true en
+// next.config.mjs, así que Next emite "/_next/image/?url=..." y no
+// "/_next/image?url=...". La barra va como opcional para que el script sirva
+// con y sin esa opción.
+function desenvolver(src) {
+  const limpia = src.replace(/&amp;/g, "&");
+  const m = limpia.match(/\/_next\/image\/?\?[^"'\s]*?url=([^&"'\s]+)/);
+  if (!m) return limpia;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return limpia;
+  }
+}
+
+// Fotos del catálogo que el navegador realmente pinta: las que están dentro de
+// una etiqueta <img>. Se ignora todo lo que no sea foto de alguna propiedad
+// (logo, foto del asesor, iconos).
+function fotosRenderizadas(html) {
   const encontradas = [];
-  const regex = /<img\b[^>]*?\ssrc=["']([^"']+)["'][^>]*>/gi;
-  let m;
-  while ((m = regex.exec(html)) !== null) {
-    const original = urlOriginal(m[1]);
-    if (!original) continue;
-    // Ignoramos los assets fijos del sitio (logo, foto del asesor, etc.):
-    // acá nos importan las fotos del catálogo, que viven en Supabase.
-    if (!original.includes("/storage/v1/object/public/")) continue;
-    if (!encontradas.includes(original)) encontradas.push(original);
+  const tags = html.match(/<img\b[^>]*>/gi) || [];
+  for (const tag of tags) {
+    for (const m of tag.matchAll(/\ssrc=["']([^"']+)["']/gi)) {
+      const url = desenvolver(m[1]);
+      if (duenoDeLaFoto.has(url) && !encontradas.includes(url)) encontradas.push(url);
+    }
   }
   return encontradas;
 }
 
+// ¿La foto aparece en algún lugar del HTML, aunque no se haya pintado? Sirve
+// para distinguir "no se dibujó" de "no está por ningún lado".
+function apareceEnElHtml(html, foto) {
+  return html.includes(foto) || html.includes(encodeURIComponent(foto));
+}
+
+// Las propiedades vendidas o no disponibles devuelven 404 a propósito
+// (app/propiedades/[slug]/page.js llama a notFound()). No son un error: se saltean.
+const publicadas = propiedades.filter(
+  (p) => !p.vendida && !p.noDisponible && p.status !== "no_disponible",
+);
+const saltadas = propiedades.length - publicadas.length;
+
 const lineas = [];
 let totalFotos = 0;
 let problemas = 0;
+let htmlDeMuestra = null;
 
-for (const p of propiedades) {
+for (const p of publicadas) {
   const ruta = `${BASE}/propiedades/${p.id}/`;
   let html;
   try {
@@ -119,25 +171,34 @@ for (const p of propiedades) {
     process.exit(1);
   }
 
-  const enPagina = fotosDelHtml(html);
+  if (htmlDeMuestra === null) htmlDeMuestra = html;
+
+  const renderizadas = fotosRenderizadas(html);
   // Lo que la base dice que son las fotos de ESTA propiedad.
-  const enBase = [p.image, p.image1, p.image2, p.image3, p.image4].filter(Boolean);
+  const enBase = CAMPOS_FOTO.map((c) => p[c]).filter(Boolean);
 
   lineas.push(`# ${p.id} | ${p.title ?? "(sin título)"}`);
-  for (const foto of enPagina) {
-    // La comprobación que importa: cada foto que aparece en la ficha tiene que
-    // ser una de las fotos que la base le asigna a esta propiedad.
-    const corresponde = enBase.includes(foto);
-    if (!corresponde) problemas++;
-    lineas.push(`${p.id}\t${corresponde ? "OK " : "AJENA"}\t${foto}`);
-    totalFotos++;
-  }
-  // Fotos que la base tiene cargadas y la página no muestra.
-  for (const foto of enBase) {
-    if (!enPagina.includes(foto)) {
-      lineas.push(`${p.id}\tFALTA\t${foto}`);
+  for (const foto of renderizadas) {
+    // La comprobación que importa: cada foto que la ficha pinta tiene que ser
+    // una de las fotos que la base le asigna a esta propiedad.
+    if (enBase.includes(foto)) {
+      lineas.push(`${p.id}\tOK \t${foto}`);
+    } else {
+      // Es foto del catálogo pero de OTRA propiedad: exactamente el accidente
+      // que este script existe para detectar.
+      lineas.push(`${p.id}\tAJENA\t${foto}\t(es de la propiedad ${duenoDeLaFoto.get(foto)})`);
       problemas++;
     }
+    totalFotos++;
+  }
+  // Fotos que la base tiene cargadas y la ficha no pinta.
+  for (const foto of enBase) {
+    if (renderizadas.includes(foto)) continue;
+    // Distinguimos los dos casos: la foto no está en ningún lado (FALTA) o está
+    // en los datos de la página pero no llegó a pintarse (SIN-PINTAR).
+    const etiqueta = apareceEnElHtml(html, foto) ? "SIN-PINTAR" : "FALTA";
+    lineas.push(`${p.id}\t${etiqueta}\t${foto}`);
+    problemas++;
   }
   lineas.push("");
 }
@@ -152,9 +213,30 @@ if (salida) {
   console.log(texto);
 }
 
-console.log(`\n${propiedades.length} propiedades · ${totalFotos} fotos encontradas en las fichas`);
+console.log(
+  `\n${publicadas.length} propiedades publicadas · ${totalFotos} fotos pintadas en las fichas` +
+    (saltadas ? `\n(${saltadas} vendidas o no disponibles: se saltean, su ficha da 404 a propósito)` : ""),
+);
+
+// Si no se encontró ni una sola foto, el problema casi seguro es del script y no
+// del sitio. Guardamos el HTML de una ficha para poder mirarlo.
+if (totalFotos === 0 && htmlDeMuestra) {
+  const ruta = "docs/debug-ficha.html";
+  writeFileSync(ruta, htmlDeMuestra);
+  console.error(
+    `\nNo se encontró NINGUNA foto en ninguna ficha. Eso apunta a un fallo del script,\n` +
+      `no a fotos cruzadas. Guardé el HTML de una ficha en ${ruta} para revisarlo.`,
+  );
+  process.exit(1);
+}
+
 if (problemas > 0) {
-  console.error(`\n*** ${problemas} problema(s): buscá las líneas AJENA o FALTA en el snapshot. ***`);
+  console.error(
+    `\n*** ${problemas} problema(s). En el snapshot:\n` +
+      `    AJENA      = la ficha muestra una foto de OTRA propiedad. Grave.\n` +
+      `    SIN-PINTAR = la foto está en los datos de la página pero no se pintó.\n` +
+      `    FALTA      = la foto no aparece por ningún lado. ***`,
+  );
   process.exit(1);
 }
 console.log("Todas las fotos de cada ficha corresponden a esa propiedad.");
