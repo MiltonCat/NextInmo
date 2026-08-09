@@ -152,7 +152,7 @@ export async function signInAccount(prevState, formData) {
     return { error: "Demasiados intentos. Esperá una hora antes de volver a pedir un enlace." };
   }
 
-  const redirectUrl = getAccountAuthRedirectUrl();
+  const redirectUrl = await getAccountAuthRedirectUrl();
   if (!redirectUrl) {
     console.error("Falta ACCOUNT_AUTH_REDIRECT_URL: nadie puede ingresar.");
     return { error: ERROR_SIN_CONFIGURAR };
@@ -208,7 +208,7 @@ export async function registerBuyerAccount(prevState, formData) {
     return { error: "Ya pediste varios enlaces. Esperá una hora antes de volver a intentar." };
   }
 
-  const redirectUrl = getAccountAuthRedirectUrl();
+  const redirectUrl = await getAccountAuthRedirectUrl();
   if (!redirectUrl) {
     console.error("Falta ACCOUNT_AUTH_REDIRECT_URL: nadie puede registrarse.");
     return { error: ERROR_SIN_CONFIGURAR };
@@ -298,7 +298,7 @@ export async function verifyAccountCode(prevState, formData) {
  * Google y entra siempre con la que menos usa, sin que se le ofrezca elegir.
  */
 export async function signInWithGoogle() {
-  const redirectUrl = getAccountAuthRedirectUrl();
+  const redirectUrl = await getAccountAuthRedirectUrl();
   if (!redirectUrl) {
     console.error("Falta ACCOUNT_AUTH_REDIRECT_URL: no se puede entrar con Google.");
     redirect("/cuenta/login/?auth_error=1");
@@ -369,7 +369,25 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function getAccountAuthRedirectUrl() {
+// En desarrollo el host con el que se navega no es estable: `next dev` atiende
+// igual en localhost y en 127.0.0.1, y el verificador PKCE es una cookie. Si el
+// ingreso arranca en un host y el proveedor devuelve al otro, la cookie no
+// viaja y el canje muere con `pkce_code_verifier_not_found`. Derivar el origen
+// del propio pedido garantiza que la vuelta caiga en el mismo tarro de cookies.
+//
+// El host llega en una cabecera, que el cliente controla: aceptar cualquier
+// valor convertiría esto en un redirect abierto. Por eso solo se acepta fuera
+// de producción y solo para los dos nombres locales, con puerto opcional.
+const HOST_LOCAL = /^(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
+
+async function getAccountAuthRedirectUrl() {
+  if (process.env.NODE_ENV !== "production") {
+    const host = (await headers()).get("host");
+    if (host && HOST_LOCAL.test(host)) {
+      return `http://${host}/auth/callback/?next=%2Fcuenta`;
+    }
+  }
+
   const configuredUrl = process.env.ACCOUNT_AUTH_REDIRECT_URL;
   if (!configuredUrl) return null;
 
