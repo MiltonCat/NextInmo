@@ -23,8 +23,12 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // Honeypot: si un bot completó el campo invisible, fingimos éxito y no guardamos.
-    if (body.website) return NextResponse.json({ ok: true });
+    // Acá había un descarte por campo trampa que ningún formulario alimentaba:
+    // los leads llegan por `registrarConsulta()`, que arma el payload en código.
+    // Era código muerto y además una mina: el día que el payload incluyera un
+    // campo llamado `website` —la URL de la propiedad, por ejemplo— los leads
+    // habrían dejado de guardarse sin un solo error en ningún lado. El abuso ya
+    // lo corta el rate limit de arriba.
 
     if (!TIPOS.has(body.tipo) || !body.nombre?.trim()) {
       return NextResponse.json({ ok: false, error: "datos_invalidos" }, { status: 400 });

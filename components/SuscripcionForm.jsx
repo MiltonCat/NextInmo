@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import CampoTrampa from "./CampoTrampa";
 
 const INTERESES = [
   { value: "", label: "¿Qué buscás? (opcional)" },
@@ -15,7 +16,7 @@ export default function SuscripcionForm({ placement = "home" }) {
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [interes, setInteres] = useState("");
-  const [website, setWebsite] = useState(""); // honeypot
+  const [trampa, setTrampa] = useState("");
   const [estado, setEstado] = useState("idle"); // idle | enviando | ok | error
   const containerRef = useRef(null);
   const startedRef = useRef(false);
@@ -60,7 +61,7 @@ export default function SuscripcionForm({ placement = "home" }) {
       const res = await fetch("/api/suscripcion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, nombre, interes, website }),
+        body: JSON.stringify({ email, nombre, interes, trampa }),
       });
       const data = await res.json().catch(() => ({}));
       const ok = res.ok && data.ok;
@@ -88,17 +89,7 @@ export default function SuscripcionForm({ placement = "home" }) {
 
   return (
     <form ref={containerRef} onSubmit={onSubmit} onFocus={markStarted} className="space-y-3">
-      {/* Honeypot anti-spam: invisible para personas, tentador para bots. */}
-      <input
-        type="text"
-        name="website"
-        value={website}
-        onChange={(e) => setWebsite(e.target.value)}
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden="true"
-        className="hidden"
-      />
+      <CampoTrampa valor={trampa} onChange={setTrampa} />
 
       <div className="flex flex-col sm:flex-row gap-3">
         <input

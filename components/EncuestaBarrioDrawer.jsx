@@ -41,7 +41,6 @@ const EMPTY = {
   nombre: "",
   email: "",
   quiere_informe: false,
-  website: "", // honeypot
 };
 
 const ERRORES = {
@@ -201,7 +200,11 @@ export default function EncuestaBarrioDrawer({ open, onClose, barrioInicial = ""
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (form.website) return;
+    // Se sacó el descarte silencioso por campo trampa. Los gestores de
+    // contraseñas completan campos ocultos, y acá eso significaba que alguien
+    // escribía la opinión de su barrio, apretaba enviar y no pasaba nada, sin
+    // mensaje de error. Conseguir estas opiniones es justamente lo más difícil
+    // del proyecto: perder una por una trampa antibots no compensa.
     setStatus("loading");
     setError("");
     try {
@@ -312,21 +315,6 @@ export default function EncuestaBarrioDrawer({ open, onClose, barrioInicial = ""
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="px-6 py-6">
-              {/* Honeypot */}
-              <div
-                style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}
-                aria-hidden="true"
-              >
-                <input
-                  type="text"
-                  name="website"
-                  value={form.website}
-                  onChange={(e) => set("website", e.target.value)}
-                  tabIndex={-1}
-                  autoComplete="off"
-                />
-              </div>
-
               {/* ── PASO 1 — Quién responde ─────────────────────────────── */}
               {paso === 0 && (
                 <div className="space-y-6">

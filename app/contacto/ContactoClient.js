@@ -11,7 +11,7 @@ const CONTACT_WA_URL = whatsappUrl(
   "Hola Milton, estoy en la página de contacto de Catalán Propiedades y quisiera contarte qué propiedad o asesoramiento estoy buscando."
 );
 
-const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "", website: "" };
+const INITIAL = { name: "", email: "", phone: "", monto: "", objetivo: "", plazo: "", message: "" };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_REGEX = /^[+\d\s()-]{6,}$/;
@@ -55,7 +55,12 @@ export default function ContactoClient() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.website) return;
+    // Acá había un descarte silencioso por campo trampa: si venía completo, el
+    // formulario no hacía nada y no avisaba nada. Los gestores de contraseñas
+    // completan campos ocultos, así que eso se tragaba consultas de personas
+    // reales sin dejar rastro. En el formulario de contacto de una inmobiliaria
+    // ese es el error más caro posible: una consulta perdida no se recupera, y
+    // el spam que evitaba lo filtra igual el servicio que recibe el envío.
     const errs = validate(formData);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
@@ -256,18 +261,6 @@ export default function ContactoClient() {
               )}
 
               <form onSubmit={handleSubmit} noValidate className="space-y-4">
-                {/* Honeypot — invisible para humanos, los bots lo completan */}
-                <div style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
-                  <input
-                    type="text"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleChange}
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-[#222222] mb-1">
                     Nombre completo <span className="text-red-400">*</span>

@@ -27,8 +27,20 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // Honeypot: si un bot completó el campo invisible, fingimos éxito y no guardamos.
-    if (body.website) return NextResponse.json({ ok: true });
+    // Campo trampa. Acá sí se mantiene el descarte silencioso, y es el único
+    // formulario donde se justifica: un alta basura no solo ensucia la lista,
+    // encima dispara un mail de bienvenida a una dirección inventada, y eso
+    // castiga la reputación del remitente y termina mandando a spam los correos
+    // que sí importan.
+    //
+    // El riesgo de equivocarse bajó mucho: el campo dejó de llamarse "website"
+    // —que era lo que los gestores de contraseñas completaban solos— y ahora
+    // lleva los atributos que cada gestor respeta para saltearlo. Ver
+    // components/CampoTrampa.jsx.
+    if (body.trampa) {
+      console.warn("[/api/suscripcion] campo trampa completado; no se da de alta");
+      return NextResponse.json({ ok: true });
+    }
 
     const email = String(body.email || "").trim().toLowerCase();
     if (!EMAIL_RE.test(email)) {

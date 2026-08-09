@@ -58,7 +58,10 @@ export async function POST(request) {
     const body = await request.json();
 
     // Honeypot: si un bot completó el campo invisible, fingimos éxito y no guardamos.
-    if (body.website) return NextResponse.json({ ok: true });
+    // (El campo trampa se sacó de este formulario: descartaba en silencio
+    // opiniones de personas reales cuyo gestor de contraseñas completaba el
+    // campo oculto, y conseguir estas opiniones es lo más difícil del proyecto.
+    // El rate limit de arriba es lo que cubre el abuso.)
 
     // ── Validación de los campos obligatorios ────────────────────────────
     const barrio = String(body.barrio || "").trim();
