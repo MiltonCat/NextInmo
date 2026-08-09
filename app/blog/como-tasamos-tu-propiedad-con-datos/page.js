@@ -1,6 +1,6 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
-import { SITE_URL, WA_URL, canonicalUrl, TASADOR_URL } from "@/config";
+import { SITE_URL, WA_URL, canonicalUrl, TASADOR_PATH } from "@/config";
 import { RELEVADAS_TOTAL_FMT, RELEVADAS_MODELO_FMT } from "@/lib/mercado";
 import PodcastPlayer from "@/components/PodcastPlayer";
 
@@ -75,7 +75,7 @@ const faqJsonLd = {
       name: "¿Es gratis usar el tasador?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Sí. El tasador online es gratuito, da un resultado al instante e incluye un informe en PDF para que tengas la estimación por escrito. No pedimos pago ni compromiso.",
+        text: "Sí. El tasador online es gratuito y da un resultado al instante: un rango de valor, el precio por m² y cómo se compara con la mediana de tu barrio. La primera tasación no pide ningún dato; de la segunda en adelante te pedimos un correo. No pedimos pago ni compromiso.",
       },
     },
     {
@@ -158,7 +158,7 @@ const PASOS = [
     puntos: [
       "Un valor central de referencia.",
       "Un rango donde es muy probable que caiga el valor real.",
-      "Un informe en PDF gratis para que lo tengas por escrito.",
+      "La comparación contra la mediana relevada de tu barrio, gratis.",
     ],
   },
 ];
@@ -265,14 +265,12 @@ export default function ComoTasamosConDatosPage() {
               <TrackedLink
                 event="tasador_click"
                 eventParams={{ location: "blog_como_tasamos_intro" }}
-                href={TASADOR_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={TASADOR_PATH}
                 className="font-semibold underline underline-offset-2 hover:text-blue-900"
               >
                 tasador online
               </TrackedLink>{" "}
-              te da una estimación al instante, gratis y con un informe en PDF. Después volvé y entendé qué hay detrás de ese número.
+              te da una estimación al instante y gratis. Después volvé y entendé qué hay detrás de ese número.
             </p>
           </div>
         </div>
@@ -356,14 +354,12 @@ export default function ComoTasamosConDatosPage() {
               <p className="text-rose-600 text-xs font-bold uppercase tracking-widest mb-2">Tasador online</p>
               <p className="font-black text-gray-900 text-lg mb-2 leading-snug">Resultado al instante</p>
               <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1">
-                Cargás los datos de tu propiedad y el modelo te devuelve un valor, un rango y un informe en PDF en el momento. Ideal para hacerte una primera idea, gratis y sin esperar.
+                Cargás los datos de tu propiedad y el modelo te devuelve un rango de valor y la comparación con tu barrio en el momento. Ideal para hacerte una primera idea, gratis y sin esperar.
               </p>
               <TrackedLink
                 event="tasador_click"
                 eventParams={{ location: "blog_como_tasamos_comparativa" }}
-                href={TASADOR_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={TASADOR_PATH}
                 className="inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors self-start"
               >
                 Tasar al instante
@@ -427,9 +423,7 @@ export default function ComoTasamosConDatosPage() {
               <TrackedLink
                 event="tasador_click"
                 eventParams={{ location: "blog_como_tasamos_cta" }}
-                href={TASADOR_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={TASADOR_PATH}
                 className="inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors"
               >
                 Tasar mi propiedad al instante

@@ -1,4 +1,4 @@
-import { SITE_URL, canonicalUrl, TASADOR_URL, WA_URL } from "@/config";
+import { SITE_URL, canonicalUrl, TASADOR_PATH, WA_URL } from "@/config";
 import mercado, { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 import TrackedLink from "@/components/TrackedLink";
 import PodcastPlayer from "@/components/PodcastPlayer";
@@ -562,7 +562,7 @@ export default function AlquilerTemporarioPage() {
                   Consultar por WhatsApp →
                 </TrackedLink>
                 <a
-                  href={TASADOR_URL}
+                  href={TASADOR_PATH}
                   className="inline-block bg-white/10 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/20 transition-colors border border-white/20"
                 >
                   Probar el tasador

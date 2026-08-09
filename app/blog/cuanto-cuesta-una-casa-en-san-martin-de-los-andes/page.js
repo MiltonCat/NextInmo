@@ -1,6 +1,6 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
-import { SITE_URL, WA_URL, canonicalUrl, TASADOR_URL } from "@/config";
+import { SITE_URL, WA_URL, canonicalUrl, TASADOR_PATH } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
 
 export const metadata = {
@@ -240,9 +240,7 @@ export default function CuantoCuestaUnaCasaPage() {
               <TrackedLink
                 event="tasador_click"
                 eventParams={{ location: "blog_cuanto_cuesta_casa" }}
-                href={TASADOR_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={TASADOR_PATH}
                 className="font-semibold underline underline-offset-2 hover:text-blue-900"
               >
                 tasador
@@ -315,9 +313,7 @@ export default function CuantoCuestaUnaCasaPage() {
               <TrackedLink
                 event="tasador_click"
                 eventParams={{ location: "blog_cuanto_cuesta_casa_cta" }}
-                href={TASADOR_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={TASADOR_PATH}
                 className="inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors"
               >
                 Tasar una propiedad al instante

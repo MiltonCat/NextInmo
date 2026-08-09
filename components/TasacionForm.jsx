@@ -20,8 +20,8 @@ const DORMITORIOS = ["1", "2", "3", "4", "5+"];
 
 const campo =
   "w-full px-3.5 py-3 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white " +
-  "placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 " +
-  "focus:border-slate-900 transition";
+  "placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 " +
+  "focus:border-gray-900 transition";
 const etiqueta = "block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2";
 
 export default function TasacionForm() {
@@ -100,7 +100,7 @@ export default function TasacionForm() {
         </p>
         <button
           onClick={() => { setEnviado(false); setForm({ tipo: "", zona: "", superficie: "", dormitorios: "", estado: "", anio: "", nombre: "", whatsapp: "", comentarios: "" }); }}
-          className="mt-3 text-slate-900 hover:text-slate-700 text-sm font-semibold underline underline-offset-4 transition-colors"
+          className="mt-3 text-gray-900 hover:text-gray-700 text-sm font-semibold underline underline-offset-4 transition-colors"
         >
           Tasar otra propiedad
         </button>
@@ -124,7 +124,7 @@ export default function TasacionForm() {
                 aria-pressed={activo}
                 className={`flex flex-col items-center gap-2 py-4 px-3 rounded-lg border transition ${
                   activo
-                    ? "border-slate-900 bg-slate-900 text-white"
+                    ? "border-gray-900 bg-gray-900 text-white"
                     : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
                 }`}
               >
@@ -142,7 +142,7 @@ export default function TasacionForm() {
             href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Hola Milton, quiero tasar una propiedad que no figura en el formulario.")}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-slate-900 font-medium underline underline-offset-2"
+            className="text-gray-900 font-medium underline underline-offset-2"
           >
             Escribinos directo
           </a>{" "}
@@ -185,7 +185,7 @@ export default function TasacionForm() {
                 aria-pressed={activo}
                 className={`py-2.5 rounded-lg border text-sm font-medium transition ${
                   activo
-                    ? "border-slate-900 bg-slate-900 text-white"
+                    ? "border-gray-900 bg-gray-900 text-white"
                     : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
                 }`}
               >
@@ -211,7 +211,7 @@ export default function TasacionForm() {
           {rango && (
             <>
               <div className="relative h-1.5 bg-gray-200 rounded-full mt-4 mb-2">
-                <div className="absolute inset-y-0 left-[15%] right-[15%] bg-slate-900 rounded-full" />
+                <div className="absolute inset-y-0 left-[15%] right-[15%] bg-gray-900 rounded-full" />
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-400 tabular-nums">USD {rango.p25.toLocaleString("es-AR")}</span>
@@ -276,7 +276,7 @@ export default function TasacionForm() {
       <div>
         <button
           type="submit"
-          className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
+          className="w-full flex items-center justify-center gap-2.5 bg-gray-900 hover:bg-gray-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />

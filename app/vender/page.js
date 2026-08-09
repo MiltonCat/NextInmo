@@ -1,6 +1,6 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
-import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL, WA_URL } from "@/config";
+import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_PATH, WA_URL } from "@/config";
 import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
 
 export const metadata = {
@@ -149,7 +149,7 @@ export default function VenderPage() {
             <TrackedLink
               event="tasador_click"
               eventParams={{ source: "vender_hero" }}
-              href={TASADOR_URL}
+              href={TASADOR_PATH}
               className="inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors"
             >
               Tasar gratis online en 2 minutos
@@ -213,7 +213,7 @@ export default function VenderPage() {
         <TrackedLink
           event="tasador_click"
           eventParams={{ source: "vender_cta" }}
-          href={TASADOR_URL}
+          href={TASADOR_PATH}
           className="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6 mb-14 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
         >
           <div className="flex-1">
@@ -225,7 +225,7 @@ export default function VenderPage() {
             </p>
             <p className="text-slate-300 text-sm leading-relaxed">
               Tasador predictivo entrenado con datos reales de San Martín de los Andes.
-              Estimación inmediata más informe PDF gratis.
+              Estimación inmediata, con el rango y la comparación contra tu barrio.
             </p>
           </div>
           <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap flex-shrink-0">

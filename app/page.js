@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
 import { getProperties } from "@/lib/properties";
 
-import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_URL } from "@/config";
+import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_PATH } from "@/config";
 
 // Refresca el contenido desde la base cada 5 minutos sin necesidad de redeploy.
 export const revalidate = 300;
@@ -179,7 +179,7 @@ export default async function Home() {
           <TrackedLink
             event="tasador_click"
             eventParams={{ source: "home" }}
-            href={TASADOR_URL}
+            href={TASADOR_PATH}
             className="group flex flex-col justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
           >
             <div>
@@ -188,7 +188,7 @@ export default async function Home() {
                 ¿Cuánto vale tu propiedad? Descubrilo con el tasador predictivo
               </p>
               <p className="text-slate-300 text-sm leading-relaxed">
-                Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes, más un informe PDF gratis.
+                Estimación inmediata con un modelo entrenado con datos reales de San Martín de los Andes. Sin dejar datos la primera vez.
               </p>
             </div>
             <span className="inline-flex items-center justify-center gap-2 bg-rose-600 group-hover:bg-rose-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors whitespace-nowrap self-start">
