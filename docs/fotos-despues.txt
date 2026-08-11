@@ -1,0 +1,153 @@
+# 110 | Cabaña de 2 dormitorios en complejo sobre calle Villegas – Alquiler permanente
+110	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818437018-kntuxo.jpeg
+110	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818330070-tqmp7e.jpeg
+110	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818330403-p8xavz.jpeg
+110	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818330966-msqdu9.jpeg
+110	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818331267-d3qv83.jpeg
+
+# 111 | Cabaña de 3 dormitorios en complejo sobre calle Villegas – Alquiler permanente
+111	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818805415-8xalmb.jpeg
+111	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818805679-nxk1bc.jpeg
+111	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818806051-09mlzm.jpeg
+111	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818806553-xjsrbt.jpeg
+111	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784818807253-5j1jaw.jpeg
+
+# 107 | Cabaña de 2 habitaciones con patio en calle Fosbery
+107	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784727504571-gnn04a.jpeg
+107	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784727505341-lcyxo3.jpeg
+107	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784727505978-k9wrma.jpeg
+107	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784727506453-yyby50.jpeg
+107	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784727506786-vs0yka.jpeg
+
+# 108 | Amplia casa con gran potencial en Ruca Hue
+108	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784730726288-mu7t3n.jpeg
+108	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784730726871-zxb8xi.jpeg
+108	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784730727452-7mjcze.jpeg
+108	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784730728242-mr3xzw.jpeg
+108	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784730728997-s1uizi.jpeg
+
+# 109 | Gran casa con amplio parque y entorno natural en Ruca Hue
+109	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784731110316-4fqjms.jpeg
+109	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784731110811-dtar40.jpeg
+109	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784731111228-x6mfbx.jpeg
+109	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784731111546-kum3m7.jpeg
+109	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1784731111834-oddlni.jpeg
+
+# 4 | Casa con piscina en barrio privado – Exclusividad y confort en San Martín de los Andes
+4	OK 	/imgs/Imgs9/casa5.webp
+4	OK 	/imgs/Imgs9/casa6.webp
+4	OK 	/imgs/Imgs9/casa10.webp
+4	OK 	/imgs/Imgs9/casa8.webp
+4	OK 	/imgs/Imgs9/casa12.webp
+
+# 6 | Monoambiente en el centro de San Martín de los Andes – Comodidad y ubicación ideal
+6	OK 	/imgs/Imgs10/foto3.webp
+6	OK 	/imgs/Imgs10/foto4.webp
+6	OK 	/imgs/Imgs10/foto5.webp
+6	OK 	/imgs/Imgs10/foto6.webp
+6	OK 	/imgs/Imgs10/foto2.webp
+
+# 7 | Complejo de cabañas en Meliquina – Naturaleza, tranquilidad y encanto patagónico
+7	OK 	/imgs/Imgs11/foto10.webp
+7	OK 	/imgs/Imgs11/foto25.webp
+7	OK 	/imgs/Imgs11/foto9.webp
+7	OK 	/imgs/Imgs11/foto22.webp
+7	OK 	/imgs/Imgs11/foto16.webp
+
+# 11 | Loteo exclusivo de San Martín de los Andes – Naturaleza y tranquilidad
+11	OK 	/imgs/Imgs6/foto2.webp
+11	OK 	/imgs/Imgs6/foto.webp
+11	OK 	/imgs/Imgs6/foto3.webp
+11	OK 	/imgs/Imgs6/foto4.webp
+11	OK 	/imgs/Imgs6/foto5.webp
+
+# 15 | Lote en Venta en Barrio Alihuén – San Martín de los Andes
+15	OK 	/imgs/Imgs15/foto1.webp
+15	OK 	/imgs/Imgs15/foto6.webp
+15	OK 	/imgs/Imgs15/foto3.webp
+15	OK 	/imgs/Imgs15/foto4.webp
+15	OK 	/imgs/Imgs15/foto5.webp
+
+# 5 | Espacio, confort y naturaleza a minutos del centro
+5	OK 	/imgs/Imgs20/foto20.webp
+5	OK 	/imgs/Imgs20/foto17.webp
+5	OK 	/imgs/Imgs20/foto25.webp
+5	OK 	/imgs/Imgs20/foto22.webp
+5	OK 	/imgs/Imgs20/foto19.webp
+
+# 20 | Hermoso departamento de 3 ambientes
+20	OK 	/imgs/Imgs25/foto21.webp
+20	OK 	/imgs/Imgs25/foto20.webp
+20	OK 	/imgs/Imgs25/foto19.webp
+20	OK 	/imgs/Imgs25/foto18.webp
+20	OK 	/imgs/Imgs25/foto17.webp
+
+# 22 | Casa con amplio lote en Vega Maipú – San Martín de los Andes
+22	OK 	/imgs/Imgs26/foto.webp
+22	OK 	/imgs/Imgs26/foto1.webp
+22	OK 	/imgs/Imgs26/foto2.webp
+22	OK 	/imgs/Imgs26/foto3.webp
+22	OK 	/imgs/Imgs26/foto4.webp
+
+# 21 | Oportunidad Departamento de 3 habitaciones
+21	OK 	/imgs/Imgs23/foto14.webp
+21	OK 	/imgs/Imgs23/foto13.webp
+21	OK 	/imgs/Imgs23/foto12.webp
+21	OK 	/imgs/Imgs23/foto11.webp
+21	OK 	/imgs/Imgs23/foto10.webp
+
+# 23 | Propiedad única en Barrio Costas del Aluminé – Aluminé
+23	OK 	/imgs/Imgs27/foto.webp
+23	OK 	/imgs/Imgs27/foto1.webp
+23	OK 	/imgs/Imgs27/foto2.webp
+23	OK 	/imgs/Imgs27/foto3.webp
+23	OK 	/imgs/Imgs27/foto4.webp
+
+# 24 | Lote de 900 m² en Caleuche – San Martín de los Andes
+24	OK 	/imgs/Imgs28/foto.webp
+24	OK 	/imgs/Imgs28/foto1.webp
+24	OK 	/imgs/Imgs28/foto2.webp
+24	OK 	/imgs/Imgs28/foto3.webp
+24	OK 	/imgs/Imgs28/foto4.webp
+
+# 101 | Departamento céntrico
+101	OK 	/imgs/Alquiler1/casa5.webp
+101	OK 	/imgs/Alquiler1/casa1.webp
+101	OK 	/imgs/Alquiler1/casa2.webp
+101	OK 	/imgs/Alquiler1/casa3.webp
+101	OK 	/imgs/Alquiler1/casa4.webp
+
+# 102 | Hermosa cabaña en la Cascada
+102	OK 	/imgs/Alquiler2/foto4.webp
+102	OK 	/imgs/Alquiler2/foto.webp
+102	OK 	/imgs/Alquiler2/foto1.webp
+102	OK 	/imgs/Alquiler2/foto2.webp
+102	OK 	/imgs/Alquiler2/foto3.webp
+
+# 103 | Hermosa Cabaña en las Nalcas
+103	OK 	/imgs/Alquiler3/casa.webp
+103	OK 	/imgs/Alquiler3/casa1.webp
+103	OK 	/imgs/Alquiler3/casa2.webp
+103	OK 	/imgs/Alquiler3/casa3.webp
+103	OK 	/imgs/Alquiler3/casa4.webp
+
+# 104 | Cabaña en alquiler – 2 dormitorios con living comedor
+104	OK 	/imgs/Alquiler/foto.webp
+104	OK 	/imgs/Alquiler/foto1.webp
+104	OK 	/imgs/Alquiler/foto2.webp
+104	OK 	/imgs/Alquiler/foto3.webp
+104	OK 	/imgs/Alquiler/foto5.webp
+
+# 105 | 🏡 Hermoso departamento en Barrio Cascada
+105	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1785339926832-03pneg.jpeg
+105	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1785339927471-jbw2aj.jpeg
+105	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1785339927972-iup8ot.jpeg
+105	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1785339928233-s84v2i.jpeg
+105	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1785339928868-n035mh.jpeg
+
+# 106 | Departamento de 1 habitación en el centro, con una vista que enamora
+106	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1783032855103-4qlmi4.jpeg
+106	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1783032855546-opno1z.jpeg
+106	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1783032855968-mku1za.jpeg
+106	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1783032856357-qbeqlg.jpeg
+106	OK 	https://fukarishpopbtxtzhrrd.supabase.co/storage/v1/object/public/property-images/prop/1783032857042-z43exu.jpeg
