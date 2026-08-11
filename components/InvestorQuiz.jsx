@@ -22,12 +22,23 @@ const QUESTIONS = [
       { texto: "Es parte del juego, no me afecta", puntaje: 3 },
     ],
   },
+  // La opción del medio decía "Generar renta mensual estable" y quedó
+  // inservible al realinear los perfiles (ver PERFILES, más abajo): el moderado
+  // pasó a ser compra y reventa, que justamente no paga renta mensual. Alguien
+  // podía elegir "quiero renta todos los meses" y terminar leyendo "el retorno
+  // llega todo junto en la venta".
+  //
+  // El problema de fondo es que las otras tres preguntas miden tolerancia al
+  // riesgo y esta se había colado midiendo preferencia de producto, con la
+  // misma escala de 1 a 3 y sumando al mismo total. Una preferencia no es un
+  // punto intermedio de nada: quien quiere renta mensual puede ser el más
+  // conservador de todos. Ahora las cuatro preguntan lo mismo.
   {
     id: 3,
     pregunta: "¿Cuál es tu objetivo principal?",
     opciones: [
       { texto: "Proteger mi capital", puntaje: 1 },
-      { texto: "Generar renta mensual estable", puntaje: 2 },
+      { texto: "Hacer crecer mi capital sin arriesgar de más", puntaje: 2 },
       { texto: "Maximizar el retorno", puntaje: 3 },
     ],
   },
@@ -42,32 +53,57 @@ const QUESTIONS = [
   },
 ];
 
+// Los tres perfiles apuntan a las tres estrategias que la página sabe medir, en
+// el mismo orden de riesgo que publica su matriz y con las mismas tres opciones
+// que tiene el simulador. Es una sola escalera dicha en tres lugares:
+//
+//   Conservador → alquiler permanente → matriz 3,5 / 7  → simulador "alquiler"
+//   Moderado    → compra y reventa    → matriz 6,5 / 14 → simulador "reventa"
+//   Dinámico    → alquiler turístico  → matriz 7,5 / 18 → simulador "turistico"
+//
+// Antes no cerraba en ninguno de los tres. El conservador recibía "terrenos y
+// lotes", que se sacaron de la comparativa el 10-ago porque el modelo no los
+// mide: terminaba el test, leía que le convenía un terreno y bajaba a una tabla
+// donde los terrenos no existen. El moderado decía "departamentos" y la página
+// le resaltaba la tarjeta de casas. Y el dinámico ofrecía dos estrategias en
+// una sola línea ("turístico o reventa") que el simulador cotiza por separado y
+// con retornos distintos.
+//
+// Los `roi` salen del simulador de /inversiones, no de la matriz. Son la misma
+// cuenta que la persona ve dos clics después —"Simulá cuánto podrías ganar con
+// este perfil"— y prometer acá un número que esa pantalla no confirma es la
+// forma más rápida de que deje de creerle a las dos. La valorización de la
+// serie del m² corre al 4,0% anual (2.450 → 2.650, últimos dos años).
 const PERFILES = {
   conservador: {
     label: "Conservador",
     color: "rose",
     descripcion: "Priorizás la seguridad de tu dinero por encima del retorno. Preferís no asumir riesgos.",
-    recomendacion: "Terrenos y lotes en zonas de desarrollo",
-    detalle: "Baja volatilidad y alta valorización a largo plazo sin necesidad de gestión activa. Ideal para preservar capital en dólares.",
-    roi: "8–12% anual (valorización)",
+    recomendacion: "Casa o departamento para alquiler permanente",
+    detalle: "Cobrás todos los meses en dólares y la propiedad se valoriza mientras tanto, sin depender de la temporada ni de gestión activa. Es lo de menor riesgo de la comparativa y por donde entra la mayoría de los que invierten por primera vez.",
+    // renta neta 4,9–6,6% (bruta 6,1–8,2% del relevamiento, menos 20% de
+    // gastos y vacancia) + 4,0% de valorización.
+    roi: "9–11% anual (renta + valorización)",
     riesgo: "Bajo",
   },
   moderado: {
     label: "Moderado",
     color: "green",
-    descripcion: "Buscás equilibrio entre seguridad y rendimiento. Aceptás algo de espera a cambio de una renta estable.",
-    recomendacion: "Departamentos para alquiler tradicional",
-    detalle: "Renta mensual estable en dólares con valorización sostenida del inmueble. La opción más elegida por inversores de primera vez.",
-    roi: "6–8% anual (renta)",
+    descripcion: "Buscás más rendimiento que el de un alquiler y aceptás esperar a la venta para cobrarlo.",
+    recomendacion: "Compra y reventa con refuncionalización",
+    detalle: "Comprás por debajo del valor de mercado, mejorás la propiedad y vendés. El retorno llega todo junto en la venta: en el medio no entra renta, y cuándo se vende lo decide el mercado.",
+    // 4,0% de valorización + 4 a 10 puntos de margen por comprar bien y mejorar.
+    roi: "8–14% anual (valorización + margen)",
     riesgo: "Medio",
   },
   agresivo: {
     label: "Dinámico",
     color: "orange",
     descripcion: "Querés maximizar el retorno y estás dispuesto a gestionar más activamente tu inversión.",
-    recomendacion: "Alquiler turístico o reventa con refuncionalización",
-    detalle: "Mayor retorno potencial. Requiere gestión activa o delegar en una administradora. Alta demanda en temporadas de ski y trekking.",
-    roi: "12–18% anual",
+    recomendacion: "Departamento para alquiler turístico",
+    detalle: "Es lo que más rinde, pero el ingreso es estacional: fuerte en ski y verano, flojo el resto del año. Requiere gestión activa o delegarla en una administradora.",
+    // renta neta 9,6% (12% bruto bien gestionado, menos 20%) + 4,0%.
+    roi: "12–16% anual (renta + valorización)",
     riesgo: "Medio-alto",
   },
 };

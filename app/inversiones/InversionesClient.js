@@ -91,6 +91,32 @@ const RENTALS = (mercadoJson.rentabilidad_alquiler?.tabla ?? [])
     ...PRECIOS_SEGMENTO[r.segmento],
   }));
 
+// --- Supuestos del simulador (se muestran también al usuario, al pie de la calculadora) ---
+//
+// Vivían más abajo, pegados al motor del simulador. Subieron acá porque desde
+// el 11-ago la matriz de riesgo/retorno también los usa: son los supuestos de
+// la página, no los de un componente.
+const GASTOS_VACANCIA = 0.2;      // descuento sobre la renta bruta: gastos, gestión y vacancia
+const RENTA_BRUTA_TURISTICO = 12; // % anual bruto estimado para alquiler turístico bien gestionado
+const MARGEN_REVENTA = [4, 10];   // puntos sobre la valorización de mercado por comprar bien y mejorar
+
+// Valorización anual del m²: crecimiento compuesto de los últimos dos puntos de
+// la serie (2.450 → 2.650 = 4,0%). El simulador la calculaba adentro de su
+// useMemo; ahora se calcula una sola vez y la usan los dos, que era la
+// condición para que la matriz no pueda volver a decir otra cosa.
+const VALORIZACION_ANUAL =
+  (Math.pow(
+    EVOLUCION_HISTORICA[EVOLUCION_HISTORICA.length - 1].precio /
+      EVOLUCION_HISTORICA[EVOLUCION_HISTORICA.length - 3].precio,
+    1 / 2
+  ) - 1) * 100;
+
+// Renta bruta media del alquiler permanente, sobre los mismos segmentos que
+// publica la tabla de rentabilidad. El simulador elige el segmento más cercano
+// al monto que escribe la persona; la matriz no tiene monto, así que promedia.
+const RENTA_BRUTA_ALQUILER =
+  RENTALS.reduce((a, r) => a + r.rentabilidad, 0) / (RENTALS.length || 1);
+
 const PESOS = { Demanda: 0.35, Liquidez: 0.20, 'Revalorización': 0.30, Estabilidad: 0.15 };
 
 const scoreLabel = (score) => {
@@ -183,31 +209,80 @@ const SCORE_DATA = [
 // porque el modelo no puede medirlo, no puede estar en el gráfico de al lado
 // con un riesgo de 1,8 y un retorno del 5 % escritos a mano. Las dos cosas son
 // la misma afirmación en dos formatos.
+//
+// El eje de retorno se calcula desde el 11-ago (decisión de Milton); antes
+// estaba escrito a mano y decía otra cosa que el simulador de esta misma
+// página:
+//
+//   Casa alquiler   7 %  →  el simulador daba 9,6 %
+//   Casa reventa    14 % →  el simulador daba 11,0 %
+//   Depto turístico 18 % →  el simulador daba 13,6 %
+//
+// No eran números viejos: eran números de otro lado. Un visitante que hacía el
+// test, miraba la matriz y después movía el simulador recibía dos respuestas
+// distintas a la misma pregunta en la misma pantalla, y la que tenía respaldo
+// era siempre la más baja. Es el mismo problema que la serie del m² duplicada
+// que se unificó el 9-ago: el arreglo no es corregir los números sino sacarlos
+// del mismo lugar, para que no puedan volver a separarse.
+//
+// Local comercial se cae del gráfico. Su 9 % tampoco tenía origen, y esta vez
+// no hay de dónde sacarlo: `rentabilidad_alquiler` del modelo cubre deptos y
+// casas, no locales, así que no existe el número de renta que haría falta para
+// ubicarlo en el eje. Mantiene su tarjeta en la comparativa, que puntúa cuatro
+// factores que sí tienen fuente —incluido el m² de locales— y no promete un
+// retorno anual. Es la regla que ya se le aplicó a Terreno el 10-ago.
+const retornoAnual = (rentaBruta) =>
+  Math.round((rentaBruta * (1 - GASTOS_VACANCIA) + VALORIZACION_ANUAL) * 10) / 10;
+
 const MATRIX_DATA = [
-  { nombre: 'Casa alquiler', riesgo: 3.5, retorno: 7, color: '#E8325A' },
-  { nombre: 'Local comercial', riesgo: 5, retorno: 9, color: '#f472b6' },
-  { nombre: 'Casa reventa', riesgo: 6.5, retorno: 14, color: '#f59e0b' },
-  { nombre: 'Depto turístico', riesgo: 7.5, retorno: 18, color: '#f97316' },
+  { nombre: 'Casa alquiler', riesgo: 3.5, retorno: retornoAnual(RENTA_BRUTA_ALQUILER), color: '#E8325A' },
+  {
+    nombre: 'Casa reventa',
+    riesgo: 6.5,
+    // La reventa no paga renta: el retorno es la valorización más el margen por
+    // comprar bien y mejorar, igual que en el simulador.
+    retorno: Math.round((VALORIZACION_ANUAL + (MARGEN_REVENTA[0] + MARGEN_REVENTA[1]) / 2) * 10) / 10,
+    color: '#f59e0b',
+  },
+  { nombre: 'Depto turístico', riesgo: 7.5, retorno: retornoAnual(RENTA_BRUTA_TURISTICO), color: '#f97316' },
 ];
 
-// Conecta el resultado del quiz con el resto de la página:
-// qué card de la comparativa resaltar y con qué tipo preconfigurar el simulador.
-// El simulador no tiene opción "terreno", por eso el perfil conservador no lo preconfigura.
+// Conecta el resultado del quiz con el resto de la página: qué tarjeta de la
+// comparativa resaltar y con qué tipo preconfigurar el simulador.
 //
-// `conservador.card` pasó a null al sacar Terreno de la comparativa. Si quedaba
-// en "Terreno", el resaltado buscaba una tarjeta que ya no existe y no pasaba
-// nada —sin error, sin aviso—: el visitante conservador terminaba el test y la
-// página no reaccionaba. Un null dice que no hay tarjeta que resaltar; un
-// string que no matchea con nada es un bug esperando.
+// Cerrado el 2026-08-11 (decisión de Milton). Venía marcado como PENDIENTE
+// desde el 10-ago: al sacar Terreno de la comparativa, el conservador quedó con
+// `card: null` y `calc: null` —terminaba el test y la página no reaccionaba,
+// sin error y sin aviso— mientras el quiz le seguía recomendando terrenos.
 //
-// PENDIENTE PARA MILTON: el quiz igual le sigue recomendando terrenos al perfil
-// conservador (InvestorQuiz.jsx → PERFILES.conservador.recomendacion). Eso es un
-// consejo de vendedor, no un dato del modelo, así que no se tocó. Pero hoy un
-// conservador lee "te conviene un terreno" y después baja a una comparativa
-// donde los terrenos no existen. Hay que decidir una de las dos.
+// La salida no fue devolver Terreno sino alinear los tres perfiles con las tres
+// estrategias que la página sí mide, ordenadas por riesgo igual que la matriz
+// de acá abajo y con las mismas tres opciones que ya tenía el simulador. El
+// detalle de por qué cada perfil recibe lo que recibe está en el comentario de
+// PERFILES, en components/InvestorQuiz.jsx.
+//
+// `moderado.card` queda en null a propósito, y es el único que sigue así: la
+// reventa está en MATRIX_DATA pero no tiene tarjeta en SCORE_DATA, así que no
+// hay nada que resaltar. El null es literal —no hay tarjeta—, a diferencia de
+// un string que no matchea, que es un bug esperando. El moderado igual
+// preconfigura el simulador en "reventa", que es el gesto que más se nota.
+//
+// Y no va a tenerla: se evaluó agregarla el 11-ago y se descartó. "Casa
+// reventa" es el mismo activo que "Casa alquiler" —el modelo tiene un solo
+// número para casas— así que demanda, liquidez y revalorización serían
+// idénticas (75, 55, 80) y lo único que cambiaría es estabilidad, donde la
+// reventa es peor porque no paga renta. Da 65/100: última de las cuatro, no por
+// ser peor inversión (la matriz le da 11% contra 9,6% del alquiler) sino porque
+// ninguno de los cuatro factores puede ver el margen de reventa, que es lo que
+// hace que la estrategia valga la pena.
+//
+// El fondo: SCORE_DATA compara tipos de propiedad —qué comprar— y la reventa es
+// qué hacer con lo comprado. Meterlas en la misma tabla le pone puntaje a dos
+// preguntas distintas. Si alguna vez hay que resolverlo, es cambiando qué mide
+// la comparativa, no agregando una fila.
 const PERFIL_MAP = {
-  conservador: { card: null, calc: null, label: "Conservador" },
-  moderado: { card: "Casa alquiler", calc: "alquiler", label: "Moderado" },
+  conservador: { card: "Casa alquiler", calc: "alquiler", label: "Conservador" },
+  moderado: { card: null, calc: "reventa", label: "Moderado" },
   agresivo: { card: "Depto turístico", calc: "turistico", label: "Dinámico" },
 };
 
@@ -308,10 +383,6 @@ function Badge({ tipo, className = "" }) {
   );
 }
 
-// --- Supuestos del simulador (se muestran también al usuario, al pie de la calculadora) ---
-const GASTOS_VACANCIA = 0.2;      // descuento sobre la renta bruta: gastos, gestión y vacancia
-const RENTA_BRUTA_TURISTICO = 12; // % anual bruto estimado para alquiler turístico bien gestionado
-const MARGEN_REVENTA = [4, 10];   // puntos sobre la valorización de mercado por comprar bien y mejorar
 const TASA_PLAZO_FIJO = 0.01;     // plazo fijo en dólares en bancos argentinos (~0,5–2% anual)
 
 const fmtPct = (v) => v.toLocaleString("es-AR", { maximumFractionDigits: 1 });
@@ -425,8 +496,10 @@ export default function InversionesClient() {
     }
     const rentaNeta = rentaBruta * (1 - GASTOS_VACANCIA);
 
-    const n = evolucion.length;
-    const valorizacion = (Math.pow(evolucion[n - 1].precio / evolucion[n - 3].precio, 1 / 2) - 1) * 100;
+    // La misma constante que ubica los puntos de la matriz de riesgo/retorno.
+    // Estaba calculada acá adentro y la matriz tenía sus propios números a
+    // mano; mientras fueran dos cuentas distintas iban a volver a divergir.
+    const valorizacion = VALORIZACION_ANUAL;
 
     const esReventa = calcTipo === "reventa";
     const totalAnual = esReventa
@@ -452,7 +525,9 @@ export default function InversionesClient() {
       m2Ref, m2Etiqueta, m2Comprables: Math.round(calcMonto / m2Ref),
       plazoFijoTotal: calcMonto * Math.pow(1 + TASA_PLAZO_FIJO, calcPlazo),
     };
-  }, [calcTipo, calcMonto, calcPlazo, evolucion]);
+    // `evolucion` sale de las dependencias: la valorización ya no se calcula
+    // acá adentro, viene de VALORIZACION_ANUAL, que es constante de módulo.
+  }, [calcTipo, calcMonto, calcPlazo]);
 
   const handleLeadSubmit = (e) => {
     e.preventDefault();
@@ -780,15 +855,37 @@ export default function InversionesClient() {
                     {/* Las dos etiquetas que sí valen color: una dice cómo salió
                         en el análisis, la otra que este es el tipo que le tocó
                         a la persona en el quiz. El resto de la tarjeta era
-                        color decorativo. */}
-                    <div className="mt-2 flex flex-wrap gap-1.5">
+                        color decorativo.
+
+                        La fila reserva su altura con `h-5` aunque no haya
+                        ninguna etiqueta. Sin eso colapsaba a 0 y las tarjetas
+                        sin etiqueta subían 20 px respecto de la que sí la
+                        tiene: la barra de puntaje, los cuatro factores y la
+                        descripción quedaban en distinta línea entre columnas,
+                        que es justo lo que una comparativa no puede permitirse
+                        —se comparan de a pares, en horizontal—.
+
+                        Los 20 px salen de la etiqueta: `leading-4` (16) +
+                        `py-0.5` (2+2). El leading va explícito porque
+                        `text-[10px]` es un valor arbitrario y Tailwind no le
+                        asigna line-height propio: heredaría el del contenedor
+                        y la altura dejaría de ser predecible.
+
+                        Es `min-h` y no `h` fija: las dos etiquetas juntas miden
+                        ~200 px y la columna más angosta (2 col a 640 px) da
+                        300, así que nunca deberían envolver. Pero si alguna vez
+                        envuelven —una fuente de reemplazo más ancha, una
+                        etiqueta con más texto—, con altura fija se montarían
+                        sobre la barra de puntaje. Así crece la fila y a lo sumo
+                        se desalinea, que es un problema más chico. */}
+                    <div className="mt-2 flex min-h-[20px] flex-wrap items-start gap-1.5">
                       {esMejor && (
-                        <span className="rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <span className="rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
                           Mejor posicionado
                         </span>
                       )}
                       {activo.tipo === cardRecomendada && (
-                        <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
                           Para tu perfil
                         </span>
                       )}
@@ -1015,6 +1112,21 @@ export default function InversionesClient() {
                 </div>
               ))}
             </dl>
+
+            {/* Los dos ejes no tienen el mismo respaldo y hasta hoy la página no
+                lo decía. El de retorno sale de los mismos supuestos que el
+                simulador de más abajo, así que se puede rastrear. El de riesgo
+                es una escala de 1 a 10 puesta a criterio: no hay nada en el
+                relevamiento que mida volatilidad, y no declararlo dejaba que la
+                posición horizontal de cada punto pasara por dato. Mismo criterio
+                que /precio-m2, que separa lo relevado de lo estimado. */}
+            <p className="mt-4 text-xs leading-relaxed text-gray-400">
+              El retorno de cada punto sale de los mismos supuestos que la calculadora de
+              más abajo: la renta estimada de cada tipo, menos gastos y vacancia, más la
+              valorización del m² del relevamiento. La posición en el eje de riesgo, en
+              cambio, es una estimación propia sobre cuánto pueden variar esos resultados
+              de un año a otro: no surge del relevamiento.
+            </p>
           </section>
 
           {/* El desglose del simulador */}
