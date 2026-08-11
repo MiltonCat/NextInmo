@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const STEPS = [
   {
     numero: "01",
@@ -45,28 +47,30 @@ const STEPS = [
 export default function AdvisoryProcess() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-          <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Cómo trabajamos</span>
+      <div className="mb-12 text-center">
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 px-3.5 py-1.5 text-xs font-medium text-gray-600">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Cómo trabajamos
         </div>
-        <h2 className="text-3xl font-bold text-white mb-3">Así te acompañamos</h2>
-        <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
+        <h2 className="text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-gray-900 md:text-[34px]">
+          Así te acompañamos
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-gray-600 md:text-base">
           Cuatro pasos claros desde el primer contacto hasta que tu capital empieza a trabajar.
         </p>
       </div>
 
       <div className="relative">
-        <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-gray-800" />
+        <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-gray-100" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {STEPS.map((step, index) => (
             <div key={step.numero} className="relative flex flex-col items-center text-center">
-              <div className="relative z-10 w-20 h-20 rounded-full bg-[#1a1a28] border-2 border-primary-500/40 flex flex-col items-center justify-center mb-5 shadow-sm">
-                <span className="text-primary-400">{step.icono}</span>
-                <span className="text-[10px] font-bold text-gray-600 mt-0.5">{step.numero}</span>
+              <div className="relative z-10 mb-5 flex h-20 w-20 flex-col items-center justify-center rounded-full border border-gray-200 bg-white">
+                <span className="text-gray-900">{step.icono}</span>
+                <span className="mt-0.5 text-[10px] font-semibold text-gray-400">{step.numero}</span>
               </div>
-              <h3 className="font-semibold text-gray-100 text-base mb-2">{step.titulo}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{step.descripcion}</p>
+              <h3 className="mb-2 text-[17px] font-semibold tracking-[-0.01em] text-gray-900">{step.titulo}</h3>
+              <p className="text-[15px] leading-relaxed text-gray-600">{step.descripcion}</p>
               {index < STEPS.length - 1 && (
                 <div className="md:hidden mt-6 text-gray-700">
                   <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,13 +83,52 @@ export default function AdvisoryProcess() {
         </div>
       </div>
 
-      <div className="mt-12 text-center">
-        <a
-          href="/contacto"
-          className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm shadow"
-        >
-          Empezar con la consulta inicial
-        </a>
+      {/* La cara de quien atiende.
+
+          Esta sección eran cuatro iconos SVG grises: describía un
+          acompañamiento personal sin mostrar a ninguna persona. En una página
+          donde alguien está por decidir dónde pone USD 150.000, lo primero que
+          quiere saber es a quién le está preguntando.
+
+          Va la foto de Milton y no una pareja de banco de imágenes a propósito.
+          Todas las fotos con gente del sitio ya están usadas dos veces —las de
+          /tasacion las repite /precio-m2—, pero además una foto real gana:
+          quien mira esto puede buscar el nombre, el LinkedIn y la matrícula, y
+          que todo dé. Un modelo de stock no resiste esa comprobación.
+
+          Todo lo que se afirma acá está publicado en /nosotros y en la home:
+          nombre, rol y los más de 10 años en el mercado de San Martín. Si algo
+          de eso cambia, se cambia en los tres lados. */}
+      <div className="mt-14 border-t border-gray-100 pt-10">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+          <Image
+            src="/Milton.webp"
+            alt="Milton Catalán, asesor inmobiliario en San Martín de los Andes"
+            width={96}
+            height={96}
+            sizes="96px"
+            className="h-24 w-24 flex-shrink-0 rounded-full border border-gray-200 object-cover object-top"
+          />
+          <div>
+            <p className="text-[15px] leading-relaxed text-gray-600">
+              “Los números de esta página te dan el orden de magnitud. La decisión
+              concreta —qué comprar, en qué barrio y a qué precio— la charlamos.”
+            </p>
+            <p className="mt-3 text-[15px] font-semibold text-gray-900">Milton Catalán</p>
+            <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+              Estratega de activos inmobiliarios · Más de 10 años en San Martín de los Andes
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-10 text-center">
+          <a
+            href="/contacto"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+          >
+            Empezar con la consulta inicial
+          </a>
+        </div>
       </div>
     </section>
   );

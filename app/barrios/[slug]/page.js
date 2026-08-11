@@ -5,7 +5,7 @@
 //
 // Tres fuentes distintas, mostradas por separado a propósito:
 //   1. Perfil editorial  (lib/barriosPerfil.js)  — lo que investigamos nosotros
-//   2. Precio del m²     (lib/precioZonas.js)    — relevamiento de mercado
+//   2. Precio del m²     (lib/precioZonas.js)    — mediana real del modelo
 //   3. Opiniones         (Supabase)              — lo que dicen los vecinos
 //
 // Solo se publican los barrios con `perfilCompleto`. Un barrio sin perfil no
@@ -17,7 +17,7 @@ import { notFound } from "next/navigation";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { barriosConPerfil, getBarrio, barrioDesdeLocation } from "@/lib/barrios";
 import { getPerfilBarrio } from "@/lib/barriosPerfil";
-import { preciosDeBarrio } from "@/lib/precioZonas";
+import { medianaDeBarrio } from "@/lib/precioZonas";
 import { getOpinionesPublicas } from "@/lib/barrioOpiniones";
 import { DIMENSIONES, nivelDePublicacion, formatearProporcion } from "@/lib/barrioEncuesta";
 import { getProperties } from "@/lib/properties";
@@ -99,7 +99,7 @@ export default async function BarrioPage({ params }) {
   // ejemplo "costanera") todavía no es una página: 404 antes que página vacía.
   if (!barrio || !perfil || barrio.slug !== slug) notFound();
 
-  const precios = preciosDeBarrio(slug);
+  const mediana = medianaDeBarrio(slug);
   const { agregado, citas } = await getOpinionesPublicas(slug);
 
   const todas = await getProperties();
@@ -169,36 +169,49 @@ export default async function BarrioPage({ params }) {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-12">
 
-        {/* ── Precio del m² ────────────────────────────────────────── */}
+        {/* ── Precio del m² ────────────────────────────────────────────
+            Cuando el modelo tiene datos suficientes del barrio, ese es EL
+            número y el rango editorial del perfil no se muestra: los dos
+            juntos se contradicen a la vista (en Vega Maipú el perfil decía
+            1.400–1.900 y la mediana real es 2.508) y obligan al visitante a
+            decidir a cuál creerle.
+
+            Y desde el 2026-08-10 el rango editorial ya no existe: los perfiles
+            de lib/barriosPerfil.js dejaron de traer precios escritos a mano.
+            Cuando el modelo no cubre el barrio no se muestra ningún número —
+            antes se mostraba el rango del perfil, que era justo el que estaba
+            desactualizado. Le pasa a Peñón de Lolog, con 3 propiedades. */}
         <section>
           <h2 className="text-2xl font-black text-gray-900 font-jakarta mb-1">Cuánto cuesta el m²</h2>
-          <p className="text-sm text-gray-500 mb-5">Fuente: {perfil.precioFuente}</p>
+          <p className="text-sm text-gray-500 mb-5">
+            {mediana
+              ? `Mediana de ${mediana.n} propiedades relevadas en el barrio`
+              : "Todavía sin datos suficientes en este barrio"}
+          </p>
 
           <div className="rounded-2xl border border-gray-200 p-6">
-            <p className="text-3xl font-black text-rose-600 mb-1">{perfil.precioM2}</p>
-            <p className="text-sm text-gray-600">Rango general del barrio, por m² construido.</p>
-
-            {precios.length > 0 && (
-              <table className="w-full mt-6 text-sm">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
-                    <th className="pb-2 font-semibold">Tipo</th>
-                    <th className="pb-2 font-semibold text-right">USD/m²</th>
-                    <th className="pb-2 font-semibold text-right">Var.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {precios.map((z) => (
-                    <tr key={z.tipo} className="border-b border-gray-100 last:border-0">
-                      <td className="py-2 text-gray-700">{z.tipo}</td>
-                      <td className="py-2 text-right font-bold text-gray-900">
-                        {z.precioM2.toLocaleString("es-AR")}
-                      </td>
-                      <td className="py-2 text-right text-green-600">+{z.variacion}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {mediana ? (
+              <>
+                <p className="text-3xl font-black text-rose-600 mb-1">
+                  USD {mediana.medianaM2.toLocaleString("es-AR")}
+                  <span className="text-lg font-bold text-gray-400"> /m²</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Mediana del m² publicado en {barrio.nombre}, sobre {mediana.n} propiedades
+                  relevadas. La mediana es el valor del medio: la mitad se publica por encima y
+                  la mitad por debajo.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-black text-gray-400 mb-1">Sin dato publicable</p>
+                <p className="text-sm text-gray-600">
+                  Todavía no tenemos propiedades relevadas suficientes en esta zona como para
+                  publicar una mediana. Preferimos no dar un número antes que dar uno que no
+                  podemos respaldar — si querés una referencia para una propiedad concreta,
+                  tasala con el modelo.
+                </p>
+              </>
             )}
           </div>
 

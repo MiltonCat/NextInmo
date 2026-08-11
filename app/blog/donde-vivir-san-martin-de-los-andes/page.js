@@ -1,6 +1,21 @@
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import { medianaDeBarrio } from "@/lib/precioZonas";
+import { MERCADO_GENERADO } from "@/lib/mercado";
+
+// "2026-08-06" → "agosto de 2026". Sin new Date(): el parseo por zona horaria
+// puede correr un día entre servidor y cliente.
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const [ANIO_DATOS, MES_DATOS] = (MERCADO_GENERADO || "").split("-").map(Number);
+const FECHA_DATOS = MES_DATOS ? `${MESES[MES_DATOS - 1]} de ${ANIO_DATOS}` : "el último relevamiento";
+
+// Los dos barrios que el FAQ nombra por su precio. Se buscan una vez y se
+// interpolan en las respuestas: si el modelo cambia, cambia el JSON-LD.
+const M2_CALEUCHE = medianaDeBarrio("caleuche");
+const M2_CHAPELCO = medianaDeBarrio("chapelco-golf");
+const M2_CENTRO = medianaDeBarrio("centro");
+const usdM2 = (m) => (m ? `USD ${m.medianaM2.toLocaleString("es-AR")}/m²` : null);
 
 export const metadata = {
   title: "¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026",
@@ -52,7 +67,13 @@ const faqJsonLd = {
       name: "¿Cuál es el barrio más barato para vivir en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Caleuche ofrece precios accesibles, con propiedades desde USD 900/m². Vega Maipú es otra opción económica (USD 1.400–1.900/m²) y tiene alto potencial de valorización a futuro por ser zona de expansión.",
+        // Decía "Caleuche desde USD 900/m². Vega Maipú es otra opción económica
+        // (USD 1.400–1.900/m²)". Los dos escritos a mano y los dos falsos: el
+        // modelo da Caleuche en 1.263 y Vega Maipú en 2.508 — sexto de 21
+        // barrios, o sea que ya no es una opción económica y decir que lo es
+        // manda a la persona a mirar un barrio que no le entra en el
+        // presupuesto. Ahora sale del modelo.
+        text: `Caleuche es el barrio más accesible de los que tienen datos suficientes: mediana de ${usdM2(M2_CALEUCHE)} sobre ${M2_CALEUCHE?.n} propiedades relevadas. Es una zona consolidada, con comunidad local y buena conexión al centro. Tené en cuenta que la mediana es el punto medio del barrio, no el piso: hay propiedades por debajo y por encima de ese valor.`,
       },
     },
     {
@@ -60,7 +81,12 @@ const faqJsonLd = {
       name: "¿Cuál es el barrio más exclusivo de San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Chapelco Golf y Peñón de Lolog son las zonas más exclusivas, con precios entre USD 2.200 y 3.000+ por m². Chapelco Golf ofrece seguridad privada 24h, vistas panorámicas y es el barrio con mayor demanda de compradores internacionales.",
+        // Decía "entre USD 2.200 y 3.000+ por m²" para los dos juntos. El
+        // modelo pone Chapelco Golf en 3.025 —arriba del rango— y de Peñón de
+        // Lolog no puede decir nada: 3 propiedades relevadas, marcado
+        // `en_observacion`. Publicar un precio de un barrio con n=3 es lo que
+        // el resto del sitio decidió no hacer.
+        text: `Chapelco Golf & Resort es la zona privada de mayor valor con datos suficientes: mediana de ${usdM2(M2_CHAPELCO)} sobre ${M2_CHAPELCO?.n} propiedades relevadas, con seguridad privada 24 h, vistas panorámicas y la mayor demanda de compradores internacionales. El Centro es la otra zona cara de la ciudad (${usdM2(M2_CENTRO)}, sobre ${M2_CENTRO?.n} propiedades). Peñón de Lolog es igual de buscado, pero el relevamiento tiene muy pocas propiedades publicadas ahí y preferimos no dar un valor que no podemos respaldar.`,
       },
     },
     {
@@ -106,14 +132,28 @@ const faqJsonLd = {
   ],
 };
 
-const BARRIOS = [
+// El perfil editorial de cada barrio: cómo se vive, qué servicios tiene, para
+// quién es. Eso se escribe a mano y está bien que así sea.
+//
+// El PRECIO no. Hasta el 2026-08-10 cada barrio traía acá su `precioM2` como
+// texto ("USD 1.400 – 1.900") y su propia línea de fuente fechada en 2025.
+// Cuatro de los seis contradecían al modelo, y en tres el rango publicado ni
+// siquiera contenía la mediana real:
+//
+//   Centro        decía 2.500–3.200   el modelo da 3.400 (n=281)
+//   La Cascada    decía 1.800–2.400   el modelo da 2.452 (n=11)
+//   Vega Maipú    decía 1.400–1.900   el modelo da 2.508 (n=18)  ← 32 % abajo
+//
+// Ahora cada barrio trae su `slug` y el precio se busca en el modelo, igual que
+// en /tasacion y /precio-m2. Es el mismo arreglo que se le hizo a
+// lib/precioZonas.js: acá no hay números.
+const BARRIOS_PERFIL = [
   {
     nombre: "Centro",
     emoji: "🏙️",
     descripcion: "El corazón de San Martín. Acceso a todo a pie: comercios, restaurantes, lago Lácar, costanera y el Hospital Zonal. La zona con mayor demanda de alquiler turístico y permanente.",
     perfil: ["Profesionales", "Familias", "Inversores en alquiler"],
-    precioM2: "USD 2.500 – 3.200",
-    precioFuente: "Properati / Reporte Inmobiliario 2025",
+    slug: "centro",
     tranquilidad: 3,
     servicios: 5,
     inversion: 4,
@@ -152,8 +192,7 @@ const BARRIOS = [
     emoji: "⛳",
     descripcion: "Barrio privado de alta gama con vistas a la montaña y al campo de golf. El más exclusivo de la ciudad. Seguridad privada 24h, baja densidad y mucho verde. Requiere auto para absolutamente todo.",
     perfil: ["Inversores premium", "Familias de alto poder adquisitivo", "Segunda residencia"],
-    precioM2: "USD 2.200 – 3.000+",
-    precioFuente: "Argenprop / Zonaprop 2025",
+    slug: "chapelco-golf",
     tranquilidad: 5,
     servicios: 2,
     inversion: 5,
@@ -192,8 +231,7 @@ const BARRIOS = [
     emoji: "🌊",
     descripcion: "Zona residencial tranquila sobre la ruta a la Cascada del Chachín. Muy buscada por familias y profesionales remotos que quieren naturaleza sin sacrificar la cercanía al centro. Accesos de ripio en sectores internos.",
     perfil: ["Familias", "Trabajadores remotos", "Quienes buscan tranquilidad"],
-    precioM2: "USD 1.800 – 2.400",
-    precioFuente: "Estimación propia — datos de mercado local 2025",
+    slug: "la-cascada",
     tranquilidad: 5,
     servicios: 3,
     inversion: 4,
@@ -229,10 +267,13 @@ const BARRIOS = [
   {
     nombre: "Vega Maipú",
     emoji: "🌿",
-    descripcion: "Barrio en plena expansión al norte del centro. Los precios más accesibles de zonas residenciales con el mayor potencial de valorización. Infraestructura en desarrollo — ideal para quienes pueden esperar que el barrio madure.",
+    // Decía "los precios más accesibles de zonas residenciales". El modelo lo
+    // pone en USD 2.508/m², sexto de 21 barrios y por encima de La Cascada: ya
+    // no es el barrio barato que era cuando se escribió el artículo. Justo el
+    // atractivo que describe —zona de expansión— es lo que le movió el precio.
+    descripcion: "Barrio en plena expansión al norte del centro, con mucho potencial de valorización. Empezó siendo la zona residencial accesible de la ciudad y los precios ya acompañaron ese crecimiento. Infraestructura todavía en desarrollo — ideal para quienes pueden esperar que el barrio termine de madurar.",
     perfil: ["Primera vivienda", "Inversores a largo plazo", "Jóvenes profesionales"],
-    precioM2: "USD 1.400 – 1.900",
-    precioFuente: "Argenprop / datos propios 2025",
+    slug: "vega-maipu",
     tranquilidad: 4,
     servicios: 3,
     inversion: 5,
@@ -270,8 +311,7 @@ const BARRIOS = [
     emoji: "🏔️",
     descripcion: "Zona exclusiva sobre el lago Lolog con vistas de primer nivel. Para quienes priorizan entorno natural de elite sobre la accesibilidad urbana. El más alejado del centro — 30 a 40 minutos al hospital.",
     perfil: ["Inversores de alto patrimonio", "Segunda residencia premium", "Amantes de la naturaleza extrema"],
-    precioM2: "USD 2.200 – 3.000+",
-    precioFuente: "Datos propios / operaciones cerradas en zona 2024–2025",
+    slug: "penon-de-lolog",
     tranquilidad: 5,
     servicios: 1,
     inversion: 4,
@@ -311,8 +351,7 @@ const BARRIOS = [
     emoji: "🏡",
     descripcion: "Barrio popular consolidado con precios accesibles dentro de la ciudad. Comunidad local auténtica, buena conectividad al centro y servicios básicos completos. Muy elegido para residencia permanente.",
     perfil: ["Residencia permanente", "Primera vivienda", "Comunidad local"],
-    precioM2: "USD 900 – 1.400",
-    precioFuente: "Argenprop / Mercado Libre 2025",
+    slug: "caleuche",
     tranquilidad: 4,
     servicios: 3,
     inversion: 3,
@@ -346,6 +385,22 @@ const BARRIOS = [
     tags: ["Accesible", "Residencial", "Local"],
   },
 ];
+
+// Se publica la mediana con su `n`, no un rango inventado. `medianaDeBarrio()`
+// devuelve null cuando el modelo marca el barrio `en_observacion` (menos de 4
+// propiedades relevadas) — le pasa a Peñón de Lolog, que tiene 3. Ahí se dice
+// que no hay dato en vez de estimar uno: es la regla que ya siguen
+// /precio-m2 y la tabla de barrios de /tasacion.
+const BARRIOS = BARRIOS_PERFIL.map((b) => {
+  const m = medianaDeBarrio(b.slug);
+  return {
+    ...b,
+    precioM2: m ? `USD ${m.medianaM2.toLocaleString("es-AR")}/m²` : "Sin dato publicable",
+    precioFuente: m
+      ? `Mediana sobre ${m.n} propiedades relevadas · datos al ${FECHA_DATOS}`
+      : "Menos de 4 propiedades relevadas: no publicamos una mediana",
+  };
+});
 
 function Puntos({ valor, max = 5, color = "bg-gray-900" }) {
   return (
@@ -633,7 +688,7 @@ export default function DondeVivirPage() {
           <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-400">
             <span>🌐 Internet · 🚌 Transporte · 🏥 Hospital · 💧 Cloacas · 🔒 Seguridad · 🚗 Auto / 🚶 Sin auto</span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">Precios basados en Properati, Argenprop y operaciones de mercado local. Junio 2026.</p>
+          <p className="text-xs text-gray-400 mt-1">Precios basados en nuestro relevamiento de la oferta publicada y en operaciones de mercado local. Junio 2026.</p>
         </section>
 
         {/* Cards */}
@@ -655,7 +710,11 @@ export default function DondeVivirPage() {
               { perfil: "Querés vivir cerca de todo sin auto", recomendacion: "Centro", razon: "Acceso a pie a lago, comercios, hospital. Mayor demanda y liquidez." },
               { perfil: "Trabajás de forma remota y necesitás buena conexión", recomendacion: "Centro o Vega Maipú", razon: "Fibra óptica COTESMA hasta 2.000 Mbps — el mejor internet de la región." },
               { perfil: "Buscás tranquilidad y naturaleza con familia", recomendacion: "La Cascada", razon: "Bosque nativo, silencio y entorno patagónico a minutos del centro." },
-              { perfil: "Primera vivienda con presupuesto limitado", recomendacion: "Vega Maipú o Caleuche", razon: "Precios del m² más accesibles y buena conexión con el centro." },
+              // Vega Maipú salió de esta fila: con el modelo al día está en USD
+              // 2.508/m², por encima de La Cascada. Mandar ahí a alguien con
+              // presupuesto limitado, en la tabla que existe justamente para
+              // eso, era el mismo error que tenía el FAQ.
+              { perfil: "Primera vivienda con presupuesto limitado", recomendacion: "Caleuche", razon: "El m² más accesible de los barrios con datos suficientes, y buena conexión con el centro." },
               { perfil: "Invertir para alquiler turístico", recomendacion: "Centro", razon: "Mayor demanda turística y mejor rentabilidad por noche durante todo el año." },
               { perfil: "Inversión premium a largo plazo", recomendacion: "Chapelco Golf", razon: "Mayor valorización histórica, seguridad privada y perfil de comprador internacional." },
               { perfil: "Exclusividad total y no te importa el aislamiento", recomendacion: "Peñón de Lolog", razon: "Vistas al lago Lolog únicas, pero distante 30–40 min del hospital y sin cloacas." },
@@ -712,7 +771,6 @@ export default function DondeVivirPage() {
         <section className="mb-14 border border-gray-100 rounded-2xl p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Fuentes consultadas</p>
           <ul className="space-y-2 text-xs text-gray-500">
-            <li>• <a href="https://www.properati.com.ar/s/san-martin-de-los-andes/departamento/venta" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">Properati — Precios de departamentos en venta, San Martín de los Andes 2025</a></li>
             <li>• <a href="https://www.reporteinmobiliario.com/article5612-precio-del-m2-real-de-cierre-en-febrero-2025" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">Reporte Inmobiliario — Precio del m² real de cierre, febrero 2025</a></li>
             <li>• <a href="https://www.lacardigital.com.ar/cotesma-anuncio-un-upgrade-de-velocidad-en-sus-servicios-de-internet-por-fibra-optica/" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">Lacar Digital — COTESMA upgrade velocidad fibra óptica hasta 2.000 Mbps</a></li>
             <li>• <a href="https://www.centromedicoroca.com.ar/" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">Centro Médico Roca — Especialidades y sedes San Martín de los Andes</a></li>

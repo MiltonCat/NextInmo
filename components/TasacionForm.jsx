@@ -5,10 +5,16 @@ import { registrarConsulta } from "@/lib/registrarConsulta";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { VALOR_M2, RANGO_M2 } from "@/lib/mercado";
 
-// Solo Casa y Departamento: son los únicos tipos con datos suficientes para mostrar
-// una referencia de mercado honesta (435 y 472 propiedades). Cabaña (46) y Terreno
-// (34) quedaron afuera por decisión de negocio — quien tenga uno usa "otro tipo",
-// que va directo a WhatsApp sin prometer un número que no tenemos.
+// Solo Casa y Departamento: son los únicos tipos con datos suficientes para
+// mostrar una referencia de mercado honesta. Al export del 6-ago-2026 son 188 y
+// 472 propiedades (`RANGO_M2[tipo].n`, las que sobreviven al descarte, no los
+// avisos relevados). Cabaña, Terreno, Local y Oficina quedan afuera: el export
+// no trae su `n`, así que no se sabe sobre cuántas propiedades salió la
+// mediana. Quien tenga uno usa "otro tipo", que va directo a WhatsApp sin
+// prometer un número que no tenemos.
+//
+// Los conteos NO se escriben acá —este comentario decía "435 y 472" de un
+// export viejo—: viajan con el dato, en RANGO_M2.
 const TIPOS = [
   { valor: "Casa", label: "Casa", icono: "M3 12l9-9 9 9M5 10v10h14V10" },
   { valor: "Departamento", label: "Departamento", icono: "M4 21V5a1 1 0 011-1h6a1 1 0 011 1v16M12 21V9a1 1 0 011-1h6a1 1 0 011 1v12M8 8h.01M8 12h.01M16 12h.01M16 16h.01" },

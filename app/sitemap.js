@@ -4,18 +4,25 @@ import { getProperties } from "@/lib/properties";
 import { canonicalUrl } from "@/config";
 import { blogPosts } from "@/lib/blogPosts";
 import { barriosConPerfil } from "@/lib/barrios";
+import { MERCADO_GENERADO } from "@/lib/mercado";
 
 export default async function sitemap() {
   const properties = await getProperties();
   const now = new Date();
+
+  // Las páginas que viven de los datos del modelo cambian cuando se re-releva el
+  // mercado, no cuando se buildea. Decirle a Google que /precio-m2 se actualizó
+  // hoy —cuando los números son de hace un mes— es una señal falsa, y termina
+  // costando confianza en el resto del sitemap.
+  const datosMercado = new Date(`${MERCADO_GENERADO}T12:00:00Z`);
 
   const staticRoutes = [
     { url: canonicalUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1.0 },
     { url: canonicalUrl("/propiedades"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: canonicalUrl("/alquileres"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: canonicalUrl("/inversiones"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: canonicalUrl("/precio-m2"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: canonicalUrl("/tasacion"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: canonicalUrl("/precio-m2"), lastModified: datosMercado, changeFrequency: "monthly", priority: 0.8 },
+    { url: canonicalUrl("/tasacion"), lastModified: datosMercado, changeFrequency: "monthly", priority: 0.7 },
     { url: canonicalUrl("/simulador-credito"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/vender"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/nosotros"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },

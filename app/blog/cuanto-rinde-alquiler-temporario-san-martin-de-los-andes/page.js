@@ -1,5 +1,5 @@
 import { SITE_URL, canonicalUrl, TASADOR_PATH, WA_URL } from "@/config";
-import mercado, { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import mercado, { RELEVADAS_PUBLICO } from "@/lib/mercado";
 import TrackedLink from "@/components/TrackedLink";
 import PodcastPlayer from "@/components/PodcastPlayer";
 
@@ -622,7 +622,7 @@ export default function AlquilerTemporarioPage() {
               financiero ni recomendación de inversión. Las tarifas, ocupaciones y
               costos son estimaciones de referencia para San Martín de los Andes y
               varían según ubicación, calidad, gestión y temporada; el valor del m²
-              surge de {RELEVADAS_TOTAL_FMT} propiedades relevadas y también puede
+              surge de {RELEVADAS_PUBLICO} propiedades relevadas y también puede
               variar. Los rendimientos son escenarios probables, no promesas.
               Consultá con un asesor inmobiliario profesional antes de tomar decisiones
               de inversión.

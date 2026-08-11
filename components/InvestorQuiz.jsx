@@ -72,26 +72,40 @@ const PERFILES = {
   },
 };
 
+// Del colorMap sobrevive solo el acento de texto.
+//
+// Los fondos tintados y los botones de color se fueron al pasar el test al
+// lenguaje de /tasacion, por dos motivos. El primero es un bug: desde la
+// conversión a tema claro los botones saturados llevaban `text-gray-900`
+// —negro sobre verde o naranja fuerte—, la misma clase de resto que dejó
+// invisibles los campos del formulario de contacto. El segundo es que el
+// fondo de color no distinguía nada que el título del perfil no dijera ya.
+//
+// El acento queda donde sí significa: el retorno y el nivel de riesgo, que es
+// lo único que cambia de verdad entre un perfil y otro.
+//
+// El acento va en el tono 700 y no en el 600 en el que estaba. Sobre blanco,
+// `primary-600` (#E8325A) da 4,17:1 de contraste y `orange-600` todavía menos:
+// por debajo del 4,5:1 que pide WCAG AA para texto normal. Justo acá el color
+// lo lleva el dato —el retorno y el riesgo—, que es lo último que conviene
+// dejar en el borde de lo legible. En 700 sube a 5,4:1. Los puntos siguen en
+// 500 porque son decorativos y no cargan texto.
 const colorMap = {
-  rose: {
-    bg: "bg-primary-500/10",
-    border: "border-primary-500/30",
-    btn: "bg-primary-600 hover:bg-primary-700",
-    text: "text-primary-400",
-  },
-  green: {
-    bg: "bg-green-500/10",
-    border: "border-green-500/30",
-    btn: "bg-green-600 hover:bg-green-700",
-    text: "text-green-400",
-  },
-  orange: {
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/30",
-    btn: "bg-orange-500 hover:bg-orange-600",
-    text: "text-orange-400",
-  },
+  rose: { text: "text-primary-700", dot: "bg-primary-500" },
+  green: { text: "text-emerald-700", dot: "bg-emerald-500" },
+  orange: { text: "text-orange-700", dot: "bg-orange-500" },
 };
+
+// Primitivas de tipografía: las mismas de /tasacion, /precio-m2 y del cuerpo
+// de /inversiones. Van inline porque todavía no hay un módulo compartido; si
+// se extrae uno, este es uno de los cinco lugares a tocar.
+const T_ANTETITULO = "text-[11px] font-semibold uppercase tracking-wider text-gray-400";
+const T_TITULO = "text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-gray-900";
+const T_CUERPO = "text-[15px] leading-relaxed text-gray-600";
+const BTN_PRIMARIO =
+  "inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800";
+const BTN_SECUNDARIO =
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50";
 
 // onResultado(perfilKey) se dispara al completar el test, para que la página
 // pueda reaccionar (resaltar la card recomendada, preconfigurar el simulador).
@@ -176,24 +190,21 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
     : "#";
 
   return (
-    <div className="bg-[#111118] rounded-2xl p-6 sm:p-8 border border-gray-800 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8">
       <div className="max-w-xl mx-auto">
 
         {/* Paso 0 — Intro */}
         {paso === 0 && (
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-              <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Test gratuito · 1 minuto</span>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 px-3.5 py-1.5 text-xs font-medium text-gray-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Test gratuito · 1 minuto
             </div>
-            <h2 className="text-white text-2xl font-bold mb-3">¿Qué tipo de propiedad te conviene?</h2>
-            <p className="text-gray-400 text-sm mb-8 max-w-sm mx-auto">
+            <h2 className={T_TITULO}>¿Qué tipo de propiedad te conviene?</h2>
+            <p className={`mx-auto mt-3 mb-8 max-w-sm ${T_CUERPO}`}>
               Respondé 4 preguntas y te decimos qué inversión inmobiliaria se adapta mejor a tu objetivo y perfil de riesgo.
             </p>
-            <button
-              onClick={() => setPaso(1)}
-              className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm"
-            >
+            <button onClick={() => setPaso(1)} className={BTN_PRIMARIO}>
               Empezar el test gratuito →
             </button>
           </div>
@@ -202,19 +213,19 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
         {/* Pasos 1–4 — Preguntas */}
         {paso >= 1 && paso <= 4 && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-gray-500 text-xs">Pregunta {paso} de {QUESTIONS.length}</span>
-              <div className="flex-1 mx-4 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div className="mb-6 flex items-center justify-between">
+              <span className={T_ANTETITULO}>Pregunta {paso} de {QUESTIONS.length}</span>
+              <div className="mx-4 h-1 flex-1 overflow-hidden rounded-full bg-gray-100">
                 <div
-                  className="h-full bg-primary-500 rounded-full transition-all duration-500"
+                  className="h-full rounded-full bg-gray-900 transition-all duration-500"
                   style={{ width: `${progreso}%` }}
                 />
               </div>
-              <button onClick={reiniciar} className="text-gray-600 hover:text-gray-400 text-xs transition-colors">
+              <button onClick={reiniciar} className="text-[11px] text-gray-400 transition-colors hover:text-gray-900">
                 Reiniciar
               </button>
             </div>
-            <h3 className="text-white text-lg font-semibold mb-6 leading-snug">
+            <h3 className="mb-6 text-[17px] font-semibold leading-snug tracking-[-0.01em] text-gray-900 md:text-[22px]">
               {preguntaActual.pregunta}
             </h3>
             <div className="space-y-3">
@@ -222,10 +233,10 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
                 <button
                   key={opcion.puntaje}
                   onClick={() => handleOpcion(opcion.puntaje)}
-                  className={`w-full text-left px-5 py-4 rounded-xl border text-sm font-medium transition-all duration-200 ${
+                  className={`w-full rounded-xl border px-5 py-4 text-left text-[15px] font-medium transition-all duration-200 ${
                     seleccion === opcion.puntaje
-                      ? "bg-primary-600 border-primary-500 text-white scale-[0.98]"
-                      : "bg-gray-900 border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-800"
+                      ? "scale-[0.98] border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
                   }`}
                 >
                   {opcion.texto}
@@ -238,46 +249,49 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
         {/* Paso 5 — Perfil revelado + captura de email */}
         {paso === 5 && perfil && (
           <div>
-            <div className="text-center mb-6">
-              <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Tu perfil de inversión</p>
-              <h2 className="text-white text-2xl font-bold mb-2">{perfil.label}</h2>
-              <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">{perfil.descripcion}</p>
+            <div className="mb-6 text-center">
+              <p className={`inline-flex items-center gap-1.5 ${T_ANTETITULO}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${colores.dot}`} />
+                Tu perfil de inversión
+              </p>
+              <h2 className={`mt-2 ${T_TITULO}`}>{perfil.label}</h2>
+              <p className={`mx-auto mt-3 max-w-sm ${T_CUERPO}`}>{perfil.descripcion}</p>
             </div>
 
-            <div className={`${colores.bg} ${colores.border} border rounded-xl p-5 mb-5 text-center`}>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tu estrategia está lista</p>
-              <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-sm mx-auto">
+            <div className="mb-5 rounded-xl border border-gray-200 bg-gray-50/60 p-5 text-center">
+              <p className={T_ANTETITULO}>Tu estrategia está lista</p>
+              <p className={`mx-auto mt-2 mb-4 max-w-sm ${T_CUERPO}`}>
                 Dejá tu email y te mostramos qué tipo de propiedad te conviene, el retorno
                 estimado y el nivel de riesgo de tu perfil.
               </p>
-              <form onSubmit={handleEmail} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <form onSubmit={handleEmail} className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@email.com"
-                  className={`flex-1 bg-gray-900 border rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-500 transition-colors ${
-                    errorEmail ? "border-red-500" : "border-gray-700"
+                  className={`flex-1 rounded-xl border bg-white px-4 py-3 text-[15px] text-gray-900 outline-none transition-colors placeholder:text-gray-300 ${
+                    errorEmail ? "border-red-500" : "border-gray-200 focus:border-gray-900"
                   }`}
                 />
                 <button
                   type="submit"
                   disabled={enviando}
-                  className={`text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm disabled:opacity-60 ${colores.btn}`}
+                  className={`${BTN_PRIMARIO} disabled:opacity-60`}
                 >
                   {enviando ? "Un segundo..." : "Ver mi estrategia →"}
                 </button>
               </form>
               {errorEmail && (
-                <p className="text-red-400 text-xs mt-2">Ingresá un email válido.</p>
+                <p className="mt-2 text-[11px] text-red-600">Ingresá un email válido.</p>
               )}
-              <p className="text-gray-600 text-xs mt-3">Cero spam. Solo análisis y oportunidades del mercado de SMA.</p>
+              <p className="mt-3 text-[11px] text-gray-400">Cero spam. Solo análisis y oportunidades del mercado de SMA.</p>
             </div>
 
             <div className="text-center">
               <button
                 onClick={() => setPaso(6)}
-                className="text-gray-600 hover:text-gray-400 text-xs underline underline-offset-2 transition-colors"
+                className="text-[11px] text-gray-400 underline underline-offset-2 transition-colors hover:text-gray-900"
               >
                 Prefiero ver la estrategia sin dejar mi email
               </button>
@@ -288,37 +302,37 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
         {/* Paso 6 — Resultado completo */}
         {paso === 6 && perfil && (
           <div>
-            <div className="text-center mb-6">
-              <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Tu perfil de inversión</p>
-              <h2 className="text-white text-2xl font-bold mb-2">{perfil.label}</h2>
-              <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">{perfil.descripcion}</p>
+            <div className="mb-6 text-center">
+              <p className={`inline-flex items-center gap-1.5 ${T_ANTETITULO}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${colores.dot}`} />
+                Tu perfil de inversión
+              </p>
+              <h2 className={`mt-2 ${T_TITULO}`}>{perfil.label}</h2>
+              <p className={`mx-auto mt-3 max-w-sm ${T_CUERPO}`}>{perfil.descripcion}</p>
             </div>
 
-            <div className={`${colores.bg} ${colores.border} border rounded-xl p-5 mb-5`}>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Lo que te recomendamos</p>
-              <p className={`font-bold text-base ${colores.text} mb-2`}>{perfil.recomendacion}</p>
-              <p className="text-sm text-gray-400 mb-4 leading-relaxed">{perfil.detalle}</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-700">
-                  <div className={`font-bold text-sm ${colores.text}`}>{perfil.roi}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Retorno estimado</div>
+            <div className="mb-5 rounded-xl border border-gray-200 p-5">
+              <p className={T_ANTETITULO}>Lo que te recomendamos</p>
+              <p className={`mt-2 text-[17px] font-semibold tracking-[-0.01em] ${colores.text}`}>{perfil.recomendacion}</p>
+              <p className={`mt-2 ${T_CUERPO}`}>{perfil.detalle}</p>
+              <div className="mt-5 grid grid-cols-2 divide-x divide-gray-100 border-y border-gray-100 py-5">
+                <div className="px-4 text-center">
+                  <div className={`text-[17px] font-semibold tabular-nums ${colores.text}`}>{perfil.roi}</div>
+                  <div className={`mt-1 ${T_ANTETITULO}`}>Retorno estimado</div>
                 </div>
-                <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-700">
-                  <div className={`font-bold text-sm ${colores.text}`}>{perfil.riesgo}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Nivel de riesgo</div>
+                <div className="px-4 text-center">
+                  <div className={`text-[17px] font-semibold ${colores.text}`}>{perfil.riesgo}</div>
+                  <div className={`mt-1 ${T_ANTETITULO}`}>Nivel de riesgo</div>
                 </div>
               </div>
               {onVerSimulador && (
-                <button
-                  onClick={onVerSimulador}
-                  className="w-full mt-4 text-center text-gray-300 hover:text-white bg-gray-900 border border-gray-700 hover:border-gray-500 font-medium py-3 rounded-xl transition-colors text-sm"
-                >
+                <button onClick={onVerSimulador} className={`mt-5 w-full ${BTN_SECUNDARIO}`}>
                   Simulá cuánto podrías ganar con este perfil →
                 </button>
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 href={waLink}
                 target="_blank"
@@ -327,14 +341,11 @@ export default function InvestorQuiz({ onResultado, onVerSimulador }) {
                   trackWhatsAppClick(null, "investor_quiz_result");
                   trackEvent("investor_quiz_whatsapp", { profile: calcularPerfil(respuestas) });
                 }}
-                className={`flex-1 text-center text-white font-semibold py-3 rounded-xl transition-colors text-sm ${colores.btn}`}
+                className={`flex-1 ${BTN_PRIMARIO}`}
               >
                 Quiero que me asesoren sobre esto →
               </a>
-              <button
-                onClick={reiniciar}
-                className="flex-1 text-center text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 font-medium py-3 rounded-xl transition-colors text-sm"
-              >
+              <button onClick={reiniciar} className={`flex-1 ${BTN_SECUNDARIO}`}>
                 Repetir el test
               </button>
             </div>

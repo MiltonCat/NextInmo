@@ -1,5 +1,6 @@
 import { SITE_URL, canonicalUrl, TASADOR_PATH, WA_URL } from "@/config";
-import mercado, { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import mercado, { RELEVADAS_PUBLICO } from "@/lib/mercado";
+import { barriosConMediana } from "@/lib/precioZonas";
 import TrackedLink from "@/components/TrackedLink";
 import PodcastPlayer from "@/components/PodcastPlayer";
 
@@ -89,7 +90,12 @@ const faqJsonLd = {
       name: "¿De dónde salen los datos del score?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "De un relevamiento de más de 1.700 propiedades de San Martín de los Andes: valor del m² por zona y tipo, evolución histórica de precios y rendimientos de alquiler de referencia por segmento. Sobre esa base se evalúa cada propiedad puntual.",
+        // La cifra sale de la constante: acá decía "más de 1.700" escrito a
+        // mano, un número de un export viejo que no coincidía con ninguno de
+        // los que publica el resto del sitio. Y este texto es el que Google
+        // levanta como respuesta destacada, así que era el peor lugar para
+        // tener una cifra suelta.
+        text: `De un relevamiento de ${RELEVADAS_PUBLICO} propiedades de San Martín de los Andes: valor del m² por zona y tipo, evolución histórica de precios y rendimientos de alquiler de referencia por segmento. Sobre esa base se evalúa cada propiedad puntual.`,
       },
     },
     {
@@ -112,9 +118,10 @@ export default function ScoreInversionPage() {
   const primerAnio = serie[0];
   const ultimoAnio = serie[serie.length - 1];
   const yields = mercado.rentabilidad_alquiler.tabla;
-  const barriosTop = mercado.valor_m2_usd.por_barrio
-    .filter((b) => b.estado === "usable")
-    .slice(0, 6);
+  // Vía barriosConMediana() y no leyendo por_barrio directo: el JSON crudo trae
+  // "General" —las publicaciones sin barrio declarado— en el segundo puesto por
+  // volumen, y esta tabla lo mostraba como si fuera un barrio de San Martín.
+  const barriosTop = barriosConMediana().slice(0, 6);
 
   const fmtUsd = (n) => `USD ${Math.round(n).toLocaleString("es-AR")}`;
 
@@ -268,7 +275,7 @@ export default function ScoreInversionPage() {
             </p>
             <p className="text-lg leading-relaxed text-gray-700">
               La base son datos reales: un relevamiento de{" "}
-              <strong>{RELEVADAS_TOTAL_FMT} propiedades</strong> de San Martín de
+              <strong>{RELEVADAS_PUBLICO} propiedades</strong> de San Martín de
               los Andes, con valor del m² por zona y tipo, evolución histórica de
               precios y rendimientos de alquiler de referencia.
             </p>
@@ -323,12 +330,12 @@ export default function ScoreInversionPage() {
               <div className="space-y-3">
                 {barriosTop.map((b) => (
                   <div
-                    key={b.barrio}
+                    key={b.nombre}
                     className="flex justify-between items-center border-b border-gray-700 pb-3"
                   >
-                    <span className="text-gray-300">{b.barrio}</span>
+                    <span className="text-gray-300">{b.nombre}</span>
                     <span className="text-xl font-bold text-rose-400">
-                      {fmtUsd(b.mediana_m2_usd)}
+                      {fmtUsd(b.medianaM2)}
                     </span>
                   </div>
                 ))}
@@ -568,7 +575,7 @@ export default function ScoreInversionPage() {
                   ¿De dónde salen los datos?
                 </h3>
                 <p className="text-gray-700">
-                  De un relevamiento de más de {RELEVADAS_TOTAL_FMT} propiedades de
+                  De un relevamiento de {RELEVADAS_PUBLICO} propiedades de
                   San Martín de los Andes: valor del m² por zona y tipo, evolución
                   histórica de precios y rendimientos de alquiler de referencia por
                   segmento.

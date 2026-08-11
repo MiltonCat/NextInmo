@@ -1,76 +1,103 @@
 "use client";
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { WA_NUMBER } from "@/config";
 import AdvisoryProcess from "@/components/AdvisoryProcess";
 import InvestorQuiz from "@/components/InvestorQuiz";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import mercadoJson, {
+  EVOLUCION_SERIE,
+  MERCADO_GENERADO,
+  RELEVADAS_PUBLICO,
+  VALOR_M2,
+  VALOR_M2_CASA,
+  VALOR_M2_DEPTO,
+} from "@/lib/mercado";
+import { barriosConMediana } from "@/lib/precioZonas";
 
 const InversionesEvolucionChart = dynamic(
   () => import("@/components/InversionesEvolucionChart"),
-  { ssr: false, loading: () => <div className="h-48 sm:h-72 bg-gray-800/40 rounded-xl animate-pulse" /> }
+  // El placeholder tiene que medir lo mismo que el gráfico que reemplaza, o la
+  // página salta cuando termina de cargar.
+  { ssr: false, loading: () => <div className="h-56 sm:h-80 bg-gray-100 rounded-xl animate-pulse" /> }
 );
 
 const InversionesMatrizChart = dynamic(
   () => import("@/components/InversionesMatrizChart"),
-  { ssr: false, loading: () => <div className="h-80 bg-gray-800/40 rounded-xl animate-pulse" /> }
+  { ssr: false, loading: () => <div className="h-80 sm:h-[26rem] bg-gray-100 rounded-xl animate-pulse" /> }
 );
 
-const ZONA_DATA = {
-  update: "20 Abril 2026",
-  fuentes: [
-    { nombre: "Diario 7 Lagos", url: "https://www.diario7lagos.com.ar", dato: "USD 2.520/m² - ciudad más cara de Argentina (2022)" },
-    { nombre: "Argenprop", url: "https://www.argenprop.com/inmuebles/venta/san-martin-de-los-andes", dato: "1.066 propiedades en venta (2026)" },
-    { nombre: "Zonaprop", url: "https://www.zonaprop.com.ar", dato: "202 terrenos (2026)" },
-    { nombre: "Properati", url: "https://www.properati.com.ar", dato: "Terrenos ~USD 86/m² (ene 2026)" },
-    { nombre: "Realigro", url: "https://argentina.realigro.com", dato: "Tendencias de precios EUR/m²" },
-  ],
-  nota: "No existe índice oficial para San Martín de los Andes. Datos referenciales basados en listings de portales y fuentes periodísticas.",
-  zonas: [
-    { nombre: "Centro", tipo: "Departamento", precioM2: 2735, variacion: 4.5, rentabilidad: 5.8 },
-    { nombre: "Centro", tipo: "Casa", precioM2: 2180, variacion: 4.2, rentabilidad: 4.8 },
-    { nombre: "Centro", tipo: "Terreno", precioM2: 560, variacion: 2.1, rentabilidad: null },
-    { nombre: "Centro", tipo: "Local", precioM2: 2400, variacion: 3.5, rentabilidad: 6.2 },
-    { nombre: "Chapelco Golf", tipo: "Departamento", precioM2: 3400, variacion: 6.5, rentabilidad: 4.2 },
-    { nombre: "Chapelco Golf", tipo: "Casa", precioM2: 2950, variacion: 5.8, rentabilidad: 4.0 },
-    { nombre: "Chapelco Golf", tipo: "Terreno", precioM2: 380, variacion: 8.2, rentabilidad: null },
-    { nombre: "Las Marias", tipo: "Casa", precioM2: 1750, variacion: 3.5, rentabilidad: 4.2 },
-    { nombre: "Las Marias", tipo: "Terreno", precioM2: 110, variacion: 2.8, rentabilidad: null },
-    { nombre: "Costanera", tipo: "Departamento", precioM2: 2950, variacion: 5.5, rentabilidad: 6.5 },
-    { nombre: "Costanera", tipo: "Casa", precioM2: 2400, variacion: 4.8, rentabilidad: 5.2 },
-    { nombre: "Las Pendientes", tipo: "Casa", precioM2: 2950, variacion: 5.5, rentabilidad: 4.5 },
-    { nombre: "Las Pendientes", tipo: "Terreno", precioM2: 72, variacion: 3.5, rentabilidad: null },
-  ],
-  promedioGeneral: 2600,
-  promedioReferencia: 2520,
-  // Curva coherente con el dato verificado de 2022 (USD 2.520) y el promedio
-  // verificado de 2026. Refleja un mercado maduro: precios altos y estables.
-  // Debe mantenerse alineada con la de app/precio-m2/page.js.
-  evolucionHistorica: [
-    { anio: 2021, precio: 2350, variacion: null, contexto: "Salida de pandemia — precios ya entre los más altos del país", fuente: "Estimación propia" },
-    { anio: 2022, precio: 2520, variacion: 7.2, contexto: "San Martín, el m² más caro de Argentina", fuente: "Verificado · Diario 7 Lagos / DiarioAndino" },
-    { anio: 2023, precio: 2545, variacion: 1.0, contexto: "Mercado maduro — precios estables en dólares", fuente: "Estimación propia" },
-    { anio: 2024, precio: 2570, variacion: 1.0, contexto: "Demanda turística e inversora sostenida", fuente: "Estimación propia" },
-    { anio: 2025, precio: 2590, variacion: 0.8, contexto: "Estabilización — mercado consolidado", fuente: "Estimación propia" },
-    { anio: 2026, precio: 2600, variacion: 0.4, contexto: "Sigue entre los más caros del país", fuente: "Verificado · Argenprop / Zonaprop" },
-  ],
-  rentals: [
-    { tipo: "Depto 1 dorm (40m²)", precioVenta: 95000, precioM2: 2375, alquiler: 650, rentabilidad: 8.2 },
-    { tipo: "Depto 2 dorm (80m²)", precioVenta: 185000, precioM2: 2310, alquiler: 950, rentabilidad: 6.2 },
-    { tipo: "Casa 2 dorm (96m²)", precioVenta: 210000, precioM2: 2187, alquiler: 1400, rentabilidad: 8.0 },
-    { tipo: "Casa 3 dorm (165m²)", precioVenta: 330000, precioM2: 2000, alquiler: 1800, rentabilidad: 6.5 },
-    { tipo: "Casa 4 dorm (225m²)", precioVenta: 490000, precioM2: 2177, alquiler: 2500, rentabilidad: 6.1 },
-  ],
+// El m² de referencia del simulador, por tipo de inversión.
+//
+// Antes era uno solo: `Math.round((VALOR_M2_CASA + VALOR_M2_DEPTO) / 2)` = USD
+// 2.689, rotulado en pantalla como "valor mediano actual". No era la mediana de
+// nada —es el promedio de dos medianas— y no existía en ninguna otra página del
+// sitio. El JSON del modelo incluso trae su propio general ponderado (2.684), y
+// su nota al lado dice "preferir por_tipo para publicar".
+//
+// Se notaba: con USD 150.000 esta página decía "≈ 56 m²" mientras /tasacion
+// publicaba 2.085 para casas (72 m²) y 3.292 para departamentos (46 m²). Tres
+// respuestas para la misma pregunta, y la única sin respaldo era la de acá.
+//
+// Ahora cada tipo usa el m² de lo que se está simulando, que son exactamente
+// los dos valores que publica /tasacion. "reventa" va con casas porque es lo
+// que dice la matriz de riesgo de esta misma página ("Casa reventa").
+const M2_SIMULADOR = {
+  alquiler: { m2: VALOR_M2_CASA, etiqueta: "casas" },
+  turistico: { m2: VALOR_M2_DEPTO, etiqueta: "departamentos" },
+  reventa: { m2: VALOR_M2_CASA, etiqueta: "casas" },
 };
+
+// Conteo de propiedades relevadas por tipo. Regla de Milton (2026-08-10): los
+// valores ACTUALES los da el modelo predictivo; la serie histórica se deja como
+// está. Todo lo de acá abajo es "actual", así que sale del JSON y no del
+// teclado — que es de donde salían "913 terrenos", "66 locales" y "USD 2.640".
+const RELEVADAS_POR_TIPO = mercadoJson.relevadas?.por_tipo ?? {};
+const fmtM2 = (v) => `USD ${Number(v).toLocaleString("es-AR")}/m²`;
+
+// Serie de evolución del m². Sale de lib/mercado.js, igual que /precio-m2 y
+// /tasacion.
+//
+// Hasta 2026-08-09 esta página tenía su propia copia escrita a mano que decía
+// que el m² había subido ~10% desde 2021, mientras las otras dos decían 57,7%.
+// El comentario de la constante vieja incluso pedía "mantenerla alineada con la
+// de app/precio-m2/page.js" — que es exactamente lo que nunca pasa cuando hay
+// dos copias. Ahora hay una sola.
+const EVOLUCION_HISTORICA = EVOLUCION_SERIE.map((p) => ({
+  anio: p.anio,
+  precio: p.usd_m2,
+  variacion: p.variacion_pct,
+  contexto: p.descripcion,
+  fuente: "Relevamiento propio",
+}));
+
+// Rendimientos por segmento. Los porcentajes salen del modelo; el precio de
+// referencia y el alquiler estimado se mantienen acá porque el export todavía
+// no los trae. Los segmentos coinciden uno a uno con la tabla del JSON.
+const PRECIOS_SEGMENTO = {
+  "Depto 1 dorm": { precioVenta: 95000, alquiler: 650 },
+  "Depto 2 dorm": { precioVenta: 185000, alquiler: 950 },
+  "Casa 2 dorm": { precioVenta: 210000, alquiler: 1400 },
+  "Casa 3 dorm": { precioVenta: 330000, alquiler: 1800 },
+  "Casa 4 dorm": { precioVenta: 490000, alquiler: 2500 },
+};
+
+const RENTALS = (mercadoJson.rentabilidad_alquiler?.tabla ?? [])
+  .filter((r) => PRECIOS_SEGMENTO[r.segmento])
+  .map((r) => ({
+    tipo: `${r.segmento} (${r.superficie_m2}m²)`,
+    rentabilidad: r.rentabilidad_anual_pct,
+    ...PRECIOS_SEGMENTO[r.segmento],
+  }));
 
 const PESOS = { Demanda: 0.35, Liquidez: 0.20, 'Revalorización': 0.30, Estabilidad: 0.15 };
 
 const scoreLabel = (score) => {
-  if (score >= 80) return { texto: "Muy favorable", color: "text-green-400 bg-green-500/10 border-green-500/30" };
-  if (score >= 70) return { texto: "Favorable", color: "text-primary-400 bg-primary-500/10 border-primary-500/30" };
-  if (score >= 60) return { texto: "Moderado", color: "text-amber-400 bg-amber-500/10 border-amber-500/30" };
-  return { texto: "Bajo potencial", color: "text-gray-400 bg-gray-500/10 border-gray-500/30" };
+  if (score >= 80) return { texto: "Muy favorable", color: "text-emerald-600 bg-green-500/10 border-green-500/30" };
+  if (score >= 70) return { texto: "Favorable", color: "text-primary-600 bg-primary-500/10 border-primary-500/30" };
+  if (score >= 60) return { texto: "Moderado", color: "text-amber-600 bg-amber-500/10 border-amber-500/30" };
+  return { texto: "Bajo potencial", color: "text-gray-500 bg-gray-500/10 border-gray-500/30" };
 };
 
 const FACTOR_SIMPLE = {
@@ -87,56 +114,76 @@ function calcularScore(factores) {
 const SCORE_DATA = [
   {
     tipo: 'Depto turístico', riesgo: 'Dinámico',
-    riesgoColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    riesgoColor: 'text-amber-600 bg-amber-500/10 border-amber-500/20',
     acento: 'from-amber-500 to-orange-400',
     factores: [
       { nombre: 'Demanda', valor: 90, fuente: 'Airbnb SMA: rating 4.9/5 · alta ocupación en temporadas' },
       { nombre: 'Liquidez', valor: 75, fuente: 'Mercado de alquiler turístico activo · salida vía plataformas' },
-      { nombre: 'Revalorización', valor: 85, fuente: 'Precios en USD entre los más altos del país · mercado maduro y estable · Argenprop / Diario Andino' },
+      { nombre: 'Revalorización', valor: 85, fuente: `${fmtM2(VALOR_M2_DEPTO)} para departamentos · relevamiento propio` },
       { nombre: 'Estabilidad', valor: 60, fuente: 'Ingresos estacionales: pico en ski (jul) y trekking (ene)' },
     ],
     descripcion: 'Es lo que más rinde, pero el ingreso varía: fuerte en temporada de ski y verano, más flojo el resto del año.',
   },
   {
     tipo: 'Casa alquiler', riesgo: 'Moderado',
-    riesgoColor: 'text-primary-500 bg-primary-500/10 border-primary-500/20',
+    riesgoColor: 'text-primary-600 bg-primary-500/10 border-primary-500/20',
     acento: 'from-primary-500 to-pink-500',
     factores: [
-      { nombre: 'Demanda', valor: 75, fuente: 'Solo 49 propiedades en alquiler en Argenprop · oferta muy limitada' },
+      // Decía "Solo 49 propiedades en alquiler relevadas". Ese número no está
+      // en el modelo ni puede estarlo: el relevamiento cubre avisos de VENTA,
+      // no de alquiler. No se reemplazó por otro, se dice qué mide el dato.
+      { nombre: 'Demanda', valor: 75, fuente: `${RELEVADAS_POR_TIPO.Casa} casas relevadas en venta · oferta acotada para el tamaño del mercado` },
       { nombre: 'Liquidez', valor: 55, fuente: 'Mercado de reventa moderado · stock disponible reducido' },
-      { nombre: 'Revalorización', valor: 80, fuente: 'Valor en USD sostenido · San Martín, el m² más caro del país · Zonaprop' },
+      { nombre: 'Revalorización', valor: 80, fuente: `${fmtM2(VALOR_M2_CASA)} para casas · relevamiento propio` },
       { nombre: 'Estabilidad', valor: 82, fuente: 'Alquiler residencial USD · ingreso mensual predecible (USD 1.200+)' },
     ],
     descripcion: 'Cobrás alquiler todos los meses y la propiedad sube de valor con los años. La opción más tranquila para empezar.',
   },
-  {
-    tipo: 'Terreno', riesgo: 'Conservador',
-    riesgoColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    acento: 'from-emerald-500 to-teal-400',
-    factores: [
-      { nombre: 'Demanda', valor: 50, fuente: '913 terrenos en venta en Zonaprop · alta oferta = absorción lenta' },
-      { nombre: 'Liquidez', valor: 35, fuente: 'Sin generación de renta · venta con plazos largos de negociación' },
-      { nombre: 'Revalorización', valor: 78, fuente: 'USD 15–200+/m² según zona · premium en Chapelco y lakefront' },
-      { nombre: 'Estabilidad', valor: 88, fuente: 'Sin exposición a vacancia ni ciclo de alquiler · reserva de valor' },
-    ],
-    descripcion: 'Tu plata queda resguardada en un bien que se valoriza, pero venderlo puede llevar tiempo. No genera ingreso mensual.',
-  },
+  // TERRENO SE SACÓ DE ACÁ (2026-08-10, decisión de Milton).
+  //
+  // El sitio ya había tomado esta decisión en otra página y esta no se había
+  // enterado: `/precio-m2` no publica Terreno, y lo dice por escrito —para
+  // Cabaña, Local Comercial, Terreno y Oficina el modelo no exporta el `n`, así
+  // que no se sabe sobre cuántas propiedades salió cada mediana, y quedan
+  // fuera—. El modelo se entrena solo con Casa y Departamento.
+  //
+  // Acá, en cambio, Terreno tenía tarjeta completa con puntaje sobre cuatro
+  // factores. Y el dato que sostenía el primero decía "913 terrenos en venta
+  // relevados" cuando el relevamiento tiene 116: no era un número desactualizado
+  // sino uno que el propio sitio contradice, y encima era el que justificaba el
+  // puntaje de demanda ("alta oferta = absorción lenta").
+  //
+  // Un tipo de propiedad que el modelo no puede medir no puede tener un puntaje
+  // del 1 al 100 en una tabla que se presenta como derivada del relevamiento.
   {
     tipo: 'Local comercial', riesgo: 'Moderado',
-    riesgoColor: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+    riesgoColor: 'text-sky-600 bg-sky-500/10 border-sky-500/20',
     acento: 'from-sky-500 to-cyan-400',
     factores: [
-      { nombre: 'Demanda', valor: 65, fuente: '66 locales totales en Zonaprop · mercado acotado pero activo' },
-      { nombre: 'Liquidez', valor: 58, fuente: 'Compradores de nicho · precio medio USD 350.000 · Zonaprop' },
-      { nombre: 'Revalorización', valor: 88, fuente: '+21.8% vs ene 2025 · USD 2.640/m² (ene 2026) · Zonaprop' },
+      { nombre: 'Demanda', valor: 65, fuente: `${RELEVADAS_POR_TIPO['Local Comercial']} locales relevados en total · mercado acotado pero activo` },
+      { nombre: 'Liquidez', valor: 58, fuente: 'Compradores de nicho · precio medio USD 350.000' },
+      // Decía "+21.8% vs ene 2025 · USD 2.640/m² (ene 2026)". Los dos números
+      // estaban escritos a mano y ninguno coincidía: el modelo da USD 2.900/m²
+      // para Local Comercial, y esa variación interanual no existe en el
+      // export. Ahora el m² sale del modelo y la variación se sacó, porque no
+      // hay de dónde calcularla.
+      { nombre: 'Revalorización', valor: 88, fuente: `${fmtM2(VALOR_M2['Local Comercial'])} para locales · relevamiento propio` },
       { nombre: 'Estabilidad', valor: 70, fuente: 'Depende del ciclo económico · sostenido por turismo en SMA' },
     ],
-    descripcion: 'Es lo que más subió de precio en el último año. La renta depende de cómo venga la economía y el turismo local.',
+    // "Es lo que más subió de precio en el último año" se apoyaba en el
+    // "+21,8% vs ene 2025" que se acaba de sacar por no tener respaldo. Sin ese
+    // número la frase queda sola, y el modelo no trae variación interanual por
+    // tipo, así que no hay con qué sostenerla. Se reemplaza por lo que el
+    // relevamiento sí dice.
+    descripcion: 'Mercado chico y de compradores específicos. La renta depende de cómo venga la economía y el turismo local.',
   },
 ];
 
+// Terreno sale también de acá, por lo mismo: si no está en la comparativa
+// porque el modelo no puede medirlo, no puede estar en el gráfico de al lado
+// con un riesgo de 1,8 y un retorno del 5 % escritos a mano. Las dos cosas son
+// la misma afirmación en dos formatos.
 const MATRIX_DATA = [
-  { nombre: 'Terreno', riesgo: 1.8, retorno: 5, color: '#10b981' },
   { nombre: 'Casa alquiler', riesgo: 3.5, retorno: 7, color: '#E8325A' },
   { nombre: 'Local comercial', riesgo: 5, retorno: 9, color: '#f472b6' },
   { nombre: 'Casa reventa', riesgo: 6.5, retorno: 14, color: '#f59e0b' },
@@ -146,28 +193,115 @@ const MATRIX_DATA = [
 // Conecta el resultado del quiz con el resto de la página:
 // qué card de la comparativa resaltar y con qué tipo preconfigurar el simulador.
 // El simulador no tiene opción "terreno", por eso el perfil conservador no lo preconfigura.
+//
+// `conservador.card` pasó a null al sacar Terreno de la comparativa. Si quedaba
+// en "Terreno", el resaltado buscaba una tarjeta que ya no existe y no pasaba
+// nada —sin error, sin aviso—: el visitante conservador terminaba el test y la
+// página no reaccionaba. Un null dice que no hay tarjeta que resaltar; un
+// string que no matchea con nada es un bug esperando.
+//
+// PENDIENTE PARA MILTON: el quiz igual le sigue recomendando terrenos al perfil
+// conservador (InvestorQuiz.jsx → PERFILES.conservador.recomendacion). Eso es un
+// consejo de vendedor, no un dato del modelo, así que no se tocó. Pero hoy un
+// conservador lee "te conviene un terreno" y después baja a una comparativa
+// donde los terrenos no existen. Hay que decidir una de las dos.
 const PERFIL_MAP = {
-  conservador: { card: "Terreno", calc: null, label: "Conservador" },
+  conservador: { card: null, calc: null, label: "Conservador" },
   moderado: { card: "Casa alquiler", calc: "alquiler", label: "Moderado" },
   agresivo: { card: "Depto turístico", calc: "turistico", label: "Dinámico" },
 };
 
-const gridStyle = {
-  backgroundImage: `linear-gradient(rgba(232,50,90,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(232,50,90,0.12) 1px, transparent 1px)`,
-  backgroundSize: "48px 48px",
+// Etiqueta de confianza. Mismo criterio que app/precio-m2/page.js.
+//
+// Acá solo hace falta una: los dos bloques que la usan —la serie de evolución y
+// la tabla de rentabilidad— están marcados `referencia_curada` en el JSON del
+// modelo, o sea que se cargan a mano y no salen del relevamiento. La etiqueta
+// verde de "dato propio" no corresponde en ninguno de los dos, y ponerla igual
+// sería justo el error que se corrigió en /precio-m2.
+const BADGES = {
+  estimado: { label: "Referencia de mercado", cls: "border-amber-200 text-amber-700", dot: "bg-amber-500" },
 };
 
-// Etiquetas de confianza de los datos (versión para fondo oscuro).
-// Coherente con las de app/precio-m2/page.js.
-const BADGES = {
-  verificado: { label: "Verificado", cls: "text-green-400 bg-green-500/10 border-green-500/30", dot: "bg-green-400" },
-  estimado: { label: "Estimación propia", cls: "text-amber-400 bg-amber-500/10 border-amber-500/30", dot: "bg-amber-400" },
-};
+// ─── Tipografía compartida ──────────────────────────────────────────────────
+//
+// Las mismas tres primitivas que usan /tasacion y /precio-m2. Existen para que
+// el lenguaje no dependa de que alguien se acuerde de copiar la clase correcta:
+// esta página tenía `text-2xl font-semibold` en un título, `text-lg` en otro y
+// `text-base sm:text-lg` en un tercero, todos con el mismo rol.
+//
+// La escala va en píxeles y no en `text-2xl/3xl` porque los saltos de Tailwind
+// son demasiado grandes para lo que necesita una página con mucho dato: entre
+// text-xl (20px) y text-2xl (24px) no hay nada, y el título de sección quiere
+// 26px. El tracking negativo es lo que hace que un semibold grande se lea
+// asentado en vez de inflado.
+
+function Antetitulo({ children }) {
+  return (
+    <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{children}</p>
+  );
+}
+
+function TituloSeccion({ id, children }) {
+  return (
+    <h2
+      id={id}
+      className="mt-2 text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-gray-900 md:text-[34px]"
+    >
+      {children}
+    </h2>
+  );
+}
+
+function Subtitulo({ children }) {
+  return (
+    <p className="mt-4 text-[15px] leading-relaxed text-gray-600 md:text-base">{children}</p>
+  );
+}
+
+// Encabezado de sección con la foto al lado, alternando el lado en cada
+// sección. Es el patrón de las páginas de "cómo funciona" de Airbnb, a pedido
+// de Milton, y reemplaza a la banda apaisada de ancho completo que había antes.
+//
+// Por qué es mejor acá: la banda partía la página en dos —título, foto, datos—
+// y metía 400 px de stock entre lo que la persona acababa de leer y el número
+// que venía a buscar. Al costado, la foto ocupa un espacio que en desktop
+// estaba vacío (el texto de encabezado nunca pasa de media caja) y no empuja
+// nada hacia abajo.
+//
+// `lg:` y no `md:` porque a 768 px dos columnas dejan el título en cuatro
+// palabras por línea.
+//
+// En móvil la foto va **debajo** del texto, no arriba: el orden natural del DOM
+// pondría la imagen primero y lo primero de una sección tiene que ser de qué
+// trata, no una foto de archivo. De ahí el `order`.
+//
+// `objectPosition` va por foto porque un `center` parejo le corta la cabeza a
+// la mujer de grafico1, que está arriba a la derecha.
+function SeccionConFoto({ src, alt, objectPosition = "center", ladoFoto = "izquierda", children }) {
+  const fotoPrimero = ladoFoto === "izquierda";
+  return (
+    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+      <div className={`order-2 ${fotoPrimero ? "lg:order-1" : "lg:order-2"}`}>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 lg:aspect-[3/2]">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="(max-width: 1024px) 100vw, 560px"
+            className="object-cover"
+            style={{ objectPosition }}
+          />
+        </div>
+      </div>
+      <div className={`order-1 ${fotoPrimero ? "lg:order-2" : "lg:order-1"}`}>{children}</div>
+    </div>
+  );
+}
 
 function Badge({ tipo, className = "" }) {
   const b = BADGES[tipo];
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wide ${b.cls} ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${b.cls} ${className}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${b.dot}`} />
       {b.label}
     </span>
@@ -182,6 +316,25 @@ const TASA_PLAZO_FIJO = 0.01;     // plazo fijo en dólares en bancos argentinos
 
 const fmtPct = (v) => v.toLocaleString("es-AR", { maximumFractionDigits: 1 });
 
+// Límites del monto del simulador. El campo se escribe libremente, así que hay
+// que acotarlo: sin tope, un cero de más manda el resultado a cifras que no
+// significan nada, y un campo vacío rompe la cuenta con NaN.
+const MONTO_MIN = 10000;
+const MONTO_MAX = 2000000;
+
+// Solo el número, sin acotar. Acepta "150.000" y "USD 150000".
+const leerMonto = (v) => {
+  const n = Number.parseInt(String(v).replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(n) ? n : null;
+};
+
+// OJO: el mínimo NO se aplica mientras la persona tipea, solo al salir del
+// campo. Si se acotara en cada tecla, borrar el contenido para escribir otro
+// monto sería imposible: al teclear el primer dígito ("1") el campo saltaría
+// solo a 10.000 y le movería el cursor. Durante el tipeo se acota únicamente
+// el máximo, que es el que puede romper la cuenta.
+const acotarMonto = (v) => Math.min(MONTO_MAX, Math.max(MONTO_MIN, v));
+
 const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
 // "2026-07-03" → "3 Julio 2026". Sin new Date() a propósito: el parseo por zona
@@ -192,12 +345,31 @@ function formatearFechaISO(iso) {
   return `${dia} ${MESES[mes - 1]} ${anio}`;
 }
 
-// `mercado` viene del endpoint /mercado de la API del modelo predictivo
-// (fetch con ISR en page.js). Puede ser null si la API no respondió:
-// todos los usos deben caer a los datos estáticos de ZONA_DATA.
-export default function InversionesClient({ mercado = null }) {
+// Todo lo que esta página publica sale de lib/mercado.js, o sea del export del
+// modelo (app/data/mercado_sma.json). Es la misma fuente que /tasacion y
+// /precio-m2.
+//
+// Hasta el 2026-08-10 esta página consumía además la API en vivo del modelo y
+// con eso pisaba el último punto de la serie, el m² de referencia y la fecha.
+// Se sacó, y no fue por simplificar: la API está MÁS VIEJA que el export.
+// Devuelve el relevamiento del 17-jul sobre 956 propiedades; el JSON es del
+// 6-ago sobre 1.597. En casas la brecha es del 16 % (USD 1.797 contra 2.085).
+//
+// El efecto estaba en producción: esta página publicaba "+56,9 %" mientras
+// /tasacion y /precio-m2 publicaban "+57,7 %" sobre la misma serie, y el
+// reporte descargable salía fechado tres semanas antes que el resto del sitio.
+//
+// Para volver a datos en vivo hay que reexportar y redeployar el modelo. Y
+// cuando pase, el lugar donde enchufarlo es lib/mercado.js —uno solo, del que
+// cuelgan las tres páginas— y no acá: una página con su propia fuente es
+// exactamente cómo se llegó a este problema.
+export default function InversionesClient() {
   const [activeTab, setActiveTab] = useState("zonas");
   const [calcMonto, setCalcMonto] = useState(150000);
+  // Lo que se ve en el campo mientras se tipea, separado del monto con el que
+  // se calcula. Son dos cosas distintas: el campo puede estar a medio escribir
+  // ("13") sin que el resultado salte a valores absurdos en cada tecla.
+  const [montoTexto, setMontoTexto] = useState("150000");
   const [calcPlazo, setCalcPlazo] = useState(5);
   const [calcTipo, setCalcTipo] = useState("alquiler");
   const [leadName, setLeadName] = useState("");
@@ -213,39 +385,38 @@ export default function InversionesClient({ mercado = null }) {
     if (mapa.calc) setCalcTipo(mapa.calc);
   };
 
-  const handleVerSimulador = () => {
-    document.getElementById("calculadora")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  const irA = (id) =>
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // Dos destinos distintos, y no da lo mismo cuál:
+  //   - el quiz manda a #simulador, que es donde están los controles. Acaba de
+  //     preconfigurar el tipo de inversión; mandarlo al desglose lo dejaría
+  //     mirando un resultado sin ver qué se cambió.
+  //   - el botón del hero manda a #calculadora, el desglose, que es lo que pidió.
+  const handleVerSimulador = () => irA("simulador");
+  const handleVerDetalle = () => irA("calculadora");
 
   const cardRecomendada = perfilQuiz ? PERFIL_MAP[perfilQuiz].card : null;
 
-  const fechaDatos = formatearFechaISO(mercado?.actualizado) ?? ZONA_DATA.update;
-  const totalPropiedades = mercado?.n_propiedades
-    ? mercado.n_propiedades.toLocaleString("es-AR")
-    : RELEVADAS_TOTAL_FMT;
+  const fechaDatos = formatearFechaISO(MERCADO_GENERADO);
+  // La cifra pública y redondeada, la misma que /tasacion y /precio-m2. Si esta
+  // página mostrara el conteo exacto mientras el resto dice "más de 1.500", el
+  // visitante no ve dos métricas, ve una contradicción.
+  const totalPropiedades = RELEVADAS_PUBLICO;
 
-  // Serie histórica estática, con el punto actual pisado por la mediana viva del modelo.
-  const evolucion = useMemo(() => {
-    if (!mercado?.valor_m2_general_usd) return ZONA_DATA.evolucionHistorica;
-    const serie = ZONA_DATA.evolucionHistorica.map((p) => ({ ...p }));
-    const ultimo = serie[serie.length - 1];
-    const previo = serie[serie.length - 2];
-    ultimo.precio = mercado.valor_m2_general_usd;
-    if (previo) ultimo.variacion = Math.round((ultimo.precio / previo.precio - 1) * 1000) / 10;
-    ultimo.fuente = "Modelo predictivo propio";
-    return serie;
-  }, [mercado]);
+  // La serie tal cual la exporta el modelo, sin pisar el último punto.
+  const evolucion = EVOLUCION_HISTORICA;
   const primerPunto = evolucion[0];
   const ultimoPunto = evolucion[evolucion.length - 1];
   const crecimientoPct = Math.round((ultimoPunto.precio / primerPunto.precio - 1) * 1000) / 10;
 
   // Motor del simulador: separa renta (sale de los valores reales de alquiler
-  // de ZONA_DATA.rentals, según el tramo de precio) y valorización (promedio
-  // compuesto de los últimos 2 años de la serie del m², vivo si hay `mercado`).
+  // de RENTALS, según el tramo de precio) y valorización (crecimiento anual
+  // compuesto de los últimos 2 años de la serie del m²).
   const sim = useMemo(() => {
     let rentaBruta = 0;
     if (calcTipo === "alquiler") {
-      const cercana = ZONA_DATA.rentals.reduce((a, b) =>
+      const cercana = RENTALS.reduce((a, b) =>
         Math.abs(b.precioVenta - calcMonto) < Math.abs(a.precioVenta - calcMonto) ? b : a
       );
       rentaBruta = cercana.rentabilidad;
@@ -272,15 +443,16 @@ export default function InversionesClient({ mercado = null }) {
     const ganancia = gananciaValorizacion + rentaAcumulada;
     const mensual = calcMonto * (rentaNeta / 100) / 12;
 
-    const m2Ref = mercado?.valor_m2_general_usd ?? ZONA_DATA.promedioGeneral;
+    // El m² del tipo que se está simulando, no un promedio de los dos.
+    const { m2: m2Ref, etiqueta: m2Etiqueta } = M2_SIMULADOR[calcTipo] ?? M2_SIMULADOR.alquiler;
 
     return {
       esReventa, rentaBruta, rentaNeta, valorizacion, totalAnual, rangoMin, rangoMax,
       gananciaValorizacion, rentaAcumulada, ganancia, total: calcMonto + ganancia, mensual,
-      m2Ref, m2Comprables: Math.round(calcMonto / m2Ref),
+      m2Ref, m2Etiqueta, m2Comprables: Math.round(calcMonto / m2Ref),
       plazoFijoTotal: calcMonto * Math.pow(1 + TASA_PLAZO_FIJO, calcPlazo),
     };
-  }, [calcTipo, calcMonto, calcPlazo, evolucion, mercado]);
+  }, [calcTipo, calcMonto, calcPlazo, evolucion]);
 
   const handleLeadSubmit = (e) => {
     e.preventDefault();
@@ -315,12 +487,17 @@ export default function InversionesClient({ mercado = null }) {
 
   const downloadReportTxt = () => {
     const currentDate = new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" });
-    const filasZonas = mercado?.por_barrio?.length
-      ? mercado.por_barrio.map((z) => `${z.barrio} | ${z.tipo} | $${z.mediana_m2_usd}/m² (mediana sobre ${z.n} propiedades)`)
-      : ZONA_DATA.zonas.map((zona) => `${zona.nombre} | ${zona.tipo} | $${zona.precioM2}`);
-    const fuentes = mercado
-      ? `Fuente: modelo predictivo propio (datos al ${fechaDatos}) · Portales relevados: Zonaprop, Argenprop, MercadoLibre`
-      : "Fuentes: Diario 7 Lagos, Argenprop, Zonaprop, Properati";
+    // Vía barriosConMediana(): el reporte armaba las filas con `z.tipo`, un
+    // campo que `por_barrio` no tiene, así que cada línea salía con un
+    // "undefined" en el medio. Y no filtraba "General" —las publicaciones sin
+    // barrio declarado—, que aparecía como si fuera un barrio de San Martín.
+    const filasZonas = barriosConMediana().map(
+      (b) => `${b.nombre} | USD ${b.medianaM2.toLocaleString("es-AR")}/m² (mediana sobre ${b.n} propiedades)`
+    );
+    // Una sola línea de fuente, con la fecha del export. Antes había dos según
+    // si la API había contestado, y la de la API traía su propia fecha: el TXT
+    // salía fechado tres semanas antes que la página desde la que se descargó.
+    const fuentes = `Fuente: relevamiento propio de la oferta publicada, procesado por nuestro modelo (datos al ${fechaDatos})`;
     const dataText = `VALORES POR M² - SAN MARTÍN DE LOS ANDES\n${"=".repeat(45)}\nFecha: ${currentDate}\n\n${filasZonas.join("\n")}\n\nEVOLUCIÓN HISTÓRICA (USD/m²)\n${"=".repeat(45)}\n${evolucion.map((item) => `${item.anio}: $${item.precio}/m² ${item.variacion ? `(+${item.variacion}%)` : ""} - ${item.contexto}`).join("\n")}\n\n${fuentes}`.trim();
     const blob = new Blob([dataText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -332,204 +509,361 @@ export default function InversionesClient({ mercado = null }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
-      <section className="bg-[#0a0a0f] relative overflow-hidden pt-24 pb-12" style={gridStyle}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-600/5 via-transparent to-transparent" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-            <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Inversiones · San Martín de los Andes</span>
+    <div className="min-h-screen bg-white">
+      {/* Hero sobre blanco, sin grilla ni degradado de fondo. El peso lo lleva
+          la tipografía —grande, semibold, tracking cerrado— y el aire, igual
+          que en /tasacion y /precio-m2. */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 md:pt-20 lg:px-8">
+        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-200 px-3.5 py-1.5 text-xs font-medium text-gray-600">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+          Inversiones · San Martín de los Andes
+        </span>
+
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="max-w-2xl text-[34px] font-semibold leading-[1.08] tracking-[-0.025em] text-gray-900 md:text-[52px]">
+              Invertí mejor en <span className="text-primary-600">San Martín de los Andes</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-500 md:text-lg">
+              No solo publicamos propiedades. Analizamos el mercado para ayudarte a tomar mejores
+              decisiones de inversión, con datos de acá y no promedios nacionales.
+            </p>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-black text-white font-jakarta leading-tight">Invertí mejor en<br className="hidden sm:block" /> San Martín de los Andes</h1>
-              <p className="text-gray-400 text-sm sm:text-base mt-3 max-w-xl">No solo publicamos propiedades. Analizamos el mercado para ayudarte a tomar mejores decisiones de inversión.</p>
-              <div className="flex items-center gap-2 mt-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
-                <span className="text-gray-500 text-xs">Análisis basado en {totalPropiedades} propiedades relevadas en San Martín de los Andes · 2026</span>
-              </div>
+
+          <button
+            onClick={downloadReportTxt}
+            className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 lg:self-auto"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Descargar reporte
+          </button>
+        </div>
+
+        {/* Las métricas en hairline y no en tarjetas: son el respaldo de lo que
+            dice el título, no tres botones. Encajonarlas les da un peso que no
+            les toca — es el mismo tratamiento de /tasacion y /precio-m2. */}
+        <div className="mt-10 grid grid-cols-3 divide-x divide-gray-100 border-y border-gray-100 py-5">
+          {[
+            { valor: totalPropiedades, label: "propiedades relevadas en San Martín" },
+            // La fecha del export, siempre. Decía "Semanal" cuando la API
+            // contestaba, que era una promesa de frecuencia y no un dato: la
+            // API llevaba tres semanas devolviendo el mismo relevamiento.
+            { valor: fechaDatos, label: "última actualización de los datos" },
+            { valor: "Solo SMA", label: "sin promedios nacionales de por medio" },
+          ].map((item, i) => (
+            <div key={item.label} className={i === 0 ? "pr-4" : "px-4"}>
+              <p className="text-lg font-semibold leading-tight text-gray-900 tabular-nums md:text-xl">
+                {item.valor}
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-gray-400 md:text-xs">{item.label}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 bg-gray-900 px-3 py-2 rounded-lg border border-gray-800 shadow-sm">
-                <svg className="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm text-gray-400 font-medium">{fechaDatos}</span>
-              </div>
-              <button
-                onClick={downloadReportTxt}
-                className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-lg font-medium text-sm transition-colors"
+          ))}
+        </div>
+
+        {/* El simulador vive acá arriba, no a mitad de página.
+
+            Antes estaba en la posición 7 —después del quiz, la comparativa de
+            activos, dos gráficos y la matriz de riesgo—, así que el visitante
+            recorría media página de datos sobre el mercado antes de ver un
+            número sobre SU plata. Las tres métricas de arriba son respaldo:
+            hablan de nosotros (cuántas propiedades relevamos, cada cuánto
+            actualizamos). Esta caja es lo primero que habla de él.
+
+            El desglose completo —de dónde sale la ganancia, la comparativa
+            contra plazo fijo, los supuestos— sigue estando, más abajo, en
+            #calculadora. Acá va un número y el detalle aparece si lo pide. */}
+        <div id="simulador" className="mt-8 rounded-2xl border border-gray-200 p-5 sm:p-7">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+            Simulá tu inversión
+          </p>
+
+          {perfilQuiz && PERFIL_MAP[perfilQuiz].calc === calcTipo && (
+            <div className="mt-3 flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2">
+              <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-400" />
+              <p className="text-xs font-medium text-emerald-600">
+                Preconfigurada con el tipo de inversión recomendado para tu perfil{" "}
+                {PERFIL_MAP[perfilQuiz].label}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-[1.4fr_1fr_1fr]">
+            {/* El monto se escribe. Antes era un <select> de montos fijos
+                (25K, 50K, 75K…): seguías eligiendo de una lista de montos
+                ajenos. El slider está para mover el número rápido, pero el
+                que manda es el campo — si tenés USD 137.000, ponés 137.000. */}
+            <div>
+              <label htmlFor="sim-monto" className="block text-xs font-medium text-gray-500">
+                Cuánto querés invertir (USD)
+              </label>
+              <input
+                id="sim-monto"
+                type="number"
+                inputMode="numeric"
+                min={MONTO_MIN}
+                max={MONTO_MAX}
+                step={5000}
+                value={montoTexto}
+                onChange={(e) => {
+                  setMontoTexto(e.target.value);
+                  const n = leerMonto(e.target.value);
+                  // Sin mínimo acá: el mínimo llega en el blur. Ver el
+                  // comentario de acotarMonto.
+                  if (n !== null && n > 0) setCalcMonto(Math.min(MONTO_MAX, n));
+                }}
+                onBlur={() => {
+                  const n = acotarMonto(leerMonto(montoTexto) ?? MONTO_MIN);
+                  setCalcMonto(n);
+                  setMontoTexto(String(n));
+                }}
+                className="mt-1.5 w-full rounded-xl border border-gray-200 px-4 py-3 text-[15px] text-gray-900 tabular-nums outline-none transition-colors focus:border-gray-900"
+              />
+              <input
+                type="range"
+                aria-label="Monto a invertir"
+                min={MONTO_MIN}
+                max={MONTO_MAX}
+                step={5000}
+                value={calcMonto}
+                onChange={(e) => {
+                  const n = acotarMonto(Number(e.target.value));
+                  setCalcMonto(n);
+                  setMontoTexto(String(n));
+                }}
+                className="mt-3 w-full accent-primary-600"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="sim-tipo" className="block text-xs font-medium text-gray-500">
+                Tipo
+              </label>
+              <select
+                id="sim-tipo"
+                value={calcTipo}
+                onChange={(e) => setCalcTipo(e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-[15px] text-gray-900 outline-none transition-colors focus:border-gray-900"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Descargar reporte
+                <option value="alquiler">Alquiler</option>
+                <option value="turistico">Turístico</option>
+                <option value="reventa">Reventa</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="sim-plazo" className="block text-xs font-medium text-gray-500">
+                Plazo
+              </label>
+              <select
+                id="sim-plazo"
+                value={calcPlazo}
+                onChange={(e) => setCalcPlazo(Number(e.target.value))}
+                className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-[15px] text-gray-900 outline-none transition-colors focus:border-gray-900"
+              >
+                {[1, 3, 5, 10].map((a) => (
+                  <option key={a} value={a}>
+                    {a} año{a > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* UN número, no cuatro tarjetas de colores. El resto del desglose
+              está abajo para quien lo quiera. */}
+          <div className="mt-6 border-t border-gray-100 pt-6" aria-live="polite">
+            <p className="text-[34px] font-semibold leading-none tracking-[-0.025em] text-gray-900 tabular-nums md:text-[44px]">
+              USD {Math.round(sim.total).toLocaleString("es-AR")}
+            </p>
+            <p className="mt-3 text-[15px] leading-relaxed text-gray-600">
+              Es con lo que terminarías en {calcPlazo} año{calcPlazo > 1 ? "s" : ""} si invertís{" "}
+              <strong className="font-medium text-gray-900">
+                USD {calcMonto.toLocaleString("es-AR")}
+              </strong>{" "}
+              en{" "}
+              {calcTipo === "alquiler"
+                ? "una propiedad para alquiler permanente"
+                : calcTipo === "turistico"
+                  ? "alquiler turístico"
+                  : "compra y reventa"}
+              {sim.esReventa ? (
+                <>. La ganancia viene de comprar bien, mejorar y revender: no genera renta mensual.</>
+              ) : (
+                <>
+                  : unos{" "}
+                  <strong className="font-medium text-gray-900">
+                    USD {Math.round(sim.mensual).toLocaleString("es-AR")} por mes
+                  </strong>{" "}
+                  de renta neta, más la suba de valor de la propiedad.
+                </>
+              )}{" "}
+              Estimado {fmtPct(sim.totalAnual)}% anual, en un rango de {fmtPct(sim.rangoMin)}% a{" "}
+              {fmtPct(sim.rangoMax)}%.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={handleVerDetalle}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+              >
+                Ver de dónde sale ese número
+                <span aria-hidden="true">↓</span>
               </button>
+              <span className="text-sm text-gray-400">
+                Con USD {calcMonto.toLocaleString("es-AR")} comprás ≈ {sim.m2Comprables} m² al valor
+                mediano de {sim.m2Etiqueta}
+              </span>
             </div>
           </div>
         </div>
+
+        <p className="mt-4 text-xs leading-relaxed text-gray-400">
+          Las estimaciones de esta página son orientativas: no constituyen tasación profesional,
+          asesoramiento financiero ni garantía de rentabilidad.
+        </p>
       </section>
 
-      <div className="bg-[#0a0a0f]">
-        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-
-          {/* Bloque de confianza — modelo interno */}
-          <div className="bg-[#111118] rounded-2xl p-6 sm:p-8 border border-gray-800 mb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 mb-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                  <span className="text-green-400 text-xs font-semibold tracking-widest uppercase">Análisis interno de mercado</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white mb-3">Decisiones basadas en datos reales del mercado local</h2>
-                <p className="text-gray-400 text-sm leading-relaxed mb-4">
-                  Relevamos y analizamos de forma continua las propiedades publicadas en San Martín de los Andes. Esa información nos permite orientarte mejor sobre zonas, precios y oportunidades, sin depender de promedios nacionales que no reflejan la realidad de la Patagonia.
-                </p>
-                <p className="text-gray-600 text-xs leading-relaxed border-t border-gray-800 pt-4">
-                  Las estimaciones son orientativas y no constituyen tasación profesional ni garantía de rentabilidad.
-                </p>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { valor: totalPropiedades, label: "Propiedades analizadas", desc: "Datos del mercado local" },
-                  mercado
-                    ? { valor: "Semanal", label: "Modelo reentrenado", desc: "Con datos nuevos del mercado" }
-                    : { valor: "2026", label: "Datos actualizados", desc: "Relevamiento continuo" },
-                  { valor: "SMA", label: "Mercado focalizado", desc: "Sin promedios nacionales" },
-                ].map((item) => (
-                  <div key={item.label} className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
-                    <div className="text-xl sm:text-2xl font-black text-white mb-1">{item.valor}</div>
-                    <div className="text-[11px] font-semibold text-gray-400 mb-1 leading-tight">{item.label}</div>
-                    <div className="text-[10px] text-gray-600">{item.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      <div className="bg-white">
+        <div className="max-w-6xl mx-auto px-4 py-10 sm:px-6 md:py-12 lg:px-8">
 
           {/* Test de perfil inversor */}
           <div className="mb-8">
             <InvestorQuiz onResultado={handleQuizResultado} onVerSimulador={handleVerSimulador} />
           </div>
 
-          {/* ¿Qué conviene comprar? */}
-          <div className="bg-[#111118] rounded-2xl mb-8 p-6 sm:p-8 border border-gray-800 shadow-sm">
-            <div className="mb-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                  <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Comparativa de activos</span>
-                </div>
-                <h2 className="text-2xl font-black text-white">¿Qué tipo de propiedad puede convenirte?</h2>
-                <p className="text-gray-500 text-sm mt-1">Análisis orientativo basado en datos del mercado local · No constituye asesoramiento financiero</p>
-              </div>
-              <div className="rounded-2xl border border-gray-800 bg-gray-900 px-4 py-3 shadow-sm lg:min-w-[280px]">
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-500 mb-1">Mejor posicionado según el análisis</p>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-white font-bold leading-tight">{bestAsset.tipo}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">{bestAsset.riesgo} · {bestAsset.descripcion}</p>
-                  </div>
-                  <div className={`text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br ${bestAsset.acento}`}>{bestAsset.score}</div>
-                </div>
-              </div>
-            </div>
+          {/* ¿Qué conviene comprar?
 
-            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-6">
-              <p className="text-gray-300 text-sm leading-relaxed">
-                <span className="text-white font-semibold">¿Cómo leer esto?</span> Analizamos 4 preguntas clave del mercado para cada tipo de propiedad. El puntaje resume todo en un número del 1 al 100: a mayor puntaje, mejor posicionado está ese tipo de inversión según los datos actuales de San Martín de los Andes.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-3">
+              Sin caja, sin sombra y sin gradientes. Los puntajes venían con
+              `text-transparent bg-clip-text bg-gradient-to-br`: un número
+              degradado no se lee más rápido, se lee peor, y encima cada tipo
+              tenía su propio color, así que cuatro cifras comparables entre sí
+              se veían como cuatro cosas distintas. Ahora las cuatro son del
+              mismo gris y lo que las diferencia es el número. */}
+          <section aria-labelledby="activos" className="mb-12 border-t border-gray-100 pt-10">
+            <SeccionConFoto
+              src="/grafico3.webp"
+              alt="Dos personas señalando un informe con gráficos de barras sobre una mesa de trabajo"
+              ladoFoto="izquierda"
+            >
+              <Antetitulo>Comparativa de activos</Antetitulo>
+              <TituloSeccion id="activos">¿Qué tipo de propiedad puede convenirte?</TituloSeccion>
+              <Subtitulo>
+                Analizamos cuatro preguntas clave del mercado para cada tipo de propiedad. El puntaje
+                las resume en un número del 1 al 100: a mayor puntaje, mejor posicionado está ese tipo
+                de inversión según los datos actuales de San Martín de los Andes.
+              </Subtitulo>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
                 {Object.entries(FACTOR_SIMPLE).map(([key, simple]) => (
-                  <span key={key} className="text-gray-500 text-[10px] bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1">{simple}</span>
+                  <span key={key} className="text-xs text-gray-400">{simple}</span>
                 ))}
               </div>
-            </div>
+            </SeccionConFoto>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Tres columnas, no cuatro: al sacar Terreno la grilla quedaba con
+                un hueco a la derecha. */}
+            <div className="mt-8 grid grid-cols-1 gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
               {SCORE_DATA.map((activo) => {
                 const score = calcularScore(activo.factores);
+                const esMejor = score === bestAsset.score;
                 return (
-                  <div key={activo.tipo} className={`group relative rounded-2xl p-6 transition-all duration-300 flex flex-col ${score === bestAsset.score ? "bg-gray-900 border border-primary-500/40 shadow-md ring-1 ring-primary-500/20" : "bg-gray-950/60 border border-gray-800 hover:border-gray-700 hover:shadow-md"} ${activo.tipo === cardRecomendada ? "ring-2 ring-green-500/40" : ""}`}>
-                    <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${activo.acento} opacity-70 rounded-t-2xl`} />
-                    {score === bestAsset.score && <div className="absolute -top-3 right-4 px-2.5 py-1 rounded-full bg-primary-600 text-white text-[10px] font-bold shadow">Mejor posicionado</div>}
-                    {activo.tipo === cardRecomendada && <div className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-green-600 text-white text-[10px] font-bold shadow">Para tu perfil</div>}
-
-                    {/* Título y puntaje */}
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-sm font-bold text-white leading-tight">{activo.tipo}</h3>
-                      <div className="text-right">
-                        <span className={`text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br ${activo.acento}`}>{score}</span>
-                        <p className="text-gray-600 text-[10px]">/100</p>
-                      </div>
+                  <div key={activo.tipo} className="flex flex-col border-t border-gray-100 py-5">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="text-[15px] font-medium leading-tight text-gray-900">{activo.tipo}</h3>
+                      <p className="text-[26px] font-semibold leading-none text-gray-900 tabular-nums">
+                        {score}
+                        <span className="ml-0.5 text-[11px] font-normal text-gray-400">/100</span>
+                      </p>
                     </div>
 
-                    {/* Label interpretación */}
-                    <span className={`inline-flex self-start text-[10px] font-semibold px-2 py-0.5 rounded-full border mb-3 ${scoreLabel(score).color}`}>
-                      {scoreLabel(score).texto}
-                    </span>
-
-                    {/* Barra general */}
-                    <div className="h-2 bg-gray-800 rounded-full mb-4 overflow-hidden">
-                      <div className={`h-2 bg-gradient-to-r ${activo.acento} rounded-full`} style={{ width: `${score}%` }} />
+                    {/* Las dos etiquetas que sí valen color: una dice cómo salió
+                        en el análisis, la otra que este es el tipo que le tocó
+                        a la persona en el quiz. El resto de la tarjeta era
+                        color decorativo. */}
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {esMejor && (
+                        <span className="rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-semibold text-white">
+                          Mejor posicionado
+                        </span>
+                      )}
+                      {activo.tipo === cardRecomendada && (
+                        <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+                          Para tu perfil
+                        </span>
+                      )}
                     </div>
 
-                    {/* Factores */}
-                    <div className="space-y-2.5 flex-1">
+                    <div className="mt-4 h-1 overflow-hidden rounded-full bg-gray-100">
+                      <div className="h-1 rounded-full bg-gray-900" style={{ width: `${score}%` }} />
+                    </div>
+
+                    <dl className="mt-5 flex-1 space-y-2.5">
                       {activo.factores.map((f) => (
                         <div key={f.nombre} title={f.fuente}>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-gray-400 text-[10px] font-medium">{FACTOR_SIMPLE[f.nombre] ?? f.nombre}</span>
-                            <span className="text-gray-300 text-[10px] font-semibold">{f.valor}/100</span>
+                          <div className="flex justify-between">
+                            <dt className="text-[11px] text-gray-500">{FACTOR_SIMPLE[f.nombre] ?? f.nombre}</dt>
+                            <dd className="text-[11px] font-medium text-gray-600 tabular-nums">{f.valor}</dd>
                           </div>
-                          <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
-                            <div className={`h-1 rounded-full bg-gradient-to-r ${activo.acento}`} style={{ width: `${f.valor}%` }} />
+                          <div className="mt-1 h-px bg-gray-100">
+                            <div className="h-px bg-gray-300" style={{ width: `${f.valor}%` }} />
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </dl>
 
-                    {/* Descripción simple */}
-                    <p className="text-gray-500 text-[11px] mt-4 leading-relaxed border-t border-gray-800 pt-3">{activo.descripcion}</p>
-
-                    {/* Recomendación para el ganador */}
-                    {score === bestAsset.score && (
-                      <div className="mt-3 bg-primary-600/10 border border-primary-500/20 rounded-lg px-3 py-2 text-center">
-                        <p className="text-primary-400 text-[11px] font-semibold">Mejor posicionado en el mercado actual de SMA</p>
-                      </div>
-                    )}
+                    <p className="mt-5 text-[11px] leading-relaxed text-gray-400">{activo.descripcion}</p>
                   </div>
                 );
               })}
             </div>
-            <p className="text-gray-600 text-xs mt-6 text-center">
-              Análisis orientativo basado en datos del mercado local · Fuentes: Zonaprop, Argenprop, Airbnb, Diario Andino · 2026
+            <p className="mt-8 text-xs leading-relaxed text-gray-400">
+              Análisis orientativo sobre el relevamiento propio de la oferta publicada. No
+              constituye asesoramiento financiero.
             </p>
-          </div>
+          </section>
 
           {/* Datos del mercado */}
-          <div className="bg-[#111118] rounded-xl border border-gray-800 p-4 sm:p-6 mb-8">
-            <div className="mb-4 sm:mb-5">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-900">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-                  <span className="text-gray-400 text-xs font-semibold tracking-widest uppercase">Datos del mercado · San Martín de los Andes</span>
-                </div>
-                {mercado && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                    <span className="text-green-400 text-xs font-semibold">Modelo predictivo · actualizado al {fechaDatos}</span>
-                  </div>
-                )}
-              </div>
-              <p className="text-gray-600 text-[11px]">Información orientativa basada en análisis interno · No constituye tasación profesional</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
+          <section aria-labelledby="datos" className="mb-12 border-t border-gray-100 pt-10">
+            {/* Acá va el lago y no la segunda foto de gráficos (grafico1.webp,
+                que queda disponible) por una razón concreta: toda la página
+                habla de San Martín de los Andes y no tenía una sola imagen de
+                San Martín de los Andes. Una mujer con una calculadora podría
+                estar en cualquier ciudad del mundo; el lago dice de dónde
+                salen los números que la sección está por mostrar.
+
+                `hero-lago.webp` estaba en /public sin usar en ninguna página,
+                así que no rompe la regla de no repetir fotos entre secciones.
+
+                Ojo con las otras dos "hero-" de la carpeta: hero-montana y
+                hero-pradera son el Fitz Roy, en El Chaltén, a 1.800 km de acá.
+                No van en esta página. */}
+            <SeccionConFoto
+              src="/hero-lago.webp"
+              alt="Lago rodeado de montañas boscosas con cumbres nevadas al fondo, en San Martín de los Andes"
+              ladoFoto="derecha"
+            >
+              <Antetitulo>Datos del mercado · San Martín de los Andes</Antetitulo>
+              <TituloSeccion id="datos">Cómo se movió el m² y cuánto rinde</TituloSeccion>
+              <Subtitulo>
+                Información orientativa sobre el relevamiento propio. No constituye tasación
+                profesional. Datos al {fechaDatos}.
+              </Subtitulo>
+            </SeccionConFoto>
+
+            {/* Tabs en hairline, no botones pintados: el activo se marca con el
+                subrayado y el peso del texto. Un botón rosa lleno acá compite
+                con el CTA real de la página, que es dejar los datos. */}
+            <div className="mt-8 flex flex-wrap items-center gap-6 border-b border-gray-100">
               {["zonas", "rentabilidad"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab ? "bg-primary-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
+                  className={`-mb-px border-b-2 pb-3 text-sm transition-colors ${
+                    activeTab === tab
+                      ? "border-gray-900 font-semibold text-gray-900"
+                      : "border-transparent font-medium text-gray-400 hover:text-gray-600"
+                  }`}
                 >
                   {tab === "zonas" ? "Evolución de precios" : "Estimación de rentabilidad"}
                 </button>
@@ -537,282 +871,330 @@ export default function InversionesClient({ mercado = null }) {
             </div>
 
             {activeTab === "zonas" && (
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Evolución del precio del m² (USD)</h3>
-                <InversionesEvolucionChart data={evolucion} />
-                <div className="mt-3 sm:mt-4 flex justify-between text-xs sm:text-sm text-gray-500">
-                  <span>{primerPunto.anio}: ${primerPunto.precio.toLocaleString("es-AR")}/m²</span>
-                  <span className="text-green-400 font-semibold">{crecimientoPct >= 0 ? "+" : ""}{crecimientoPct}% en {ultimoPunto.anio - primerPunto.anio} años</span>
-                  <span>{ultimoPunto.anio}: ${ultimoPunto.precio.toLocaleString("es-AR")}/m²</span>
+              /* El gráfico vuelve a estar a la vista, completo, por decisión de
+                 Milton: "el gráfico de evolución de precios me gusta más como
+                 estaba antes".
+
+                 Estuvo un rato convertido en tira sparkline con el +57,7 % en
+                 34 px arriba y la serie escondida detrás de un "Ver año por
+                 año". El razonamiento era el de Airbnb —un número decide más
+                 rápido que un gráfico—, pero acá el gráfico es el argumento:
+                 la página le está pidiendo a alguien que ponga USD 150.000 en
+                 una ciudad, y ver la curva completa es lo que sostiene el
+                 pedido. Un porcentaje solo se lee como publicidad.
+
+                 Se conserva de aquella vuelta lo que era mejora y no rediseño:
+                 el título en 17 px en vez de 22, y la nota al pie de dos líneas
+                 en vez de seis.
+
+                 Va como comentario de bloque de JavaScript y no con llaves al
+                 estilo JSX, porque acá adentro estamos en una expresión y no
+                 en los children de un elemento. */
+              <div className="mt-7">
+                <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900">
+                  Evolución del precio del m², en dólares
+                </h3>
+                <p className="mt-1 text-sm text-gray-400">
+                  San Martín de los Andes · {primerPunto.anio}–{ultimoPunto.anio}
+                </p>
+
+                <div className="mt-4">
+                  <InversionesEvolucionChart data={evolucion} alto="h-56 sm:h-80" />
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <Badge tipo="verificado" />
+
+                <div className="mt-3 flex justify-between border-t border-gray-100 pt-3 text-xs text-gray-500 tabular-nums sm:text-sm">
+                  <span>{primerPunto.anio}: USD {primerPunto.precio.toLocaleString("es-AR")}/m²</span>
+                  <span className="font-semibold text-emerald-600">
+                    {crecimientoPct >= 0 ? "+" : ""}{crecimientoPct}% en {ultimoPunto.anio - primerPunto.anio} años
+                  </span>
+                  <span>{ultimoPunto.anio}: USD {ultimoPunto.precio.toLocaleString("es-AR")}/m²</span>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
                   <Badge tipo="estimado" />
-                  <p className="text-gray-600 text-[11px] leading-relaxed flex-1 min-w-[220px]">
-                    El año <span className="text-gray-400 font-medium">2022</span> está verificado con fuentes públicas (USD 2.520/m², el más caro del país). Los años intermedios son estimaciones nuestras y el valor más reciente proviene de nuestro modelo cuando está disponible. San Martín es un mercado maduro: precios altos y estables, sin grandes saltos.
+                  <p className="text-gray-400 text-[11px] leading-relaxed flex-1 min-w-[220px]">
+                    La misma serie que publican el tasador y la página de precio del m². El modelo
+                    le verifica el último año contra la mediana actual del relevamiento.
                   </p>
                 </div>
               </div>
             )}
 
             {activeTab === "rentabilidad" && (
-              <div>
-                <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-100">Estimación de rentabilidad por alquiler</h3>
-                  <Badge tipo="estimado" />
-                </div>
-                <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-4">
-                  <p className="text-gray-300 text-sm leading-relaxed">
-                    <span className="text-white font-semibold">¿Cómo leer esto?</span> El porcentaje muestra cuánto recuperás por año solo con el alquiler: un 8% significa que por cada USD 100 invertidos, te vuelven USD 8 al año. No incluye la suba de valor de la propiedad.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {ZONA_DATA.rentals.map((item) => (
-                    <div key={`${item.tipo}-${item.precioVenta}`} className="bg-green-950/20 rounded-xl p-4 border border-green-900/30">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-medium text-gray-100">{item.tipo}</span>
-                        <span className="text-2xl font-bold text-green-400">{item.rentabilidad}%</span>
+              <div className="mt-8">
+                <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900">
+                  Estimación de rentabilidad por alquiler
+                </h3>
+                <p className="mt-4 text-[15px] leading-relaxed text-gray-600 md:text-base">
+                  El porcentaje es cuánto recuperás por año solo con el alquiler: un 8 % significa
+                  que por cada USD 100 invertidos te vuelven USD 8 al año. No incluye la suba de
+                  valor de la propiedad.
+                </p>
+
+                {/* Estas tarjetas tenían `bg-green-950/20` y bordes
+                    `green-900/30` — verdes de tema oscuro sobre fondo blanco,
+                    otro resto de la conversión del 9-ago. En hairline el dato
+                    se lee mejor y el problema desaparece solo. */}
+                <div className="mt-7 grid grid-cols-1 gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+                  {RENTALS.map((item) => (
+                    <div key={`${item.tipo}-${item.precioVenta}`} className="border-t border-gray-100 py-4">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-[15px] font-medium text-gray-900">{item.tipo}</span>
+                        <span className="text-lg font-semibold text-gray-900 tabular-nums">{item.rentabilidad}%</span>
                       </div>
-                      <div className="text-sm text-gray-400 space-y-1">
-                        <div className="flex justify-between"><span>Precio referencia:</span><span className="font-medium text-gray-300">USD {item.precioVenta.toLocaleString("es-AR")}</span></div>
-                        <div className="flex justify-between"><span>Alquiler estimado:</span><span className="font-medium text-gray-300">USD {item.alquiler}/mes</span></div>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-green-900/30">
-                        <div className="text-xs text-green-400">Renta anual estimada: USD {(item.alquiler * 12).toLocaleString("es-AR")}</div>
-                      </div>
+                      <dl className="mt-2 space-y-1 text-sm text-gray-500">
+                        <div className="flex justify-between">
+                          <dt>Precio de referencia</dt>
+                          <dd className="font-medium text-gray-600 tabular-nums">USD {item.precioVenta.toLocaleString("es-AR")}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Alquiler estimado</dt>
+                          <dd className="font-medium text-gray-600 tabular-nums">USD {item.alquiler}/mes</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Renta anual</dt>
+                          <dd className="font-medium text-gray-600 tabular-nums">USD {(item.alquiler * 12).toLocaleString("es-AR")}</dd>
+                        </div>
+                      </dl>
                     </div>
                   ))}
                 </div>
-                <p className="text-gray-600 text-[11px] mt-4">Estimaciones orientativas. Los valores reales varían según la propiedad y condiciones del mercado.</p>
+                <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <Badge tipo="estimado" />
+                  <p className="min-w-[220px] flex-1 text-[11px] leading-relaxed text-gray-400">
+                    Estimaciones orientativas. Los valores reales varían según la propiedad y las
+                    condiciones del mercado.
+                  </p>
+                </div>
               </div>
             )}
-          </div>
+          </section>
 
           {/* Matriz Riesgo / Retorno */}
-          <div className="bg-[#111118] rounded-2xl mb-8 p-6 sm:p-8 border border-gray-800 shadow-sm">
-            <div className="mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Comparativa</span>
+          <section aria-labelledby="matriz" className="mb-12 border-t border-gray-100 pt-10">
+            <Antetitulo>Riesgo y retorno</Antetitulo>
+            <TituloSeccion id="matriz">¿Cuánto riesgo vale el retorno?</TituloSeccion>
+            <Subtitulo>
+              Cuanto más arriba está el punto, más gana por año ese tipo de propiedad. Cuanto más a
+              la derecha, más pueden variar sus resultados de un año a otro. Lo mejor está arriba a
+              la izquierda: buena ganancia con pocas sorpresas.
+            </Subtitulo>
+
+            {/* Los cuatro cuadrantes tenían fondo de color al 5 % y las
+                etiquetas venían con bordes `emerald-900/50`, `amber-900/50` —
+                más restos del tema oscuro. Las líneas del cuadrante alcanzan
+                para leer la división; el color de fondo solo agregaba ruido
+                detrás de los puntos, que es lo que hay que mirar. */}
+            <div className="relative mt-5 h-80 sm:h-[26rem]">
+              <div className="pointer-events-none absolute inset-0 grid grid-cols-2 grid-rows-2">
+                <div className="border-b border-r border-gray-100" />
+                <div className="border-b border-gray-100" />
+                <div className="border-r border-gray-100" />
+                <div />
               </div>
-              <h2 className="text-2xl font-black text-white">¿Cuánto riesgo vale el retorno?</h2>
-              <p className="text-gray-500 text-sm mt-1">Posicionamiento orientativo de cada tipo de activo según riesgo y retorno estimado anual</p>
-            </div>
-            <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 mb-6">
-              <p className="text-gray-300 text-sm leading-relaxed">
-                <span className="text-white font-semibold">¿Cómo leer esto?</span> Cuanto más arriba está el punto, más gana por año ese tipo de propiedad. Cuanto más a la derecha, más pueden variar sus resultados de un año a otro. Lo ideal está arriba a la izquierda: buena ganancia con pocas sorpresas.
-              </p>
-            </div>
-            <div className="relative h-80">
-              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
-                <div className="bg-emerald-500/5 border-r border-b border-gray-800" />
-                <div className="bg-amber-500/5 border-b border-gray-800" />
-                <div className="bg-sky-500/5 border-r border-gray-800" />
-                <div className="bg-primary-500/5" />
-              </div>
-              <div className="absolute top-2 left-2 text-[10px] font-semibold text-emerald-400 bg-gray-900/90 px-2 py-1 rounded-full border border-emerald-900/50 shadow-sm pointer-events-none">Conservador</div>
-              <div className="absolute top-2 right-2 text-[10px] font-semibold text-amber-400 bg-gray-900/90 px-2 py-1 rounded-full border border-amber-900/50 shadow-sm pointer-events-none">Crecimiento</div>
-              <div className="absolute bottom-2 left-2 text-[10px] font-semibold text-sky-400 bg-gray-900/90 px-2 py-1 rounded-full border border-sky-900/50 shadow-sm pointer-events-none">Bajo retorno</div>
-              <div className="absolute bottom-2 right-2 text-[10px] font-semibold text-primary-500 bg-gray-900/90 px-2 py-1 rounded-full border border-primary-900/50 shadow-sm pointer-events-none">Riesgo elevado</div>
+              <div className="pointer-events-none absolute left-2 top-2 text-[10px] font-semibold text-gray-400">Conservador</div>
+              <div className="pointer-events-none absolute right-2 top-2 text-[10px] font-semibold text-gray-400">Crecimiento</div>
+              <div className="pointer-events-none absolute bottom-2 left-2 text-[10px] font-semibold text-gray-400">Bajo retorno</div>
+              <div className="pointer-events-none absolute bottom-2 right-2 text-[10px] font-semibold text-gray-400">Riesgo elevado</div>
               <InversionesMatrizChart data={MATRIX_DATA} />
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+
+            <dl className="mt-4 grid grid-cols-2 gap-x-10 sm:grid-cols-4">
               {[
-                { arrow: '↙', color: 'text-emerald-400', label: 'Conservador', desc: 'Bajo riesgo · Bajo retorno' },
-                { arrow: '↖', color: 'text-primary-500', label: 'Zona óptima', desc: 'Bajo riesgo · Alto retorno' },
-                { arrow: '↗', color: 'text-orange-400', label: 'Crecimiento', desc: 'Alto riesgo · Alto retorno' },
-                { arrow: '↘', color: 'text-red-400', label: 'Riesgo elevado', desc: 'Alto riesgo · Bajo retorno' },
+                { arrow: "↙", label: "Conservador", desc: "Bajo riesgo · Bajo retorno" },
+                { arrow: "↖", label: "Zona óptima", desc: "Bajo riesgo · Alto retorno" },
+                { arrow: "↗", label: "Crecimiento", desc: "Alto riesgo · Alto retorno" },
+                { arrow: "↘", label: "Riesgo elevado", desc: "Alto riesgo · Bajo retorno" },
               ].map((q) => (
-                <div key={q.label} className="flex items-start gap-2 bg-gray-900 rounded-xl p-3">
-                  <span className={`${q.color} text-base leading-none mt-0.5`}>{q.arrow}</span>
+                <div key={q.label} className="flex items-start gap-2 border-t border-gray-100 py-3">
+                  <span className="mt-0.5 text-base leading-none text-gray-400" aria-hidden="true">{q.arrow}</span>
                   <div>
-                    <p className={`${q.color} text-[10px] font-bold`}>{q.label}</p>
-                    <p className="text-gray-600 text-[10px] mt-0.5">{q.desc}</p>
+                    <dt className="text-[11px] font-semibold text-gray-900">{q.label}</dt>
+                    <dd className="mt-0.5 text-[11px] text-gray-400">{q.desc}</dd>
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </dl>
+          </section>
 
-          {/* Calculadora */}
-          <div id="calculadora" className="bg-[#111118] rounded-xl border border-gray-800 p-4 sm:p-6 mb-8 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-              <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-white">¿Cuánto podrías ganar con tu inversión?</h2>
-                <p className="text-sm text-gray-500">Simulá tu escenario de retorno</p>
+          {/* El desglose del simulador */}
+          <section id="calculadora" aria-labelledby="desglose" className="mb-12 border-t border-gray-100 pt-10">
+            <Antetitulo>El detalle</Antetitulo>
+            <TituloSeccion id="desglose">De dónde sale ese número</TituloSeccion>
+            {/* Los controles NO se repiten acá. Dos copias del mismo control se
+                desincronizan, y el visitante que cambia una no entiende por qué
+                la otra dice otra cosa. Se cambian arriba, en #simulador, y todo
+                este bloque se recalcula solo. */}
+            <Subtitulo>
+              Sobre USD {calcMonto.toLocaleString("es-AR")} a {calcPlazo} año
+              {calcPlazo > 1 ? "s" : ""}. Para cambiar el monto, el tipo o el plazo,{" "}
+              <a href="#simulador" className="font-medium text-gray-900 underline underline-offset-2">
+                volvé al simulador
+              </a>
+              . Con ese monto comprás ≈ {sim.m2Comprables} m² al valor mediano de {sim.m2Etiqueta}{" "}
+              (USD {sim.m2Ref.toLocaleString("es-AR")}/m², el mismo que publicamos en el tasador).
+            </Subtitulo>
+
+            <div>
+              {/* Las cuatro cifras iban en tarjetas rosa, verde, violeta y
+                  naranja, cada una con su borde: cuatro colores para cuatro
+                  datos del mismo cálculo, que los hacía ver como cuatro cosas
+                  sin relación. En hairline se leen como lo que son, las partes
+                  de un solo número. */}
+              <div className="mt-8 grid grid-cols-2 divide-gray-100 border-y border-gray-100 py-5 md:grid-cols-4 md:divide-x">
+                {[
+                  {
+                    valor: `${fmtPct(sim.totalAnual)}%`,
+                    label: "retorno total anual",
+                    nota: `rango estimado ${fmtPct(sim.rangoMin)}–${fmtPct(sim.rangoMax)}%`,
+                  },
+                  {
+                    valor: sim.esReventa ? "—" : `USD ${Math.round(sim.mensual).toLocaleString("es-AR")}`,
+                    label: "renta neta mensual",
+                    nota: sim.esReventa ? "la reventa no genera renta" : "gastos y vacancia descontados",
+                  },
+                  {
+                    valor: `+${fmtPct(sim.valorizacion)}%`,
+                    label: "valorización anual",
+                    nota: "evolución reciente del m² en SMA",
+                  },
+                  {
+                    valor: `USD ${Math.round(sim.total).toLocaleString("es-AR")}`,
+                    label: "total final",
+                    nota: `inversión + ganancia en ${calcPlazo} año${calcPlazo > 1 ? "s" : ""}`,
+                  },
+                ].map((m, i) => (
+                  <div key={m.label} className={i === 0 ? "pr-4" : "px-4"}>
+                    <p className="text-lg font-semibold leading-tight text-gray-900 tabular-nums md:text-xl">
+                      {m.valor}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-gray-400 md:text-xs">{m.label}</p>
+                    <p className="mt-0.5 text-[10px] leading-snug text-gray-400">{m.nota}</p>
+                  </div>
+                ))}
               </div>
-              <span className="bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full self-start">Interactiva</span>
-            </div>
 
-            {perfilQuiz && PERFIL_MAP[perfilQuiz].calc === calcTipo && (
-              <div className="flex items-center gap-2 mb-4 sm:mb-6 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
-                <p className="text-green-400 text-xs font-medium">Preconfigurada con el tipo de inversión recomendado para tu perfil {PERFIL_MAP[perfilQuiz].label}</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-              {[
-                { label: "Monto (USD)", value: calcMonto, setter: (v) => setCalcMonto(Number(v)), options: [
-                  [25000,"USD 25K"],[50000,"USD 50K"],[75000,"USD 75K"],[100000,"USD 100K"],[150000,"USD 150K"],[200000,"USD 200K"],[250000,"USD 250K"],[350000,"USD 350K"],[500000,"USD 500K"],[750000,"USD 750K"],[1000000,"USD 1M"],
-                ]},
-                { label: "Tipo", value: calcTipo, setter: (v) => setCalcTipo(v), options: [
-                  ["alquiler","Alquiler"],["turistico","Turístico"],["reventa","Reventa"],
-                ]},
-                { label: "Plazo", value: calcPlazo, setter: (v) => setCalcPlazo(Number(v)), options: [
-                  [1,"1 año"],[3,"3 años"],[5,"5 años"],[10,"10 años"],
-                ]},
-              ].map(({ label, value, setter, options }) => (
-                <div key={label}>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-400 mb-1 sm:mb-2">{label}</label>
-                  <select value={value} onChange={(e) => setter(e.target.value)} className="w-full px-2 sm:px-4 py-2 sm:py-3 border border-gray-700 bg-gray-900 text-gray-200 rounded-lg sm:rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                  </select>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2 mb-4 sm:mb-6 bg-gray-900/60 border border-gray-800 rounded-lg px-3 py-2.5">
-              <svg className="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-              <p className="text-gray-400 text-xs sm:text-sm">
-                Con <span className="text-white font-semibold">USD {calcMonto.toLocaleString("es-AR")}</span> comprás ≈ <span className="text-white font-semibold">{sim.m2Comprables} m²</span> al valor mediano actual (USD {sim.m2Ref.toLocaleString("es-AR")}/m²{mercado ? ", según nuestro modelo" : ""})
+              <p className="mt-6 text-[15px] leading-relaxed text-gray-600 md:text-base">
+                <strong className="font-medium text-gray-900">En resumen:</strong> si invertís{" "}
+                <strong className="font-medium text-gray-900">USD {calcMonto.toLocaleString("es-AR")}</strong> en{" "}
+                {calcTipo === "alquiler" ? "una propiedad para alquiler permanente" : calcTipo === "turistico" ? "alquiler turístico" : "compra y reventa"}, en {calcPlazo} año{calcPlazo > 1 ? "s" : ""} terminarías con unos{" "}
+                <strong className="font-medium text-gray-900">USD {Math.round(sim.total).toLocaleString("es-AR")}</strong>.{" "}
+                {sim.esReventa ? (
+                  <>La ganancia viene de comprar bien, mejorar y revender: entre {fmtPct(sim.rangoMin)}% y {fmtPct(sim.rangoMax)}% anual según la operación. No genera renta mensual.</>
+                ) : (
+                  <>
+                    La ganancia sale de dos lados: unos <strong className="font-medium text-gray-900">USD {Math.round(sim.mensual).toLocaleString("es-AR")} por mes</strong> de renta neta (ya descontados gastos y vacancia) más la suba de valor de la propiedad.
+                  </>
+                )}
               </p>
-            </div>
 
-            <div className="rounded-xl p-3 sm:p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="text-center p-2 sm:p-4 bg-primary-500/10 rounded-lg sm:rounded-xl border border-primary-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-primary-500">{fmtPct(sim.totalAnual)}%</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500">Retorno total anual</div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">rango estimado {fmtPct(sim.rangoMin)}–{fmtPct(sim.rangoMax)}%</div>
+              <h3 className="mt-9 text-[17px] font-semibold tracking-[-0.01em] text-gray-900">
+                De dónde sale la ganancia
+              </h3>
+              <dl className="mt-5 divide-y divide-gray-100 border-y border-gray-100">
+                {!sim.esReventa && (
+                  <div className="flex justify-between py-3 text-sm">
+                    <dt className="text-gray-500">Renta neta acumulada en {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</dt>
+                    <dd className="font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.rentaAcumulada).toLocaleString("es-AR")}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between py-3 text-sm">
+                  <dt className="text-gray-500">{sim.esReventa ? "Comprar bien, mejorar y revender" : "Valorización de la propiedad"}</dt>
+                  <dd className="font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.gananciaValorizacion).toLocaleString("es-AR")}</dd>
                 </div>
-                <div className="text-center p-2 sm:p-4 bg-green-500/10 rounded-lg sm:rounded-xl border border-green-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-green-400">{sim.esReventa ? "—" : `USD ${Math.round(sim.mensual).toLocaleString("es-AR")}`}</div>
-                  <div className="text-xs text-gray-500">Renta neta mensual</div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">{sim.esReventa ? "la reventa no genera renta" : "gastos y vacancia descontados"}</div>
+                <div className="flex justify-between py-3 text-sm">
+                  <dt className="font-medium text-gray-900">Ganancia total estimada</dt>
+                  <dd className="font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.ganancia).toLocaleString("es-AR")}</dd>
                 </div>
-                <div className="text-center p-2 sm:p-4 bg-purple-500/10 rounded-lg sm:rounded-xl border border-purple-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-purple-400">+{fmtPct(sim.valorizacion)}%</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500">Valorización anual</div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">evolución reciente del m² en SMA</div>
-                </div>
-                <div className="text-center p-2 sm:p-4 bg-orange-500/10 rounded-lg sm:rounded-xl border border-orange-500/20">
-                  <div className="text-lg sm:text-2xl font-bold text-orange-400">USD {Math.round(sim.total).toLocaleString("es-AR")}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500">Total final</div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-0.5">inversión + ganancia en {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</div>
-                </div>
-              </div>
+              </dl>
 
-              <div className="mb-4 sm:mb-6 bg-primary-500/5 border border-primary-500/15 rounded-xl p-4">
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  <span className="text-white font-semibold">En resumen:</span> si invertís{" "}
-                  <span className="text-white font-semibold">USD {calcMonto.toLocaleString("es-AR")}</span> en{" "}
-                  {calcTipo === "alquiler" ? "una propiedad para alquiler permanente" : calcTipo === "turistico" ? "alquiler turístico" : "compra y reventa"}, en {calcPlazo} año{calcPlazo > 1 ? "s" : ""} terminarías con unos{" "}
-                  <span className="text-green-400 font-semibold">USD {Math.round(sim.total).toLocaleString("es-AR")}</span>.{" "}
-                  {sim.esReventa ? (
-                    <>La ganancia viene de comprar bien, mejorar y revender: entre {fmtPct(sim.rangoMin)}% y {fmtPct(sim.rangoMax)}% anual según la operación. No genera renta mensual.</>
-                  ) : (
-                    <>
-                      La ganancia sale de dos lados: unos <span className="text-white font-semibold">USD {Math.round(sim.mensual).toLocaleString("es-AR")} por mes</span> de renta neta (ya descontados gastos y vacancia) más la suba de valor de la propiedad.
-                    </>
-                  )}
+              <h3 className="mt-9 text-[17px] font-semibold tracking-[-0.01em] text-gray-900">
+                Contra un plazo fijo en dólares, a {calcPlazo} año{calcPlazo > 1 ? "s" : ""}
+              </h3>
+              <div className="mt-5">
+                <div className="grid grid-cols-2 divide-x divide-gray-100 border-y border-gray-100 py-5">
+                  <div className="pr-4">
+                    <div className="text-lg font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.plazoFijoTotal).toLocaleString("es-AR")}</div>
+                    <div className="mt-1 text-[11px] leading-snug text-gray-400">plazo fijo en dólares</div>
+                    <div className="mt-0.5 text-[10px] leading-snug text-gray-400">~{TASA_PLAZO_FIJO * 100}% anual (bancos argentinos: 0,5–2%)</div>
+                  </div>
+                  <div className="px-4">
+                    <div className="text-lg font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.total).toLocaleString("es-AR")}</div>
+                    <div className="mt-1 text-[11px] leading-snug text-gray-400">inversión inmobiliaria</div>
+                    <div className="mt-0.5 text-[10px] leading-snug text-gray-400">~{fmtPct(sim.totalAnual)}% anual estimado</div>
+                  </div>
+                </div>
+                <p className="text-xs text-center text-gray-400 mt-2">
+                  Diferencia: <span className="font-semibold text-emerald-600">+USD {Math.round(sim.total - sim.plazoFijoTotal).toLocaleString("es-AR")}</span> a favor del inmueble
                 </p>
-              </div>
-
-              <div className="p-3 sm:p-4 bg-gray-900 rounded-xl border border-gray-800">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">De dónde sale la ganancia</p>
-                <div className="space-y-2">
-                  {!sim.esReventa && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Renta neta acumulada en {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</span>
-                      <span className="text-green-400 font-semibold">USD {Math.round(sim.rentaAcumulada).toLocaleString("es-AR")}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">{sim.esReventa ? "Comprar bien, mejorar y revender" : "Valorización de la propiedad"}</span>
-                    <span className="text-purple-400 font-semibold">USD {Math.round(sim.gananciaValorizacion).toLocaleString("es-AR")}</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t border-gray-800 pt-2">
-                    <span className="text-gray-300 font-medium">Ganancia total estimada</span>
-                    <span className="text-white font-bold">USD {Math.round(sim.ganancia).toLocaleString("es-AR")}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 p-4 bg-gray-900 border border-gray-800 rounded-xl">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Comparativa a {calcPlazo} año{calcPlazo > 1 ? "s" : ""}</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-gray-800 rounded-lg text-center border border-gray-700">
-                    <div className="text-xs text-gray-500 mb-1">Plazo fijo en dólares</div>
-                    <div className="text-base font-bold text-gray-300">USD {Math.round(sim.plazoFijoTotal).toLocaleString("es-AR")}</div>
-                    <div className="text-xs text-gray-600">~{TASA_PLAZO_FIJO * 100}% anual (bancos argentinos: 0,5–2%)</div>
-                  </div>
-                  <div className="p-3 bg-green-500/10 rounded-lg text-center border border-green-500/20">
-                    <div className="text-xs text-gray-500 mb-1">Inversión inmobiliaria</div>
-                    <div className="text-base font-bold text-green-400">USD {Math.round(sim.total).toLocaleString("es-AR")}</div>
-                    <div className="text-xs text-green-500">~{fmtPct(sim.totalAnual)}% anual estimado</div>
-                  </div>
-                </div>
-                <p className="text-xs text-center text-gray-600 mt-2">
-                  Diferencia: <span className="font-semibold text-green-400">+USD {Math.round(sim.total - sim.plazoFijoTotal).toLocaleString("es-AR")}</span> a favor del inmueble
-                </p>
-                <p className="text-[11px] text-gray-600 mt-3 pt-3 border-t border-gray-800 leading-relaxed">
+                <p className="text-[11px] text-gray-400 mt-3 pt-3 border-t border-gray-200 leading-relaxed">
                   ¿Y el plazo fijo en pesos? Paga más en términos nominales (~15–19% TNA), pero está expuesto a la devaluación: medido en dólares, su resultado a varios años es impredecible y muchas veces negativo. Por eso comparamos contra la alternativa real en la misma moneda.
                 </p>
               </div>
 
-              <p className="text-gray-600 text-[11px] mt-4 leading-relaxed">
+              <p className="mt-6 text-[11px] leading-relaxed text-gray-400">
                 Supuestos: renta bruta según valores actuales de alquiler en SMA{!sim.esReventa && sim.rentaBruta ? ` (${fmtPct(sim.rentaBruta)}% anual para este tramo de precio)` : ""}, menos {GASTOS_VACANCIA * 100}% por gastos, gestión y vacancia · valorización = promedio de los últimos 2 años del m² en SMA · renta constante, sin reinversión. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
               </p>
             </div>
 
-            <div className="mt-5 border-t border-gray-800 pt-5">
+            <div className="mt-12 border-t border-gray-100 pt-10">
               {leadSent ? (
                 <div className="flex flex-col items-center gap-2 py-4 text-center">
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <p className="text-green-400 font-semibold text-sm">¡Listo! Te redirigimos a WhatsApp</p>
-                  <p className="text-gray-500 text-xs">Milton te responde en menos de 48 hs</p>
-                  <button onClick={() => { setLeadSent(false); setLeadName(""); setLeadWa(""); }} className="text-gray-600 hover:text-gray-400 text-xs underline mt-1 transition-colors">
+                  <p className="text-[17px] font-semibold text-gray-900">¡Listo! Te redirigimos a WhatsApp</p>
+                  <p className="text-sm text-gray-500">Milton te responde en menos de 48 hs</p>
+                  <button onClick={() => { setLeadSent(false); setLeadName(""); setLeadWa(""); }} className="mt-2 text-xs text-gray-400 underline underline-offset-4 transition-colors hover:text-gray-900">
                     Enviar otra consulta
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleLeadSubmit}>
-                  <p className="text-gray-300 text-sm font-medium mb-1">Recibí una propuesta personalizada</p>
-                  <p className="text-gray-500 text-xs mb-4">Basada en tu simulación · Sin compromiso</p>
+                  {/* La cara al lado del formulario, no solo el nombre.
+                      Debajo ya decía "Milton te responde en menos de 48 hs",
+                      pero recién después de enviar. Antes de dejar el teléfono,
+                      la persona no veía a quién se lo estaba dejando. */}
+                  <div className="mb-4 flex items-center gap-3">
+                    <Image
+                      src="/Milton.webp"
+                      alt="Milton Catalán, asesor inmobiliario en San Martín de los Andes"
+                      width={44}
+                      height={44}
+                      sizes="44px"
+                      className="h-11 w-11 flex-shrink-0 rounded-full object-cover object-top"
+                    />
+                    <div>
+                      <p className="text-gray-600 text-sm font-medium">Recibí una propuesta personalizada</p>
+                      <p className="text-gray-500 text-xs">
+                        Te responde Milton, en menos de 48 hs · Sin compromiso
+                      </p>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1.5">Tu nombre</label>
+                      <label className="mb-1.5 block text-xs font-medium text-gray-500">Tu nombre</label>
                       <input
                         type="text"
                         value={leadName}
                         onChange={(e) => setLeadName(e.target.value)}
                         placeholder="Ej: María González"
                         required
-                        className="w-full px-3 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-[15px] text-gray-900 outline-none transition-colors placeholder:text-gray-300 focus:border-gray-900"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1.5">Tu WhatsApp</label>
+                      <label className="mb-1.5 block text-xs font-medium text-gray-500">Tu WhatsApp</label>
                       <input
                         type="tel"
                         value={leadWa}
                         onChange={(e) => setLeadWa(e.target.value)}
                         placeholder="Ej: +54 9 11 1234-5678"
                         required
-                        className="w-full px-3 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-[15px] text-gray-900 outline-none transition-colors placeholder:text-gray-300 focus:border-gray-900"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors text-sm"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 sm:w-auto"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -820,11 +1202,11 @@ export default function InversionesClient({ mercado = null }) {
                     </svg>
                     Solicitar propuesta por WhatsApp
                   </button>
-                  <p className="text-gray-600 text-[11px] mt-2.5">Tu información no se comparte con terceros · Respuesta en menos de 48 hs</p>
+                  <p className="mt-3 text-[11px] leading-relaxed text-gray-400">Tu información no se comparte con terceros · Respuesta en menos de 48 hs</p>
                 </form>
               )}
             </div>
-          </div>
+          </section>
 
           <AdvisoryProcess />
         </div>

@@ -4,7 +4,7 @@ import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import SuscripcionForm from "@/components/SuscripcionForm";
 import TrackedLink from "@/components/TrackedLink";
-import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import { RELEVADAS_PUBLICO } from "@/lib/mercado";
 import dynamic from "next/dynamic";
 const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
 import { getProperties } from "@/lib/properties";
@@ -145,12 +145,12 @@ export default async function Home() {
                 No somos un portal. Somos asesores con datos reales del mercado local.
               </h2>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Analizamos {RELEVADAS_TOTAL_FMT} propiedades en San Martín de los Andes para ayudarte a comprar, alquilar o invertir con información concreta, no promedios nacionales.
+                Analizamos {RELEVADAS_PUBLICO} propiedades en San Martín de los Andes para ayudarte a comprar, alquilar o invertir con información concreta, no promedios nacionales.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-6 lg:gap-10 lg:flex-shrink-0">
               {[
-                { valor: RELEVADAS_TOTAL_FMT, label: "Propiedades relevadas" },
+                { valor: RELEVADAS_PUBLICO, label: "Propiedades relevadas" },
                 { valor: "10+", label: "Años de experiencia" },
                 { valor: "+18%", label: "ROI promedio gestionado" },
               ].map((stat) => (

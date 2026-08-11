@@ -1,6 +1,9 @@
 import dynamic from "next/dynamic";
 const InversionesClient = dynamic(() => import("./InversionesClient"));
-import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_API_URL } from "@/config";
+import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
+import { VALOR_M2_CASA, VALOR_M2_DEPTO, RANGO_M2 } from "@/lib/mercado";
+
+const usd = (v) => `USD ${Number(v).toLocaleString("es-AR")}`;
 
 export const metadata = {
   title: "Inversión inmobiliaria en San Martín de los Andes 2026",
@@ -63,36 +66,34 @@ const faqJsonLd = {
       name: "¿Cuánto cuesta el m² en San Martín de los Andes?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "El precio del m² en San Martín de los Andes varía según la zona, entre USD 1.200 y USD 3.500 aproximadamente. Las zonas céntricas y con vista al lago o a la montaña concentran los valores más altos. Podés consultar el análisis actualizado de precio por zona en nuestra página de precio del m².",
+        // Decía "entre USD 1.200 y USD 3.500 aproximadamente", los dos escritos
+        // a mano. El techo era falso: el modelo pone el p75 de departamentos en
+        // USD 3.923. Y esto es un FAQPage, o sea lo que Google puede levantar
+        // como respuesta destacada — el peor lugar para un número inventado.
+        // Ahora sale del modelo, igual que /tasacion y /precio-m2.
+        text: `El precio del m² en San Martín de los Andes depende sobre todo del tipo de propiedad: la mediana está en ${usd(VALOR_M2_CASA)}/m² para casas y ${usd(VALOR_M2_DEPTO)}/m² para departamentos. El 50 % central del mercado va de ${usd(RANGO_M2.Casa?.p25)} a ${usd(RANGO_M2.Departamento?.p75)} por m². Las zonas céntricas y con vista al lago o a la montaña concentran los valores más altos. Podés consultar el análisis actualizado por zona en nuestra página de precio del m².`,
       },
     },
   ],
 };
 
-// Resumen de mercado calculado por el modelo predictivo (se reentrena cada semana).
-// Si la API no responde (Render dormido, sin red), la página usa sus datos estáticos.
-async function getMercado() {
-  try {
-    const res = await fetch(`${TASADOR_API_URL}/mercado?ciudad=sma`, {
-      next: { revalidate: 21600 }, // 6 hs
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
-export default async function InversionesPage() {
-  const mercado = await getMercado();
+// Acá había un fetch a `${TASADOR_API_URL}/mercado?ciudad=sma` cuyo resultado
+// se le pasaba al cliente para pisar la serie, el m² de referencia y la fecha.
+// Se sacó el 2026-08-10: la API devuelve un relevamiento MÁS VIEJO que el
+// export estático (17-jul sobre 956 propiedades contra 6-ago sobre 1.597), así
+// que esta página publicaba números que contradecían a /tasacion y /precio-m2.
+// El detalle está en la cabecera de InversionesClient.js.
+//
+// Cuando el modelo se reexporte y se redeploye, el enchufe va en lib/mercado.js
+// —del que cuelgan las tres páginas—, no acá.
+export default function InversionesPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <InversionesClient mercado={mercado} />
+      <InversionesClient />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_PATH, WA_URL } from "@/config";
-import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import { RELEVADAS_PUBLICO } from "@/lib/mercado";
 
 export const metadata = {
   title: "Vendé tu propiedad en San Martín de los Andes",
@@ -55,7 +55,7 @@ const faqJsonLd = {
       name: "¿Cómo se define el precio de venta de mi propiedad?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: `El precio se define con datos: ${RELEVADAS_TOTAL_FMT} propiedades relevadas en San Martín de los Andes, valores reales del m² por barrio y un modelo predictivo propio. Un precio correcto desde el inicio evita que la propiedad quede meses sin consultas.`,
+        text: `El precio se define con datos: ${RELEVADAS_PUBLICO} propiedades relevadas en San Martín de los Andes, valores reales del m² por barrio y un modelo predictivo propio. Un precio correcto desde el inicio evita que la propiedad quede meses sin consultas.`,
       },
     },
     {
@@ -104,7 +104,7 @@ const DIFERENCIALES = [
   {
     icon: "📊",
     titulo: "Precio respaldado por datos",
-    desc: `${RELEVADAS_TOTAL_FMT} propiedades relevadas en SMA y un modelo predictivo propio. El precio correcto desde el día uno.`,
+    desc: `${RELEVADAS_PUBLICO} propiedades relevadas en SMA y un modelo predictivo propio. El precio correcto desde el día uno.`,
   },
   {
     icon: "📣",

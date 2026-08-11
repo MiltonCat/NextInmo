@@ -3,12 +3,11 @@ import CarruselDecoracion from "@/components/CarruselDecoracion";
 import TasadorWizard from "@/components/TasadorWizard";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { getBarrios } from "@/lib/tasador";
+import { barriosConMediana } from "@/lib/precioZonas";
 import {
-  barriosDestacados,
   EVOLUCION_SERIE,
   EVOLUCION_VARIACION_TOTAL,
-  RELEVADAS_MODELO_FMT,
-  RELEVADAS_TOTAL_FMT,
+  RELEVADAS_PUBLICO,
   VALOR_M2_CASA,
   VALOR_M2_DEPTO,
 } from "@/lib/mercado";
@@ -131,7 +130,7 @@ const FAQS = [
   },
   {
     pregunta: "¿En qué se basa la tasación?",
-    respuesta: `El modelo se entrenó con ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín de los Andes, sobre un relevamiento total de ${RELEVADAS_TOTAL_FMT} propiedades. Mira barrio, superficie cubierta y de terreno, distribución de ambientes, cocheras y características como pileta, vista o estado a estrenar.`,
+    respuesta: `El modelo se apoya en un relevamiento de ${RELEVADAS_PUBLICO} propiedades reales de San Martín de los Andes. Mira barrio, superficie cubierta y de terreno, distribución de ambientes, cocheras y características como pileta, vista o estado a estrenar.`,
   },
   {
     pregunta: "¿Por qué el tasador devuelve un rango y no un precio exacto?",
@@ -164,7 +163,7 @@ const COMO_FUNCIONA = [
   {
     n: "02",
     titulo: "El modelo la compara",
-    texto: `Contra ${RELEVADAS_MODELO_FMT} casas y departamentos reales de San Martín, no contra un promedio nacional.`,
+    texto: `Contra ${RELEVADAS_PUBLICO} propiedades reales de San Martín, no contra un promedio nacional.`,
   },
   {
     n: "03",
@@ -210,7 +209,14 @@ function TituloSeccion({ id, children }) {
 }
 
 function SeccionBarrios() {
-  const destacados = barriosDestacados(4);
+  // Se usa barriosConMediana() y no barriosDestacados() del JSON crudo porque
+  // el segundo devolvía "General" en el puesto 2 — el cajón donde caen las
+  // publicaciones sin barrio declarado (n=173). Esta página lo estaba
+  // publicando como si fuera un barrio de San Martín, con su USD 3.000/m².
+  // barriosConMediana() además usa los nombres canónicos del sitio ("Vega
+  // Maipú", no "Vega Maipu"), así que las dos páginas nombran igual al mismo
+  // lugar.
+  const destacados = barriosConMediana().slice(0, 4);
 
   return (
     <section aria-labelledby="barrios" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 md:py-24">
@@ -228,8 +234,8 @@ function SeccionBarrios() {
 
         <dl className="mt-7 divide-y divide-gray-100 border-y border-gray-100">
           {destacados.map((b) => (
-            <div key={b.barrio} className="flex items-baseline justify-between gap-4 py-3.5">
-              <dt className="text-[15px] font-medium text-gray-900">{b.barrio}</dt>
+            <div key={b.nombre} className="flex items-baseline justify-between gap-4 py-3.5">
+              <dt className="text-[15px] font-medium text-gray-900">{b.nombre}</dt>
               <dd className="flex items-baseline gap-3">
                 <span className="text-[11px] text-gray-400 tabular-nums">{b.n} relevadas</span>
                 <span className="text-[15px] font-semibold text-gray-900 tabular-nums">
@@ -398,7 +404,7 @@ export default async function TasacionPage() {
             tres botones. Encajonarlas les daría un peso que no les toca. */}
         <div className="mt-10 grid grid-cols-3 divide-x divide-gray-100 border-y border-gray-100 py-5">
           {[
-            { valor: RELEVADAS_TOTAL_FMT, label: "propiedades relevadas" },
+            { valor: RELEVADAS_PUBLICO, label: "propiedades relevadas" },
             { valor: `USD ${VALOR_M2_CASA.toLocaleString("es-AR")}`, label: "el m² en casas" },
             { valor: `USD ${VALOR_M2_DEPTO.toLocaleString("es-AR")}`, label: "el m² en departamentos" },
           ].map((m, i) => (

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { RELEVADAS_TOTAL_FMT } from "@/lib/mercado";
+import { RELEVADAS_PUBLICO } from "@/lib/mercado";
 
 
 function StatCounter({ end, prefix = "", suffix = "", label, started }) {
@@ -46,7 +46,7 @@ const values = [
 const services = [
   { title: "Asesoría de inversión", desc: "Analizo propiedades como activos financieros: rentabilidad esperada, nivel de riesgo y proyección de valor. Para que invertís con información, no con intuición.", icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> },
   { title: "Valuación predictiva", desc: "Mediante mi modelo de análisis inmobiliario, estimo el valor actual del metro cuadrado y su evolución proyectada hasta 2031 en San Martín de los Andes.", icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg> },
-  { title: "Análisis de mercado", desc: `Datos reales del mercado inmobiliario de la Patagonia: precios por zona, tendencias y comparativas. ${RELEVADAS_TOTAL_FMT} propiedades relevadas como base de consulta.`, icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg> },
+  { title: "Análisis de mercado", desc: `Datos reales del mercado inmobiliario de la Patagonia: precios por zona, tendencias y comparativas. ${RELEVADAS_PUBLICO} propiedades relevadas como base de consulta.`, icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg> },
   { title: "Acompañamiento en la compra", desc: "Te acompaño en cada etapa: búsqueda, visita, negociación y documentación. Sin atajos y con criterio en cada paso.", icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> },
 ];
 

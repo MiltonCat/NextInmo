@@ -46,7 +46,7 @@ const ZONES = [
     tipo: "Turistico - Resort",
     score: 90,
     verdict: "Alto ticket",
-    descripcion: "Destino 4 estaciones: ski en invierno, golf y trekking en verano. Una de las 3 zonas mas buscadas segun Argenprop.",
+    descripcion: "Destino 4 estaciones: ski en invierno, golf y trekking en verano. Una de las 3 zonas mas buscadas segun nuestro relevamiento.",
   },
   {
     name: "Meliquina",
@@ -55,7 +55,7 @@ const ZONES = [
     tipo: "Natural - En desarrollo",
     score: 84,
     verdict: "Entrada baja",
-    descripcion: "Una de las 3 zonas mas populares segun Argenprop. Precios accesibles con fuerte potencial de crecimiento y turismo de naturaleza.",
+    descripcion: "Una de las 3 zonas mas populares segun nuestro relevamiento. Precios accesibles con fuerte potencial de crecimiento y turismo de naturaleza.",
   },
 ];
 
