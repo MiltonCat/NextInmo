@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const path = "/blog/sena-reserva-compraventa-inquilino";
 const url = canonicalUrl(path);
@@ -71,6 +72,8 @@ export default function SenaReservaPage() {
           </div>
           <div className="relative mt-8 aspect-[16/8.43] overflow-hidden rounded-2xl bg-gray-100"><Image src="/planos.jpg" alt="Planos y documentación de una operación inmobiliaria" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" /></div>
         </header>
+
+        <PodcastPlayer slug="sena-reserva-compraventa-inquilino" />
 
         <div className="prose prose-lg max-w-none text-gray-700">
           <div className="not-prose rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8"><p className="text-xs font-black uppercase tracking-widest text-rose-700">Idea central</p><p className="mt-3 text-lg font-semibold leading-relaxed text-gray-900">Seña y reserva no son etapas obligatorias de una misma cosa. Son instrumentos distintos y sus efectos dependen de lo que se haya escrito. Si comprador e inquilino son la misma persona, además hay dos contratos vivos hasta la escritura.</p></div>
