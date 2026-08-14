@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { BARRIOS } from "@/lib/barrios";
 
 const IMAGE_FIELDS = [
   { name: "image", label: "Foto principal" },
@@ -62,9 +63,30 @@ export default function PropertyForm({ action, property = null }) {
           </div>
         </div>
 
-        <div>
-          <label className={label} htmlFor="location">Ubicación</label>
-          <input id="location" name="location" defaultValue={p.location || ""} className={field} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={label} htmlFor="location">Ubicación</label>
+            <input id="location" name="location" defaultValue={p.location || ""} className={field} />
+          </div>
+          {/* El barrio se elige de la lista, no se escribe. De esto depende que
+              la propiedad aparezca en /barrios/<barrio> y en el bloque de
+              /precio-m2: la dirección sola ("Rivadavia 155") no alcanza para
+              deducirlo. Si queda sin elegir se sigue intentando deducir del
+              texto de Ubicación, como antes. */}
+          <div>
+            <label className={label} htmlFor="barrio">Barrio</label>
+            <select id="barrio" name="barrio" defaultValue={p.barrio || ""} className={field}>
+              <option value="">Deducir de la ubicación</option>
+              {BARRIOS.map((b) => (
+                <option key={b.slug} value={b.slug}>
+                  {b.nombre}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Sin barrio, la propiedad no se lista en la página de su zona.
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

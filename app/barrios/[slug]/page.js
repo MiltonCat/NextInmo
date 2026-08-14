@@ -15,7 +15,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
-import { barriosConPerfil, getBarrio, barrioDesdeLocation } from "@/lib/barrios";
+import { barriosConPerfil, getBarrio, barrioDePropiedad } from "@/lib/barrios";
 import { getPerfilBarrio } from "@/lib/barriosPerfil";
 import { medianaDeBarrio } from "@/lib/precioZonas";
 import { getOpinionesPublicas } from "@/lib/barrioOpiniones";
@@ -105,7 +105,10 @@ export default async function BarrioPage({ params }) {
   const todas = await getProperties();
   const propiedades = todas
     .filter((p) => !p.vendida && !p.noDisponible && p.status !== "no_disponible")
-    .filter((p) => barrioDesdeLocation(p.location)?.slug === slug);
+    // Usa el campo `barrio` cargado en el panel y, si está vacío, cae al texto
+    // de `location` como antes. Ver barrioDePropiedad en lib/barrios.js: con la
+    // deducción sola, esta lista quedaba vacía en casi todos los barrios.
+    .filter((p) => barrioDePropiedad(p)?.slug === slug);
 
   const n = agregado?.n ?? 0;
   const nivel = nivelDePublicacion(n);
