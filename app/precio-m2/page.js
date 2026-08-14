@@ -34,8 +34,10 @@ import {
   VALOR_M2_CASA,
   VALOR_M2_DEPTO,
 } from "@/lib/mercado";
-import { barriosConMediana } from "@/lib/precioZonas";
-import { barriosConPerfil } from "@/lib/barrios";
+import { barriosConMediana, medianaDeBarrio } from "@/lib/precioZonas";
+import { barriosConPerfil, barrioDePropiedad } from "@/lib/barrios";
+import { getProperties } from "@/lib/properties";
+import { getPropertySlug } from "@/data/properties";
 
 // Dos reglas para las fotos de esta página:
 //
@@ -83,11 +85,31 @@ const ACTUALIZADO = fecha.toLocaleDateString("es-AR", {
 });
 const usd = (n) => `USD ${Number(n).toLocaleString("es-AR")}`;
 
+// Title y description reescritos el 2026-08-14 por CTR.
+//
+// Medición previa (Search Console, 28 días al 12-ago-2026): esta página tenía
+// 223 impresiones en posición media 5,1 y solo 6 clics — CTR 2,7%. En posición
+// 5 lo esperable ronda 5-8%: rankeaba bien y no la clickeaba nadie. No es un
+// problema de posición, es de qué dice el resultado en la SERP.
+//
+// Dos cambios, los dos deliberados:
+//
+// 1. El title pasa de "Precio m² ..." a "Precio del m² en ...", que es como
+//    la gente escribe la consulta. El anterior estaba redactado como etiqueta
+//    de menú, no como respuesta.
+// 2. La description ahora ABRE con los dos números en vez de describir la
+//    página. En una búsqueda de precio, el número es el gancho: quien busca
+//    "cuánto vale el m²" ya ve la respuesta en el resultado, y entra a ver el
+//    detalle por barrio. Ningún competidor local publica esta cifra.
+//
+// Los valores salen de lib/mercado.js como el resto de la página — nunca
+// escribirlos a mano acá, o el día que se regenere el modelo la SERP va a
+// mostrar un precio que la página ya no dice (ver el TODO del encabezado).
 export const metadata = {
-  title: "Precio m² San Martín de los Andes 2026",
+  title: "Precio del m² en San Martín de los Andes 2026",
   // Sin "terrenos": la página ya no publica su m². Y el total sale de la
   // constante, no escrito a mano — decía "más de 1.500" fijo.
-  description: `Precio del m² en San Martín de los Andes por barrio, sobre un relevamiento propio de ${RELEVADAS_PUBLICO} propiedades. Casas, departamentos y evolución 2021–2026.`,
+  description: `Casas ${usd(VALOR_M2_CASA)} y departamentos ${usd(VALOR_M2_DEPTO)} el m². Mediana por barrio y evolución 2021–2026, sobre un relevamiento propio de ${RELEVADAS_PUBLICO} propiedades.`,
   openGraph: {
     title: "Precio del m² en San Martín de los Andes 2026 — Catalán Propiedades",
     description: `Evolución del m² 2021–2026 y mediana por barrio, sobre ${RELEVADAS_PUBLICO} propiedades relevadas en San Martín de los Andes.`,
@@ -434,6 +456,158 @@ function FilaBarrio({ b }) {
   );
 }
 
+// ── Puente al catálogo ──────────────────────────────────────────────────────
+//
+// Agregado el 2026-08-14. Hasta hoy la página terminaba ofreciendo /tasacion,
+// /inversiones y /contacto: tres herramientas más. Ninguna propiedad.
+//
+// La medición mostraba lo que costaba eso. En 28 días (al 12-ago-2026) el sitio
+// entero generó 6 clics a WhatsApp, y los cuatro orígenes fueron fichas de
+// propiedad concretas y /alquileres. Ni uno salió de una herramienta, con esta
+// página trayendo 223 impresiones. Las herramientas atraen y las propiedades
+// convierten, y entre las dos no había puente.
+//
+// Por qué el m² de cada propiedad y no una grilla de fotos: la grilla ya existe
+// en /propiedades y no hace falta otra puerta a lo mismo. Lo único que puede
+// hacer ESTA página es cerrar su propio argumento —la mediana por barrio—
+// contra algo que se puede comprar: "esta se publica 12% por debajo de la
+// mediana de su barrio". Es el mismo dato de arriba, aplicado.
+//
+// Dos reglas para no romper lo que la página viene construyendo:
+//
+// 1. NO esconder las que están por encima de la mediana. Publicar solo las
+//    baratas convertiría esto en una selección comercial disfrazada de dato,
+//    que es justo lo que el resto de la página se cuidó de no ser.
+// 2. Los lotes quedan afuera. El m² de terreno no es comparable con el de una
+//    propiedad construida, y las medianas de arriba se calculan sin terrenos
+//    (ver la nota del metadata). Compararlos daría un número que parece dato.
+// 3. Solo entran las propiedades que caen en un barrio de San Martín. Al probar
+//    esto contra el catálogo real aparecieron Meliquina y Costas del Aluminé:
+//    son otras localidades, con un m² de 625 y 783 contra los ~2.000 de acá. Al
+//    ordenar por precio quedaban primeras y le dejaban al lector la idea de que
+//    el m² en San Martín arranca en 600. En una página que trata exactamente
+//    sobre eso, no es un detalle. Se venden igual, desde /propiedades.
+async function propiedadesConM2(limite = 6) {
+  const todas = await getProperties();
+
+  return todas
+    .filter((p) => !p.vendida && !p.noDisponible && p.status !== "no_disponible")
+    .filter((p) => p.modalidad !== "alquiler_permanente")
+    .filter((p) => p.type !== "Lote")
+    .map((p) => {
+      const precio = Number(p.price);
+      const superficie = Number(p.area);
+      // Sin precio o sin superficie no hay m² que mostrar: se descarta en vez
+      // de dibujar un cero.
+      if (!precio || !superficie) return null;
+
+      // Sin barrio identificado no sabemos si está en la ciudad: fuera.
+      const barrio = barrioDePropiedad(p);
+      if (!barrio) return null;
+
+      const m2 = Math.round(precio / superficie);
+      // `medianaDeBarrio` devuelve null cuando el barrio no llega al mínimo de
+      // propiedades relevadas (le pasa hoy a Peñón de Lolog). En ese caso la
+      // fila se muestra con su m² y sin comparación — nunca con una inventada.
+      const mediana = medianaDeBarrio(barrio.slug);
+      const delta = mediana
+        ? Math.round(((m2 - mediana.medianaM2) / mediana.medianaM2) * 100)
+        : null;
+
+      return { p, m2, barrio, mediana, delta };
+    })
+    .filter(Boolean)
+    // Primero las que tienen comparación —son las que aportan el dato— y dentro
+    // de ellas, de la más barata por m² a la más cara. Las que no tienen mediana
+    // de barrio se muestran igual, al final, sin inventarles una comparación.
+    .sort((a, b) => {
+      if ((a.delta === null) !== (b.delta === null)) return a.delta === null ? 1 : -1;
+      if (a.delta !== null && b.delta !== null) return a.delta - b.delta;
+      return a.m2 - b.m2;
+    })
+    .slice(0, limite);
+}
+
+function FilaPropiedad({ item }) {
+  const { p, m2, barrio, mediana, delta } = item;
+
+  return (
+    <Link
+      href={`/propiedades/${getPropertySlug(p)}`}
+      className="group flex items-baseline justify-between gap-4 py-3.5"
+    >
+      <span className="min-w-0">
+        <span className="block truncate text-[15px] font-medium text-gray-900 group-hover:text-rose-600">
+          {p.title}
+        </span>
+        <span className="mt-0.5 block truncate text-[11px] text-gray-400">
+          {p.type}
+          {barrio ? ` · ${barrio.nombre}` : ""}
+          {mediana
+            ? ` · mediana del barrio USD ${mediana.medianaM2.toLocaleString("es-AR")}/m²`
+            : ""}
+        </span>
+      </span>
+      <span className="shrink-0 text-right">
+        <span className="block text-[15px] font-semibold text-gray-900 tabular-nums">
+          USD {m2.toLocaleString("es-AR")}/m²
+        </span>
+        {delta !== null && (
+          <span
+            className={`mt-0.5 block text-[11px] tabular-nums ${
+              delta < 0 ? "text-emerald-600" : "text-gray-400"
+            }`}
+          >
+            {delta === 0
+              ? "en la mediana"
+              : `${Math.abs(delta)}% ${delta < 0 ? "por debajo" : "por encima"}`}
+          </span>
+        )}
+      </span>
+    </Link>
+  );
+}
+
+function SeccionPropiedades({ items }) {
+  // Sin catálogo cargado no se dibuja el bloque vacío.
+  if (!items.length) return null;
+
+  return (
+    <section aria-labelledby="propiedades" className="mt-14 border-t border-gray-100 pt-14">
+      <h2
+        id="propiedades"
+        className="text-[22px] font-semibold tracking-[-0.01em] text-gray-900"
+      >
+        Cómo se paran las que están a la venta
+      </h2>
+      <p className="mt-3 text-sm leading-relaxed text-gray-500">
+        El mismo cálculo de arriba, aplicado a lo que tenemos publicado hoy: cuánto sale el m² de
+        cada propiedad y cómo queda contra la mediana de su barrio.
+      </p>
+
+      <div className="mt-6 divide-y divide-gray-100 border-y border-gray-100">
+        {items.map((item) => (
+          <FilaPropiedad key={item.p.id} item={item} />
+        ))}
+      </div>
+
+      <p className="mt-4 text-xs leading-relaxed text-gray-400">
+        El m² de cada propiedad es su precio publicado dividido su superficie. La comparación
+        contra la mediana sirve para orientarse, no para tasar: la vista, el estado y la
+        orientación mueven el precio bastante más que unos puntos de diferencia. No se incluyen
+        lotes, porque el m² de terreno no es comparable con el de una propiedad construida.
+      </p>
+
+      <Link
+        href="/propiedades"
+        className="mt-5 inline-block text-sm font-semibold text-rose-600 hover:underline"
+      >
+        Ver todas las propiedades →
+      </Link>
+    </section>
+  );
+}
+
 function SeccionBarrios() {
   return (
     <section aria-labelledby="barrios" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
@@ -565,7 +739,10 @@ function SeccionPorQue() {
   );
 }
 
-export default function PrecioM2Page() {
+export default async function PrecioM2Page() {
+  // Se resuelve en build (output: "export"), igual que en las fichas de barrio.
+  const propiedades = await propiedadesConM2();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero sobre blanco. Sin bloque de color: el peso lo lleva la tipografía
@@ -723,6 +900,12 @@ export default function PrecioM2Page() {
             ))}
           </div>
         </section>
+
+        {/* Va después del FAQ y antes del cierre: cuando alguien terminó de leer
+            los números ya sabe si el mercado le cierra, y la pregunta siguiente
+            es qué hay. El cierre —tasar la propia— queda abajo, que es el otro
+            camino posible. */}
+        <SeccionPropiedades items={propiedades} />
 
         <section
           aria-labelledby="cierre"

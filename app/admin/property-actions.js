@@ -39,6 +39,10 @@ async function buildRowFromForm(formData) {
     type: str(formData.get("type")),
     operation: str(formData.get("operation")),
     location: str(formData.get("location")),
+    // Barrio elegido a mano. `location` es texto libre y casi nunca lo nombra,
+    // así que sin este campo la propiedad no aparece en su ficha de barrio ni
+    // en el bloque de /precio-m2 (ver barrioDePropiedad en lib/barrios.js).
+    barrio: str(formData.get("barrio")),
     price: num(formData.get("price")),
     bedrooms: num(formData.get("bedrooms")),
     bathrooms: num(formData.get("bathrooms")),
