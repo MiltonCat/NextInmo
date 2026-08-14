@@ -33,12 +33,17 @@ comment on column public.properties.barrio is
 alter table public.properties
   drop constraint if exists properties_barrio_valido;
 
+-- Los cinco últimos se agregaron el 2026-08-14 al cargar la cartera real: son
+-- zonas donde hay propiedades publicadas que la lista original no contemplaba.
+-- Si se suma un barrio a lib/barrios.js, hay que sumarlo también acá.
 alter table public.properties
   add constraint properties_barrio_valido check (
     barrio is null or barrio in (
       'centro', 'chapelco-golf', 'la-cascada', 'vega-maipu', 'penon-de-lolog',
       'caleuche', 'costanera', 'las-marias', 'las-pendientes', 'via-blanca',
-      'arrayan', 'lacar', 'patagonia-norte'
+      'arrayan', 'lacar', 'patagonia-norte',
+      'vega-san-martin', 'orillas-del-quilquihue', 'san-fernando',
+      'las-nalcas', 'ruca-hue'
     )
   );
 
