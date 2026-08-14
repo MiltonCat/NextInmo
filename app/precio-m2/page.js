@@ -487,6 +487,45 @@ function FilaBarrio({ b }) {
 //    ordenar por precio quedaban primeras y le dejaban al lector la idea de que
 //    el m² en San Martín arranca en 600. En una página que trata exactamente
 //    sobre eso, no es un detalle. Se venden igual, desde /propiedades.
+// 4. Piso y techo de sanidad (agregado el 2026-08-14, ver PLAUSIBLE abajo).
+
+// Banda de plausibilidad del m² calculado.
+//
+// Por qué existe: al publicar esto aparecieron tres filas imposibles — una casa
+// en el Centro a USD 783/m² (77% por debajo de la mediana del barrio) y dos en
+// Ruca Hue a USD 136 y USD 346. Ningún m² construido de San Martín está ahí.
+//
+// La causa no es el cálculo sino el dato: `area` es un solo campo y en algunas
+// fichas trae los metros DEL TERRENO en vez de los cubiertos. Dividir el precio
+// por la superficie del lote da el m² de la tierra, que no es comparable con la
+// mediana de propiedades construidas. Es el mismo error por el que los lotes
+// están excluidos, pero escondido adentro de una casa.
+//
+// Mientras no exista un campo aparte para superficie cubierta, se descarta la
+// fila en vez de publicar el número. Un "77% por debajo" que no es real hace más
+// daño que una fila de menos: el que consulta llega con una expectativa que la
+// propiedad no puede cumplir.
+//
+// Los límites salen del propio relevamiento, no de constantes elegidas a ojo.
+const PLAUSIBLE = { pisoRelativo: 0.5, techoRelativo: 2.5 };
+
+// La mediana más baja que el modelo publica hoy. Sirve de referencia para las
+// propiedades cuyo barrio no tiene mediana propia: si su m² no llega ni a la
+// mitad del barrio más barato de la ciudad, el dato está mal.
+const MEDIANA_MINIMA = barriosConMediana().reduce(
+  (min, b) => Math.min(min, b.medianaM2),
+  Infinity
+);
+
+function m2Plausible(m2, mediana) {
+  const referencia = mediana ? mediana.medianaM2 : MEDIANA_MINIMA;
+  if (!Number.isFinite(referencia)) return true; // sin referencia no se filtra
+  return (
+    m2 >= referencia * PLAUSIBLE.pisoRelativo &&
+    m2 <= referencia * PLAUSIBLE.techoRelativo
+  );
+}
+
 async function propiedadesConM2(limite = 6) {
   const todas = await getProperties();
 
@@ -510,6 +549,11 @@ async function propiedadesConM2(limite = 6) {
       // propiedades relevadas (le pasa hoy a Peñón de Lolog). En ese caso la
       // fila se muestra con su m² y sin comparación — nunca con una inventada.
       const mediana = medianaDeBarrio(barrio.slug);
+
+      // Fuera de la banda plausible el número no describe la propiedad: casi
+      // siempre es superficie de terreno donde debería haber cubierta.
+      if (!m2Plausible(m2, mediana)) return null;
+
       const delta = mediana
         ? Math.round(((m2 - mediana.medianaM2) / mediana.medianaM2) * 100)
         : null;
