@@ -196,15 +196,19 @@ export default function FavoritosClient({ properties = [] }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {favoriteProperties.map((property) => (
                 <div key={property.id} className="flex flex-col gap-2">
-                  <div className="relative">
-                    <PropertyCard property={property} />
+                  <PropertyCard property={property} />
+                  {/* El "Comparar" va debajo de la tarjeta, no encima. Antes se
+                      posicionaba con un bottom-[104px] atado a la altura exacta
+                      de la card: cualquier cambio de diseño lo dejaba flotando
+                      en el medio de la foto. */}
+                  <div>
                     <label
-                      className={`absolute bottom-[104px] left-3 flex items-center gap-1.5 text-xs font-medium cursor-pointer select-none px-2.5 py-1 rounded-full border transition ${
+                      className={`inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer select-none px-2.5 py-1 rounded-full border transition ${
                         compareIds.includes(property.id)
                           ? "bg-primary-500 text-white border-primary-500"
                           : compareIds.length >= 3 && !compareIds.includes(property.id)
                           ? "bg-white/90 text-gray-300 border-gray-200 cursor-not-allowed"
-                          : "bg-white/90 text-gray-600 border-gray-200 hover:border-primary-500 hover:text-primary-500"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-primary-500 hover:text-primary-500"
                       }`}
                     >
                       <input

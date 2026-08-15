@@ -1,21 +1,14 @@
+// Tiene que imitar la forma de PropertyCard: si el esqueleto muestra una caja
+// con sombra y la tarjeta real no la tiene, la grilla "salta" al cargar.
 export default function PropertyCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
-      <div className="w-full h-48 bg-gray-200" />
-      <div className="p-4">
-        <div className="h-6 bg-gray-200 rounded mb-2 w-3/4" />
-        <div className="h-4 bg-gray-200 rounded mb-3 w-1/2" />
-        <div className="flex gap-2 mb-3">
-          <div className="h-6 bg-gray-200 rounded w-16" />
-          <div className="h-6 bg-gray-200 rounded w-16" />
-        </div>
-        <div className="flex gap-1 mb-3">
-          <div className="h-5 bg-gray-200 rounded w-12" />
-          <div className="h-5 bg-gray-200 rounded w-12" />
-        </div>
-        <div className="flex gap-1">
-          <div className="h-5 bg-gray-200 rounded w-16" />
-        </div>
+    <div className="animate-pulse">
+      <div className="aspect-[4/3] w-full rounded-xl bg-gray-200" />
+      <div className="pt-3">
+        <div className="mb-2 h-4 w-3/4 rounded bg-gray-200" />
+        <div className="mb-1.5 h-3.5 w-1/2 rounded bg-gray-200" />
+        <div className="mb-1.5 h-3.5 w-2/3 rounded bg-gray-200" />
+        <div className="mt-3 h-4 w-1/3 rounded bg-gray-200" />
       </div>
     </div>
   );
