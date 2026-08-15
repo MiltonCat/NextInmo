@@ -21,43 +21,19 @@ const SECONDARY_LINKS = [
   { href: "/experiencia-barrio", label: "Compartí tu barrio" },
 ];
 
+// Un ícono de línea por tipo, en vez del emoji con degradado de color que
+// había antes (rosa casa, violeta depto, verde lote, ámbar cabaña). El color
+// no aportaba información —el tipo ya está escrito debajo— y cuatro degradados
+// juntos peleaban con el resto de la barra.
+//
+// Los cuatro íconos ya estaban definidos más abajo en este mismo archivo, sin
+// que nadie los usara. Los campos bg/activeBg/text tampoco se usaban: el render
+// solo leía `ring`.
 const PROP_TYPES = [
-  {
-    type: "Casa",
-    label: "Casa",
-    emoji: "🏡",
-    bg: "from-rose-100 to-pink-200",
-    activeBg: "from-rose-200 to-pink-300",
-    text: "text-rose-800",
-    ring: "ring-rose-400",
-  },
-  {
-    type: "Departamento",
-    label: "Depto / Mono",
-    emoji: "🏢",
-    bg: "from-violet-100 to-purple-200",
-    activeBg: "from-violet-200 to-purple-300",
-    text: "text-violet-800",
-    ring: "ring-violet-400",
-  },
-  {
-    type: "Lote",
-    label: "Lote",
-    emoji: "🏔️",
-    bg: "from-emerald-100 to-green-200",
-    activeBg: "from-emerald-200 to-green-300",
-    text: "text-emerald-800",
-    ring: "ring-emerald-400",
-  },
-  {
-    type: "Cabaña",
-    label: "Cabaña",
-    emoji: "🏕️",
-    bg: "from-amber-100 to-orange-200",
-    activeBg: "from-amber-200 to-orange-300",
-    text: "text-amber-800",
-    ring: "ring-amber-400",
-  },
+  { type: "Casa", label: "Casa", Icon: HouseIcon },
+  { type: "Departamento", label: "Depto / Mono", Icon: BuildingIcon },
+  { type: "Lote", label: "Lote", Icon: LandIcon },
+  { type: "Cabaña", label: "Cabaña", Icon: CabinIcon },
 ];
 
 const CONFETTI_COLORS = ["#E8325A", "#FFD700", "#4ECDC4", "#FF6B6B", "#96CEB4", "#A8D8EA"];
@@ -193,7 +169,10 @@ export default function Navbar() {
 
   return (
     <>
-    <nav className={`fixed top-0 left-0 right-0 w-full z-50 bg-white transition-shadow duration-300 ${scrolled ? "shadow-lg" : "border-b border-gray-100"}`}>
+    {/* Regla de color de la barra: un solo acento rosa, el boton "Tasar mi
+        propiedad". Todo lo demas —tab activo, lupa, favoritos, chip— va en
+        grises. Antes competian cinco elementos rosas y ninguno destacaba. */}
+    <nav className={`fixed top-0 left-0 right-0 w-full z-50 bg-white border-b transition-colors duration-300 ${scrolled ? "border-gray-200" : "border-gray-100"}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative" ref={searchRef}>
 
         {/* ── Fila 1 ── */}
@@ -211,13 +190,13 @@ export default function Navbar() {
               const active = pathname.startsWith(href);
               return (
                 <Link key={href} href={href}
-                  className={`group flex items-center gap-1.5 px-4 py-2 text-sm rounded-full transition-all duration-200 hover:-translate-y-0.5 ${
+                  className={`group flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-200 ${
                     active
-                      ? "font-bold text-rose-700 bg-gradient-to-br from-rose-50 to-pink-50 shadow-sm shadow-rose-100 border border-rose-100"
-                      : "font-semibold text-gray-500 hover:text-gray-800 hover:bg-gray-50 hover:shadow-sm"
+                      ? "text-gray-900 bg-gray-100"
+                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
-                  <span className={`transition-transform duration-200 group-hover:scale-110 ${active ? "text-rose-500" : "text-gray-400 group-hover:text-gray-600"}`}>
+                  <span className={active ? "text-gray-900" : "text-gray-400 group-hover:text-gray-600"}>
                     {icon}
                   </span>
                   {label}
@@ -229,12 +208,11 @@ export default function Navbar() {
           {/* Chip — Compartí tu barrio */}
           <Link
             href="/experiencia-barrio"
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold hover:bg-rose-100 transition-colors flex-shrink-0 whitespace-nowrap"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 text-xs font-semibold hover:border-gray-300 hover:text-gray-900 transition-colors flex-shrink-0 whitespace-nowrap"
           >
-            <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
-            </span>
+            {/* El puntito se queda quieto. El animate-ping que tenia antes
+                pedia atencion todo el tiempo desde todas las paginas. */}
+            <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-rose-500" />
             <PinIcon />
             Compartí tu barrio
           </Link>
@@ -244,10 +222,10 @@ export default function Navbar() {
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               aria-label="Buscar por tipo"
-              className={`hidden md:flex items-center justify-center w-9 h-9 rounded-full transition-all flex-shrink-0 ${
+              className={`hidden md:flex items-center justify-center w-9 h-9 rounded-full border transition-colors flex-shrink-0 ${
                 searchOpen
-                  ? "bg-rose-500 text-white"
-                  : "bg-rose-600 text-white hover:bg-rose-500"
+                  ? "border-gray-900 bg-gray-900 text-white"
+                  : "border-gray-200 text-gray-700 hover:border-gray-400"
               }`}
             >
               <MagnifyIcon className="h-4 w-4" />
@@ -259,11 +237,7 @@ export default function Navbar() {
 
             {/* Favoritos */}
             <Link href="/favoritos" ref={heartNavRef} aria-label="Mis favoritos"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                favorites.length > 0
-                  ? "bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-100"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
             >
               <HeartIcon filled={favorites.length > 0} className="h-4 w-4" />
               {favorites.length > 0 && <span>{favorites.length}</span>}
@@ -407,20 +381,20 @@ export default function Navbar() {
             <div className="p-4">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">¿Qué tipo de propiedad buscás?</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {PROP_TYPES.map(({ type, label, emoji, ring }) => {
+                {PROP_TYPES.map(({ type, label, Icon }) => {
                   const active = selectedType === type;
                   return (
                     <button
                       key={type}
                       onMouseDown={() => selectType(type)}
-                      className={`flex flex-col items-center justify-center gap-2 rounded-2xl h-24 sm:h-28 bg-white border-2 transition-all duration-200 hover:scale-[1.05] hover:shadow-md ${
+                      className={`flex flex-col items-center justify-center gap-2 rounded-xl h-24 sm:h-28 bg-white border transition-colors duration-200 ${
                         active
-                          ? `ring-2 ${ring} border-transparent scale-[1.04] shadow-md`
-                          : "border-gray-100 hover:border-gray-200 shadow-sm"
+                          ? "border-gray-900 text-gray-900"
+                          : "border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-900"
                       }`}
                     >
-                      <span className="text-3xl sm:text-4xl leading-none select-none">{emoji}</span>
-                      <span className={`text-xs font-bold leading-tight text-center px-1 ${active ? "text-gray-900" : "text-gray-600"}`}>{label}</span>
+                      <Icon />
+                      <span className="text-xs font-semibold leading-tight text-center px-1">{label}</span>
                     </button>
                   );
                 })}
