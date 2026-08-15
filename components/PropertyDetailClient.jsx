@@ -253,23 +253,48 @@ export default function PropertyDetailClient({ property }) {
 
             {/* Sticky sidebar */}
             <div className="lg:col-span-1 lg:order-last mb-8 lg:mb-0 lg:mt-6 lg:sticky lg:top-[96px] lg:self-start lg:h-fit">
+              {/* Panel de contacto. Es la única caja con borde de la ficha —
+                  Airbnb también encierra su tarjeta de reserva—, pero adentro
+                  no va ninguna caja más: el precio suelto arriba, los datos
+                  como filas separadas por líneas finas, y los botones abajo.
+                  Antes cada dato tenía su propio recuadro gris o de color, y
+                  la caja terminaba pareciendo un tablero. */}
               <div className="border border-gray-200 rounded-2xl p-6 shadow-sm">
                   {isAlquiler ? (
                     <div className="flex flex-col gap-4">
-                      <div className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-rose-500">Alquiler mensual</p>
-                        <p className="mt-1 text-3xl font-black text-gray-900 leading-none">$ {property.precioAlquilerARS?.toLocaleString("es-AR")}</p>
-                        <p className="text-xs font-medium text-rose-700/80 mt-1">Acompaña la lectura de la ficha</p>
+                      <div>
+                        <p className="text-3xl font-bold text-gray-900 leading-none">
+                          $ {property.precioAlquilerARS?.toLocaleString("es-AR")}
+                          <span className="text-base font-normal text-gray-500"> /mes</span>
+                        </p>
                       </div>
                       <div className="flex flex-col divide-y divide-gray-100 text-sm">
                         <div className="flex justify-between py-2.5">
                           <span className="text-gray-500">Disponible desde</span>
-                          <span className="font-semibold text-green-600">{property.disponibleDesde}</span>
+                          <span className="font-medium text-gray-900">{property.disponibleDesde}</span>
                         </div>
                         <div className="flex justify-between py-2.5">
                           <span className="text-gray-500">Mínimo</span>
-                          <span className="text-gray-700">{property.mesesMinimos} meses</span>
+                          <span className="font-medium text-gray-900">{property.mesesMinimos} meses</span>
                         </div>
+                        {property.bedrooms > 0 && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">Dormitorios</span>
+                            <span className="font-medium text-gray-900">{property.bedrooms}</span>
+                          </div>
+                        )}
+                        {property.bathrooms > 0 && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">Baños</span>
+                            <span className="font-medium text-gray-900">{property.bathrooms}</span>
+                          </div>
+                        )}
+                        {property.area > 0 && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">Superficie</span>
+                            <span className="font-medium text-gray-900">{property.area} m²</span>
+                          </div>
+                        )}
                         {property.condiciones && (
                           <div className="flex justify-between py-2.5 gap-4">
                             <span className="text-gray-500 shrink-0">Condiciones</span>
@@ -277,28 +302,6 @@ export default function PropertyDetailClient({ property }) {
                           </div>
                         )}
                       </div>
-                      {(property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0) && (
-                        <div className="grid grid-cols-3 gap-2">
-                          {property.bedrooms > 0 && (
-                            <div className="text-center bg-gray-50 rounded-xl p-3">
-                              <p className="text-xl font-bold text-gray-800">{property.bedrooms}</p>
-                              <p className="text-xs text-gray-500">Dorm.</p>
-                            </div>
-                          )}
-                          {property.bathrooms > 0 && (
-                            <div className="text-center bg-gray-50 rounded-xl p-3">
-                              <p className="text-xl font-bold text-gray-800">{property.bathrooms}</p>
-                              <p className="text-xs text-gray-500">Baños</p>
-                            </div>
-                          )}
-                          {property.area > 0 && (
-                            <div className="text-center bg-gray-50 rounded-xl p-3">
-                              <p className="text-xl font-bold text-gray-800">{property.area}</p>
-                              <p className="text-xs text-gray-500">m²</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
                       {property.alquilada ? (
                         <a
                           href={waLink(property, propertyWhatsappMessage(property, { action: "similar" }))}
@@ -345,40 +348,35 @@ export default function PropertyDetailClient({ property }) {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-4">
-                      <div className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-rose-500">Precio</p>
-                        <p className="mt-1 text-3xl font-black text-gray-900 leading-none">USD {property.price?.toLocaleString("es-AR")}</p>
-                        <p className="text-xs font-medium text-rose-700/80 mt-1">Acompaña la lectura de la ficha</p>
+                      <div>
+                        <p className="text-3xl font-bold text-gray-900 leading-none">USD {property.price?.toLocaleString("es-AR")}</p>
                       </div>
-                      {property.roi && (
-                        <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-xl px-4 py-3">
-                          <span className="text-green-700 text-sm font-medium">ROI estimado</span>
-                          <span className="text-green-700 font-bold text-lg">~{property.roi}%</span>
-                        </div>
-                      )}
-                      {(property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0) && (
-                        <div className="grid grid-cols-3 gap-2">
-                          {property.bedrooms > 0 && (
-                            <div className="text-center bg-gray-50 rounded-xl p-3">
-                              <p className="text-xl font-bold text-gray-800">{property.bedrooms}</p>
-                              <p className="text-xs text-gray-500">Dorm.</p>
-                            </div>
-                          )}
-                          {property.bathrooms > 0 && (
-                            <div className="text-center bg-gray-50 rounded-xl p-3">
-                              <p className="text-xl font-bold text-gray-800">{property.bathrooms}</p>
-                              <p className="text-xs text-gray-500">Baños</p>
-                            </div>
-                          )}
-                          {property.area > 0 && (
-                            <div className="text-center bg-gray-50 rounded-xl p-3">
-                              <p className="text-xl font-bold text-gray-800">{property.area}</p>
-                              <p className="text-xs text-gray-500">m²</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <hr className="border-gray-100" />
+                      <div className="flex flex-col divide-y divide-gray-100 text-sm">
+                        {property.bedrooms > 0 && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">Dormitorios</span>
+                            <span className="font-medium text-gray-900">{property.bedrooms}</span>
+                          </div>
+                        )}
+                        {property.bathrooms > 0 && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">Baños</span>
+                            <span className="font-medium text-gray-900">{property.bathrooms}</span>
+                          </div>
+                        )}
+                        {property.area > 0 && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">Superficie</span>
+                            <span className="font-medium text-gray-900">{property.area} m²</span>
+                          </div>
+                        )}
+                        {property.roi && (
+                          <div className="flex justify-between py-2.5">
+                            <span className="text-gray-500">ROI estimado</span>
+                            <span className="font-medium text-gray-900">~{property.roi}%</span>
+                          </div>
+                        )}
+                      </div>
                       <button
                         onClick={() => setShowInquiry(true)}
                         className="block w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-xl text-center transition"
