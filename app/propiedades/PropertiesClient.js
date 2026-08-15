@@ -132,26 +132,22 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
               </p>
             </div>
 
+            {/* Antes esta tarjeta era un degradado rosa con un halo borroso y
+                un emoji, justo al lado de la grilla de propiedades. Ahora es
+                una caja blanca con borde: el color queda para el texto del
+                enlace, que es lo único en lo que hay que hacer clic. */}
             <Link
               href="/tasacion"
-              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 p-5 lg:w-[320px] hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+              className="group rounded-2xl border border-gray-200 p-5 lg:w-[320px] transition-colors hover:border-gray-400"
             >
-              <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-rose-200/40 blur-2xl" />
-              <div className="relative flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                  <span className="text-xl">🏡</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold tracking-wider uppercase text-rose-600 mb-0.5">¿Tenés una propiedad?</p>
-                  <p className="text-sm font-bold text-gray-900 leading-snug">Tasación gratis con datos reales del mercado</p>
-                  <span className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-rose-600 group-hover:gap-2 transition-all">
-                    Pedir tasación
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
+              <p className="text-xs font-semibold text-gray-500 mb-1">¿Tenés una propiedad?</p>
+              <p className="text-sm font-semibold text-gray-900 leading-snug">Tasación gratis con datos reales del mercado</p>
+              <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-rose-600">
+                Pedir tasación
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </span>
             </Link>
           </div>
         </div>

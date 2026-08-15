@@ -180,7 +180,7 @@ export default async function Home() {
             event="tasador_click"
             eventParams={{ source: "home" }}
             href={TASADOR_PATH}
-            className="group flex flex-col justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-md hover:shadow-lg transition-shadow"
+            className="group flex flex-col justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-slate-900 transition-colors hover:bg-slate-800"
           >
             <div>
               <p className="text-rose-400 text-[11px] font-bold tracking-widest uppercase mb-1.5">¿Vendés? · Resultado al instante</p>
@@ -300,7 +300,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="relative">
-              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative aspect-video rounded-2xl overflow-hidden">
                 <Image
                   src="/trayectoria.jpeg"
                   alt="San Martín de los Andes — Catalán Propiedades"
@@ -310,9 +310,12 @@ export default async function Home() {
                   className="object-cover" style={{ objectPosition: 'center 65%' }}
                 />
               </div>
-              <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl hidden md:block">
-                <p className="text-rose-600 text-3xl font-bold mb-1">100%</p>
-                <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Atención Personalizada</p>
+              {/* La placa se apoya sobre la foto con un borde, no con una
+                  sombra grande: la sombra la hacía flotar y competía con la
+                  imagen. */}
+              <div className="absolute -bottom-6 -right-6 bg-white border border-gray-200 p-6 rounded-2xl hidden md:block">
+                <p className="text-gray-900 text-3xl font-bold mb-1">100%</p>
+                <p className="text-gray-500 text-xs font-medium">Atención personalizada</p>
               </div>
             </div>
           </div>
@@ -333,30 +336,28 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Sin emoji decorativo arriba de cada operación: el tipo ya está
+                escrito abajo, así que el 🏔️ no agregaba dato, solo ruido. */}
             {[
               {
-                emoji: "🏔️",
                 tipo: "Lote",
                 zona: "Vega Maipú",
                 precio: "USD 110.000",
                 detalle: "Vendido · 2024",
               },
               {
-                emoji: "🏔️",
                 tipo: "Lote 600 m² · Caleuche",
                 zona: "Paseo de los Músicos",
                 precio: "USD 30.000",
                 detalle: "Vendido · 2020",
               },
               {
-                emoji: "🏪",
                 tipo: "Local comercial a estrenar",
                 zona: "Centro",
                 precio: "USD 200.000",
                 detalle: "Vendido · 2025",
               },
               {
-                emoji: "🏢",
                 tipo: "Monoambiente en pozo",
                 zona: "Centro",
                 precio: "USD 105.000",
@@ -364,11 +365,10 @@ export default async function Home() {
               },
             ].map((op) => (
               <div key={`${op.tipo}-${op.precio}`} className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col">
-                <span className="text-2xl mb-3">{op.emoji}</span>
-                <p className="text-sm font-bold text-gray-900 leading-snug">{op.tipo}</p>
-                <p className="text-xs text-gray-400 mt-0.5 mb-4">{op.zona}</p>
-                <p className="text-xl font-black text-gray-900 mt-auto">{op.precio}</p>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-emerald-600 mt-1">{op.detalle}</p>
+                <p className="text-sm font-semibold text-gray-900 leading-snug">{op.tipo}</p>
+                <p className="text-xs text-gray-500 mt-0.5 mb-6">{op.zona}</p>
+                <p className="text-xl font-bold text-gray-900 mt-auto">{op.precio}</p>
+                <p className="text-xs text-gray-500 mt-1">{op.detalle}</p>
               </div>
             ))}
           </div>

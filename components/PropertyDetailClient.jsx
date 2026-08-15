@@ -10,7 +10,7 @@ import SimuladorCuota from "@/components/SimuladorCuota";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { propertyWhatsappMessage, whatsappUrl } from "@/lib/whatsapp";
-import { getPropertyDescriptionEmoji, splitPropertyDescription } from "@/lib/propertyDescription";
+import { splitPropertyDescription } from "@/lib/propertyDescription";
 
 function waLink(property, message = "") {
   return whatsappUrl(message || propertyWhatsappMessage(property));
@@ -397,25 +397,20 @@ export default function PropertyDetailClient({ property }) {
             {/* Main content */}
             <div className="lg:col-span-2">
               <section className="mb-8 pb-8 border-b border-gray-100">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold text-gray-800">Descripción</h2>
-                  <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-rose-700">
-                    ✦ Lectura rápida
-                  </span>
-                </div>
-                <div className="space-y-3 font-[family-name:var(--font-plus-jakarta)]">
+                <h2 className="mb-4 text-lg font-semibold text-gray-800">Descripción</h2>
+                {/* La descripción es texto, no fichas. Antes cada párrafo iba
+                    dentro de una caja rosa con degradado y un emoji arriba, y
+                    leer tres párrafos era leer tres cajas apiladas. El corte en
+                    párrafos (splitPropertyDescription) se mantiene: eso sí
+                    ayuda a leer. */}
+                <div className="space-y-4 font-[family-name:var(--font-plus-jakarta)]">
                   {(descriptionParagraphs.length > 0 ? descriptionParagraphs : [descriptionText]).map((paragraph, index) => (
-                    <div
+                    <p
                       key={`${index}-${paragraph.slice(0, 24)}`}
-                      className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/80 via-white to-white p-4 sm:p-5 shadow-sm"
+                      className="text-[15px] leading-8 text-gray-700 text-pretty"
                     >
-                      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.25em] text-rose-500">
-                        {getPropertyDescriptionEmoji(paragraph, property.type)}
-                      </p>
-                      <p className="text-[15px] leading-8 text-gray-700 sm:text-justify text-left text-pretty">
-                        {paragraph}
-                      </p>
-                    </div>
+                      {paragraph}
+                    </p>
                   ))}
                 </div>
               </section>
