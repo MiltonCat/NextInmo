@@ -55,7 +55,9 @@ function PropertyCard({ property }) {
 
   const cardContent = (
     <>
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
+      {/* 16:10 y no 4:3: en el listado entra bastante más catálogo por
+          pantallazo, sobre todo en celular donde va una sola columna. */}
+      <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-gray-100">
         <Image
           src={property.image}
           alt={property.title}
