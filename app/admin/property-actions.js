@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { requireUser } from "@/lib/auth";
+import { notifyUsersAboutNewProperty } from "@/lib/emailNuevaPropiedad";
 import {
   getNextIds,
   insertProperty,
@@ -87,10 +89,26 @@ function revalidatePublic() {
   revalidatePath("/admin");
 }
 
+// ¿Corresponde avisar por correo de esta propiedad recién cargada?
+//
+// Se exige que el aviso esté tildado, que haya barrio (sin él no hay con qué
+// cruzar los favoritos) y que la propiedad esté efectivamente disponible.
+// Devuelve el motivo cuando no corresponde, para dejarlo en el log: si Milton
+// espera un correo y no llega, el log dice exactamente por qué.
+function motivoParaNoAvisar(row, pidioAviso) {
+  if (!pidioAviso) return "el aviso quedó destildado en el formulario";
+  if (!row.barrio) return "la propiedad no tiene barrio cargado";
+  if (row.vendida) return "está marcada como vendida";
+  if (row.alquilada) return "está marcada como alquilada";
+  if (row.reservada) return "está marcada como reservada";
+  return null;
+}
+
 export async function createProperty(prevState, formData) {
   await requireUser();
+  let row;
   try {
-    const row = await buildRowFromForm(formData);
+    row = await buildRowFromForm(formData);
     if (!row.title) return { error: "El título es obligatorio." };
     const { nextId, nextSort } = await getNextIds();
     row.id = nextId;
@@ -99,6 +117,30 @@ export async function createProperty(prevState, formData) {
   } catch (e) {
     return { error: e.message };
   }
+
+  // El aviso va DESPUÉS de que la propiedad quedó guardada, y fuera del camino
+  // de la respuesta: mandar varios correos por SMTP tarda segundos y no puede
+  // dejar a Milton mirando un formulario colgado. `after()` los manda una vez
+  // que la página ya respondió.
+  //
+  // Un fallo acá nunca revierte el alta: la propiedad ya está publicada y eso
+  // es lo que importa. El error queda en el log de Vercel.
+  const motivo = motivoParaNoAvisar(row, bool(formData.get("avisarPorCorreo")));
+  if (motivo) {
+    console.log(`[alta de propiedad ${row.id}] sin aviso por correo: ${motivo}.`);
+  } else {
+    after(async () => {
+      try {
+        const r = await notifyUsersAboutNewProperty(row);
+        console.log(
+          `[alta de propiedad ${row.id}] aviso enviado a ${r.enviados} de ${r.destinatarios} personas con favoritos en "${row.barrio}".`
+        );
+      } catch (e) {
+        console.error(`[alta de propiedad ${row.id}] falló el aviso por correo:`, e);
+      }
+    });
+  }
+
   revalidatePublic();
   redirect("/admin");
 }

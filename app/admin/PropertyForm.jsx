@@ -153,6 +153,39 @@ export default function PropertyForm({ action, property = null }) {
         </div>
       </section>
 
+      {/*
+        Aviso por correo. Solo al cargar una propiedad nueva: al editar no tiene
+        sentido y reenviar sería molestar a la misma gente dos veces.
+
+        Va tildado por defecto porque avisar es el comportamiento deseado, pero
+        queda a la vista y se puede destildar: el correo le llega a clientes
+        reales y no hay forma de deshacerlo. Si la publicación está a medias o
+        es una carga de prueba, se destilda y listo.
+      */}
+      {!property && (
+        <section className="rounded-xl border border-rose-200 bg-rose-50 p-6">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              name="avisarPorCorreo"
+              defaultChecked
+              className="mt-1"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-gray-900">
+                Avisar por correo a quienes guardaron favoritos en este barrio
+              </span>
+              <span className="mt-1 block text-sm leading-relaxed text-gray-600">
+                Sale un correo con la foto y el precio a cada persona con
+                propiedades guardadas en el mismo barrio. Requiere que el campo
+                Barrio esté completo. No se envía nada si marcaste la propiedad
+                como vendida, alquilada o reservada.
+              </span>
+            </span>
+          </label>
+        </section>
+      )}
+
       {/* --- Fotos --- */}
       <section className="bg-white rounded-xl shadow-sm p-6 space-y-4">
         <h2 className="font-semibold text-gray-900">Fotos</h2>
