@@ -68,11 +68,23 @@ export default function Hero() {
           pointerEvents: collapsed ? "none" : "auto",
         }}
       >
+        {/*
+          El H1 dice la frase exacta que la gente busca en Google:
+          "inmobiliaria san martin de los andes" acumula 282 impresiones en 28
+          días entre sus tres variantes, y la home rankea ahí en posición ~10.
+          Es la consulta más valiosa del sitio.
+
+          Durante unas horas el 17/08/2026 este H1 decía "Compra donde otros ya
+          compraron: +18% ROI gestionados" — sin la palabra "inmobiliaria" ni la
+          ciudad. Le sacaba a Google la señal principal de qué es esta página
+          justo en la búsqueda que más importa. La urgencia y la prueba social
+          viven ahora en la bajada, donde no compiten con el posicionamiento.
+        */}
         <h1 className="text-gray-900 text-[1.7rem] sm:text-4xl font-bold mb-2 drop-shadow-lg leading-tight max-w-[19rem] sm:max-w-none">
-          Compra donde otros ya compraron: +18% ROI gestionados
+          Inmobiliaria en San Martín de los Andes
         </h1>
         <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-5 max-w-[18rem] sm:max-w-xl leading-snug">
-          Propiedades nuevas cada semana. Asesoramiento local verificado.
+          +18% ROI gestionados · Propiedades nuevas cada semana
         </p>
         <div className="flex w-full max-w-[17rem] flex-col sm:w-auto sm:max-w-none sm:flex-row gap-2.5 sm:gap-3">
           <Link

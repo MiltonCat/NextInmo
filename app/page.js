@@ -14,9 +14,16 @@ import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_PATH } from "@/config";
 // Refresca el contenido desde la base cada 5 minutos sin necesidad de redeploy.
 export const revalidate = 300;
 
+// El title arranca con la frase exacta de la búsqueda principal
+// ("inmobiliaria san martin de los andes", 282 impresiones en 28 días,
+// posición ~10). Google le da más peso a lo que está al principio, y ahí es
+// donde se juega subir de la posición 10 al top 5.
+//
+// La description es lo que decide el clic una vez que ya aparecés: repite la
+// frase, suma la prueba (años, matrícula, ROI) y recién después el catálogo.
 export const metadata = {
-  title: "Compra, Alquila e Invierte en San Martín de los Andes | +18% ROI | Catalán Propiedades",
-  description: "Propiedades nuevas cada semana en San Martín de los Andes. Compra, alquila o invierte con asesoramiento local verificado. 10+ años, martillera matriculada.",
+  title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
+  description: "Inmobiliaria en San Martín de los Andes con +10 años y martillera matriculada. +18% ROI gestionado. Casas, departamentos y lotes en venta y alquiler permanente, con datos reales del mercado.",
   openGraph: {
     title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
     description: "Propiedades en venta y alquiler permanente en San Martín de los Andes, con asesoría local y datos del mercado.",
