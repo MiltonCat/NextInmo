@@ -105,11 +105,30 @@ const usd = (n) => `USD ${Number(n).toLocaleString("es-AR")}`;
 // Los valores salen de lib/mercado.js como el resto de la página — nunca
 // escribirlos a mano acá, o el día que se regenere el modelo la SERP va a
 // mostrar un precio que la página ya no dice (ver el TODO del encabezado).
+// La página rankea en posición ~5 con 239 impresiones en 28 días, pero solo 5
+// clics: un CTR del 2% donde esa posición debería dar 6-8%.
+//
+// Hipótesis del cambio: la descripción anterior abría con el valor puntual del
+// m² ("Casas USD X y departamentos USD Y"), o sea que respondía la consulta
+// dentro del propio resultado de Google. Quien buscaba el número ya lo tenía
+// ahí y no necesitaba entrar.
+//
+// Ahora el snippet muestra que el dato existe y de dónde sale —el relevamiento
+// propio, la serie de años— pero lo que solo está adentro (la mediana de SU
+// barrio, la calculadora) queda como motivo del clic. El título suma "barrio
+// por barrio", que es la diferencia real contra los portales que publican un
+// promedio nacional.
+//
+// Si en la próxima revisión el CTR no se movió, la hipótesis era otra y hay que
+// cruzar qué consultas traen estas impresiones.
 export const metadata = {
-  title: "Precio del m² en San Martín de los Andes 2026",
+  // 57 caracteres: entra entero en el resultado de Google, que corta cerca de
+  // los 60. Con "barrio por barrio" se pasaba y quedaba truncado con puntos
+  // suspensivos justo en la parte que diferencia la página.
+  title: "Precio del m² en San Martín de los Andes 2026, por barrio",
   // Sin "terrenos": la página ya no publica su m². Y el total sale de la
   // constante, no escrito a mano — decía "más de 1.500" fijo.
-  description: `Casas ${usd(VALOR_M2_CASA)} y departamentos ${usd(VALOR_M2_DEPTO)} el m². Mediana por barrio y evolución 2021–2026, sobre un relevamiento propio de ${RELEVADAS_PUBLICO} propiedades.`,
+  description: `¿Cuánto vale el m² en tu barrio? Mediana por zona, evolución 2021–2026 y una calculadora para estimar tu propiedad, sobre un relevamiento propio de ${RELEVADAS_PUBLICO} propiedades en San Martín de los Andes.`,
   openGraph: {
     title: "Precio del m² en San Martín de los Andes 2026 — Catalán Propiedades",
     description: `Evolución del m² 2021–2026 y mediana por barrio, sobre ${RELEVADAS_PUBLICO} propiedades relevadas en San Martín de los Andes.`,
