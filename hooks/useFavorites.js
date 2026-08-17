@@ -1,6 +1,5 @@
 "use client";
-import { useMemo, useSyncExternalStore, useEffect, useState } from "react";
-import { useAuth } from "./useAuth";
+import { useMemo, useSyncExternalStore, useEffect } from "react";
 
 const EVENT = "propiaFavoritesChanged";
 const STORAGE_KEY = "propiaFavorites";
@@ -20,6 +19,12 @@ const STORAGE_KEY = "propiaFavorites";
 // los favoritos siguen funcionando durante la sesión en vez de que el botón
 // deje de responder por completo.
 let memoria = null;
+
+// El sync con la cuenta corre UNA vez por carga de página, no una vez por
+// componente: `useFavorites` se usa en PropertyCard, Navbar y FavoritosClient
+// a la vez, y sin este candado cada tarjeta del listado dispararía su propio
+// POST al montarse.
+let yaSincronizado = false;
 
 function leerDeStorage() {
   try {
@@ -59,71 +64,71 @@ function parseFavorites(value) {
   }
 }
 
-export function useFavorites() {
-  const { user } = useAuth(); // Obtener usuario autenticado (si existe)
-  const [isSyncing, setIsSyncing] = useState(false);
+// Guarda una lista completa y avisa a todos los componentes montados.
+function escribirLista(lista) {
+  const serializada = JSON.stringify(lista);
+  if (serializada === memoria) return; // Nada cambió: no repintamos de gusto.
 
+  memoria = serializada;
+  try {
+    localStorage.setItem(STORAGE_KEY, memoria);
+  } catch {
+    // Sin persistencia entre sesiones, pero la actual sigue usable.
+  }
+  window.dispatchEvent(new Event(EVENT));
+}
+
+export function useFavorites() {
   const snapshot = useSyncExternalStore(subscribeToFavorites, getFavoritesSnapshot, () => "[]");
   const favorites = useMemo(() => parseFavorites(snapshot), [snapshot]);
 
-  // NUEVO: Sincronizar a Supabase cuando usuario se loguea
+  // Al cargar la página, ofrecemos los favoritos locales al servidor. Si hay
+  // sesión, los guarda en la cuenta y nos devuelve la lista completa —así los
+  // corazones marcados en el celular aparecen en la computadora. Si no hay
+  // sesión, responde que no y todo sigue funcionando con localStorage.
   useEffect(() => {
-    if (!user || isSyncing) return;
+    if (yaSincronizado) return;
+    yaSincronizado = true;
 
-    setIsSyncing(true);
+    const locales = parseFavorites(getFavoritesSnapshot());
 
     fetch("/api/favorites/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        localFavorites: favorites,
-      }),
+      body: JSON.stringify({ localFavorites: locales }),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(`[useFavorites] Synced ${data.synced} favorites to server`);
+        if (!data?.authenticated || !Array.isArray(data.favorites)) return;
+        escribirLista(data.favorites);
       })
-      .catch((err) => {
-        console.error("[useFavorites] sync error:", err);
-      })
-      .finally(() => {
-        setIsSyncing(false);
+      .catch(() => {
+        // Sin conexión o error del servidor: los favoritos locales alcanzan.
+        // Se reintenta en la próxima carga de página.
       });
-  }, [user]); // Solo corre cuando user cambia (login/logout)
+  }, []);
 
   const toggle = (id) => {
     const current = parseFavorites(getFavoritesSnapshot());
-    const updated = current.includes(id)
-      ? current.filter((f) => f !== id)
-      : [...current, id];
+    const activando = !current.includes(id);
+    const updated = activando ? [...current, id] : current.filter((f) => f !== id);
 
-    // Primero la memoria: garantiza que la UI reaccione pase lo que pase.
-    memoria = JSON.stringify(updated);
+    escribirLista(updated);
 
-    try {
-      localStorage.setItem(STORAGE_KEY, memoria);
-    } catch {
-      // Sin persistencia entre sesiones, pero la actual sigue usable.
-    }
-
-    // NUEVO: Si hay usuario logged in, sincronizar el cambio al servidor
-    if (user) {
-      fetch("/api/favorites/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertyId: Number(id),
-          isFavorite: updated.includes(id),
-        }),
-      }).catch((err) => {
-        console.error("[toggle-favorite] sync error:", err);
-      });
-    }
-
-    window.dispatchEvent(new Event(EVENT));
+    // Se avisa al servidor siempre, sin chequear antes si hay sesión: la
+    // cookie de sesión es httpOnly y el navegador no puede leerla. Si no hay
+    // cuenta, la route responde `authenticated: false` y no escribe nada.
+    fetch("/api/favorites/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId: Number(id), isFavorite: activando }),
+    }).catch(() => {
+      // El corazón ya se pintó y quedó en localStorage. El próximo sync al
+      // cargar la página lo sube a la cuenta.
+    });
   };
 
   const isFavorite = (id) => favorites.includes(id);
 
-  return { favorites, toggle, isFavorite, isSyncing };
+  return { favorites, toggle, isFavorite };
 }

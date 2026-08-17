@@ -3,15 +3,28 @@
 
 import { notifyUsersAboutNewProperty } from "@/lib/emailNuevaPropiedad";
 
-// Token secreto para verificar que la llamada viene del admin
+// Token secreto para verificar que la llamada viene del admin.
+//
+// Este endpoint manda correos a personas reales: si queda abierto, cualquiera
+// que descubra la URL puede spamear a toda la lista y quemar la cuota de Gmail.
+// Por eso, cuando falta el secreto en producción, RECHAZA en vez de permitir.
+// La versión anterior devolvía `true` en ese caso "para desarrollo" y eso dejó
+// el endpoint público durante el primer deploy.
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET_NUEVA_PROPIEDAD;
+const EN_PRODUCCION = process.env.NODE_ENV === "production";
 
 function verifyToken(authHeader) {
   if (!WEBHOOK_SECRET) {
+    if (EN_PRODUCCION) {
+      console.error(
+        "[nueva-propiedad] WEBHOOK_SECRET_NUEVA_PROPIEDAD no configurada en producción: se rechaza el pedido."
+      );
+      return false;
+    }
     console.warn(
-      "[nueva-propiedad] WEBHOOK_SECRET no configurada; no verificando token"
+      "[nueva-propiedad] WEBHOOK_SECRET no configurada; en desarrollo se permite sin token."
     );
-    return true; // En desarrollo, permitir sin token
+    return true;
   }
 
   const token = authHeader?.replace("Bearer ", "");

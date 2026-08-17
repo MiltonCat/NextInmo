@@ -1,36 +1,41 @@
 // POST /api/favorites/toggle
-// Agrega o remueve una propiedad de favoritos para user autenticado
+//
+// Persiste un corazón en la cuenta. El cliente lo llama siempre que alguien
+// marca o desmarca, sin saber si hay sesión: si no hay, acá se ignora.
+//
+// Se usa `getSessionUser` y no `requireAuthenticatedUser` porque ese último
+// hace `redirect()`, y un redirect como respuesta a un `fetch` no es un error
+// que el cliente pueda interpretar — devuelve HTML del login con status 307.
 
-import { requireAuthenticatedUser } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { addFavorite, removeFavorite } from "@/lib/userPreferences";
 
 export async function POST(request) {
   try {
-    const user = await requireAuthenticatedUser();
-    const body = await request.json();
-    const { propertyId, isFavorite } = body;
+    const user = await getSessionUser();
 
-    if (!propertyId) {
-      return Response.json(
-        { error: "Missing propertyId" },
-        { status: 400 }
-      );
+    // Sin cuenta el favorito vive solo en localStorage. No es un error.
+    if (!user) {
+      return Response.json({ authenticated: false, saved: false });
+    }
+
+    const body = await request.json();
+    const propertyId = Number(body?.propertyId);
+    const isFavorite = Boolean(body?.isFavorite);
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return Response.json({ error: "propertyId inválido" }, { status: 400 });
     }
 
     if (isFavorite) {
-      await addFavorite(user.id, Number(propertyId));
-      console.log(`[favorites/toggle] User ${user.id} added ${propertyId}`);
+      await addFavorite(user.id, propertyId);
     } else {
-      await removeFavorite(user.id, Number(propertyId));
-      console.log(`[favorites/toggle] User ${user.id} removed ${propertyId}`);
+      await removeFavorite(user.id, propertyId);
     }
 
-    return Response.json({ ok: true });
+    return Response.json({ authenticated: true, saved: true });
   } catch (error) {
     console.error("[favorites/toggle] error:", error);
-    return Response.json(
-      { error: error.message || "Failed to toggle" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Failed to toggle" }, { status: 500 });
   }
 }

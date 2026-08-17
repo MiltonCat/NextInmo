@@ -3,6 +3,36 @@
 
 ---
 
+## ⚠️ CORRECCIÓN (17/08/2026) — leer antes que el resto
+
+La primera versión de este documento indicaba crear un hook `hooks/useAuth.js`
+que leyera la sesión con `supabaseBrowser()`. **Eso no funciona en este
+proyecto** y hacía que el sync de favoritos nunca corriera (la tabla quedaba
+siempre en 0 filas).
+
+El motivo: `lib/supabaseBrowser.js` crea el cliente con
+`auth: { persistSession: false }`. Ese cliente sirve para lecturas públicas,
+no guarda ni lee sesión. La sesión real vive en cookies httpOnly y la maneja
+`@supabase/ssr` del lado del servidor (`lib/supabaseServer.js`). Por eso
+`getSession()` en el navegador devuelve siempre `null`.
+
+**Cómo quedó resuelto:**
+
+- `hooks/useAuth.js` se eliminó. No hay detección de sesión en el cliente.
+- `hooks/useFavorites.js` llama a `/api/favorites/sync` en cada carga de
+  página, sin condiciones. El servidor lee la cookie y decide: si hay sesión
+  sincroniza y devuelve la lista completa; si no, responde
+  `authenticated: false` y no escribe nada.
+- `toggle()` avisa al servidor siempre, por el mismo motivo: el navegador no
+  puede saber si hay sesión.
+- Las dos API routes usan `getSessionUser()` en vez de
+  `requireAuthenticatedUser()`, porque este último hace `redirect()` y un
+  redirect como respuesta a un `fetch` devuelve el HTML del login con 307.
+
+Las secciones de más abajo que mencionan `useAuth` quedan obsoletas.
+
+---
+
 ## ✅ Archivos Creados
 
 - [x] `docs/sql-crear-user-preferences.sql` — SQL para tabla

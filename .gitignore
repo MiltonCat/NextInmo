@@ -62,6 +62,12 @@ out.zip
 # audios crudos del TTS: se comprimen a public/podcast/ y no se versionan
 /audios-nuevos/
 
+# videos de propiedades: los genera scripts/video-propiedad.mjs a partir de las
+# fotos, así que son artefactos derivados. Versionarlos sumaba ~7 MB de binarios
+# al historial en cada regeneración y ninguna página del sitio los consume.
+# Para recrearlos: node scripts/video-propiedad.mjs
+/public/videos/
+
 # Datos de la revision diaria de analitica (se regeneran, no van al repo)
 revision-web.json
 
