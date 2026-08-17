@@ -39,26 +39,38 @@ export async function POST(request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Parsear body
     const body = await request.json();
     const { property } = body;
 
     if (!property || !property.id) {
-      return Response.json(
-        { error: "Missing property data" },
-        { status: 400 }
-      );
+      return Response.json({ error: "Falta el objeto property" }, { status: 400 });
     }
 
+    // Modo de prueba: si viene `testEmail`, el correo sale SOLO a esa
+    // dirección. La lista real de destinatarios se calcula igual y se informa
+    // en la respuesta, así se puede verificar el cruce por barrio sin
+    // escribirle a ningún cliente.
+    const testEmail = typeof body.testEmail === "string" ? body.testEmail.trim() : null;
+    const esPrueba = Boolean(testEmail);
+
     console.log(
-      `[nueva-propiedad] Received property ${property.id}: ${property.title}`
+      `[nueva-propiedad] propiedad ${property.id} ("${property.title}"), ` +
+        `barrio "${property.barrio || "sin barrio"}"${esPrueba ? ` — PRUEBA a ${testEmail}` : ""}`
     );
 
-    // Enviar emails en background (no bloquea la respuesta)
-    const sent = await notifyUsersAboutNewProperty(property);
+    const resultado = await notifyUsersAboutNewProperty(property, {
+      soloA: testEmail,
+    });
 
     return Response.json(
-      { ok: true, property_id: property.id, emails_sent: sent },
+      {
+        ok: true,
+        property_id: property.id,
+        barrio: property.barrio || null,
+        modo: resultado.modo,
+        destinatarios_reales: resultado.destinatarios,
+        correos_enviados: resultado.enviados,
+      },
       { status: 200 }
     );
   } catch (error) {

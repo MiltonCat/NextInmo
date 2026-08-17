@@ -3,33 +3,55 @@
 
 ---
 
-## ⚠️ CORRECCIÓN (17/08/2026) — leer antes que el resto
+## ⛔ ESTE DOCUMENTO QUEDÓ OBSOLETO (17/08/2026)
 
-La primera versión de este documento indicaba crear un hook `hooks/useAuth.js`
-que leyera la sesión con `supabaseBrowser()`. **Eso no funciona en este
-proyecto** y hacía que el sync de favoritos nunca corriera (la tabla quedaba
-siempre en 0 filas).
+**Todo lo que sigue describe una tabla `user_preferences` que ya no existe y
+que nunca debió crearse.** Se deja como registro del error, no como guía.
 
-El motivo: `lib/supabaseBrowser.js` crea el cliente con
-`auth: { persistSession: false }`. Ese cliente sirve para lecturas públicas,
-no guarda ni lee sesión. La sesión real vive en cookies httpOnly y la maneja
-`@supabase/ssr` del lado del servidor (`lib/supabaseServer.js`). Por eso
-`getSession()` en el navegador devuelve siempre `null`.
+### Qué pasó
 
-**Cómo quedó resuelto:**
+El sitio **ya tenía** favoritos sincronizados a Supabase antes de empezar esto:
 
-- `hooks/useAuth.js` se eliminó. No hay detección de sesión en el cliente.
-- `hooks/useFavorites.js` llama a `/api/favorites/sync` en cada carga de
-  página, sin condiciones. El servidor lee la cookie y decide: si hay sesión
-  sincroniza y devuelve la lista completa; si no, responde
-  `authenticated: false` y no escribe nada.
-- `toggle()` avisa al servidor siempre, por el mismo motivo: el navegador no
-  puede saber si hay sesión.
-- Las dos API routes usan `getSessionUser()` en vez de
-  `requireAuthenticatedUser()`, porque este último hace `redirect()` y un
-  redirect como respuesta a un `fetch` devuelve el HTML del login con 307.
+- Tabla `client_favorites`, definida en `docs/sql/client_accounts_security.sql`
+- La escribe `app/cuenta/FavoriteSync.jsx` → `syncLocalFavorites()` en
+  `app/cuenta/actions.js`
+- La lee `lib/clientPortal.js`
+- Ya estaba anotado en `docs/investigacion/producto-2026-08-06.md`, línea 17
 
-Las secciones de más abajo que mencionan `useAuth` quedan obsoletas.
+Sin verificar nada de eso, se creó `user_preferences` en paralelo con la misma
+forma y el mismo propósito, y se apuntó el email drip ahí. Como los favoritos
+reales seguían yendo a `client_favorites`, la tabla nueva quedaba siempre en
+0 filas y parecía que el sync estaba roto.
+
+### Dos bugs de paso, ambos del mismo descuido
+
+1. **`hooks/useAuth.js`** leía la sesión con `supabaseBrowser()`, que se crea
+   con `auth: { persistSession: false }` y nunca devuelve sesión. La sesión
+   vive en cookies httpOnly y solo la ve el servidor. Ver `lib/auth.js`
+   (`getSessionUser`). El hook se eliminó.
+
+2. **El cruce por barrio usaba `location`**, que es la dirección de la calle
+   ("Rivadavia 155, San Martín de los Andes"). El barrio es la columna
+   `barrio`, con slugs (`centro`, `chapelco-golf`). Nunca habría matcheado.
+
+### Qué quedó en pie
+
+- `lib/emailNuevaPropiedad.js` — reescrito sobre `client_favorites`, cruzando
+  por `barrio`. **Esta es la referencia buena.**
+- `app/api/webhook/nueva-propiedad/route.js` — el disparador, protegido con
+  `WEBHOOK_SECRET_NUEVA_PROPIEDAD` (rechaza si falta el secreto en producción).
+- `hooks/useFavorites.js` — restaurado a su versión original.
+
+### Eliminado
+
+`lib/userPreferences.js` · `app/api/favorites/sync/` ·
+`app/api/favorites/toggle/` · `hooks/useAuth.js` ·
+`docs/sql-crear-user-preferences.sql` · la tabla `user_preferences`.
+
+### La lección
+
+Antes de crear una tabla o proponer una feature en este repo: buscar primero.
+El sitio tiene mucho más implementado de lo que aparenta.
 
 ---
 
