@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { notifyUsersAboutNewProperty } from "@/lib/emailNuevaPropiedad";
+import { barrioDePropiedad } from "@/lib/barrios";
 import {
   getNextIds,
   insertProperty,
@@ -97,7 +98,12 @@ function revalidatePublic() {
 // espera un correo y no llega, el log dice exactamente por qué.
 function motivoParaNoAvisar(row, pidioAviso) {
   if (!pidioAviso) return "el aviso quedó destildado en el formulario";
-  if (!row.barrio) return "la propiedad no tiene barrio cargado";
+  // Igual que el resto del sitio: vale el barrio elegido a mano y también el
+  // deducido de la Ubicación, que es lo que hace la opción "Deducir de la
+  // ubicación" del formulario.
+  if (!barrioDePropiedad(row)) {
+    return `no se pudo determinar el barrio (campo vacío y la ubicación "${row.location || ""}" no permite deducirlo)`;
+  }
   if (row.vendida) return "está marcada como vendida";
   if (row.alquilada) return "está marcada como alquilada";
   if (row.reservada) return "está marcada como reservada";
@@ -133,7 +139,8 @@ export async function createProperty(prevState, formData) {
       try {
         const r = await notifyUsersAboutNewProperty(row);
         console.log(
-          `[alta de propiedad ${row.id}] aviso enviado a ${r.enviados} de ${r.destinatarios} personas con favoritos en "${row.barrio}".`
+          `[alta de propiedad ${row.id}] aviso enviado a ${r.enviados} de ${r.destinatarios} personas ` +
+            `con favoritos en "${barrioDePropiedad(row)?.slug}".`
         );
       } catch (e) {
         console.error(`[alta de propiedad ${row.id}] falló el aviso por correo:`, e);
