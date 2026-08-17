@@ -10,7 +10,12 @@ import { notifyUsersAboutNewProperty } from "@/lib/emailNuevaPropiedad";
 // Por eso, cuando falta el secreto en producción, RECHAZA en vez de permitir.
 // La versión anterior devolvía `true` en ese caso "para desarrollo" y eso dejó
 // el endpoint público durante el primer deploy.
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET_NUEVA_PROPIEDAD;
+//
+// Se recorta con trim() a propósito: al pegar el valor en el panel de Vercel
+// se cuelan espacios o un salto de línea con facilidad, y como la variable
+// está marcada Sensitive no se puede volver a leer para comparar. Sin el trim,
+// ese carácter invisible da un 401 imposible de diagnosticar desde afuera.
+const WEBHOOK_SECRET = (process.env.WEBHOOK_SECRET_NUEVA_PROPIEDAD || "").trim();
 const EN_PRODUCCION = process.env.NODE_ENV === "production";
 
 function verifyToken(authHeader) {
@@ -27,8 +32,21 @@ function verifyToken(authHeader) {
     return true;
   }
 
-  const token = authHeader?.replace("Bearer ", "");
-  return token === WEBHOOK_SECRET;
+  const token = (authHeader || "").replace(/^Bearer\s+/i, "").trim();
+  if (!token) return false;
+
+  const coincide = token === WEBHOOK_SECRET;
+
+  // Sin filtrar el secreto: solo lo suficiente para distinguir "no llegó el
+  // token" de "llegó pero no coincide", que es la duda real cuando falla.
+  if (!coincide) {
+    console.error(
+      `[nueva-propiedad] token rechazado (recibido: ${token.length} caracteres, ` +
+        `esperado: ${WEBHOOK_SECRET.length}).`
+    );
+  }
+
+  return coincide;
 }
 
 export async function POST(request) {
