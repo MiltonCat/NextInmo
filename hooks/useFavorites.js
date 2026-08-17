@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore, useEffect, useState } from "react";
+import { useAuth } from "./useAuth";
 
 const EVENT = "propiaFavoritesChanged";
 const STORAGE_KEY = "propiaFavorites";
@@ -59,8 +60,36 @@ function parseFavorites(value) {
 }
 
 export function useFavorites() {
+  const { user } = useAuth(); // Obtener usuario autenticado (si existe)
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const snapshot = useSyncExternalStore(subscribeToFavorites, getFavoritesSnapshot, () => "[]");
   const favorites = useMemo(() => parseFavorites(snapshot), [snapshot]);
+
+  // NUEVO: Sincronizar a Supabase cuando usuario se loguea
+  useEffect(() => {
+    if (!user || isSyncing) return;
+
+    setIsSyncing(true);
+
+    fetch("/api/favorites/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        localFavorites: favorites,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(`[useFavorites] Synced ${data.synced} favorites to server`);
+      })
+      .catch((err) => {
+        console.error("[useFavorites] sync error:", err);
+      })
+      .finally(() => {
+        setIsSyncing(false);
+      });
+  }, [user]); // Solo corre cuando user cambia (login/logout)
 
   const toggle = (id) => {
     const current = parseFavorites(getFavoritesSnapshot());
@@ -77,10 +106,24 @@ export function useFavorites() {
       // Sin persistencia entre sesiones, pero la actual sigue usable.
     }
 
+    // NUEVO: Si hay usuario logged in, sincronizar el cambio al servidor
+    if (user) {
+      fetch("/api/favorites/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: Number(id),
+          isFavorite: updated.includes(id),
+        }),
+      }).catch((err) => {
+        console.error("[toggle-favorite] sync error:", err);
+      });
+    }
+
     window.dispatchEvent(new Event(EVENT));
   };
 
   const isFavorite = (id) => favorites.includes(id);
 
-  return { favorites, toggle, isFavorite };
+  return { favorites, toggle, isFavorite, isSyncing };
 }

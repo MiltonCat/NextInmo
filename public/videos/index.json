@@ -1,0 +1,12 @@
+{
+  "4": {
+    "video": "/videos/propiedad-4.mp4",
+    "poster": "/videos/propiedad-4.jpg",
+    "vertical": null
+  },
+  "6": {
+    "video": "/videos/propiedad-6.mp4",
+    "poster": "/videos/propiedad-6.jpg",
+    "vertical": "/videos/propiedad-6-vertical.mp4"
+  }
+}

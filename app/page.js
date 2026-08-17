@@ -15,8 +15,8 @@ import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_PATH } from "@/config";
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
-  description: "Inmobiliaria en San Martín de los Andes con +10 años de trayectoria y martillera matriculada. Casas, departamentos, monoambientes y lotes en venta y alquiler permanente, con asesoría local y datos reales del mercado.",
+  title: "Compra, Alquila e Invierte en San Martín de los Andes | +18% ROI | Catalán Propiedades",
+  description: "Propiedades nuevas cada semana en San Martín de los Andes. Compra, alquila o invierte con asesoramiento local verificado. 10+ años, martillera matriculada.",
   openGraph: {
     title: "Inmobiliaria en San Martín de los Andes | Catalán Propiedades",
     description: "Propiedades en venta y alquiler permanente en San Martín de los Andes, con asesoría local y datos del mercado.",
@@ -73,8 +73,8 @@ export default async function Home() {
                 href: "/propiedades",
                 number: "01",
                 title: "Quiero comprar",
-                description: "Explorá propiedades disponibles y encontrá opciones según tu búsqueda.",
-                action: "Ver propiedades",
+                description: "Propiedades nuevas cada semana. Asesoramiento verificado en cada zona.",
+                action: "Explorar propiedades",
               },
               {
                 event: "home_intent_sell",
@@ -91,8 +91,8 @@ export default async function Home() {
                 href: "/inversiones",
                 number: "03",
                 title: "Quiero invertir",
-                description: "Analizá oportunidades, zonas y escenarios con datos del mercado local.",
-                action: "Analizar inversiones",
+                description: "Rentabilidad verificada: +18% ROI. Análisis por zona con datos reales.",
+                action: "Ver oportunidades",
               },
               {
                 event: "home_intent_market",
