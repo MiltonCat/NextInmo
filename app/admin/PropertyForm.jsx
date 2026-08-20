@@ -1,103 +1,33 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useCallback, useState } from "react";
 import Link from "next/link";
 import { BARRIOS } from "@/lib/barrios";
-import { supabaseBrowser } from "@/lib/supabaseBrowser";
-
-const IMAGE_FIELDS = [
-  { name: "image", label: "Foto principal" },
-  { name: "image1", label: "Foto 2" },
-  { name: "image2", label: "Foto 3" },
-  { name: "image3", label: "Foto 4" },
-  { name: "image4", label: "Foto 5" },
-];
+import { normalizeImages } from "@/lib/photoImages";
+import ImagesManager from "./ImagesManager";
 
 const field = "w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-gray-900 focus:outline-none";
 const label = "block text-sm font-medium text-gray-700 mb-1";
 
-// Sube una foto directo al Storage de Supabase y devuelve su URL pública.
-//
-// Antes las fotos viajaban dentro de la Server Action. Vercel rechaza con 413
-// cualquier request de más de 4,5 MB *antes* de invocar la función, así que con
-// dos fotos de propiedad ya alcanzaba para que el navegador mostrara la
-// pantalla de error de la plataforma: la acción nunca corría y no había manera
-// de avisar dentro del formulario. (`serverActions.bodySizeLimit` en
-// next.config.mjs no puede levantar ese tope: solo aplica en `next dev`.)
-//
-// Ahora el servidor firma un permiso de un solo uso y el archivo va del
-// navegador a Supabase. Al enviar el formulario solo viaja texto.
-async function subirFoto(file) {
-  // La barra final es obligatoria: con trailingSlash activado, pedir la ruta
-  // sin barra provoca un 308 y hay cabeceras que no sobreviven al salto.
-  const res = await fetch("/api/admin/foto-firmada/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nombre: file.name }),
-  });
-
-  const permiso = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(permiso.error || `No se pudo preparar la subida (error ${res.status}).`);
-  }
-
-  const supabase = supabaseBrowser();
-  if (!supabase) throw new Error("Falta la configuración de Supabase en el navegador.");
-
-  const { error } = await supabase.storage
-    .from(permiso.bucket)
-    .uploadToSignedUrl(permiso.path, permiso.token, file, {
-      contentType: file.type || undefined,
-    });
-  if (error) throw new Error(`No se pudo subir "${file.name}": ${error.message}`);
-
-  return permiso.urlPublica;
-}
-
-function esArchivoElegido(file) {
-  return file && typeof file === "object" && typeof file.arrayBuffer === "function" && file.size > 0;
-}
-
 // Formulario reutilizable para cargar (property = null) o editar una propiedad.
 export default function PropertyForm({ action, property = null }) {
-  const [progreso, setProgreso] = useState(null);
+  // ImagesManager sube cada foto al Storage apenas se la elige (ver
+  // lib/subirFotoAdmin.js), así que el formulario ya no maneja archivos: manda
+  // solo texto y la Server Action se invoca directo, sin envoltorio.
+  //
+  // Mientras alguna foto esté en camino no se puede guardar: la propiedad
+  // quedaría publicada sin esas fotos y habría que volver a editarla.
+  const [subiendoFotos, setSubiendoFotos] = useState(false);
+  const onSubiendoChange = useCallback((v) => setSubiendoFotos(v), []);
   const p = property || {};
 
-  // Envoltorio de la Server Action: primero deja las fotos en el Storage, y
-  // recién después manda el formulario ya sin archivos. El servidor las toma
-  // del campo oculto `<campo>_current`, igual que cuando se edita y se conserva
-  // la foto anterior, así que buildRowFromForm no necesita saber nada de esto.
-  async function subirFotosYGuardar(prevState, formData) {
-    const pendientes = IMAGE_FIELDS
-      .map(({ name }) => ({ name, file: formData.get(name) }))
-      .filter(({ file }) => esArchivoElegido(file));
+  // Galería inicial. `normalizeImages` acepta la columna `images` (formato
+  // nuevo, con ambiente por foto) y también los cinco campos históricos, para
+  // que una propiedad cargada antes de la migración abra con sus fotos en el
+  // orden de siempre.
+  const fotosIniciales = normalizeImages(p.images, [p.image, p.image1, p.image2, p.image3, p.image4]);
 
-    try {
-      for (const [i, { name, file }] of pendientes.entries()) {
-        setProgreso(`Subiendo foto ${i + 1} de ${pendientes.length}…`);
-        formData.set(`${name}_current`, await subirFoto(file));
-      }
-    } catch (e) {
-      setProgreso(null);
-      // Las fotos que sí subieron quedan huérfanas en el bucket. Es preferible
-      // eso a perder la carga: al reintentar se suben de nuevo y la propiedad
-      // queda bien. Limpiarlas es tarea de mantenimiento, no del formulario.
-      return { error: e.message };
-    }
-
-    // Los archivos ya están en Supabase: sacarlos del envío lo deja en unos
-    // pocos KB de texto, muy por debajo del tope de la plataforma.
-    for (const { name } of IMAGE_FIELDS) formData.delete(name);
-
-    setProgreso("Guardando la propiedad…");
-    try {
-      return await action(prevState, formData);
-    } finally {
-      setProgreso(null);
-    }
-  }
-
-  const [state, formAction, pending] = useActionState(subirFotosYGuardar, undefined);
+  const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
     <form action={formAction} className="space-y-8">
@@ -268,24 +198,12 @@ export default function PropertyForm({ action, property = null }) {
       {/* --- Fotos --- */}
       <section className="bg-white rounded-xl shadow-sm p-6 space-y-4">
         <h2 className="font-semibold text-gray-900">Fotos</h2>
-        <p className="text-sm text-gray-500">
-          Subí hasta 5 fotos. Si dejás un casillero vacío al editar, se conserva la foto actual.
+        <p className="text-sm leading-relaxed text-gray-500">
+          Cargá todas las que tengas: la ficha las agrupa por ambiente en un recorrido fotográfico,
+          como hace Airbnb. Las primeras cinco son las que se ven en la grilla de arriba de la ficha,
+          y la primera de todas es la portada.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {IMAGE_FIELDS.map(({ name, label: lbl }) => (
-            <div key={name} className="border border-gray-200 rounded-lg p-3">
-              <span className={label}>{lbl}</span>
-              {p[name] && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p[name]} alt="" className="w-full h-32 object-cover rounded-md mb-2 bg-gray-100" />
-                  <input type="hidden" name={`${name}_current`} value={p[name]} />
-                </>
-              )}
-              <input type="file" name={name} accept="image/*" className="text-sm" />
-            </div>
-          ))}
-        </div>
+        <ImagesManager initialImages={fotosIniciales} onSubiendoChange={onSubiendoChange} />
       </section>
 
       {/* --- Datos de alquiler --- */}
@@ -320,14 +238,16 @@ export default function PropertyForm({ action, property = null }) {
       <div className="flex items-center gap-4">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || subiendoFotos}
           className="rounded-lg bg-gray-900 text-white px-6 py-2.5 font-medium hover:bg-gray-800 disabled:opacity-60"
         >
           {pending
-            ? progreso || "Guardando…"
-            : property
-              ? "Guardar cambios"
-              : "Cargar propiedad"}
+            ? "Guardando…"
+            : subiendoFotos
+              ? "Esperando a que terminen de subir las fotos…"
+              : property
+                ? "Guardar cambios"
+                : "Cargar propiedad"}
         </button>
         <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900">
           Cancelar

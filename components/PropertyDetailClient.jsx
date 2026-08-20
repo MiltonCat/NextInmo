@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Lightbox from "@/components/Lightbox";
+import PhotoTour from "@/components/PhotoTour";
 import VisitScheduler from "@/components/VisitScheduler";
 import PropertyInquiry from "@/components/PropertyInquiry";
 import PropertySheet from "@/components/PropertySheet";
@@ -16,7 +17,20 @@ function waLink(property, message = "") {
   return whatsappUrl(message || propertyWhatsappMessage(property));
 }
 
+// Ícono de grilla 2x2, el mismo que usa Airbnb en su botón "Mostrar todas las fotos".
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
+      <rect x="0" y="0" width="6.5" height="6.5" rx="1" />
+      <rect x="9.5" y="0" width="6.5" height="6.5" rx="1" />
+      <rect x="0" y="9.5" width="6.5" height="6.5" rx="1" />
+      <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1" />
+    </svg>
+  );
+}
+
 export default function PropertyDetailClient({ property }) {
+  const [tourOpen, setTourOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -47,7 +61,18 @@ export default function PropertyDetailClient({ property }) {
     );
   }
 
-  const allImages = [property.image, property.image1, property.image2, property.image3, property.image4].filter(Boolean);
+  // La galería completa viene armada por lib/properties.js como
+  // [{ url, category }], sin límite de cantidad. El fallback cubre a cualquiera
+  // que renderice esta ficha con una propiedad cruda (el respaldo estático, una
+  // preview, un test) y no haya pasado por normalize().
+  const allImages = property.images?.length
+    ? property.images
+    : [property.image, property.image1, property.image2, property.image3, property.image4]
+        .filter(Boolean)
+        .map((url) => ({ url, category: null }));
+  // En la ficha se muestran solo las primeras cinco; el resto vive en el
+  // recorrido fotográfico.
+  const previewImages = allImages.slice(0, 5);
   const fav = isFavorite(property.id);
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const isLot = /lote|terreno/i.test(property.type || "");
@@ -83,7 +108,13 @@ export default function PropertyDetailClient({ property }) {
     window.open(whatsappUrl(msg), "_blank");
   };
 
-  const openGallery = (index = 0) => {
+  // Tres niveles, igual que Airbnb:
+  //   1. la grilla de la ficha (cinco fotos)
+  //   2. → el recorrido fotográfico, agrupado por ambiente
+  //   3. → una foto a pantalla completa (el Lightbox de siempre)
+  const openTour = () => setTourOpen(true);
+
+  const openPhotoFromTour = (index) => {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
@@ -197,54 +228,56 @@ export default function PropertyDetailClient({ property }) {
           <div className="relative mb-8 hidden lg:grid grid-cols-4 grid-rows-2 gap-1 h-64 lg:h-80 overflow-hidden rounded-xl">
             <div className="relative col-span-2 row-span-2">
               <Image
-                src={property.image}
+                src={previewImages[0]?.url}
                 alt={property.title}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover cursor-pointer hover:opacity-95 transition"
-                onClick={() => openGallery(0)}
+                onClick={openTour}
               />
             </div>
-            {[property.image1, property.image2, property.image3, property.image4].map((image, index) => (
+            {previewImages.slice(1, 5).map((image, index) => (
               <div key={index} className="relative col-span-1 row-span-1">
                 <Image
-                  src={image || property.image}
+                  src={image?.url || previewImages[0]?.url}
                   alt={`${property.title} - ${index + 2}`}
                   fill
                   sizes="25vw"
                   className="object-cover cursor-pointer hover:opacity-95 transition"
-                  onClick={() => openGallery(index + 1)}
+                  onClick={openTour}
                 />
               </div>
             ))}
             <button
-              onClick={() => openGallery(0)}
+              onClick={openTour}
               className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-lg bg-white/95 px-4 py-2 text-sm font-semibold text-gray-800 shadow-lg transition hover:bg-white"
             >
-              Ver {allImages.length} fotos
+              <GridIcon />
+              Ver las {allImages.length} fotos
             </button>
           </div>
 
           {/* Gallery - mobile */}
           <div className="lg:hidden mb-6">
             <div className="overflow-x-auto flex gap-1 pb-2 snap-x snap-mandatory">
-              {allImages.map((img, idx) => (
+              {previewImages.map((img, idx) => (
                 <div key={idx} className="relative flex-shrink-0 w-full h-64 snap-center">
                   <Image
-                    src={img}
+                    src={img.url}
                     alt={`${property.title} - ${idx + 1}`}
                     fill
                     priority={idx === 0}
                     sizes="100vw"
                     className="object-cover rounded-xl cursor-pointer"
-                    onClick={() => openGallery(idx)}
+                    onClick={openTour}
                   />
                 </div>
               ))}
             </div>
-            <button onClick={() => openGallery(0)} className="w-full mt-2 border border-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm">
-              Ver {allImages.length} fotos
+            <button onClick={openTour} className="w-full mt-2 border border-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm inline-flex items-center justify-center gap-2">
+              <GridIcon />
+              Ver las {allImages.length} fotos
             </button>
           </div>
 
@@ -463,7 +496,22 @@ export default function PropertyDetailClient({ property }) {
             </div>
           </div>
 
-          <Lightbox images={allImages} title={property.title} isOpen={lightboxOpen} onClose={() => setLightboxOpen(false)} startIndex={lightboxIndex} />
+          <PhotoTour
+            images={allImages}
+            title={property.title}
+            isOpen={tourOpen}
+            onClose={() => setTourOpen(false)}
+            onOpenPhoto={openPhotoFromTour}
+          />
+          {/* El Lightbox trabaja con URLs sueltas y se abre desde el recorrido,
+              con el índice de la foto dentro de la galería completa. */}
+          <Lightbox
+            images={allImages.map((img) => img.url)}
+            title={property.title}
+            isOpen={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+            startIndex={lightboxIndex}
+          />
         </div>
       </div>
 

@@ -11,10 +11,7 @@ import {
   insertProperty,
   updateProperty as dbUpdate,
   deleteProperty as dbDelete,
-  uploadImage,
 } from "@/lib/adminDb";
-
-const IMAGE_FIELDS = ["image", "image1", "image2", "image3", "image4"];
 
 // --- helpers de parseo del formulario ---
 function num(v) {
@@ -66,18 +63,44 @@ async function buildRowFromForm(formData) {
 
   row.modalidad = row.operation === "alquiler" ? "alquiler_permanente" : row.operation;
 
-  // Imágenes: si se subió un archivo nuevo, se sube y se usa su URL;
-  // si no, se conserva la URL actual (campo oculto `<campo>_current`).
-  for (const field of IMAGE_FIELDS) {
-    const file = formData.get(field);
-    if (file && typeof file === "object" && typeof file.arrayBuffer === "function" && file.size > 0) {
-      row[field] = await uploadImage(file);
-    } else {
-      row[field] = str(formData.get(`${field}_current`));
-    }
-  }
+  // Imágenes. Ya no viaja ningún archivo por acá: ImagesManager las sube al
+  // Storage desde el navegador y manda la galería final —ordenada, con el
+  // ambiente de cada foto— en un único campo de texto.
+  //
+  //   [{"url": "https://…/cocina.jpg", "category": "cocina"}, …]
+  //
+  // `images[0]` es la portada. Un JSON roto no puede tumbar el alta: se toma
+  // como galería vacía y la propiedad se guarda igual, sin fotos.
+  row.images = parseImagesJson(formData.get("images_json"));
+
+  // Espejo de las primeras cinco en las columnas históricas. Las tarjetas, el
+  // SEO, el mapa, la exportación de ficha y el correo de aviso siguen leyendo
+  // `image`/`image1..4`, y así no se enteran del cambio. Se escriben siempre,
+  // incluso en null, para que al borrar una foto no quede una URL vieja
+  // colgada en la columna.
+  row.image = row.images[0]?.url ?? null;
+  row.image1 = row.images[1]?.url ?? null;
+  row.image2 = row.images[2]?.url ?? null;
+  row.image3 = row.images[3]?.url ?? null;
+  row.image4 = row.images[4]?.url ?? null;
 
   return row;
+}
+
+// Lee el campo `images_json` del formulario. Descarta entradas sin URL y
+// normaliza la categoría ausente a null, para que en la base nunca quede una
+// foto a medio formar.
+function parseImagesJson(raw) {
+  let parsed;
+  try {
+    parsed = JSON.parse(String(raw ?? "") || "[]");
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .map((img) => ({ url: str(img?.url), category: str(img?.category) }))
+    .filter((img) => img.url);
 }
 
 // Refresca las páginas públicas que muestran propiedades.
