@@ -1,8 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PHOTO_CATEGORIES } from "@/lib/photoImages";
+import { PHOTO_CATEGORIES, esVideo } from "@/lib/photoImages";
 import { subirFotoAdmin } from "@/lib/subirFotoAdmin";
+
+// Tope por archivo del bucket `property-images` (50 MB). Se chequea acá además
+// de en Supabase porque el rechazo del Storage llega recién al final de la
+// subida: con un video de 200 MB por una conexión de San Martín eso es esperar
+// varios minutos para recibir un error que se sabía de entrada.
+const TOPE_BYTES = 50 * 1024 * 1024;
+
+const TIPOS_ACEPTADOS = "image/*,video/mp4,video/quicktime,video/webm";
+
+// Un archivo recién elegido todavía no tiene URL, así que el tipo se decide por
+// el MIME que informa el navegador y, si no lo informa (pasa con algunos .mov),
+// por la extensión del nombre.
+function esArchivoDeVideo(file) {
+  return String(file?.type || "").startsWith("video/") || esVideo(file?.name);
+}
+
+function pesoLegible(bytes) {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 // Gestor de fotos del formulario de propiedades. Reemplaza los 5 casilleros
 // fijos por una galería de cantidad libre:
@@ -30,6 +49,7 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
       url: img.url,
       preview: img.url,
       category: img.category || null,
+      kind: img.kind === "video" || esVideo(img.url) ? "video" : "image",
       estado: "listo",
       error: null,
     }))
@@ -70,15 +90,23 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
       const files = Array.from(fileList || []).filter((f) => f.size > 0);
       if (files.length === 0) return;
 
-      const nuevas = files.map((file) => ({
-        key: `nueva-${contador.current++}`,
-        file,
-        url: null,
-        preview: URL.createObjectURL(file),
-        category: null,
-        estado: "subiendo",
-        error: null,
-      }));
+      const nuevas = files.map((file) => {
+        const pesado = file.size > TOPE_BYTES;
+        return {
+          key: `nueva-${contador.current++}`,
+          // Un archivo que ya sabemos que el bucket va a rechazar no se manda:
+          // queda en error desde el arranque, con el peso a la vista.
+          file: pesado ? null : file,
+          url: null,
+          preview: URL.createObjectURL(file),
+          category: null,
+          kind: esArchivoDeVideo(file) ? "video" : "image",
+          estado: pesado ? "error" : "subiendo",
+          error: pesado
+            ? `Pesa ${pesoLegible(file.size)} y el máximo por archivo es 50 MB. Comprimilo antes de subirlo.`
+            : null,
+        };
+      });
 
       setPhotos((prev) => [...prev, ...nuevas]);
 
@@ -86,6 +114,7 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
       // de subida (que en San Martín suele ser la mitad que la de bajada) y
       // hace que todas tarden, en vez de ir viéndolas aparecer.
       for (const foto of nuevas) {
+        if (!foto.file) continue;
         try {
           const url = await subirFotoAdmin(foto.file);
           actualizar(foto.key, { url, estado: "listo", file: null });
@@ -112,12 +141,26 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
     [photos, actualizar]
   );
 
+  // La primera de la lista es la portada, y la portada TIENE que ser una foto:
+  // de ahí salen la tarjeta del listado, la imagen del SEO y la del correo de
+  // aviso, y ninguna de las tres sabe mostrar un video. Si el primer lugar
+  // quedó ocupado por un video, sube la primera foto que haya.
+  const conPortadaValida = (lista) => {
+    const primeraFoto = lista.findIndex((p) => p.kind !== "video");
+    if (primeraFoto <= 0) return lista;
+    return [lista[primeraFoto], ...lista.filter((_, i) => i !== primeraFoto)];
+  };
+
   const mover = (index, delta) => {
     setPhotos((prev) => {
       const destino = index + delta;
       if (destino < 0 || destino >= prev.length) return prev;
       const next = [...prev];
       [next[index], next[destino]] = [next[destino], next[index]];
+      // El movimiento se descarta si deja un video de portada. Se prefiere no
+      // hacer nada antes que reacomodar por atrás: si el botón moviera la cosa
+      // a un lugar distinto del que se pidió, no se entendería por qué.
+      if (next[0]?.kind === "video" && next.some((p) => p.kind !== "video")) return prev;
       return next;
     });
   };
@@ -126,7 +169,10 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
     // La foto ya subida NO se borra del bucket: si el guardado falla o el admin
     // se arrepiente y cancela, la propiedad tiene que quedar como estaba. Los
     // archivos sueltos son tarea de mantenimiento, no del formulario.
-    setPhotos((prev) => prev.filter((p) => p.key !== key));
+    //
+    // Acá sí se reacomoda solo: al borrar la portada, el video que venía atrás
+    // pasaría a primer lugar sin que nadie lo haya pedido.
+    setPhotos((prev) => conPortadaValida(prev.filter((p) => p.key !== key)));
   };
 
   // Lo único que viaja al servidor. Solo las que terminaron de subir: una foto
@@ -134,11 +180,17 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
   const valorEnviado = JSON.stringify(
     photos
       .filter((p) => p.estado === "listo" && p.url)
-      .map(({ url, category }) => ({ url, category: category || null }))
+      .map(({ url, category, kind }) => ({
+        url,
+        // Un video no tiene ambiente: no es "la cocina", es el recorrido entero.
+        category: kind === "video" ? null : category || null,
+        kind: kind === "video" ? "video" : "image",
+      }))
   );
 
   const listas = photos.filter((p) => p.estado === "listo").length;
   const fallidas = photos.filter((p) => p.estado === "error").length;
+  const videos = photos.filter((p) => p.estado === "listo" && p.kind === "video").length;
 
   return (
     <div className="space-y-4">
@@ -153,25 +205,47 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
                 photo.estado === "error" ? "border-red-300 bg-red-50" : "border-gray-200"
               }`}
             >
-              {index === 0 && photo.estado === "listo" && (
+              {index === 0 && photo.estado === "listo" && photo.kind !== "video" && (
                 <span className="absolute left-1 top-1 z-10 rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
                   PORTADA
                 </span>
               )}
+              {photo.kind === "video" && (
+                <span className="absolute right-1 top-1 z-10 rounded bg-gray-900/85 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  VIDEO
+                </span>
+              )}
 
               <div className="relative mb-2 h-28 overflow-hidden rounded-md bg-gray-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.preview}
-                  alt=""
-                  className={`h-full w-full object-cover ${photo.estado !== "listo" ? "opacity-40" : ""}`}
-                />
+                {photo.kind === "video" ? (
+                  <video
+                    src={photo.preview}
+                    // `metadata` alcanza para sacar el primer cuadro y saber
+                    // cuánto dura. Precargar el video entero de quince fichas
+                    // abiertas en el panel sería absurdo.
+                    preload="metadata"
+                    muted
+                    playsInline
+                    controls={photo.estado === "listo"}
+                    className={`h-full w-full object-cover ${photo.estado !== "listo" ? "opacity-40" : ""}`}
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={photo.preview}
+                    alt=""
+                    className={`h-full w-full object-cover ${photo.estado !== "listo" ? "opacity-40" : ""}`}
+                  />
+                )}
                 {photo.estado === "subiendo" && (
                   <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
                     Subiendo…
                   </span>
                 )}
-                {photo.estado === "error" && (
+                {/* Sin `file` no hay nada que reintentar: es un archivo que ni
+                    se llegó a mandar (pesa más que el tope). Ahí el único
+                    camino es quitarlo y subir una versión más liviana. */}
+                {photo.estado === "error" && photo.file && (
                   <button
                     type="button"
                     onClick={() => reintentar(photo.key)}
@@ -182,19 +256,29 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
                 )}
               </div>
 
-              <select
-                value={photo.category || ""}
-                onChange={(e) => actualizar(photo.key, { category: e.target.value || null })}
-                disabled={photo.estado !== "listo"}
-                className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs text-gray-700 focus:border-gray-900 focus:outline-none disabled:bg-gray-100"
-              >
-                <option value="">Sin categoría</option>
-                {PHOTO_CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
+              {photo.kind === "video" ? (
+                // El ambiente agrupa fotos dentro del recorrido; un video no
+                // pertenece a un ambiente, tiene su propia sección arriba de
+                // todo. Se deja el lugar ocupado para que la grilla no se
+                // desalinee cuando hay fotos al lado.
+                <p className="rounded-md bg-gray-100 px-2 py-1.5 text-xs text-gray-500">
+                  Se muestra al inicio del recorrido
+                </p>
+              ) : (
+                <select
+                  value={photo.category || ""}
+                  onChange={(e) => actualizar(photo.key, { category: e.target.value || null })}
+                  disabled={photo.estado !== "listo"}
+                  className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs text-gray-700 focus:border-gray-900 focus:outline-none disabled:bg-gray-100"
+                >
+                  <option value="">Sin categoría</option>
+                  {PHOTO_CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex gap-1">
@@ -237,12 +321,12 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
 
       <div className="rounded-lg border border-dashed border-gray-300 p-4">
         <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="agregar-fotos">
-          Agregar fotos
+          Agregar fotos o video
         </label>
         <input
           id="agregar-fotos"
           type="file"
-          accept="image/*"
+          accept={TIPOS_ACEPTADOS}
           multiple
           onChange={(e) => {
             agregarArchivos(e.target.files);
@@ -255,11 +339,17 @@ export default function ImagesManager({ initialImages = [], onSubiendoChange }) 
           elegís. La primera de la lista es la portada. El ambiente es opcional, pero es lo que
           arma el recorrido fotográfico agrupado en la ficha pública.
         </p>
+        <p className="mt-2 text-xs leading-relaxed text-gray-500">
+          También podés subir un video (mp4, mov o webm), hasta 50 MB. Va al principio del
+          recorrido, no puede ser la portada, y conviene comprimirlo: un recorrido de un minuto en
+          720p pesa unos 10 MB, y el mismo archivo sin comprimir puede irse a 80.
+        </p>
       </div>
 
       {photos.length > 0 && (
         <p className="text-xs text-gray-500">
-          {listas} {listas === 1 ? "foto lista" : "fotos listas"}
+          {listas} {listas === 1 ? "archivo listo" : "archivos listos"}
+          {videos > 0 && ` (${videos === 1 ? "1 video" : `${videos} videos`})`}
           {subiendo && " · subiendo…"}
           {fallidas > 0 && ` · ${fallidas} con error`}
         </p>

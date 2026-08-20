@@ -6,6 +6,7 @@ import { after } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { notifyUsersAboutNewProperty } from "@/lib/emailNuevaPropiedad";
 import { barrioDePropiedad } from "@/lib/barrios";
+import { conPortadaDeFoto, normalizeImageEntry, soloFotos } from "@/lib/photoImages";
 import {
   getNextIds,
   insertProperty,
@@ -63,33 +64,46 @@ async function buildRowFromForm(formData) {
 
   row.modalidad = row.operation === "alquiler" ? "alquiler_permanente" : row.operation;
 
-  // Imágenes. Ya no viaja ningún archivo por acá: ImagesManager las sube al
-  // Storage desde el navegador y manda la galería final —ordenada, con el
-  // ambiente de cada foto— en un único campo de texto.
+  // Galería. Ya no viaja ningún archivo por acá: ImagesManager sube fotos y
+  // video al Storage desde el navegador y manda la galería final —ordenada, con
+  // el ambiente de cada foto y el tipo de cada entrada— en un único campo de
+  // texto.
   //
-  //   [{"url": "https://…/cocina.jpg", "category": "cocina"}, …]
+  //   [{"url": "https://…/recorrido.mp4", "category": null,     "kind": "video"},
+  //    {"url": "https://…/cocina.jpg",    "category": "cocina", "kind": "image"}, …]
   //
-  // `images[0]` es la portada. Un JSON roto no puede tumbar el alta: se toma
-  // como galería vacía y la propiedad se guarda igual, sin fotos.
-  row.images = parseImagesJson(formData.get("images_json"));
+  // `images[0]` es la portada y siempre es una foto (ver conPortadaDeFoto). Un
+  // JSON roto no puede tumbar el alta: se toma como galería vacía y la
+  // propiedad se guarda igual, sin fotos.
+  row.images = conPortadaDeFoto(parseImagesJson(formData.get("images_json")));
 
-  // Espejo de las primeras cinco en las columnas históricas. Las tarjetas, el
-  // SEO, el mapa, la exportación de ficha y el correo de aviso siguen leyendo
-  // `image`/`image1..4`, y así no se enteran del cambio. Se escriben siempre,
-  // incluso en null, para que al borrar una foto no quede una URL vieja
-  // colgada en la columna.
-  row.image = row.images[0]?.url ?? null;
-  row.image1 = row.images[1]?.url ?? null;
-  row.image2 = row.images[2]?.url ?? null;
-  row.image3 = row.images[3]?.url ?? null;
-  row.image4 = row.images[4]?.url ?? null;
+  // Espejo de las primeras cinco FOTOS en las columnas históricas. Las
+  // tarjetas, el SEO, el mapa, la exportación de ficha y el correo de aviso
+  // siguen leyendo `image`/`image1..4`, y así no se enteran del cambio.
+  //
+  // El video se excluye a propósito: ninguno de esos consumidores sabe
+  // reproducirlo. Una tarjeta con <img src="…mp4"> queda en blanco y el correo
+  // de aviso llega con un recuadro roto, que es peor que llegar sin foto.
+  //
+  // Se escriben siempre, incluso en null, para que al borrar una foto no quede
+  // una URL vieja colgada en la columna.
+  const fotos = soloFotos(row.images);
+  row.image = fotos[0]?.url ?? null;
+  row.image1 = fotos[1]?.url ?? null;
+  row.image2 = fotos[2]?.url ?? null;
+  row.image3 = fotos[3]?.url ?? null;
+  row.image4 = fotos[4]?.url ?? null;
 
   return row;
 }
 
 // Lee el campo `images_json` del formulario. Descarta entradas sin URL y
 // normaliza la categoría ausente a null, para que en la base nunca quede una
-// foto a medio formar.
+// entrada a medio formar.
+//
+// El tipo se deduce de la extensión de la URL, no del `kind` que llegó del
+// formulario: el navegador no es una fuente confiable y una entrada marcada
+// como foto que en realidad es un mp4 terminaría de portada.
 function parseImagesJson(raw) {
   let parsed;
   try {
@@ -99,8 +113,8 @@ function parseImagesJson(raw) {
   }
   if (!Array.isArray(parsed)) return [];
   return parsed
-    .map((img) => ({ url: str(img?.url), category: str(img?.category) }))
-    .filter((img) => img.url);
+    .map((img) => normalizeImageEntry({ url: str(img?.url), category: str(img?.category) }))
+    .filter((img) => img?.url);
 }
 
 // Refresca las páginas públicas que muestran propiedades.

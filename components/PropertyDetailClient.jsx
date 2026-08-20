@@ -12,6 +12,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { propertyWhatsappMessage, whatsappUrl } from "@/lib/whatsapp";
 import { splitPropertyDescription } from "@/lib/propertyDescription";
+import { normalizeImages, soloFotos, soloVideos } from "@/lib/photoImages";
 
 function waLink(property, message = "") {
   return whatsappUrl(message || propertyWhatsappMessage(property));
@@ -25,6 +26,14 @@ function GridIcon() {
       <rect x="9.5" y="0" width="6.5" height="6.5" rx="1" />
       <rect x="0" y="9.5" width="6.5" height="6.5" rx="1" />
       <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1" />
+    </svg>
+  );
+}
+
+function PlayBadgeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
+      <path d="M8 5.14v13.72a.5.5 0 00.76.43l11.14-6.86a.5.5 0 000-.86L8.76 4.71a.5.5 0 00-.76.43z" />
     </svg>
   );
 }
@@ -62,17 +71,28 @@ export default function PropertyDetailClient({ property }) {
   }
 
   // La galería completa viene armada por lib/properties.js como
-  // [{ url, category }], sin límite de cantidad. El fallback cubre a cualquiera
-  // que renderice esta ficha con una propiedad cruda (el respaldo estático, una
-  // preview, un test) y no haya pasado por normalize().
-  const allImages = property.images?.length
-    ? property.images
-    : [property.image, property.image1, property.image2, property.image3, property.image4]
-        .filter(Boolean)
-        .map((url) => ({ url, category: null }));
+  // [{ url, category, kind }], sin límite de cantidad. Se vuelve a normalizar
+  // acá para cubrir a cualquiera que renderice esta ficha con una propiedad
+  // cruda (el respaldo estático, una preview, un test) y no haya pasado por
+  // normalize(): así `kind` está siempre, y nunca hay que preguntarse si esta
+  // entrada es una foto o un video.
+  const allImages = normalizeImages(property.images, [
+    property.image,
+    property.image1,
+    property.image2,
+    property.image3,
+    property.image4,
+  ]);
+
+  // La grilla de arriba y el Lightbox trabajan SOLO con fotos: los dos usan
+  // next/image, que con un mp4 no dibuja nada. El video vive en el recorrido,
+  // que sí sabe reproducirlo.
+  const fotos = soloFotos(allImages);
+  const videos = soloVideos(allImages);
+
   // En la ficha se muestran solo las primeras cinco; el resto vive en el
   // recorrido fotográfico.
-  const previewImages = allImages.slice(0, 5);
+  const previewImages = fotos.slice(0, 5);
   const fav = isFavorite(property.id);
   const isAlquiler = property.modalidad === "alquiler_permanente";
   const isLot = /lote|terreno/i.test(property.type || "");
@@ -226,21 +246,26 @@ export default function PropertyDetailClient({ property }) {
 
           {/* Gallery - desktop */}
           <div className="relative mb-8 hidden lg:grid grid-cols-4 grid-rows-2 gap-1 h-64 lg:h-80 overflow-hidden rounded-xl">
-            <div className="relative col-span-2 row-span-2">
-              <Image
-                src={previewImages[0]?.url}
-                alt={property.title}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover cursor-pointer hover:opacity-95 transition"
-                onClick={openTour}
-              />
+            <div className="relative col-span-2 row-span-2 bg-gray-100">
+              {/* next/image sin `src` tira error y rompe la ficha entera. Antes
+                  no pasaba nunca porque una propiedad sin fotos no llegaba a
+                  publicarse; ahora puede existir una cargada solo con video. */}
+              {previewImages[0]?.url && (
+                <Image
+                  src={previewImages[0].url}
+                  alt={property.title}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover cursor-pointer hover:opacity-95 transition"
+                  onClick={openTour}
+                />
+              )}
             </div>
             {previewImages.slice(1, 5).map((image, index) => (
               <div key={index} className="relative col-span-1 row-span-1">
                 <Image
-                  src={image?.url || previewImages[0]?.url}
+                  src={image.url}
                   alt={`${property.title} - ${index + 2}`}
                   fill
                   sizes="25vw"
@@ -249,13 +274,27 @@ export default function PropertyDetailClient({ property }) {
                 />
               </div>
             ))}
-            <button
-              onClick={openTour}
-              className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-lg bg-white/95 px-4 py-2 text-sm font-semibold text-gray-800 shadow-lg transition hover:bg-white"
-            >
-              <GridIcon />
-              Ver las {allImages.length} fotos
-            </button>
+            <div className="absolute bottom-4 right-4 flex items-center gap-2">
+              {/* El video no entra en la grilla —son todos next/image— así que
+                  se anuncia con su propio botón. Sin esto quedaría enterrado
+                  adentro del recorrido y no se enteraría nadie. */}
+              {videos.length > 0 && (
+                <button
+                  onClick={openTour}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-900/90 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-gray-900"
+                >
+                  <PlayBadgeIcon />
+                  Ver video
+                </button>
+              )}
+              <button
+                onClick={openTour}
+                className="inline-flex items-center gap-2 rounded-lg bg-white/95 px-4 py-2 text-sm font-semibold text-gray-800 shadow-lg transition hover:bg-white"
+              >
+                <GridIcon />
+                Ver las {fotos.length} fotos
+              </button>
+            </div>
           </div>
 
           {/* Gallery - mobile */}
@@ -275,10 +314,18 @@ export default function PropertyDetailClient({ property }) {
                 </div>
               ))}
             </div>
-            <button onClick={openTour} className="w-full mt-2 border border-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm inline-flex items-center justify-center gap-2">
-              <GridIcon />
-              Ver las {allImages.length} fotos
-            </button>
+            <div className="mt-2 flex gap-2">
+              {videos.length > 0 && (
+                <button onClick={openTour} className="flex-1 bg-gray-900 text-white font-semibold py-2.5 rounded-xl text-sm inline-flex items-center justify-center gap-2">
+                  <PlayBadgeIcon />
+                  Ver video
+                </button>
+              )}
+              <button onClick={openTour} className="flex-1 border border-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm inline-flex items-center justify-center gap-2">
+                <GridIcon />
+                Ver las {fotos.length} fotos
+              </button>
+            </div>
           </div>
 
           {/* Main layout */}
@@ -503,10 +550,11 @@ export default function PropertyDetailClient({ property }) {
             onClose={() => setTourOpen(false)}
             onOpenPhoto={openPhotoFromTour}
           />
-          {/* El Lightbox trabaja con URLs sueltas y se abre desde el recorrido,
-              con el índice de la foto dentro de la galería completa. */}
+          {/* El Lightbox trabaja con URLs sueltas y se abre desde el recorrido.
+              Recibe SOLO fotos, y el índice que manda el recorrido ya viene
+              contado sobre esta misma lista (ver photoIndex en PhotoTour). */}
           <Lightbox
-            images={allImages.map((img) => img.url)}
+            images={fotos.map((img) => img.url)}
             title={property.title}
             isOpen={lightboxOpen}
             onClose={() => setLightboxOpen(false)}
