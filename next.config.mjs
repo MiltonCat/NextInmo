@@ -50,10 +50,21 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ["recharts"],
-    // El panel /admin sube hasta 5 fotos por propiedad en una Server Action.
-    // El límite por defecto es 1 MB y las fotos pesan varios MB, así que se amplía.
     serverActions: {
-      bodySizeLimit: "25mb",
+      // OJO: esto NO sirve para subir fotos pesadas en producción.
+      //
+      // Vercel corta cualquier request de más de 4,5 MB antes de invocar la
+      // función, y ese tope de plataforma no se puede levantar desde acá: este
+      // ajuste solo tiene efecto con `next dev`. Durante meses el panel mandó
+      // las cinco fotos dentro de la Server Action y en producción devolvía un
+      // 413 (pantalla de error de Vercel, sin pasar por el formulario) mientras
+      // en local andaba perfecto.
+      //
+      // Hoy las fotos van del navegador directo a Supabase con una URL firmada
+      // (ver lib/adminDb.js → crearSubidaFirmada) y el formulario manda solo
+      // texto. Este valor queda como red de seguridad para el camino sin
+      // JavaScript y para cargas por script, pero nada debería acercarse a él.
+      bodySizeLimit: "4mb",
       // Next valida cada Server Action comparando la cabecera `Origin` del
       // navegador contra el host que cree tener. `next dev` se registra como
       // `localhost:3000`, así que entrar por `127.0.0.1:3000` —que es a donde
