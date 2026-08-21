@@ -2,7 +2,7 @@
   "ciudad": "sma",
   "ciudad_display": "San Martín de los Andes",
   "generado": "2026-08-21",
-  "datos_al": "2026-08-06",
+  "datos_al": "2026-08-21",
   "fuente": "propiedades_limpias.csv",
   "_leyenda_origen": {
     "calculado": "Derivado del dataset del modelo (vigente).",
@@ -10,17 +10,17 @@
   },
   "relevadas": {
     "_origen": "calculado",
-    "total": 1597,
+    "total": 1646,
     "por_tipo": {
-      "Casa": 512,
-      "Departamento": 505,
-      "Otro": 353,
-      "Terreno": 116,
-      "Local Comercial": 61,
-      "Cabaña": 48,
+      "Casa": 532,
+      "Departamento": 514,
+      "Otro": 359,
+      "Terreno": 128,
+      "Local Comercial": 62,
+      "Cabaña": 49,
       "Oficina": 2
     },
-    "usables_modelo": 1017,
+    "usables_modelo": 1046,
     "tipos_modelo": [
       "Casa",
       "Departamento"
@@ -28,35 +28,35 @@
   },
   "valor_m2_usd": {
     "_origen": "calculado",
-    "_nota_casas": "Se excluyeron 247 casas con `superficie_terreno == superficie_cubierta` (el portal cargó el lote como superficie cubierta), que hundían la mediana de Casa. Ver descartar_superficie_dudosa().",
+    "_nota_casas": "Se excluyeron 257 casas con `superficie_terreno == superficie_cubierta` (el portal cargó el lote como superficie cubierta), que hundían la mediana de Casa. Ver descartar_superficie_dudosa().",
     "_nota_general": "referencia_general_casa_depto pondera las medianas por tipo con la composición real del mercado. Mezcla casas y departamentos, que difieren ~58%: preferir por_tipo para publicar. Lo mismo vale dentro de cada barrio: por_barrio[].mediana_m2_usd también mezcla, y por_barrio[].por_tipo tiene el desglose.",
-    "referencia_general_casa_depto": 2684,
+    "referencia_general_casa_depto": 2675,
     "por_tipo": {
-      "Cabaña": 2695,
+      "Cabaña": 2640,
       "Casa": 2085,
-      "Departamento": 3292,
+      "Departamento": 3286,
       "Local Comercial": 2900,
       "Oficina": 1713,
       "Otro": 752,
-      "Terreno": 478
+      "Terreno": 443
     },
     "rango_por_tipo": {
       "Casa": {
-        "p25": 1598,
-        "p75": 2620,
-        "n": 188
+        "p25": 1591,
+        "p75": 2609,
+        "n": 197
       },
       "Departamento": {
-        "p25": 2662,
-        "p75": 3923,
-        "n": 472
+        "p25": 2644,
+        "p75": 3914,
+        "n": 483
       }
     },
     "por_barrio": [
       {
         "barrio": "Centro",
-        "n": 281,
-        "mediana_m2_usd": 3400,
+        "n": 287,
+        "mediana_m2_usd": 3386,
         "estado": "usable",
         "por_tipo": {
           "Casa": {
@@ -64,36 +64,36 @@
             "n": 26
           },
           "Departamento": {
-            "mediana_m2_usd": 3455,
-            "n": 255
+            "mediana_m2_usd": 3444,
+            "n": 261
           }
         }
       },
       {
         "barrio": "General",
-        "n": 173,
+        "n": 178,
         "mediana_m2_usd": 3000,
         "estado": "usable",
         "por_tipo": {
           "Casa": {
             "mediana_m2_usd": 2112,
-            "n": 33
+            "n": 35
           },
           "Departamento": {
-            "mediana_m2_usd": 3348,
-            "n": 140
+            "mediana_m2_usd": 3333,
+            "n": 143
           }
         }
       },
       {
         "barrio": "Chapelco Golf & Resort",
-        "n": 23,
-        "mediana_m2_usd": 3025,
+        "n": 24,
+        "mediana_m2_usd": 3122,
         "estado": "usable",
         "por_tipo": {
           "Casa": {
-            "mediana_m2_usd": 2754,
-            "n": 14
+            "mediana_m2_usd": 2857,
+            "n": 15
           },
           "Departamento": {
             "mediana_m2_usd": 3929,
@@ -115,13 +115,37 @@
       },
       {
         "barrio": "Altos del Sol",
-        "n": 11,
-        "mediana_m2_usd": 2027,
+        "n": 13,
+        "mediana_m2_usd": 2107,
         "estado": "usable",
         "por_tipo": {
           "Casa": {
-            "mediana_m2_usd": 1948,
-            "n": 10
+            "mediana_m2_usd": 2067,
+            "n": 12
+          }
+        }
+      },
+      {
+        "barrio": "Las Pendientes Ski Village",
+        "n": 12,
+        "mediana_m2_usd": 3518,
+        "estado": "usable",
+        "por_tipo": {
+          "Departamento": {
+            "mediana_m2_usd": 3646,
+            "n": 9
+          }
+        }
+      },
+      {
+        "barrio": "Caleuche",
+        "n": 11,
+        "mediana_m2_usd": 1557,
+        "estado": "usable",
+        "por_tipo": {
+          "Casa": {
+            "mediana_m2_usd": 1557,
+            "n": 11
           }
         }
       },
@@ -138,18 +162,6 @@
         }
       },
       {
-        "barrio": "Las Pendientes Ski Village",
-        "n": 11,
-        "mediana_m2_usd": 3537,
-        "estado": "usable",
-        "por_tipo": {
-          "Departamento": {
-            "mediana_m2_usd": 3686,
-            "n": 8
-          }
-        }
-      },
-      {
         "barrio": "Altos del Chapelco",
         "n": 10,
         "mediana_m2_usd": 1962,
@@ -158,18 +170,6 @@
           "Casa": {
             "mediana_m2_usd": 1962,
             "n": 10
-          }
-        }
-      },
-      {
-        "barrio": "Caleuche",
-        "n": 9,
-        "mediana_m2_usd": 1263,
-        "estado": "usable",
-        "por_tipo": {
-          "Casa": {
-            "mediana_m2_usd": 1263,
-            "n": 9
           }
         }
       },
@@ -192,11 +192,11 @@
       {
         "barrio": "Las Marias del Valle Club de Campo",
         "n": 8,
-        "mediana_m2_usd": 2154,
+        "mediana_m2_usd": 1896,
         "estado": "usable",
         "por_tipo": {
           "Casa": {
-            "mediana_m2_usd": 2154,
+            "mediana_m2_usd": 1896,
             "n": 8
           }
         }
@@ -240,11 +240,11 @@
       {
         "barrio": "Alihuen Alto y Bajo",
         "n": 5,
-        "mediana_m2_usd": 2325,
+        "mediana_m2_usd": 1722,
         "estado": "usable",
         "por_tipo": {
           "Casa": {
-            "mediana_m2_usd": 1935,
+            "mediana_m2_usd": 1634,
             "n": 4
           }
         }
@@ -284,6 +284,13 @@
             "n": 5
           }
         }
+      },
+      {
+        "barrio": "Chacra 28",
+        "n": 4,
+        "mediana_m2_usd": 1245,
+        "estado": "usable",
+        "por_tipo": {}
       },
       {
         "barrio": "El Desafío",
@@ -341,13 +348,6 @@
         "por_tipo": {}
       },
       {
-        "barrio": "Chacra 28",
-        "n": 3,
-        "mediana_m2_usd": 1328,
-        "estado": "en_observacion",
-        "por_tipo": {}
-      },
-      {
         "barrio": "El Oasis",
         "n": 3,
         "mediana_m2_usd": 3409,
@@ -358,6 +358,13 @@
         "barrio": "Estancia Los Nires",
         "n": 3,
         "mediana_m2_usd": 2719,
+        "estado": "en_observacion",
+        "por_tipo": {}
+      },
+      {
+        "barrio": "Los Coirones",
+        "n": 3,
+        "mediana_m2_usd": 1458,
         "estado": "en_observacion",
         "por_tipo": {}
       },
@@ -376,16 +383,16 @@
         "por_tipo": {}
       },
       {
-        "barrio": "Callejon de Gin Gins",
-        "n": 2,
-        "mediana_m2_usd": 1986,
+        "barrio": "Tiro Federal",
+        "n": 3,
+        "mediana_m2_usd": 2700,
         "estado": "en_observacion",
         "por_tipo": {}
       },
       {
-        "barrio": "Los Coirones",
+        "barrio": "Callejon de Gin Gins",
         "n": 2,
-        "mediana_m2_usd": 1479,
+        "mediana_m2_usd": 1986,
         "estado": "en_observacion",
         "por_tipo": {}
       },
@@ -397,16 +404,9 @@
         "por_tipo": {}
       },
       {
-        "barrio": "Tiro Federal",
-        "n": 2,
-        "mediana_m2_usd": 3128,
-        "estado": "en_observacion",
-        "por_tipo": {}
-      },
-      {
         "barrio": "Altos De La Vega",
         "n": 1,
-        "mediana_m2_usd": 912,
+        "mediana_m2_usd": 794,
         "estado": "en_observacion",
         "por_tipo": {}
       },
