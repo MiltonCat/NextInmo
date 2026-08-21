@@ -399,13 +399,25 @@ const datasetJsonLd = {
       value: VALOR_M2_DEPTO,
       description: `Mediana sobre ${RANGO_M2.Departamento?.n} propiedades. Rango intercuartil ${RANGO_M2.Departamento?.p25}–${RANGO_M2.Departamento?.p75} USD/m².`,
     },
-    ...BARRIOS.map((b) => ({
-      "@type": "PropertyValue",
-      name: `Precio del m² en ${b.nombre}`,
-      unitText: "USD/m²",
-      value: b.medianaM2,
-      description: `Mediana sobre ${b.n} propiedades relevadas en ${b.nombre}, casas y departamentos.`,
-    })),
+    ...BARRIOS.map((b) => {
+      // El valor sigue siendo la mediana mezclada, pero la descripción ya no se
+      // queda en "casas y departamentos": cuando el modelo tiene comparables de
+      // cada tipo en ese barrio, dice cuánto vale cada uno. La mezcla del Centro
+      // (3.400) queda a 33% de sus casas (2.564) y a 2% de sus deptos (3.455):
+      // decir solo el promedio era esconder justo lo que le importa al que lee.
+      const desglose = Object.entries(b.porTipo)
+        .map(([tipo, v]) => `${tipo.toLowerCase()}s ${v.mediana_m2_usd} USD/m² (${v.n})`)
+        .join(", ");
+      return {
+        "@type": "PropertyValue",
+        name: `Precio del m² en ${b.nombre}`,
+        unitText: "USD/m²",
+        value: b.medianaM2,
+        description: desglose
+          ? `Mediana sobre ${b.n} propiedades relevadas en ${b.nombre}, casas y departamentos. Por tipo: ${desglose}.`
+          : `Mediana sobre ${b.n} propiedades relevadas en ${b.nombre}, casas y departamentos.`,
+      };
+    }),
   ],
 };
 
