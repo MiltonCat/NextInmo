@@ -34,7 +34,7 @@ import {
   VALOR_M2_CASA,
   VALOR_M2_DEPTO,
 } from "@/lib/mercado";
-import { barriosConMediana, medianaDeBarrio } from "@/lib/precioZonas";
+import { barriosConMediana, medianaDeBarrio, medianaDeBarrioPorTipo } from "@/lib/precioZonas";
 import { barriosConPerfil, barrioDePropiedad } from "@/lib/barrios";
 import { getProperties } from "@/lib/properties";
 import { getPropertySlug } from "@/data/properties";
@@ -228,6 +228,14 @@ const POR_TIPO = Object.entries(VALOR_M2)
 const BARRIOS = barriosConMediana();
 const BARRIOS_VISIBLES = BARRIOS.slice(0, 8);
 const BARRIOS_OCULTOS = BARRIOS.slice(8);
+
+// El Centro como ejemplo del desglose casa/depto: es el barrio con más
+// comparables (287) y el que tiene la brecha más visible entre los dos tipos.
+// Sale del JSON, no escrito acá — si el próximo relevamiento lo mueve, el texto
+// se mueve solo. Es la misma regla que hizo que BARRIO_MAS_CARO se calcule.
+const MEDIANA_CENTRO = medianaDeBarrio("centro");
+const CENTRO_CASA = medianaDeBarrioPorTipo("centro", "Casa");
+const CENTRO_DEPTO = medianaDeBarrioPorTipo("centro", "Departamento");
 
 // El barrio con la mediana más alta, para el FAQ. Se calcula: escribirlo a mano
 // es lo que hizo que la página destacara "máximo por zona: Chapelco Golf" cuando
@@ -721,11 +729,19 @@ function SeccionBarrios() {
           </details>
         )}
 
+        {/* Este texto decía que el cruce barrio × tipo "no existe". Dejó de ser
+            cierto el 21-ago: `exportar_mercado.py` lo publica en
+            por_barrio[].por_tipo y se lee con medianaDeBarrioPorTipo(). Mantener
+            una limitación que ya no aplica es tan impreciso como inventar el
+            número que faltaba. */}
         <p className="mt-3 text-xs leading-relaxed text-gray-400">
           Solo se listan los barrios con al menos 4 propiedades relevadas: con una o dos, la
-          mediana no significa nada. No hay columna por tipo dentro de cada barrio porque ese dato
-          no existe — el relevamiento no alcanza para separar los departamentos del Centro de las
-          casas del Centro sin inventar el número.
+          mediana no significa nada. La cifra de cada barrio mezcla casas y departamentos, que son
+          mercados distintos: en el Centro la mezcla da{" "}
+          {MEDIANA_CENTRO?.medianaM2?.toLocaleString("es-AR") ?? "—"} USD/m², pero las casas están
+          en {CENTRO_CASA?.medianaM2?.toLocaleString("es-AR") ?? "—"} y los departamentos en{" "}
+          {CENTRO_DEPTO?.medianaM2?.toLocaleString("es-AR") ?? "—"}. Cuando sepas de qué tipo es tu
+          propiedad, mirá el valor por tipo de más arriba antes que el del barrio.
         </p>
       </BloqueConFoto>
     </section>
