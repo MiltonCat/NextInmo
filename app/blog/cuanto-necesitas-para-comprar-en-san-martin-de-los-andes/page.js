@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
+import PodcastPlayer from "@/components/PodcastPlayer";
 import { SITE_URL, WA_URL, canonicalUrl, TASADOR_PATH } from "@/config";
 import { RELEVADAS_PUBLICO } from "@/lib/mercado";
 
@@ -145,6 +146,15 @@ const articleJsonLd = {
     logo: { "@type": "ImageObject", url: `${SITE_URL}/logoMC.webp` },
   },
   mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  // Versión escuchada del artículo (ver components/PodcastPlayer).
+  audio: {
+    "@type": "AudioObject",
+    name: "¿Cuánto necesitás realmente para comprar en San Martín de los Andes? — versión en audio",
+    contentUrl: `${SITE_URL}/podcast/cuanto-necesitas-para-comprar-en-san-martin-de-los-andes.mp3`,
+    encodingFormat: "audio/mpeg",
+    duration: "PT29M38S",
+    inLanguage: "es-AR",
+  },
 };
 
 const faqJsonLd = {
@@ -213,6 +223,8 @@ export default function CuantoNecesitasPage() {
             />
           </div>
         </header>
+
+        <PodcastPlayer slug="cuanto-necesitas-para-comprar-en-san-martin-de-los-andes" />
 
         <div className="prose prose-lg max-w-none text-gray-700">
           {/* Respuesta corta arriba de todo: es lo que la gente vino a buscar y
