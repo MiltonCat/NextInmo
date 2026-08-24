@@ -25,6 +25,17 @@ const eslintConfig = defineConfig([
       "react-hooks/exhaustive-deps": "warn",
     },
   },
+  // Los tests end-to-end no son React: corren en Playwright. Su forma de
+  // entregarle al test la página ya preparada es una función que por
+  // convención se llama `use()`, y la regla de hooks la confunde con el `use`
+  // de React y pide que el archivo sea un componente. No lo es. El resto del
+  // lint (variables sin usar, imports rotos) sigue corriendo acá.
+  {
+    files: ["e2e/**/*.js", "playwright.config.mjs"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

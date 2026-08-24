@@ -88,3 +88,9 @@ docs/debug-ficha.html
 # ya cubria /audios-nuevos/, pero los crudos que se dejan al lado del mp3
 # quedaban afuera del patron.
 /public/podcast/*.m4a
+
+# Salidas de la suite end-to-end (Playwright): trazas, capturas y videos de las
+# corridas fallidas, y el reporte HTML del CI. Se regeneran en cada corrida y
+# pesan; al repo va la suite, no sus resultados.
+/test-results/
+/playwright-report/
