@@ -9,14 +9,14 @@ const TABS = [
   { href: "/propiedades", label: "Comprar",  icon: <TabBuyIcon /> },
   { href: "/alquileres",  label: "Alquilar", icon: <TabKeyIcon /> },
   { href: "/inversiones", label: "Invertir", icon: <TabChartIcon /> },
+  // Cuarta pestaña, y por eso la única con `desdeLg`: entre 768 y 1023 px la
+  // barra de escritorio no da para cuatro más el botón de tasar, que empezaba
+  // a cortarse contra el borde. Ahí Desarrollos se sigue alcanzando desde el
+  // menú, y en el celular está siempre en la barra de abajo.
+  { href: "/desarrollos", label: "Desarrollos", icon: <TabBuildingIcon />, desdeLg: true },
 ];
 
 const SECONDARY_LINKS = [
-  // Desarrollos va en el menú y no como cuarta pestaña al lado de
-  // Comprar/Alquilar/Invertir: con un solo emprendimiento cargado, una pestaña
-  // fija promete un catálogo que todavía no existe. Cuando haya tres o cuatro,
-  // sube a PRIMARY.
-  { href: "/desarrollos",        label: "Desarrollos" },
   { href: "/vender",             label: "Vender" },
   { href: "/nosotros",           label: "Nosotros" },
   { href: "/contacto",           label: "Contacto" },
@@ -191,11 +191,11 @@ export default function Navbar() {
 
           {/* Tabs — desktop */}
           <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            {TABS.map(({ href, label, icon }) => {
+            {TABS.map(({ href, label, icon, desdeLg }) => {
               const active = pathname.startsWith(href);
               return (
                 <Link key={href} href={href}
-                  className={`group flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-200 ${
+                  className={`group ${desdeLg ? "hidden lg:flex" : "flex"} items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-200 ${
                     active
                       ? "text-gray-900 bg-gray-100"
                       : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
@@ -210,10 +210,14 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Chip — Compartí tu barrio */}
+          {/* Chip — Compartí tu barrio.
+              Vuelve recién en xl: entre 1024 y 1279 px la barra tiene que
+              elegir entre este chip y la cuarta pestaña, y gana la pestaña.
+              Sin esto el botón "Tasar mi propiedad" se cortaba contra el
+              borde justo a 1024. El chip sigue en el menú. */}
           <Link
             href="/experiencia-barrio"
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 text-xs font-semibold hover:border-gray-300 hover:text-gray-900 transition-colors flex-shrink-0 whitespace-nowrap"
+            className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 text-xs font-semibold hover:border-gray-300 hover:text-gray-900 transition-colors flex-shrink-0 whitespace-nowrap"
           >
             {/* El puntito se queda quieto. El animate-ping que tenia antes
                 pedia atencion todo el tiempo desde todas las paginas. */}
@@ -441,7 +445,7 @@ export default function Navbar() {
       />
     ))}
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
-      <div className="grid grid-cols-4 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5">
+      <div className="grid grid-cols-5 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5">
         {TABS.map(({ href, label, icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -577,6 +581,13 @@ function TabChartIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+    </svg>
+  );
+}
+function TabBuildingIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
     </svg>
   );
 }
