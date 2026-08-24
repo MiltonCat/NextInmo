@@ -27,6 +27,22 @@ const nextConfig = {
   // conexiones, así GA4, Vercel Analytics, Supabase, Leaflet y EmailJS siguen
   // funcionando sin riesgo de romper producción. Endurecerla (script-src con
   // nonces) es un paso posterior que requiere pruebas.
+  // La nota "cuánto necesitás para comprar" se bajó el 2026-08-24: publicaba
+  // la comisión con IVA y el impuesto de sellos partido 50/50, y ninguna de las
+  // dos cosas es como opera la inmobiliaria. Su URL ya estaba indexada y en el
+  // sitemap, así que se redirige al listado en vez de dejarla en 404: quien la
+  // busque encuentra el resto del blog. Si la nota vuelve corregida, se saca
+  // este redirect.
+  async redirects() {
+    return [
+      {
+        source: "/blog/cuanto-necesitas-para-comprar-en-san-martin-de-los-andes",
+        destination: "/blog",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
