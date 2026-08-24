@@ -42,8 +42,8 @@ export const metadata = {
 const gastos = [
   {
     concepto: "Comisión inmobiliaria",
-    detalle: "En Catalán Propiedades el comprador paga 3% + IVA. Es un porcentaje fijo y se dice antes de la reserva, no después.",
-    porcentaje: "3% + IVA",
+    detalle: "En Catalán Propiedades el comprador paga 3% y no se le suma IVA: ese 3% es el número final. Es un porcentaje fijo y se dice antes de la reserva, no después.",
+    porcentaje: "3% (sin IVA)",
     quien: "Comprador",
   },
   {
@@ -283,25 +283,25 @@ export default function CuantoNecesitasPage() {
             <div className="rounded-2xl border border-gray-200 p-6">
               <p className="text-sm font-black uppercase tracking-wide text-gray-500">Departamento · USD 120.000</p>
               <ul className="mt-4 space-y-2 text-gray-700">
-                <li className="flex justify-between gap-4"><span>Comisión 3% + IVA</span><span className="font-semibold tabular-nums">USD 4.356</span></li>
+                <li className="flex justify-between gap-4"><span>Comisión 3% (sin IVA)</span><span className="font-semibold tabular-nums">USD 3.600</span></li>
                 <li className="flex justify-between gap-4"><span>Sellos (mitad del 3%)</span><span className="font-semibold tabular-nums">USD 1.800</span></li>
                 <li className="flex justify-between gap-4"><span>Escribano 2% + IVA</span><span className="font-semibold tabular-nums">USD 2.904</span></li>
                 <li className="flex justify-between gap-4"><span>Registro y certificados</span><span className="font-semibold tabular-nums">USD 960</span></li>
               </ul>
               <p className="mt-4 border-t border-gray-200 pt-4 text-lg font-black text-gray-900">
-                Necesitás ≈ USD 130.020
+                Necesitás ≈ USD 129.264
               </p>
             </div>
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6">
               <p className="text-sm font-black uppercase tracking-wide text-rose-800">Casa · USD 250.000</p>
               <ul className="mt-4 space-y-2 text-gray-700">
-                <li className="flex justify-between gap-4"><span>Comisión 3% + IVA</span><span className="font-semibold tabular-nums">USD 9.075</span></li>
+                <li className="flex justify-between gap-4"><span>Comisión 3% (sin IVA)</span><span className="font-semibold tabular-nums">USD 7.500</span></li>
                 <li className="flex justify-between gap-4"><span>Sellos (mitad del 3%)</span><span className="font-semibold tabular-nums">USD 3.750</span></li>
                 <li className="flex justify-between gap-4"><span>Escribano 2% + IVA</span><span className="font-semibold tabular-nums">USD 6.050</span></li>
                 <li className="flex justify-between gap-4"><span>Registro y certificados</span><span className="font-semibold tabular-nums">USD 2.000</span></li>
               </ul>
               <p className="mt-4 border-t border-rose-200 pt-4 text-lg font-black text-gray-900">
-                Necesitás ≈ USD 270.875
+                Necesitás ≈ USD 269.300
               </p>
             </div>
           </div>
