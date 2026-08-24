@@ -12,6 +12,11 @@ const TABS = [
 ];
 
 const SECONDARY_LINKS = [
+  // Desarrollos va en el menú y no como cuarta pestaña al lado de
+  // Comprar/Alquilar/Invertir: con un solo emprendimiento cargado, una pestaña
+  // fija promete un catálogo que todavía no existe. Cuando haya tres o cuatro,
+  // sube a PRIMARY.
+  { href: "/desarrollos",        label: "Desarrollos" },
   { href: "/vender",             label: "Vender" },
   { href: "/nosotros",           label: "Nosotros" },
   { href: "/contacto",           label: "Contacto" },

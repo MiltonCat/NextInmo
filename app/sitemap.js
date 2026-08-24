@@ -1,6 +1,8 @@
 export const revalidate = 3600;
 import { getPropertySlug } from "@/data/properties";
 import { getProperties } from "@/lib/properties";
+import { getDevelopments } from "@/lib/developments";
+import { getDevelopmentSlug } from "@/data/developments";
 import { canonicalUrl } from "@/config";
 import { blogPosts } from "@/lib/blogPosts";
 import { barriosConPerfil } from "@/lib/barrios";
@@ -8,6 +10,7 @@ import { MERCADO_GENERADO } from "@/lib/mercado";
 
 export default async function sitemap() {
   const properties = await getProperties();
+  const developments = await getDevelopments();
   const now = new Date();
 
   // Las páginas que viven de los datos del modelo cambian cuando se re-releva el
@@ -21,6 +24,7 @@ export default async function sitemap() {
     { url: canonicalUrl("/propiedades"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: canonicalUrl("/alquileres"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: canonicalUrl("/inversiones"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: canonicalUrl("/desarrollos"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: canonicalUrl("/precio-m2"), lastModified: datosMercado, changeFrequency: "monthly", priority: 0.8 },
     { url: canonicalUrl("/tasacion"), lastModified: datosMercado, changeFrequency: "monthly", priority: 0.7 },
     { url: canonicalUrl("/simulador-credito"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
@@ -54,6 +58,23 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
+  // Los desarrollos ocultos ya vienen filtrados por getDevelopments(), asi que
+  // el sitemap no puede mandar a Google a una ficha que devuelve 404.
+  //
+  // lastModified sale de la fecha en que se relevo el material del
+  // desarrollador, no de hoy: una obra se mueve de a semanas y los precios que
+  // publicamos son los de la ultima lista que pasaron. Decirle a Google que la
+  // ficha cambio hoy, cuando los numeros son de agosto, es la misma senal falsa
+  // que este archivo ya evita en /precio-m2.
+  const developmentRoutes = developments.map((development) => ({
+    url: canonicalUrl(`/desarrollos/${getDevelopmentSlug(development)}`),
+    lastModified: development.fuente?.relevado
+      ? new Date(`${development.fuente.relevado}T12:00:00Z`)
+      : now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
   const tipoRoutes = ["casas", "departamentos", "cabanas", "lotes", "monoambientes", "ph"].map((tipo) => ({
     url: canonicalUrl(`/propiedades/${tipo}`),
     lastModified: now,
@@ -71,5 +92,5 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...blogRoutes, ...barrioRoutes, ...tipoRoutes, ...propertyRoutes];
+  return [...staticRoutes, ...blogRoutes, ...barrioRoutes, ...developmentRoutes, ...tipoRoutes, ...propertyRoutes];
 }

@@ -26,6 +26,7 @@ export default function Footer() {
               <Link href="/propiedades" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Propiedades</Link>
               <Link href="/alquileres" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Alquileres</Link>
               <Link href="/inversiones" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Inversiones</Link>
+              <Link href="/desarrollos" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Desarrollos</Link>
               <Link href="/precio-m2" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Precio del m²</Link>
               <Link href="/tasacion" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Tasar mi propiedad</Link>
               <Link href="/vender" className="text-sm text-gray-600 hover:text-rose-600 transition-colors font-dm">Vender mi propiedad</Link>
