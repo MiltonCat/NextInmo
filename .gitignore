@@ -77,3 +77,14 @@ _prueba
 _admin_check.png
 *.log
 docs/debug-ficha.html
+
+# Carpeta de descarte: cosas que esperan confirmacion para borrarse. Llego a
+# tener 76 MB de tarballs y locks viejos, y un `git add .` distraido los mete
+# al historial para siempre.
+/_to_delete/
+
+# Crudos del podcast. A public/podcast/ va SOLO el mp3 comprimido que sirve el
+# sitio (64 kbps mono); el .m4a de origen pesa entre 40 y 55 MB. El .gitignore
+# ya cubria /audios-nuevos/, pero los crudos que se dejan al lado del mp3
+# quedaban afuera del patron.
+/public/podcast/*.m4a
