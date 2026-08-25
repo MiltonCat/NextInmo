@@ -89,6 +89,14 @@ docs/debug-ficha.html
 # quedaban afuera del patron.
 /public/podcast/*.m4a
 
+# El audio de la nota "cuanto necesitas para comprar", que salio de linea el
+# 2026-08-24 porque narra los montos viejos (la comision con IVA que no se
+# cobra, y el sellos partido 50/50 cuando lo paga entero el comprador). Se
+# deja en disco por si la nota vuelve, pero no se publica: hasta hoy seguia
+# sirviendose en produccion aunque ya no lo enlazara nadie. Si la nota vuelve
+# corregida, hay que regenerarlo antes de volver a versionarlo.
+/public/podcast/cuanto-necesitas-para-comprar-en-san-martin-de-los-andes.mp3
+
 # Salidas de la suite end-to-end (Playwright): trazas, capturas y videos de las
 # corridas fallidas, y el reporte HTML del CI. Se regeneran en cada corrida y
 # pesan; al repo va la suite, no sus resultados.

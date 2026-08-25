@@ -37,7 +37,7 @@ const nextConfig = {
     return [
       {
         source: "/blog/cuanto-necesitas-para-comprar-en-san-martin-de-los-andes",
-        destination: "/blog",
+        destination: "/blog/",
         permanent: true,
       },
     ];
