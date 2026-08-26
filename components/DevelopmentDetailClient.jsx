@@ -1092,8 +1092,9 @@ function IconoAmenity({ texto, apagado }) {
 // Cuánto termina costando cada plan de pago.
 //
 // El desarrollador publica anticipo y cuota, nunca el total. Y en este proyecto
-// la diferencia no es un detalle: el mismo lote sale 60.000 de contado y 88.500
-// financiado a seis años. Esa cuenta la hace igual cualquiera que se siente con
+// la diferencia no es un detalle: el mismo lote tiene un precio de lista de
+// 67.000, baja a 60.000 de contado y llega a 88.500 financiado a seis años.
+// Esa cuenta la hace igual cualquiera que se siente con
 // una calculadora, así que esconderla no evita la conversación, solo la corre
 // al día en que ya firmó. Mostrarla es lo que hace que la ficha sea una
 // herramienta y no un folleto.
@@ -1146,19 +1147,24 @@ function PlanesDePago({ categorias = [], elegida = 0, onElegir }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {t.precioContado > 0 && (
-              <tr>
-                <td className="py-3 pr-4 font-semibold text-gray-900">Contado</td>
+            {t.precioDesde > 0 && (
+              <tr className="bg-gray-50/70">
+                <td className="py-3 pr-4 font-semibold text-gray-900">
+                  Base de financiación
+                </td>
                 <td className="py-3 pr-4 text-gray-500">—</td>
                 <td className="py-3 pr-4 text-gray-500">—</td>
                 <td className="py-3 pr-4 text-right font-semibold text-gray-900">
-                  {usd(t.precioContado)}
+                  {usd(t.precioDesde)}
                 </td>
               </tr>
             )}
             {t.planes.map((p, i) => {
               const total = p.anticipo + p.cuota * p.meses;
-              const base = t.precioContado > 0 ? t.precioContado : t.precioDesde;
+              // La financiación parte del precio de lista. El precio de contado
+              // es un descuento independiente y no debe usarse como base del
+              // recargo de los planes.
+              const base = t.precioDesde;
               const extra = Math.round((total / base - 1) * 100);
               const pctAnticipo = t.precioDesde > 0
                 ? Math.round((p.anticipo / t.precioDesde) * 100)
@@ -1177,7 +1183,7 @@ function PlanesDePago({ categorias = [], elegida = 0, onElegir }) {
                     <span className="font-semibold text-gray-900">{usd(total)}</span>
                     {extra > 0 && (
                       <span className="block text-xs text-gray-500">
-                        +{extra}% sobre el contado
+                        +{extra}% sobre el precio de lista
                       </span>
                     )}
                   </td>
@@ -1189,9 +1195,10 @@ function PlanesDePago({ categorias = [], elegida = 0, onElegir }) {
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-gray-400">
-        El total es la suma del anticipo más todas las cuotas, calculada por
-        nosotros sobre la lista de precios del desarrollador. No incluye gastos
-        de escritura, impuestos ni gastos administrativos.
+        Los planes financiados parten del precio de lista, no del precio de
+        contado. El total es la suma del anticipo más todas las cuotas, calculada
+        por nosotros sobre la lista de precios del desarrollador. No incluye
+        gastos de escritura, impuestos ni gastos administrativos.
       </p>
     </div>
   );
