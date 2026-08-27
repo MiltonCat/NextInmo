@@ -29,8 +29,8 @@ export default function Hero() {
             Inmobiliaria en San Martín de los Andes
           </p>
 
-          <h1 className="max-w-3xl text-4xl font-black leading-[0.98] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl">
-            Comprá con datos, no con intuición.
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-[0.98] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
+            Invertí con datos, no con intuición
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-white/78 sm:text-lg">
