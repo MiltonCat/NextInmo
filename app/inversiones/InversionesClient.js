@@ -1319,13 +1319,34 @@ export default function InversionesClient() {
                 ))}
               </div>
 
+              {/* La fila técnica filtra y califica a quien ya entiende TIR,
+                  VAN y cap rate. Esta traducción no la reemplaza: permite que
+                  alguien sin formación financiera llegue a la misma conclusión
+                  sin tener que aprender seis métricas antes de consultar. */}
+              <div className="mt-6 rounded-2xl bg-gray-50 p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                  En palabras simples
+                </p>
+                <p className="mt-2 text-[17px] font-semibold leading-snug text-gray-900 sm:text-xl">
+                  Ponés USD {calcMonto.toLocaleString("es-AR")}
+                  {sim.esReventa
+                    ? <> y, después de comprar, mejorar y vender, podrías terminar con USD {Math.round(sim.total).toLocaleString("es-AR")}.</>
+                    : <> y podrías recibir unos USD {Math.round(sim.mensual).toLocaleString("es-AR")} netos por mes. Al vender después de {calcPlazo} año{calcPlazo > 1 ? "s" : ""}, terminarías con aproximadamente USD {Math.round(sim.total).toLocaleString("es-AR")}.</>}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                  {sim.van >= 0
+                    ? <>Con estos supuestos, la inversión supera el objetivo de rendimiento del escenario {sim.escenario.label.toLowerCase()}.</>
+                    : <>Con estos supuestos, la inversión gana dinero, pero no alcanza el objetivo de rendimiento del {fmtPct(sim.escenario.tasaExigida * 100)}% anual. Habría que comprar más barato, cobrar más alquiler o aceptar un retorno menor.</>}
+                </p>
+              </div>
+
               <p className="mt-6 text-[15px] leading-relaxed text-gray-600 md:text-base">
                 <strong className="font-medium text-gray-900">En resumen:</strong> si invertís{" "}
                 <strong className="font-medium text-gray-900">USD {calcMonto.toLocaleString("es-AR")}</strong> en{" "}
                 {calcTipo === "alquiler" ? "una propiedad para alquiler permanente" : calcTipo === "turistico" ? "alquiler turístico" : "compra y reventa"}, en {calcPlazo} año{calcPlazo > 1 ? "s" : ""} terminarías con unos{" "}
                 <strong className="font-medium text-gray-900">USD {Math.round(sim.total).toLocaleString("es-AR")}</strong>.{" "}
                 {sim.esReventa ? (
-                  <>La mejora agrega {fmtPct(MARGEN_REVENTA * 100)}% una sola vez al precio proyectado; no se compone cada año ni genera renta mensual.</>
+                  <>La mejora agrega {fmtPct(sim.escenario.margenReventa * 100)}% una sola vez al precio proyectado; no se compone cada año ni genera renta mensual.</>
                 ) : (
                   <>
                     La ganancia sale de dos lados: unos <strong className="font-medium text-gray-900">USD {Math.round(sim.mensual).toLocaleString("es-AR")} por mes</strong> de renta neta (ya descontados gastos y vacancia) más la suba de valor de la propiedad.
