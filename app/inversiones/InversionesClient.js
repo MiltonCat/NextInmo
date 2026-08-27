@@ -124,6 +124,16 @@ const VALORIZACION_PROYECTADA = 2;
 // Escenarios explícitos del DCF. No son pronósticos: son juegos coherentes de
 // supuestos para medir cuánto depende el resultado de cada variable.
 const ESCENARIOS = {
+  invierno_debil: {
+    label: "Invierno débil 2025–26",
+    valorizacion: 0,
+    crecimientoRenta: 0,
+    vacancia: { alquiler: 0.12, turistico: 0.60 },
+    gastosIngreso: { alquiler: 0.18, turistico: 0.30 },
+    reservaCapex: { alquiler: 0.06, turistico: 0.08 },
+    margenReventa: 0.08,
+    tasaExigida: 0.11,
+  },
   conservador: {
     label: "Conservador",
     valorizacion: 0,
@@ -603,7 +613,15 @@ export default function InversionesClient() {
       if (!esReventa) {
         const crecimiento = Math.pow(1 + escenario.crecimientoRenta, (mes - 1) / 12);
         const ingresoPotencial = precioPropiedad * (rentaBruta / 100) / 12 * crecimiento;
-        const ingresoEfectivo = ingresoPotencial * (1 - vacancia);
+        // El escenario 2025–26 no supone una recuperación instantánea. Para
+        // turístico arranca con 40 % de ocupación efectiva y recupera cinco
+        // puntos por año hasta estabilizarse en 60 %. Es una prueba de estrés,
+        // no una afirmación de que esos porcentajes vayan a repetirse.
+        const anioProyectado = Math.floor((mes - 1) / 12);
+        const vacanciaMes = calcEscenario === "invierno_debil" && calcTipo === "turistico"
+          ? Math.max(0.40, 0.60 - anioProyectado * 0.05)
+          : vacancia;
+        const ingresoEfectivo = ingresoPotencial * (1 - vacanciaMes);
         flujoMes = ingresoEfectivo * (1 - gastosIngreso - reservaCapex);
         rentaAcumulada += flujoMes;
         if (mes <= 12) rentaPrimerAno += flujoMes;
@@ -1410,7 +1428,7 @@ export default function InversionesClient() {
               </div>
 
               <p className="mt-6 text-[11px] leading-relaxed text-gray-400">
-                Escenario {sim.escenario.label.toLowerCase()}: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida{!sim.esReventa ? ` · renta bruta de referencia ${fmtPct(sim.rentaBruta)}% · vacancia ${Math.round(sim.vacancia * 100)}% · gastos operativos ${Math.round(sim.gastosIngreso * 100)}% · reserva para reparaciones ${Math.round(sim.reservaCapex * 100)}% · crecimiento de renta ${fmtPct(sim.escenario.crecimientoRenta * 100)}% anual` : ""} · valorización {fmtPct(sim.valorizacion)}% anual · tasa exigida para el VAN {fmtPct(sim.escenario.tasaExigida * 100)}%{sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${Math.round(sim.escenario.margenReventa * 100)}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Flujos mensuales en USD, sin financiación ni impuestos personales. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
+                Escenario {sim.escenario.label.toLowerCase()}: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida{!sim.esReventa ? ` · renta bruta de referencia ${fmtPct(sim.rentaBruta)}% · vacancia ${Math.round(sim.vacancia * 100)}% · gastos operativos ${Math.round(sim.gastosIngreso * 100)}% · reserva para reparaciones ${Math.round(sim.reservaCapex * 100)}% · crecimiento de renta ${fmtPct(sim.escenario.crecimientoRenta * 100)}% anual` : ""}{calcEscenario === "invierno_debil" && calcTipo === "turistico" ? " · recuperación gradual: ocupación de 40% el primer año hasta 60% desde el quinto" : ""} · valorización {fmtPct(sim.valorizacion)}% anual · tasa exigida para el VAN {fmtPct(sim.escenario.tasaExigida * 100)}%{sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${Math.round(sim.escenario.margenReventa * 100)}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Flujos mensuales en USD, sin financiación ni impuestos personales. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
               </p>
             </div>
 
