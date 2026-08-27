@@ -96,9 +96,14 @@ const RENTALS = (mercadoJson.rentabilidad_alquiler?.tabla ?? [])
 // Vivían más abajo, pegados al motor del simulador. Subieron acá porque desde
 // el 11-ago la matriz de riesgo/retorno también los usa: son los supuestos de
 // la página, no los de un componente.
-const GASTOS_VACANCIA = 0.2;      // descuento sobre la renta bruta: gastos, gestión y vacancia
-const RENTA_BRUTA_TURISTICO = 12; // % anual bruto estimado para alquiler turístico bien gestionado
-const MARGEN_REVENTA = [4, 10];   // puntos sobre la valorización de mercado por comprar bien y mejorar
+const COSTOS_ENTRADA = 0.06;       // escritura, honorarios, comisión e impuestos de adquisición
+const COSTOS_SALIDA = 0.04;        // comisión, impuestos y gastos al vender
+const GASTOS_ALQUILER = 0.30;      // vacancia, mantenimiento, impuestos y administración
+const GASTOS_TURISTICO = 0.45;     // suma equipamiento, plataformas, limpieza y mayor vacancia
+const EQUIPAMIENTO_TURISTICO = 0.05;
+const RENTA_BRUTA_TURISTICO = 10;  // referencia conservadora; antes era 12 % fijo
+const REFORMA_REVENTA = 0.08;      // capital reservado para poner en valor
+const MARGEN_REVENTA = 0.15;       // mejora sobre el precio, una sola vez al vender
 
 // Valorización anual del m²: crecimiento compuesto de los últimos dos puntos de
 // la serie (2.450 → 2.650 = 4,0%). El simulador la calculaba adentro de su
@@ -110,6 +115,11 @@ const VALORIZACION_ANUAL =
       EVOLUCION_HISTORICA[EVOLUCION_HISTORICA.length - 3].precio,
     1 / 2
   ) - 1) * 100;
+
+// La evolución reciente fue cercana al 4 %, pero proyectarla completa hacia
+// adelante convertía un dato histórico en promesa. El simulador usa 2 % como
+// escenario base; el 4 % queda publicado solo como antecedente de mercado.
+const VALORIZACION_PROYECTADA = 2;
 
 // Renta bruta media del alquiler permanente, sobre los mismos segmentos que
 // publica la tabla de rentabilidad. El simulador elige el segmento más cercano
@@ -231,20 +241,20 @@ const SCORE_DATA = [
 // ubicarlo en el eje. Mantiene su tarjeta en la comparativa, que puntúa cuatro
 // factores que sí tienen fuente —incluido el m² de locales— y no promete un
 // retorno anual. Es la regla que ya se le aplicó a Terreno el 10-ago.
-const retornoAnual = (rentaBruta) =>
-  Math.round((rentaBruta * (1 - GASTOS_VACANCIA) + VALORIZACION_ANUAL) * 10) / 10;
+const retornoCaja = (rentaBruta, gastos) =>
+  Math.round(rentaBruta * (1 - gastos) * 10) / 10;
 
 const MATRIX_DATA = [
-  { nombre: 'Casa alquiler', riesgo: 3.5, retorno: retornoAnual(RENTA_BRUTA_ALQUILER), color: '#E8325A' },
+  { nombre: 'Casa alquiler', riesgo: 3.5, retorno: retornoCaja(RENTA_BRUTA_ALQUILER, GASTOS_ALQUILER), color: '#E8325A' },
   {
     nombre: 'Casa reventa',
     riesgo: 6.5,
     // La reventa no paga renta: el retorno es la valorización más el margen por
     // comprar bien y mejorar, igual que en el simulador.
-    retorno: Math.round((VALORIZACION_ANUAL + (MARGEN_REVENTA[0] + MARGEN_REVENTA[1]) / 2) * 10) / 10,
+    retorno: 4,
     color: '#f59e0b',
   },
-  { nombre: 'Depto turístico', riesgo: 7.5, retorno: retornoAnual(RENTA_BRUTA_TURISTICO), color: '#f97316' },
+  { nombre: 'Depto turístico', riesgo: 7.5, retorno: retornoCaja(RENTA_BRUTA_TURISTICO, GASTOS_TURISTICO), color: '#f97316' },
 ];
 
 // Conecta el resultado del quiz con el resto de la página: qué tarjeta de la
@@ -481,52 +491,59 @@ export default function InversionesClient() {
   const ultimoPunto = evolucion[evolucion.length - 1];
   const crecimientoPct = Math.round((ultimoPunto.precio / primerPunto.precio - 1) * 1000) / 10;
 
-  // Motor del simulador: separa renta (sale de los valores reales de alquiler
-  // de RENTALS, según el tramo de precio) y valorización (crecimiento anual
-  // compuesto de los últimos 2 años de la serie del m²).
+  // Motor financiero: `calcMonto` es todo el capital disponible, no el precio
+  // de cartel. Primero separa costos de entrada, equipamiento o reforma; recién
+  // el resto compra el inmueble. La renta y la venta se calculan sobre ese
+  // precio real, y la salida descuenta sus propios costos.
   const sim = useMemo(() => {
+    const esReventa = calcTipo === "reventa";
+    const gastosOperativos = calcTipo === "turistico" ? GASTOS_TURISTICO : GASTOS_ALQUILER;
+    const costoAdicional = esReventa
+      ? REFORMA_REVENTA
+      : calcTipo === "turistico"
+        ? EQUIPAMIENTO_TURISTICO
+        : 0;
+    const precioPropiedad = calcMonto / (1 + COSTOS_ENTRADA + costoAdicional);
+    const costosIniciales = calcMonto - precioPropiedad;
+
     let rentaBruta = 0;
     if (calcTipo === "alquiler") {
       const cercana = RENTALS.reduce((a, b) =>
-        Math.abs(b.precioVenta - calcMonto) < Math.abs(a.precioVenta - calcMonto) ? b : a
+        Math.abs(b.precioVenta - precioPropiedad) < Math.abs(a.precioVenta - precioPropiedad) ? b : a
       );
       rentaBruta = cercana.rentabilidad;
     } else if (calcTipo === "turistico") {
       rentaBruta = RENTA_BRUTA_TURISTICO;
     }
-    const rentaNeta = rentaBruta * (1 - GASTOS_VACANCIA);
+    const rentaNeta = rentaBruta * (1 - gastosOperativos);
+    const rentaAnual = precioPropiedad * (rentaNeta / 100);
+    const rentaAcumulada = esReventa ? 0 : rentaAnual * calcPlazo;
+    const mensual = esReventa ? 0 : rentaAnual / 12;
 
-    // La misma constante que ubica los puntos de la matriz de riesgo/retorno.
-    // Estaba calculada acá adentro y la matriz tenía sus propios números a
-    // mano; mientras fueran dos cuentas distintas iban a volver a divergir.
-    const valorizacion = VALORIZACION_ANUAL;
-
-    const esReventa = calcTipo === "reventa";
-    const totalAnual = esReventa
-      ? valorizacion + (MARGEN_REVENTA[0] + MARGEN_REVENTA[1]) / 2
-      : rentaNeta + valorizacion;
-    const rangoMin = esReventa ? valorizacion + MARGEN_REVENTA[0] : Math.max(0, totalAnual - 2);
-    const rangoMax = esReventa ? valorizacion + MARGEN_REVENTA[1] : totalAnual + 2;
-
-    // Proyección: valorización compuesta; renta constante, sin reinversión.
-    const gananciaValorizacion = esReventa
-      ? calcMonto * (Math.pow(1 + totalAnual / 100, calcPlazo) - 1)
-      : calcMonto * (Math.pow(1 + valorizacion / 100, calcPlazo) - 1);
-    const rentaAcumulada = esReventa ? 0 : calcMonto * (rentaNeta / 100) * calcPlazo;
-    const ganancia = gananciaValorizacion + rentaAcumulada;
-    const mensual = calcMonto * (rentaNeta / 100) / 12;
+    const valorizacion = VALORIZACION_PROYECTADA;
+    const valorMercadoFinal = precioPropiedad * Math.pow(1 + valorizacion / 100, calcPlazo);
+    // En reventa, la mejora agrega margen una sola vez. Antes se sumaba a una
+    // tasa anual y se componía cada año, aunque la obra se hace una vez.
+    const precioVentaBruto = esReventa
+      ? valorMercadoFinal * (1 + MARGEN_REVENTA)
+      : valorMercadoFinal;
+    const costosSalida = precioVentaBruto * COSTOS_SALIDA;
+    const ventaNeta = precioVentaBruto - costosSalida;
+    const total = ventaNeta + rentaAcumulada;
+    const ganancia = total - calcMonto;
+    const totalAnual = (Math.pow(Math.max(total, 1) / calcMonto, 1 / calcPlazo) - 1) * 100;
+    const rentaSobreCapital = esReventa ? 0 : (rentaAnual / calcMonto) * 100;
 
     // El m² del tipo que se está simulando, no un promedio de los dos.
     const { m2: m2Ref, etiqueta: m2Etiqueta } = M2_SIMULADOR[calcTipo] ?? M2_SIMULADOR.alquiler;
 
     return {
-      esReventa, rentaBruta, rentaNeta, valorizacion, totalAnual, rangoMin, rangoMax,
-      gananciaValorizacion, rentaAcumulada, ganancia, total: calcMonto + ganancia, mensual,
-      m2Ref, m2Etiqueta, m2Comprables: Math.round(calcMonto / m2Ref),
+      esReventa, rentaBruta, rentaNeta, valorizacion, totalAnual, rentaSobreCapital,
+      rentaAcumulada, ganancia, total, mensual, precioPropiedad, costosIniciales,
+      costosSalida, ventaNeta, valorMercadoFinal, gastosOperativos, costoAdicional,
+      m2Ref, m2Etiqueta, m2Comprables: Math.round(precioPropiedad / m2Ref),
       plazoFijoTotal: calcMonto * Math.pow(1 + TASA_PLAZO_FIJO, calcPlazo),
     };
-    // `evolucion` sale de las dependencias: la valorización ya no se calcula
-    // acá adentro, viene de VALORIZACION_ANUAL, que es constante de módulo.
   }, [calcTipo, calcMonto, calcPlazo]);
 
   const handleLeadSubmit = (e) => {
@@ -539,7 +556,7 @@ export default function InversionesClient() {
       `• Monto: USD ${calcMonto.toLocaleString("es-AR")}\n` +
       `• Tipo: ${tipoLabel}\n` +
       `• Plazo: ${calcPlazo} año${calcPlazo > 1 ? "s" : ""}\n` +
-      `• Retorno total estimado: ${fmtPct(sim.totalAnual)}% anual (rango ${fmtPct(sim.rangoMin)}–${fmtPct(sim.rangoMax)}%)\n` +
+      `• Retorno anualizado estimado: ${fmtPct(sim.totalAnual)}%\n` +
       (sim.esReventa ? "" : `• Renta neta mensual estimada: USD ${Math.round(sim.mensual).toLocaleString("es-AR")}\n`) +
       `• Ganancia total estimada: USD ${Math.round(sim.ganancia).toLocaleString("es-AR")}\n\n` +
       `Mi WhatsApp: ${leadWa.trim()}`
@@ -774,8 +791,7 @@ export default function InversionesClient() {
                   de renta neta, más la suba de valor de la propiedad.
                 </>
               )}{" "}
-              Estimado {fmtPct(sim.totalAnual)}% anual, en un rango de {fmtPct(sim.rangoMin)}% a{" "}
-              {fmtPct(sim.rangoMax)}%.
+              El retorno anualizado estimado, después de costos de entrada y salida, es {fmtPct(sim.totalAnual)}%.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -787,7 +803,7 @@ export default function InversionesClient() {
                 <span aria-hidden="true">↓</span>
               </button>
               <span className="text-sm text-gray-400">
-                Con USD {calcMonto.toLocaleString("es-AR")} comprás ≈ {sim.m2Comprables} m² al valor
+                Descontando costos iniciales, el capital alcanza para ≈ {sim.m2Comprables} m² al valor
                 mediano de {sim.m2Etiqueta}
               </span>
             </div>
@@ -1121,9 +1137,9 @@ export default function InversionesClient() {
                 posición horizontal de cada punto pasara por dato. Mismo criterio
                 que /precio-m2, que separa lo relevado de lo estimado. */}
             <p className="mt-4 text-xs leading-relaxed text-gray-400">
-              El retorno de cada punto sale de los mismos supuestos que la calculadora de
-              más abajo: la renta estimada de cada tipo, menos gastos y vacancia, más la
-              valorización del m² del relevamiento. La posición en el eje de riesgo, en
+              En alquiler, el eje vertical muestra renta neta de gastos y vacancia, sin sumar
+              valorización. En reventa muestra una referencia anualizada después de costos,
+              con el margen de mejora aplicado una sola vez. La posición en el eje de riesgo, en
               cambio, es una estimación propia sobre cuánto pueden variar esos resultados
               de un año a otro: no surge del relevamiento.
             </p>
@@ -1143,7 +1159,7 @@ export default function InversionesClient() {
               <a href="#simulador" className="font-medium text-gray-900 underline underline-offset-2">
                 volvé al simulador
               </a>
-              . Con ese monto comprás ≈ {sim.m2Comprables} m² al valor mediano de {sim.m2Etiqueta}{" "}
+              . Después de separar los costos iniciales, comprás ≈ {sim.m2Comprables} m² al valor mediano de {sim.m2Etiqueta}{" "}
               (USD {sim.m2Ref.toLocaleString("es-AR")}/m², el mismo que publicamos en el tasador).
             </Subtitulo>
 
@@ -1157,18 +1173,18 @@ export default function InversionesClient() {
                 {[
                   {
                     valor: `${fmtPct(sim.totalAnual)}%`,
-                    label: "retorno total anual",
-                    nota: `rango estimado ${fmtPct(sim.rangoMin)}–${fmtPct(sim.rangoMax)}%`,
+                    label: "retorno anualizado",
+                    nota: "después de costos de entrada y salida",
                   },
                   {
                     valor: sim.esReventa ? "—" : `USD ${Math.round(sim.mensual).toLocaleString("es-AR")}`,
                     label: "renta neta mensual",
-                    nota: sim.esReventa ? "la reventa no genera renta" : "gastos y vacancia descontados",
+                    nota: sim.esReventa ? "la reventa no genera renta" : `${Math.round(sim.gastosOperativos * 100)}% de gastos descontado`,
                   },
                   {
                     valor: `+${fmtPct(sim.valorizacion)}%`,
                     label: "valorización anual",
-                    nota: "evolución reciente del m² en SMA",
+                    nota: `escenario base; antecedente reciente ${fmtPct(VALORIZACION_ANUAL)}%`,
                   },
                   {
                     valor: `USD ${Math.round(sim.total).toLocaleString("es-AR")}`,
@@ -1192,7 +1208,7 @@ export default function InversionesClient() {
                 {calcTipo === "alquiler" ? "una propiedad para alquiler permanente" : calcTipo === "turistico" ? "alquiler turístico" : "compra y reventa"}, en {calcPlazo} año{calcPlazo > 1 ? "s" : ""} terminarías con unos{" "}
                 <strong className="font-medium text-gray-900">USD {Math.round(sim.total).toLocaleString("es-AR")}</strong>.{" "}
                 {sim.esReventa ? (
-                  <>La ganancia viene de comprar bien, mejorar y revender: entre {fmtPct(sim.rangoMin)}% y {fmtPct(sim.rangoMax)}% anual según la operación. No genera renta mensual.</>
+                  <>La mejora agrega {fmtPct(MARGEN_REVENTA * 100)}% una sola vez al precio proyectado; no se compone cada año ni genera renta mensual.</>
                 ) : (
                   <>
                     La ganancia sale de dos lados: unos <strong className="font-medium text-gray-900">USD {Math.round(sim.mensual).toLocaleString("es-AR")} por mes</strong> de renta neta (ya descontados gastos y vacancia) más la suba de valor de la propiedad.
@@ -1211,8 +1227,16 @@ export default function InversionesClient() {
                   </div>
                 )}
                 <div className="flex justify-between py-3 text-sm">
-                  <dt className="text-gray-500">{sim.esReventa ? "Comprar bien, mejorar y revender" : "Valorización de la propiedad"}</dt>
-                  <dd className="font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.gananciaValorizacion).toLocaleString("es-AR")}</dd>
+                  <dt className="text-gray-500">Capital destinado al precio de la propiedad</dt>
+                  <dd className="font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.precioPropiedad).toLocaleString("es-AR")}</dd>
+                </div>
+                <div className="flex justify-between py-3 text-sm">
+                  <dt className="text-gray-500">Costos iniciales{sim.esReventa ? " y reforma" : calcTipo === "turistico" ? " y equipamiento" : ""}</dt>
+                  <dd className="font-semibold text-gray-900 tabular-nums">− USD {Math.round(sim.costosIniciales).toLocaleString("es-AR")}</dd>
+                </div>
+                <div className="flex justify-between py-3 text-sm">
+                  <dt className="text-gray-500">Venta neta proyectada, descontando costos de salida</dt>
+                  <dd className="font-semibold text-gray-900 tabular-nums">USD {Math.round(sim.ventaNeta).toLocaleString("es-AR")}</dd>
                 </div>
                 <div className="flex justify-between py-3 text-sm">
                   <dt className="font-medium text-gray-900">Ganancia total estimada</dt>
@@ -1237,7 +1261,10 @@ export default function InversionesClient() {
                   </div>
                 </div>
                 <p className="text-xs text-center text-gray-400 mt-2">
-                  Diferencia: <span className="font-semibold text-emerald-600">+USD {Math.round(sim.total - sim.plazoFijoTotal).toLocaleString("es-AR")}</span> a favor del inmueble
+                  Diferencia: <span className={`font-semibold ${sim.total >= sim.plazoFijoTotal ? "text-emerald-600" : "text-rose-600"}`}>
+                    {sim.total >= sim.plazoFijoTotal ? "+" : "−"}USD {Math.abs(Math.round(sim.total - sim.plazoFijoTotal)).toLocaleString("es-AR")}
+                  </span>{" "}
+                  {sim.total >= sim.plazoFijoTotal ? "a favor del inmueble" : "a favor del plazo fijo"}
                 </p>
                 <p className="text-[11px] text-gray-400 mt-3 pt-3 border-t border-gray-200 leading-relaxed">
                   ¿Y el plazo fijo en pesos? Paga más en términos nominales (~15–19% TNA), pero está expuesto a la devaluación: medido en dólares, su resultado a varios años es impredecible y muchas veces negativo. Por eso comparamos contra la alternativa real en la misma moneda.
@@ -1245,7 +1272,7 @@ export default function InversionesClient() {
               </div>
 
               <p className="mt-6 text-[11px] leading-relaxed text-gray-400">
-                Supuestos: renta bruta según valores actuales de alquiler en SMA{!sim.esReventa && sim.rentaBruta ? ` (${fmtPct(sim.rentaBruta)}% anual para este tramo de precio)` : ""}, menos {GASTOS_VACANCIA * 100}% por gastos, gestión y vacancia · valorización = promedio de los últimos 2 años del m² en SMA · renta constante, sin reinversión. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
+                Supuestos: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida · renta bruta de referencia{!sim.esReventa && sim.rentaBruta ? ` ${fmtPct(sim.rentaBruta)}%` : ""} · {Math.round(sim.gastosOperativos * 100)}% de descuento por vacancia, mantenimiento, impuestos y gestión · valorización futura base {fmtPct(VALORIZACION_PROYECTADA)}% anual (el antecedente reciente de {fmtPct(VALORIZACION_ANUAL)}% no se proyecta completo){sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${MARGEN_REVENTA * 100}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Renta constante, sin reinversión. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
               </p>
             </div>
 

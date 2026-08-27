@@ -83,7 +83,7 @@ const PERFILES = {
     detalle: "Cobrás todos los meses en dólares y la propiedad se valoriza mientras tanto, sin depender de la temporada ni de gestión activa. Es lo de menor riesgo de la comparativa y por donde entra la mayoría de los que invierten por primera vez.",
     // renta neta 4,9–6,6% (bruta 6,1–8,2% del relevamiento, menos 20% de
     // gastos y vacancia) + 4,0% de valorización.
-    roi: "9–11% anual (renta + valorización)",
+    roi: "4–6% anual de renta neta estimada",
     riesgo: "Bajo",
   },
   moderado: {
@@ -93,7 +93,7 @@ const PERFILES = {
     recomendacion: "Compra y reventa con refuncionalización",
     detalle: "Comprás por debajo del valor de mercado, mejorás la propiedad y vendés. El retorno llega todo junto en la venta: en el medio no entra renta, y cuándo se vende lo decide el mercado.",
     // 4,0% de valorización + 4 a 10 puntos de margen por comprar bien y mejorar.
-    roi: "8–14% anual (valorización + margen)",
+    roi: "Margen único al vender, después de costos",
     riesgo: "Medio",
   },
   agresivo: {
@@ -103,7 +103,7 @@ const PERFILES = {
     recomendacion: "Departamento para alquiler turístico",
     detalle: "Es lo que más rinde, pero el ingreso es estacional: fuerte en ski y verano, flojo el resto del año. Requiere gestión activa o delegarla en una administradora.",
     // renta neta 9,6% (12% bruto bien gestionado, menos 20%) + 4,0%.
-    roi: "12–16% anual (renta + valorización)",
+    roi: "5–7% anual de renta neta estimada",
     riesgo: "Medio-alto",
   },
 };
