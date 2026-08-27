@@ -121,6 +121,20 @@ const VALORIZACION_ANUAL =
 // escenario base; el 4 % queda publicado solo como antecedente de mercado.
 const VALORIZACION_PROYECTADA = 2;
 
+const DIAS_POR_MES = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+// Tarifa de referencia para una unidad céntrica cercana a USD 135.000. Se
+// escala suavemente con el valor de la propiedad; duplicar el precio no duplica
+// la tarifa porque ubicación, capacidad y calidad no crecen en línea recta.
+const ADR_TURISTICO_BASE = [70, 70, 55, 50, 45, 55, 75, 75, 65, 55, 55, 65];
+const PROPIEDAD_TURISTICA_REFERENCIA = 135440;
+
+const OCUPACION_TURISTICA = {
+  invierno_debil: [0.65, 0.65, 0.35, 0.25, 0.20, 0.25, 0.48, 0.38, 0.25, 0.25, 0.35, 0.55],
+  conservador:    [0.70, 0.70, 0.40, 0.30, 0.25, 0.30, 0.50, 0.45, 0.30, 0.30, 0.40, 0.60],
+  base:           [0.80, 0.80, 0.50, 0.40, 0.35, 0.40, 0.60, 0.55, 0.45, 0.40, 0.50, 0.70],
+  optimista:      [0.85, 0.85, 0.60, 0.50, 0.45, 0.50, 0.75, 0.70, 0.60, 0.55, 0.65, 0.80],
+};
+
 // Escenarios explícitos del DCF. No son pronósticos: son juegos coherentes de
 // supuestos para medir cuánto depende el resultado de cada variable.
 const ESCENARIOS = {
@@ -133,6 +147,8 @@ const ESCENARIOS = {
     reservaCapex: { alquiler: 0.06, turistico: 0.08 },
     margenReventa: 0.08,
     tasaExigida: 0.11,
+    factorTarifa: 0.90,
+    impactoCostoViaje: -0.15,
   },
   conservador: {
     label: "Conservador",
@@ -143,6 +159,8 @@ const ESCENARIOS = {
     reservaCapex: { alquiler: 0.06, turistico: 0.08 },
     margenReventa: 0.08,
     tasaExigida: 0.10,
+    factorTarifa: 0.95,
+    impactoCostoViaje: -0.10,
   },
   base: {
     label: "Base",
@@ -153,6 +171,8 @@ const ESCENARIOS = {
     reservaCapex: { alquiler: 0.05, turistico: 0.07 },
     margenReventa: MARGEN_REVENTA,
     tasaExigida: 0.08,
+    factorTarifa: 1,
+    impactoCostoViaje: 0,
   },
   optimista: {
     label: "Optimista",
@@ -163,6 +183,8 @@ const ESCENARIOS = {
     reservaCapex: { alquiler: 0.04, turistico: 0.05 },
     margenReventa: 0.22,
     tasaExigida: 0.07,
+    factorTarifa: 1.08,
+    impactoCostoViaje: 0.05,
   },
 };
 
@@ -588,8 +610,6 @@ export default function InversionesClient() {
         Math.abs(b.precioVenta - precioPropiedad) < Math.abs(a.precioVenta - precioPropiedad) ? b : a
       );
       rentaBruta = cercana.rentabilidad;
-    } else if (calcTipo === "turistico") {
-      rentaBruta = RENTA_BRUTA_TURISTICO;
     }
     const vacancia = esReventa ? 0 : escenario.vacancia[calcTipo];
     const gastosIngreso = esReventa ? 0 : escenario.gastosIngreso[calcTipo];
@@ -608,20 +628,42 @@ export default function InversionesClient() {
     const flujos = [-calcMonto];
     let rentaAcumulada = 0;
     let rentaPrimerAno = 0;
+    let ingresoBrutoPrimerAno = 0;
+    let nochesOcupadasPrimerAno = 0;
+    let nochesDisponiblesPrimerAno = 0;
     for (let mes = 1; mes <= meses; mes += 1) {
       let flujoMes = 0;
       if (!esReventa) {
         const crecimiento = Math.pow(1 + escenario.crecimientoRenta, (mes - 1) / 12);
-        const ingresoPotencial = precioPropiedad * (rentaBruta / 100) / 12 * crecimiento;
-        // El escenario 2025–26 no supone una recuperación instantánea. Para
-        // turístico arranca con 40 % de ocupación efectiva y recupera cinco
-        // puntos por año hasta estabilizarse en 60 %. Es una prueba de estrés,
-        // no una afirmación de que esos porcentajes vayan a repetirse.
-        const anioProyectado = Math.floor((mes - 1) / 12);
-        const vacanciaMes = calcEscenario === "invierno_debil" && calcTipo === "turistico"
-          ? Math.max(0.40, 0.60 - anioProyectado * 0.05)
-          : vacancia;
-        const ingresoEfectivo = ingresoPotencial * (1 - vacanciaMes);
+        let ingresoEfectivo;
+        if (calcTipo === "turistico") {
+          const indiceMes = (mes - 1) % 12;
+          const anioProyectado = Math.floor((mes - 1) / 12);
+          const perfil = OCUPACION_TURISTICA[calcEscenario] ?? OCUPACION_TURISTICA.base;
+          const recuperacion = calcEscenario === "invierno_debil"
+            ? Math.min(0.20, anioProyectado * 0.05)
+            : 0;
+          const ocupacion = Math.min(
+            0.90,
+            Math.max(0, (perfil[indiceMes] + recuperacion) * (1 + escenario.impactoCostoViaje))
+          );
+          const escalaPropiedad = Math.min(
+            1.60,
+            Math.max(0.75, Math.sqrt(precioPropiedad / PROPIEDAD_TURISTICA_REFERENCIA))
+          );
+          const tarifa = ADR_TURISTICO_BASE[indiceMes] * escalaPropiedad * escenario.factorTarifa * crecimiento;
+          const dias = DIAS_POR_MES[indiceMes];
+          ingresoEfectivo = tarifa * dias * ocupacion;
+          if (mes <= 12) {
+            ingresoBrutoPrimerAno += ingresoEfectivo;
+            nochesOcupadasPrimerAno += dias * ocupacion;
+            nochesDisponiblesPrimerAno += dias;
+          }
+        } else {
+          const ingresoPotencial = precioPropiedad * (rentaBruta / 100) / 12 * crecimiento;
+          ingresoEfectivo = ingresoPotencial * (1 - vacancia);
+          if (mes <= 12) ingresoBrutoPrimerAno += ingresoEfectivo;
+        }
         flujoMes = ingresoEfectivo * (1 - gastosIngreso - reservaCapex);
         rentaAcumulada += flujoMes;
         if (mes <= 12) rentaPrimerAno += flujoMes;
@@ -639,15 +681,22 @@ export default function InversionesClient() {
     const capRate = esReventa ? 0 : (rentaPrimerAno / precioPropiedad) * 100;
     const mensual = esReventa ? 0 : rentaPrimerAno / 12;
     const equityMultiple = total / calcMonto;
+    const rentaBrutaCalculada = esReventa ? 0 : (ingresoBrutoPrimerAno / precioPropiedad) * 100;
+    const ocupacionPromedio = calcTipo === "turistico" && nochesDisponiblesPrimerAno
+      ? nochesOcupadasPrimerAno / nochesDisponiblesPrimerAno
+      : null;
+    const tarifaPromedio = calcTipo === "turistico" && nochesOcupadasPrimerAno
+      ? ingresoBrutoPrimerAno / nochesOcupadasPrimerAno
+      : null;
 
     // El m² del tipo que se está simulando, no un promedio de los dos.
     const { m2: m2Ref, etiqueta: m2Etiqueta } = M2_SIMULADOR[calcTipo] ?? M2_SIMULADOR.alquiler;
 
     return {
-      esReventa, rentaBruta, valorizacion, totalAnual, rentaSobreCapital, capRate,
+      esReventa, rentaBruta: rentaBrutaCalculada, valorizacion, totalAnual, rentaSobreCapital, capRate,
       rentaAcumulada, ganancia, total, mensual, precioPropiedad, costosIniciales,
       costosSalida, ventaNeta, valorMercadoFinal, costoAdicional, escenario,
-      vacancia, gastosIngreso, reservaCapex, van, equityMultiple,
+      vacancia, gastosIngreso, reservaCapex, van, equityMultiple, ocupacionPromedio, tarifaPromedio,
       m2Ref, m2Etiqueta, m2Comprables: Math.round(precioPropiedad / m2Ref),
       plazoFijoTotal: calcMonto * Math.pow(1 + TASA_PLAZO_FIJO, calcPlazo),
     };
@@ -1375,6 +1424,17 @@ export default function InversionesClient() {
               <h3 className="mt-9 text-[17px] font-semibold tracking-[-0.01em] text-gray-900">
                 De dónde sale la ganancia
               </h3>
+              {calcTipo === "turistico" && (
+                <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50 p-5">
+                  <p className="text-sm font-semibold text-gray-900">Cómo calculamos el alquiler turístico</p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                    Para cada mes multiplicamos <strong className="font-medium text-gray-900">tarifa por noche × noches del mes × ocupación esperada</strong>. Luego descontamos operación y reparaciones. En este escenario, el primer año usa una ocupación promedio de <strong className="font-medium text-gray-900">{fmtPct(sim.ocupacionPromedio * 100)}%</strong> y una tarifa promedio de <strong className="font-medium text-gray-900">USD {Math.round(sim.tarifaPromedio)} por noche ocupada</strong>.
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-gray-500">
+                    Julio y agosto se modelan por separado: el escenario de invierno débil parte de la temporada desfavorable observada en 2025–2026 y recupera 5 puntos de ocupación por año, con un máximo de 20 puntos. Así, un invierno malo reduce el ingreso en vez de quedar oculto dentro de un promedio anual.
+                  </p>
+                </div>
+              )}
               <dl className="mt-5 divide-y divide-gray-100 border-y border-gray-100">
                 {!sim.esReventa && (
                   <div className="flex justify-between py-3 text-sm">
@@ -1428,7 +1488,7 @@ export default function InversionesClient() {
               </div>
 
               <p className="mt-6 text-[11px] leading-relaxed text-gray-400">
-                Escenario {sim.escenario.label.toLowerCase()}: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida{!sim.esReventa ? ` · renta bruta de referencia ${fmtPct(sim.rentaBruta)}% · vacancia ${Math.round(sim.vacancia * 100)}% · gastos operativos ${Math.round(sim.gastosIngreso * 100)}% · reserva para reparaciones ${Math.round(sim.reservaCapex * 100)}% · crecimiento de renta ${fmtPct(sim.escenario.crecimientoRenta * 100)}% anual` : ""}{calcEscenario === "invierno_debil" && calcTipo === "turistico" ? " · recuperación gradual: ocupación de 40% el primer año hasta 60% desde el quinto" : ""} · valorización {fmtPct(sim.valorizacion)}% anual · tasa exigida para el VAN {fmtPct(sim.escenario.tasaExigida * 100)}%{sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${Math.round(sim.escenario.margenReventa * 100)}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Flujos mensuales en USD, sin financiación ni impuestos personales. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
+                Escenario {sim.escenario.label.toLowerCase()}: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida{calcTipo === "alquiler" ? ` · rendimiento bruto efectivo del primer año ${fmtPct(sim.rentaBruta)}% · vacancia ${Math.round(sim.vacancia * 100)}%` : calcTipo === "turistico" ? ` · ocupación promedio del primer año ${fmtPct(sim.ocupacionPromedio * 100)}% · tarifa media USD ${Math.round(sim.tarifaPromedio)}/noche · ajuste por costo de viaje ${sim.escenario.impactoCostoViaje >= 0 ? "+" : ""}${Math.round(sim.escenario.impactoCostoViaje * 100)}%` : ""}{!sim.esReventa ? ` · gastos operativos ${Math.round(sim.gastosIngreso * 100)}% · reserva para reparaciones ${Math.round(sim.reservaCapex * 100)}% · crecimiento de tarifa/renta ${fmtPct(sim.escenario.crecimientoRenta * 100)}% anual` : ""} · valorización {fmtPct(sim.valorizacion)}% anual · tasa exigida para el VAN {fmtPct(sim.escenario.tasaExigida * 100)}%{sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${Math.round(sim.escenario.margenReventa * 100)}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Flujos mensuales en USD, sin financiación ni impuestos personales. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
               </p>
             </div>
 
