@@ -1,128 +1,71 @@
-"use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+
+const proofPoints = [
+  { value: "+10 años", label: "en el mercado local" },
+  { value: "+18% ROI", label: "gestionado" },
+  { value: "SMA", label: "asesoría en el lugar" },
+];
 
 export default function Hero() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setCollapsed(window.scrollY > 80);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 767px)");
-    const syncViewport = () => setIsMobile(media.matches);
-    syncViewport();
-    media.addEventListener("change", syncViewport);
-    return () => media.removeEventListener("change", syncViewport);
-  }, []);
-
-  const heroHeight = collapsed ? (isMobile ? "84px" : "110px") : (isMobile ? "265px" : "55vh");
-  const heroMinHeight = collapsed ? (isMobile ? "84px" : "110px") : (isMobile ? "265px" : "380px");
-  const metricsHeight = isMobile ? "92px" : "110px";
-
   return (
-    <div
-      className="relative overflow-hidden bg-white"
-      style={{
-        height: heroHeight,
-        minHeight: heroMinHeight,
-        transition: "height 900ms cubic-bezier(0.4, 0, 0.2, 1), min-height 900ms cubic-bezier(0.4, 0, 0.2, 1)",
-      }}
-    >
+    <section className="relative isolate min-h-[620px] overflow-hidden bg-slate-950 sm:min-h-[680px] lg:min-h-[760px]">
       <Image
         src="/portada.webp"
-        alt="San Martín de los Andes — Catalán Propiedades"
+        alt="Paisaje de San Martín de los Andes"
         fill
         priority
         sizes="100vw"
-        className="object-cover hero-kenburns"
-        style={{
-          transition: "opacity 900ms ease",
-          opacity: collapsed ? 0.3 : isMobile ? 0.42 : 1,
-        }}
+        className="object-cover object-center"
       />
 
-      <div
-        className="absolute inset-x-0 bottom-0"
-        style={{
-          height: collapsed ? metricsHeight : "112px",
-          background: isMobile
-            ? "linear-gradient(to top, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.72) 58%, transparent 100%)"
-            : "linear-gradient(to top, rgba(255,255,255,0.95) 0%, transparent 100%)",
-          transition: "height 900ms cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,12,18,0.88)_0%,rgba(5,12,18,0.68)_42%,rgba(5,12,18,0.18)_72%,rgba(5,12,18,0.06)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(5,12,18,0.72)_0%,transparent_42%)]" />
 
-      <div
-        className="absolute inset-x-0 flex flex-col items-center justify-center text-center px-4"
-        style={{
-          top: 0,
-          bottom: isMobile ? "0px" : metricsHeight,
-          opacity: collapsed ? 0 : 1,
-          transition: "opacity 600ms ease",
-          pointerEvents: collapsed ? "none" : "auto",
-        }}
-      >
-        {/*
-          El H1 dice la frase exacta que la gente busca en Google:
-          "inmobiliaria san martin de los andes" acumula 282 impresiones en 28
-          días entre sus tres variantes, y la home rankea ahí en posición ~10.
-          Es la consulta más valiosa del sitio.
+      <div className="relative mx-auto flex min-h-[620px] max-w-7xl items-end px-4 pb-10 pt-28 sm:min-h-[680px] sm:px-6 sm:pb-14 lg:min-h-[760px] lg:items-center lg:px-8 lg:pb-20 lg:pt-32">
+        <div className="w-full max-w-3xl">
+          <p className="mb-5 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white/75 sm:text-xs">
+            <span className="h-px w-9 bg-rose-500" aria-hidden="true" />
+            Inmobiliaria en San Martín de los Andes
+          </p>
 
-          Durante unas horas el 17/08/2026 este H1 decía "Compra donde otros ya
-          compraron: +18% ROI gestionados" — sin la palabra "inmobiliaria" ni la
-          ciudad. Le sacaba a Google la señal principal de qué es esta página
-          justo en la búsqueda que más importa. La urgencia y la prueba social
-          viven ahora en la bajada, donde no compiten con el posicionamiento.
-        */}
-        <h1 className="text-gray-900 text-[1.7rem] sm:text-4xl font-bold mb-2 drop-shadow-lg leading-tight max-w-[19rem] sm:max-w-none">
-          Inmobiliaria en San Martín de los Andes
-        </h1>
-        <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-5 max-w-[18rem] sm:max-w-xl leading-snug">
-          +18% ROI gestionados · Propiedades nuevas cada semana
-        </p>
-        <div className="flex w-full max-w-[17rem] flex-col sm:w-auto sm:max-w-none sm:flex-row gap-2.5 sm:gap-3">
-          <Link
-            href="/propiedades"
-            className="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm shadow-lg text-center"
-          >
-            Ver propiedades
-          </Link>
-          <Link
-            href="/inversiones"
-            className="hidden sm:inline-block bg-white/90 hover:bg-white text-gray-800 font-semibold px-6 py-3 rounded-xl transition-colors text-sm border border-gray-200 shadow-sm text-center"
-          >
-            Analizar inversión
-          </Link>
+          <h1 className="max-w-3xl text-4xl font-black leading-[0.98] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl">
+            Comprá con datos, no con intuición.
+          </h1>
+
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/78 sm:text-lg">
+            Te ayudamos a comprar, vender e invertir con conocimiento del lugar y datos reales del mercado.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/propiedades"
+              className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-rose-600 px-6 text-sm font-bold text-white transition hover:bg-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+            >
+              Explorar propiedades
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              href="/vender"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              Quiero vender o tasar
+            </Link>
+          </div>
+
+          <dl className="mt-10 grid max-w-2xl grid-cols-3 border-t border-white/20 pt-5 sm:mt-12 sm:pt-6">
+            {proofPoints.map((item, index) => (
+              <div
+                key={item.label}
+                className={`min-w-0 ${index > 0 ? "border-l border-white/20 pl-4 sm:pl-7" : "pr-4 sm:pr-7"}`}
+              >
+                <dt className="text-base font-black text-white sm:text-xl">{item.value}</dt>
+                <dd className="mt-1 text-[10px] leading-tight text-white/60 sm:text-xs">{item.label}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
-
-
-      <div className="absolute inset-x-0 bottom-0 px-6 hidden md:flex items-center justify-center"
-        style={{ height: metricsHeight }}
-      >
-        <div className="flex items-center gap-4 md:gap-12">
-          <div className="text-center">
-            <p className="text-gray-900 text-base md:text-xl font-bold leading-none">+18% ROI</p>
-            <p className="text-gray-500 text-xs mt-0.5 tracking-wide">Gestionados</p>
-          </div>
-          <div className="w-px h-6 bg-gray-200" />
-          <div className="text-center">
-            <p className="text-gray-900 text-base md:text-xl font-bold leading-none">10+</p>
-            <p className="text-gray-500 text-xs mt-0.5 tracking-wide">Años de experiencia</p>
-          </div>
-          <div className="w-px h-6 bg-gray-200" />
-          <div className="text-center">
-            <p className="text-gray-900 text-base md:text-xl font-bold leading-none">San Martín</p>
-            <p className="text-gray-500 text-xs mt-0.5 tracking-wide">de los Andes</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

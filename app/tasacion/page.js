@@ -8,8 +8,6 @@ import {
   EVOLUCION_SERIE,
   EVOLUCION_VARIACION_TOTAL,
   RELEVADAS_PUBLICO,
-  VALOR_M2_CASA,
-  VALOR_M2_DEPTO,
 } from "@/lib/mercado";
 import { TASACIONES_LIBRES } from "@/lib/tasadorOpciones";
 
@@ -412,13 +410,24 @@ export default async function TasacionPage() {
           local. La primera tasación no te pide ni el nombre.
         </p>
 
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <a
+            href="#tasador"
+            className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-gray-900 px-6 text-sm font-semibold text-white transition-colors hover:bg-gray-700"
+          >
+            Tasar mi propiedad
+            <span aria-hidden="true">↓</span>
+          </a>
+          <p className="text-sm text-gray-500">Menos de un minuto · sin compromiso</p>
+        </div>
+
         {/* Métricas en hairline, no en tarjetas: son un dato de respaldo, no
             tres botones. Encajonarlas les daría un peso que no les toca. */}
         <div className="mt-10 grid grid-cols-3 divide-x divide-gray-100 border-y border-gray-100 py-5">
           {[
-            { valor: RELEVADAS_PUBLICO, label: "propiedades relevadas" },
-            { valor: `USD ${VALOR_M2_CASA.toLocaleString("es-AR")}`, label: "el m² en casas" },
-            { valor: `USD ${VALOR_M2_DEPTO.toLocaleString("es-AR")}`, label: "el m² en departamentos" },
+            { valor: "Tu valor", label: "estimación inmediata" },
+            { valor: "Un rango", label: "con margen a la vista" },
+            { valor: "Tu barrio", label: "comparación por m²" },
           ].map((m, i) => (
             <div key={m.label} className={i === 0 ? "pr-4" : "px-4"}>
               <p className="text-lg font-semibold leading-tight text-gray-900 tabular-nums md:text-xl">
@@ -430,7 +439,7 @@ export default async function TasacionPage() {
         </div>
       </section>
 
-      <div className="mx-auto mt-10 max-w-3xl px-4 sm:px-6 md:mt-12 lg:px-8">
+      <div id="tasador" className="mx-auto mt-10 max-w-3xl scroll-mt-24 px-4 sm:px-6 md:mt-12 lg:px-8">
         <TasadorWizard barrios={barrios} />
       </div>
 

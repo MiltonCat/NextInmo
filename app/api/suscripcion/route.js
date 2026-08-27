@@ -15,6 +15,17 @@ const INTERESES = new Set(["comprar", "alquilar", "invertir", "mirar"]);
 const SOURCES = new Set(["web", "tasador", "test-inversor"]);
 // Validación de email simple y suficiente (formato básico).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TIPOS = new Set(["casa", "departamento", "lote", "comercial"]);
+
+function notasDeBusqueda(body) {
+  const partes = [
+    TIPOS.has(body.tipo) ? `Tipo: ${body.tipo}` : null,
+    clamp(body.zona, 120) ? `Zona: ${clamp(body.zona, 120)}` : null,
+    clamp(body.presupuesto, 120) ? `Presupuesto: ${clamp(body.presupuesto, 120)}` : null,
+    clamp(body.whatsapp, 60) ? `WhatsApp: ${clamp(body.whatsapp, 60)}` : null,
+  ].filter(Boolean);
+  return partes.length ? partes.join(" · ") : null;
+}
 
 export async function POST(request) {
   try {
@@ -48,6 +59,7 @@ export async function POST(request) {
     }
 
     const interes = INTERESES.has(body.interes) ? body.interes : null;
+    const notas = notasDeBusqueda(body);
 
     const source = SOURCES.has(body.source) ? body.source : "web";
     const yaExistia = await subscriberExists(email);
@@ -56,6 +68,7 @@ export async function POST(request) {
       nombre: clamp(body.nombre, 200),
       interes,
       source,
+      ...(notas ? { notas } : {}),
     });
 
     // Email de bienvenida solo para altas nuevas, enviado después de

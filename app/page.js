@@ -5,8 +5,6 @@ import PropertyCard from "@/components/PropertyCard";
 import SuscripcionForm from "@/components/SuscripcionForm";
 import TrackedLink from "@/components/TrackedLink";
 import { RELEVADAS_PUBLICO } from "@/lib/mercado";
-import dynamic from "next/dynamic";
-const InvestmentMapClient = dynamic(() => import("@/components/InvestmentMapClient"));
 import { getProperties } from "@/lib/properties";
 
 import { canonicalUrl, DEFAULT_OG_IMAGE, TASADOR_PATH } from "@/config";
@@ -57,6 +55,38 @@ export default async function Home() {
     <div>
       <Hero />
 
+      {/* El catálogo aparece primero: es la razón principal por la que la
+          mayoría llega a la home y la acción con menor fricción. */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-rose-600">
+                Selección Catalán
+              </p>
+              <h2 className="text-2xl font-black leading-tight text-gray-900 sm:text-3xl">
+                Propiedades destacadas
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">
+                Oportunidades revisadas por nuestro equipo en San Martín de los Andes.
+              </p>
+            </div>
+            <Link
+              href="/propiedades"
+              className="inline-flex items-center gap-2 text-sm font-bold text-rose-600 transition-colors hover:text-rose-500"
+            >
+              Ver todas las propiedades <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {featuredProperties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Entrada guiada: orienta cada visita hacia el recorrido que necesita. */}
       <section className="border-b border-gray-100 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
@@ -65,22 +95,22 @@ export default async function Home() {
               Empezá por acá
             </p>
             <h2 className="text-2xl font-black leading-tight text-gray-900 sm:text-3xl">
-              ¿Qué querés hacer en San Martín de los Andes?
+              Dos caminos, el mismo acompañamiento local
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-gray-500 sm:text-base">
-              Elegí tu objetivo y te llevamos directo a la información y las herramientas que necesitás.
+              Te ayudamos a encontrar tu próxima propiedad o a vender la que ya tenés con una estrategia clara.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
             {[
               {
                 event: "home_intent_buy",
                 intent: "buy",
                 href: "/propiedades",
                 number: "01",
-                title: "Quiero comprar",
-                description: "Propiedades nuevas cada semana. Asesoramiento verificado en cada zona.",
+                title: "Quiero comprar una propiedad",
+                description: "Explorá oportunidades seleccionadas y recibí asesoramiento sobre zonas, precios y documentación.",
                 action: "Explorar propiedades",
               },
               {
@@ -89,26 +119,8 @@ export default async function Home() {
                 href: "/vender",
                 number: "02",
                 title: "Quiero vender o tasar",
-                description: "Conocé el valor de tu propiedad y cómo te acompañamos para venderla.",
+                description: "Conocé el valor estimado de tu propiedad y cómo podemos acompañarte durante toda la venta.",
                 action: "Empezar mi tasación",
-              },
-              {
-                event: "home_intent_invest",
-                intent: "invest",
-                href: "/inversiones",
-                number: "03",
-                title: "Quiero invertir",
-                description: "Rentabilidad verificada: +18% ROI. Análisis por zona con datos reales.",
-                action: "Ver oportunidades",
-              },
-              {
-                event: "home_intent_market",
-                intent: "market",
-                href: "/precio-m2",
-                number: "04",
-                title: "Quiero conocer el mercado",
-                description: "Compará precios por metro cuadrado y entendé mejor cada zona.",
-                action: "Ver precios y zonas",
               },
             ].map((option) => (
               <TrackedLink
@@ -231,39 +243,28 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">
-          Propiedades Destacadas
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-        <div className="text-center mt-12">
-          <Link
-            href="/propiedades"
-            className="inline-block bg-rose-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-rose-500 transition shadow-lg"
-          >
-            Ver todas las propiedades
-          </Link>
-        </div>
-      </section>
-
       {/* Suscripción — "sé el primero en enterarte" */}
-      <section className="bg-rose-600">
-        <div className="max-w-4xl mx-auto px-4 py-14 sm:px-6 lg:px-8">
-          <div className="text-center mb-7">
-            <p className="text-rose-200 text-xs font-bold tracking-widest uppercase mb-2">Propiedades nuevas</p>
-            <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-3">
-              Sé el primero en enterarte
+      <section className="border-y border-gray-100 bg-slate-50">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:px-8 lg:py-20">
+          <div>
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-rose-600">Radar de propiedades</p>
+            <h2 className="text-3xl font-black leading-tight text-gray-900 sm:text-4xl">
+              Recibí propiedades que coincidan con tu búsqueda
             </h2>
-            <p className="text-rose-100 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-              En San Martín de los Andes las mejores oportunidades se venden rápido. Dejanos tu email
-              y te avisamos apenas entra una propiedad nueva — antes de que llegue a los portales.
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-gray-600 sm:text-base">
+              Guardá lo que buscás una sola vez. Cuando entre algo compatible, te avisamos por email.
             </p>
+            <ul className="mt-6 space-y-3 text-sm text-gray-700">
+              {["Alertas según tu tipo y presupuesto", "Oportunidades de San Martín de los Andes", "Podés darte de baja cuando quieras"].map((item) => (
+                <li key={item} className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-600" aria-hidden="true">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="max-w-xl mx-auto">
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)] sm:p-7">
             <SuscripcionForm />
           </div>
         </div>
@@ -451,8 +452,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      <InvestmentMapClient />
     </div>
   );
 }

@@ -306,12 +306,33 @@ export default function TasadorResultado({
         </div>
       )}
 
-      <div className="rounded-2xl border border-gray-200 p-6">
-        <p className="text-[17px] font-semibold text-gray-900">Lo que el modelo no puede ver</p>
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 bg-gray-50/70 p-6">
+          <Etiqueta>Siguiente paso</Etiqueta>
+          <p className="mt-2 text-[20px] font-semibold tracking-[-0.015em] text-gray-900">
+            Convertí esta estimación en un precio de publicación
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-gray-600">
+            Milton puede revisar personalmente los detalles que el modelo no ve y decirte si el
+            rango se sostiene antes de publicar.
+          </p>
+        </div>
+
+        <div className="p-6">
+          <ul className="grid gap-3 text-sm text-gray-700 sm:grid-cols-3">
+            {["Revisión de la propiedad", "Comparables de la zona", "Estrategia de publicación"].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+
         <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-          La vista real desde el living, el estado fino de la carpintería, el ruido de la calle a
-          las 8 de la mañana, cómo entra el sol en julio. Eso mueve el precio y solo se ve yendo.
-          Milton la mira gratis y te dice si el rango se sostiene.
+          La revisión inicial es gratuita y sin compromiso. El mensaje ya incluye los datos y el
+          resultado de esta tasación para que no tengas que escribir todo de nuevo.
         </p>
 
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
@@ -323,12 +344,12 @@ export default function TasadorResultado({
               trackEvent("tasador_resultado_whatsapp", { barrio: datos.barrio, tipo: datos.tipo });
               trackWhatsAppClick(null, "tasador_resultado");
             }}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-gray-700"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500"
           >
             <svg className="h-[18px] w-[18px]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.122 1.528 5.855L.057 23.882l6.186-1.622A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.658-.518-5.168-1.418l-.371-.22-3.673.963.981-3.585-.242-.38A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
             </svg>
-            Que Milton la revise
+            Pedir revisión por WhatsApp
           </a>
           <button
             type="button"
@@ -340,6 +361,7 @@ export default function TasadorResultado({
           >
             Tasar otra propiedad
           </button>
+        </div>
         </div>
       </div>
 

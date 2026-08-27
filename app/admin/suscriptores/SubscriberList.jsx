@@ -62,13 +62,14 @@ export default function SubscriberList({ subscribers }) {
         correo para avisar a todos sin que vean los emails de los demás.
       </p>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
+        <table className="w-full min-w-[900px] text-sm">
           <thead className="bg-gray-100 text-gray-600 text-left">
             <tr>
               <th className="px-4 py-3 font-medium">Email</th>
               <th className="px-4 py-3 font-medium">Nombre</th>
               <th className="px-4 py-3 font-medium">Interés</th>
+              <th className="px-4 py-3 font-medium">Búsqueda</th>
               <th className="px-4 py-3 font-medium">Fecha</th>
               <th className="px-4 py-3 font-medium text-right">Acciones</th>
             </tr>
@@ -81,6 +82,9 @@ export default function SubscriberList({ subscribers }) {
                 </td>
                 <td className="px-4 py-3 text-gray-700">{s.nombre || "—"}</td>
                 <td className="px-4 py-3 text-gray-600">{INTERES_LABEL[s.interes] || "—"}</td>
+                <td className="max-w-xs px-4 py-3 text-xs leading-relaxed text-gray-600">
+                  {s.notas || "Sin preferencias"}
+                </td>
                 <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatFecha(s.created_at)}</td>
                 <td className="px-4 py-3 text-right">
                   <form action={removeSubscriber}>
