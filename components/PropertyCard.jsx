@@ -33,7 +33,7 @@ function PropertyCard({ property }) {
 
   const categoryLabel = isAlquiler
     ? "Alquiler permanente"
-    : operationLabel[property.operation] ?? "Venta";
+    : `${property.type || "Propiedad"} en venta`;
 
   const handleToggle = (e) => {
     e.preventDefault();

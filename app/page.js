@@ -49,7 +49,39 @@ export const metadata = {
 
 export default async function Home() {
   const properties = await getProperties();
-  const featuredProperties = properties.slice(0, 3);
+
+  // La home no es un espejo de las primeras filas de la base: es una vidriera.
+  // Se respetan el orden editorial (`sort_order`) y solo se eligen propiedades
+  // realmente disponibles. La composición es deliberada: un alquiler
+  // permanente primero, un monoambiente en venta y una casa en venta.
+  const disponibles = properties.filter((property) =>
+    !property.vendida &&
+    !property.alquilada &&
+    !property.reservada &&
+    !property.noDisponible &&
+    property.status !== "no_disponible"
+  );
+  const alquilerDestacado = disponibles.find(
+    (property) => property.modalidad === "alquiler_permanente"
+  );
+  const esVentaDisponible = (property) =>
+      property.modalidad !== "alquiler_permanente" &&
+      (property.operation === "venta" || property.operation === "ambas");
+  const monoambienteDestacado = disponibles.find(
+    (property) =>
+      esVentaDisponible(property) &&
+      property.type?.toLocaleLowerCase("es-AR") === "monoambiente"
+  );
+  const casaDestacada = disponibles.find(
+    (property) =>
+      esVentaDisponible(property) &&
+      property.type?.toLocaleLowerCase("es-AR") === "casa"
+  );
+  const featuredProperties = [
+    alquilerDestacado,
+    monoambienteDestacado,
+    casaDestacada,
+  ].filter(Boolean);
 
   return (
     <div>
