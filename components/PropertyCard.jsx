@@ -9,9 +9,9 @@ import { getPropertySlug } from "@/data/properties";
 //
 // 1. Sin sombra ni borde. La separación entre tarjetas la hace el aire, no una
 //    caja. La foto con esquinas redondeadas es el único elemento con forma.
-// 2. Sobre la foto van solo ESTADOS (destacada, vendida, alquilada, reservada):
-//    cosas que cambian con el tiempo y hay que ver de un vistazo. Los ATRIBUTOS
-//    (operación, tipo, ambientes, m²) van en el texto, que es donde se leen.
+// 2. La operación va siempre sobre la foto para que en una selección mixta se
+//    distinga de inmediato una venta de un alquiler permanente. Los estados
+//    (destacada, vendida, alquilada, reservada) aparecen como una segunda señal.
 // 3. Nada de recuadros grises alrededor de cada dato: una línea de texto con
 //    separadores "·". Misma información, mucho menos ruido.
 // 4. Un solo color fuerte en toda la tarjeta —el corazón cuando está activo—.
@@ -27,9 +27,13 @@ function PropertyCard({ property }) {
 
   const operationLabel = {
     venta: "Venta",
-    alquiler: "Alquiler",
+    alquiler: "Alquiler permanente",
     ambas: "Venta y alquiler",
   };
+
+  const categoryLabel = isAlquiler
+    ? "Alquiler permanente"
+    : operationLabel[property.operation] ?? "Venta";
 
   const handleToggle = (e) => {
     e.preventDefault();
@@ -65,6 +69,9 @@ function PropertyCard({ property }) {
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={`object-cover transition-transform duration-500 ${isUnavailable ? "brightness-50 grayscale" : "group-hover:scale-[1.03]"} ${property.alquilada ? "brightness-50" : property.reservada ? "brightness-75" : ""}`}
         />
+        <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm">
+          {categoryLabel}
+        </span>
         {property.vendida ? (
           <span className="absolute inset-0 flex items-center justify-center text-xl font-black tracking-[0.2em] text-white bg-black/25">
             VENDIDA
@@ -75,7 +82,7 @@ function PropertyCard({ property }) {
           </span>
         ) : (
           (isFeatured || property.alquilada || property.reservada) && (
-            <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
+            <div className="absolute left-3 top-11 flex flex-col items-start gap-1.5">
               {property.alquilada ? (
                 <span className="rounded-full bg-gray-900/85 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
                   Alquilada

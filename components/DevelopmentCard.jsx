@@ -8,8 +8,8 @@ import { estadoDe, getDevelopmentSlug, unidadLabel } from "@/data/developments";
 //
 // 1. Sin sombra ni borde: la foto redondeada es la única forma. La separación
 //    entre tarjetas la hace el aire.
-// 2. Sobre la foto va SOLO el estado de la obra. Es lo que cambia con el tiempo
-//    y lo primero que alguien mira para saber si el proyecto le sirve.
+// 2. Sobre la foto se identifica primero que es un desarrollo inmobiliario y,
+//    separado, el estado de la obra. Así no se confunde con una venta usada.
 // 3. El avance de obra va como barra fina bajo el título. En un desarrollo es
 //    el dato que separa "una idea" de "algo que existe".
 // 4. Un solo color fuerte por tarjeta, el del estado. El precio va en negro:
@@ -105,7 +105,10 @@ function DevelopmentCard({ development }) {
           <SinFoto nombre={development.name} />
         )}
 
-        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm">
+            Desarrollo inmobiliario
+          </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-900 shadow-sm">
             <span className={`h-1.5 w-1.5 rounded-full ${styles.dot}`} />
             {estado.label}
