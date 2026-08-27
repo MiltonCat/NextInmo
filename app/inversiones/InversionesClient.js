@@ -121,6 +121,71 @@ const VALORIZACION_ANUAL =
 // escenario base; el 4 % queda publicado solo como antecedente de mercado.
 const VALORIZACION_PROYECTADA = 2;
 
+// Escenarios explícitos del DCF. No son pronósticos: son juegos coherentes de
+// supuestos para medir cuánto depende el resultado de cada variable.
+const ESCENARIOS = {
+  conservador: {
+    label: "Conservador",
+    valorizacion: 0,
+    crecimientoRenta: 0,
+    vacancia: { alquiler: 0.12, turistico: 0.45 },
+    gastosIngreso: { alquiler: 0.18, turistico: 0.30 },
+    reservaCapex: { alquiler: 0.06, turistico: 0.08 },
+    margenReventa: 0.08,
+    tasaExigida: 0.10,
+  },
+  base: {
+    label: "Base",
+    valorizacion: VALORIZACION_PROYECTADA,
+    crecimientoRenta: 0.01,
+    vacancia: { alquiler: 0.08, turistico: 0.35 },
+    gastosIngreso: { alquiler: 0.15, turistico: 0.25 },
+    reservaCapex: { alquiler: 0.05, turistico: 0.07 },
+    margenReventa: MARGEN_REVENTA,
+    tasaExigida: 0.08,
+  },
+  optimista: {
+    label: "Optimista",
+    valorizacion: VALORIZACION_ANUAL,
+    crecimientoRenta: 0.02,
+    vacancia: { alquiler: 0.05, turistico: 0.25 },
+    gastosIngreso: { alquiler: 0.12, turistico: 0.20 },
+    reservaCapex: { alquiler: 0.04, turistico: 0.05 },
+    margenReventa: 0.22,
+    tasaExigida: 0.07,
+  },
+};
+
+function vanMensual(flujos, tasaAnual) {
+  const tasaMensual = Math.pow(1 + tasaAnual, 1 / 12) - 1;
+  return flujos.reduce((van, flujo, mes) => van + flujo / Math.pow(1 + tasaMensual, mes), 0);
+}
+
+// TIR por bisección sobre flujos mensuales regulares. Devuelve null cuando los
+// flujos no cambian de signo o no existe una raíz razonable.
+function tirAnual(flujos) {
+  const vpn = (tasaMensual) =>
+    flujos.reduce((valor, flujo, mes) => valor + flujo / Math.pow(1 + tasaMensual, mes), 0);
+  let baja = -0.99;
+  let alta = 2;
+  let vpnBaja = vpn(baja);
+  const vpnAlta = vpn(alta);
+  if (!Number.isFinite(vpnBaja) || !Number.isFinite(vpnAlta) || vpnBaja * vpnAlta > 0) return null;
+  for (let i = 0; i < 120; i += 1) {
+    const media = (baja + alta) / 2;
+    const vpnMedia = vpn(media);
+    if (Math.abs(vpnMedia) < 0.01) return (Math.pow(1 + media, 12) - 1) * 100;
+    if (vpnBaja * vpnMedia <= 0) {
+      alta = media;
+    } else {
+      baja = media;
+      vpnBaja = vpnMedia;
+    }
+  }
+  const mensual = (baja + alta) / 2;
+  return (Math.pow(1 + mensual, 12) - 1) * 100;
+}
+
 // Renta bruta media del alquiler permanente, sobre los mismos segmentos que
 // publica la tabla de rentabilidad. El simulador elige el segmento más cercano
 // al monto que escribe la persona; la matriz no tiene monto, así que promedia.
@@ -453,6 +518,7 @@ export default function InversionesClient() {
   const [montoTexto, setMontoTexto] = useState("150000");
   const [calcPlazo, setCalcPlazo] = useState(5);
   const [calcTipo, setCalcTipo] = useState("alquiler");
+  const [calcEscenario, setCalcEscenario] = useState("base");
   const [leadName, setLeadName] = useState("");
   const [leadWa, setLeadWa] = useState("");
   const [leadSent, setLeadSent] = useState(false);
@@ -496,8 +562,8 @@ export default function InversionesClient() {
   // el resto compra el inmueble. La renta y la venta se calculan sobre ese
   // precio real, y la salida descuenta sus propios costos.
   const sim = useMemo(() => {
+    const escenario = ESCENARIOS[calcEscenario] ?? ESCENARIOS.base;
     const esReventa = calcTipo === "reventa";
-    const gastosOperativos = calcTipo === "turistico" ? GASTOS_TURISTICO : GASTOS_ALQUILER;
     const costoAdicional = esReventa
       ? REFORMA_REVENTA
       : calcTipo === "turistico"
@@ -515,36 +581,59 @@ export default function InversionesClient() {
     } else if (calcTipo === "turistico") {
       rentaBruta = RENTA_BRUTA_TURISTICO;
     }
-    const rentaNeta = rentaBruta * (1 - gastosOperativos);
-    const rentaAnual = precioPropiedad * (rentaNeta / 100);
-    const rentaAcumulada = esReventa ? 0 : rentaAnual * calcPlazo;
-    const mensual = esReventa ? 0 : rentaAnual / 12;
-
-    const valorizacion = VALORIZACION_PROYECTADA;
+    const vacancia = esReventa ? 0 : escenario.vacancia[calcTipo];
+    const gastosIngreso = esReventa ? 0 : escenario.gastosIngreso[calcTipo];
+    const reservaCapex = esReventa ? 0 : escenario.reservaCapex[calcTipo];
+    const valorizacion = escenario.valorizacion;
     const valorMercadoFinal = precioPropiedad * Math.pow(1 + valorizacion / 100, calcPlazo);
     // En reventa, la mejora agrega margen una sola vez. Antes se sumaba a una
     // tasa anual y se componía cada año, aunque la obra se hace una vez.
     const precioVentaBruto = esReventa
-      ? valorMercadoFinal * (1 + MARGEN_REVENTA)
+      ? valorMercadoFinal * (1 + escenario.margenReventa)
       : valorMercadoFinal;
     const costosSalida = precioVentaBruto * COSTOS_SALIDA;
     const ventaNeta = precioVentaBruto - costosSalida;
-    const total = ventaNeta + rentaAcumulada;
+
+    const meses = calcPlazo * 12;
+    const flujos = [-calcMonto];
+    let rentaAcumulada = 0;
+    let rentaPrimerAno = 0;
+    for (let mes = 1; mes <= meses; mes += 1) {
+      let flujoMes = 0;
+      if (!esReventa) {
+        const crecimiento = Math.pow(1 + escenario.crecimientoRenta, (mes - 1) / 12);
+        const ingresoPotencial = precioPropiedad * (rentaBruta / 100) / 12 * crecimiento;
+        const ingresoEfectivo = ingresoPotencial * (1 - vacancia);
+        flujoMes = ingresoEfectivo * (1 - gastosIngreso - reservaCapex);
+        rentaAcumulada += flujoMes;
+        if (mes <= 12) rentaPrimerAno += flujoMes;
+      }
+      if (mes === meses) flujoMes += ventaNeta;
+      flujos.push(flujoMes);
+    }
+
+    const total = flujos.slice(1).reduce((suma, flujo) => suma + flujo, 0);
     const ganancia = total - calcMonto;
-    const totalAnual = (Math.pow(Math.max(total, 1) / calcMonto, 1 / calcPlazo) - 1) * 100;
-    const rentaSobreCapital = esReventa ? 0 : (rentaAnual / calcMonto) * 100;
+    const tir = tirAnual(flujos);
+    const totalAnual = tir ?? (Math.pow(Math.max(total, 1) / calcMonto, 1 / calcPlazo) - 1) * 100;
+    const van = vanMensual(flujos, escenario.tasaExigida);
+    const rentaSobreCapital = esReventa ? 0 : (rentaPrimerAno / calcMonto) * 100;
+    const capRate = esReventa ? 0 : (rentaPrimerAno / precioPropiedad) * 100;
+    const mensual = esReventa ? 0 : rentaPrimerAno / 12;
+    const equityMultiple = total / calcMonto;
 
     // El m² del tipo que se está simulando, no un promedio de los dos.
     const { m2: m2Ref, etiqueta: m2Etiqueta } = M2_SIMULADOR[calcTipo] ?? M2_SIMULADOR.alquiler;
 
     return {
-      esReventa, rentaBruta, rentaNeta, valorizacion, totalAnual, rentaSobreCapital,
+      esReventa, rentaBruta, valorizacion, totalAnual, rentaSobreCapital, capRate,
       rentaAcumulada, ganancia, total, mensual, precioPropiedad, costosIniciales,
-      costosSalida, ventaNeta, valorMercadoFinal, gastosOperativos, costoAdicional,
+      costosSalida, ventaNeta, valorMercadoFinal, costoAdicional, escenario,
+      vacancia, gastosIngreso, reservaCapex, van, equityMultiple,
       m2Ref, m2Etiqueta, m2Comprables: Math.round(precioPropiedad / m2Ref),
       plazoFijoTotal: calcMonto * Math.pow(1 + TASA_PLAZO_FIJO, calcPlazo),
     };
-  }, [calcTipo, calcMonto, calcPlazo]);
+  }, [calcTipo, calcMonto, calcPlazo, calcEscenario]);
 
   const handleLeadSubmit = (e) => {
     e.preventDefault();
@@ -555,8 +644,10 @@ export default function InversionesClient() {
       `📊 Mi simulación:\n` +
       `• Monto: USD ${calcMonto.toLocaleString("es-AR")}\n` +
       `• Tipo: ${tipoLabel}\n` +
+      `• Escenario: ${sim.escenario.label}\n` +
       `• Plazo: ${calcPlazo} año${calcPlazo > 1 ? "s" : ""}\n` +
-      `• Retorno anualizado estimado: ${fmtPct(sim.totalAnual)}%\n` +
+      `• TIR anual estimada: ${fmtPct(sim.totalAnual)}%\n` +
+      `• VAN: ${sim.van >= 0 ? "+" : "−"}USD ${Math.abs(Math.round(sim.van)).toLocaleString("es-AR")}\n` +
       (sim.esReventa ? "" : `• Renta neta mensual estimada: USD ${Math.round(sim.mensual).toLocaleString("es-AR")}\n`) +
       `• Ganancia total estimada: USD ${Math.round(sim.ganancia).toLocaleString("es-AR")}\n\n` +
       `Mi WhatsApp: ${leadWa.trim()}`
@@ -681,7 +772,7 @@ export default function InversionesClient() {
             </div>
           )}
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-[1.4fr_1fr_1fr]">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             {/* El monto se escribe. Antes era un <select> de montos fijos
                 (25K, 50K, 75K…): seguías eligiendo de una lista de montos
                 ajenos. El slider está para mover el número rápido, pero el
@@ -758,6 +849,22 @@ export default function InversionesClient() {
                   <option key={a} value={a}>
                     {a} año{a > 1 ? "s" : ""}
                   </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="sim-escenario" className="block text-xs font-medium text-gray-500">
+                Escenario
+              </label>
+              <select
+                id="sim-escenario"
+                value={calcEscenario}
+                onChange={(e) => setCalcEscenario(e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-[15px] text-gray-900 outline-none transition-colors focus:border-gray-900"
+              >
+                {Object.entries(ESCENARIOS).map(([key, escenario]) => (
+                  <option key={key} value={key}>{escenario.label}</option>
                 ))}
               </select>
             </div>
@@ -1169,27 +1276,37 @@ export default function InversionesClient() {
                   datos del mismo cálculo, que los hacía ver como cuatro cosas
                   sin relación. En hairline se leen como lo que son, las partes
                   de un solo número. */}
-              <div className="mt-8 grid grid-cols-2 divide-gray-100 border-y border-gray-100 py-5 md:grid-cols-4 md:divide-x">
+              <div className="mt-8 grid grid-cols-2 gap-y-5 divide-gray-100 border-y border-gray-100 py-5 md:grid-cols-3 lg:grid-cols-6 lg:divide-x">
                 {[
                   {
                     valor: `${fmtPct(sim.totalAnual)}%`,
-                    label: "retorno anualizado",
-                    nota: "después de costos de entrada y salida",
+                    label: "TIR anual en USD",
+                    nota: "usa cada flujo mensual y la venta final",
                   },
                   {
-                    valor: sim.esReventa ? "—" : `USD ${Math.round(sim.mensual).toLocaleString("es-AR")}`,
-                    label: "renta neta mensual",
-                    nota: sim.esReventa ? "la reventa no genera renta" : `${Math.round(sim.gastosOperativos * 100)}% de gastos descontado`,
+                    valor: `${sim.van >= 0 ? "+" : "−"}USD ${Math.abs(Math.round(sim.van)).toLocaleString("es-AR")}`,
+                    label: "VAN",
+                    nota: `contra una tasa exigida de ${fmtPct(sim.escenario.tasaExigida * 100)}%`,
                   },
                   {
-                    valor: `+${fmtPct(sim.valorizacion)}%`,
-                    label: "valorización anual",
-                    nota: `escenario base; antecedente reciente ${fmtPct(VALORIZACION_ANUAL)}%`,
+                    valor: sim.esReventa ? "—" : `${fmtPct(sim.capRate)}%`,
+                    label: "cap rate neto",
+                    nota: sim.esReventa ? "no aplica a reventa" : "ingreso neto del año 1 / precio",
+                  },
+                  {
+                    valor: sim.esReventa ? "—" : `${fmtPct(sim.rentaSobreCapital)}%`,
+                    label: "cash-on-cash",
+                    nota: sim.esReventa ? "no hay caja periódica" : "caja neta año 1 / capital total",
+                  },
+                  {
+                    valor: `${sim.equityMultiple.toFixed(2)}×`,
+                    label: "múltiplo de capital",
+                    nota: "cobros totales / capital invertido",
                   },
                   {
                     valor: `USD ${Math.round(sim.total).toLocaleString("es-AR")}`,
-                    label: "total final",
-                    nota: `inversión + ganancia en ${calcPlazo} año${calcPlazo > 1 ? "s" : ""}`,
+                    label: "capital final",
+                    nota: `${calcPlazo} año${calcPlazo > 1 ? "s" : ""}, incluida la venta neta`,
                   },
                 ].map((m, i) => (
                   <div key={m.label} className={i === 0 ? "pr-4" : "px-4"}>
@@ -1272,7 +1389,7 @@ export default function InversionesClient() {
               </div>
 
               <p className="mt-6 text-[11px] leading-relaxed text-gray-400">
-                Supuestos: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida · renta bruta de referencia{!sim.esReventa && sim.rentaBruta ? ` ${fmtPct(sim.rentaBruta)}%` : ""} · {Math.round(sim.gastosOperativos * 100)}% de descuento por vacancia, mantenimiento, impuestos y gestión · valorización futura base {fmtPct(VALORIZACION_PROYECTADA)}% anual (el antecedente reciente de {fmtPct(VALORIZACION_ANUAL)}% no se proyecta completo){sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${MARGEN_REVENTA * 100}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Renta constante, sin reinversión. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
+                Escenario {sim.escenario.label.toLowerCase()}: el monto incluye todo el capital · {COSTOS_ENTRADA * 100}% de costos de entrada · {COSTOS_SALIDA * 100}% de costos de salida{!sim.esReventa ? ` · renta bruta de referencia ${fmtPct(sim.rentaBruta)}% · vacancia ${Math.round(sim.vacancia * 100)}% · gastos operativos ${Math.round(sim.gastosIngreso * 100)}% · reserva para reparaciones ${Math.round(sim.reservaCapex * 100)}% · crecimiento de renta ${fmtPct(sim.escenario.crecimientoRenta * 100)}% anual` : ""} · valorización {fmtPct(sim.valorizacion)}% anual · tasa exigida para el VAN {fmtPct(sim.escenario.tasaExigida * 100)}%{sim.esReventa ? ` · reforma ${REFORMA_REVENTA * 100}% · margen de mejora ${Math.round(sim.escenario.margenReventa * 100)}% aplicado una sola vez` : calcTipo === "turistico" ? ` · equipamiento inicial ${EQUIPAMIENTO_TURISTICO * 100}%` : ""}. Flujos mensuales en USD, sin financiación ni impuestos personales. Estimación orientativa: no constituye asesoramiento financiero ni garantía de rentabilidad.
               </p>
             </div>
 
