@@ -365,3 +365,113 @@ form:hover .nav-icon-search {
 @media (prefers-reduced-motion: reduce) {
   .winter-brand-snow { display: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   Tipografía de artículos — reemplazo local de @tailwindcss/typography.
+   El proyecto usa Tailwind v4 sin ese plugin, así que las clases `prose` de
+   los posts del blog, /privacidad y /terminos no aplicaban NADA: con el
+   preflight poniendo margin:0, dos <p> seguidos salían pegados.
+   Se define acá en @layer components para no sumar dependencia y para que
+   cualquier utilidad suelta (max-w-none, text-gray-700, etc.) siga ganando.
+   Solo se usan las variantes que existen en el repo: prose, prose-base y
+   prose-lg. Si algún día se agrega prose-invert o prose-<color>, hay que
+   escribirlas acá o instalar el plugin.
+--------------------------------------------------------------------------- */
+@layer components {
+  .prose {
+    color: #374151;
+    max-width: 68ch;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose > :first-child { margin-top: 0; }
+  .prose > :last-child { margin-bottom: 0; }
+
+  .prose p { margin-block: 1.25em; }
+  .prose h2 {
+    margin-top: 2.25em;
+    margin-bottom: 0.75em;
+    font-size: 1.6em;
+    line-height: 1.25;
+    font-weight: 700;
+    color: #111827;
+  }
+  .prose h3 {
+    margin-top: 1.75em;
+    margin-bottom: 0.6em;
+    font-size: 1.3em;
+    line-height: 1.35;
+    font-weight: 700;
+    color: #111827;
+  }
+  .prose h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #111827;
+  }
+  .prose ul, .prose ol { margin-block: 1.25em; padding-left: 1.625em; }
+  .prose ul { list-style-type: disc; }
+  .prose ol { list-style-type: decimal; }
+  .prose li { margin-block: 0.5em; }
+  .prose li::marker { color: #9ca3af; }
+  .prose ul ul, .prose ul ol, .prose ol ul, .prose ol ol { margin-block: 0.5em; }
+
+  .prose a {
+    color: var(--color-primary-600);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose a:hover { color: var(--color-primary-700); }
+  .prose strong { font-weight: 700; color: #111827; }
+  .prose blockquote {
+    margin-block: 1.6em;
+    padding-left: 1.1em;
+    border-left: 4px solid var(--color-primary-200);
+    font-style: italic;
+    color: #4b5563;
+  }
+  .prose hr { margin-block: 2.5em; border-color: #e5e7eb; }
+  .prose img, .prose figure { margin-block: 2em; }
+  .prose figcaption {
+    margin-top: 0.6em;
+    font-size: 0.875em;
+    color: #6b7280;
+  }
+  .prose code {
+    font-size: 0.9em;
+    background-color: #f3f4f6;
+    padding: 0.15em 0.35em;
+    border-radius: 0.25rem;
+  }
+  .prose pre {
+    margin-block: 1.7em;
+    padding: 1em 1.25em;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+  .prose pre code { background: none; padding: 0; color: inherit; }
+  .prose table {
+    width: 100%;
+    margin-block: 2em;
+    font-size: 0.95em;
+    border-collapse: collapse;
+  }
+  .prose th, .prose td {
+    padding: 0.6em 0.75em;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+  .prose th { font-weight: 600; color: #111827; }
+
+  .prose-base { font-size: 1rem; line-height: 1.75; }
+
+  .prose-lg { font-size: 1.125rem; line-height: 1.8; }
+  .prose-lg p { margin-block: 1.35em; }
+  .prose-lg h2 { margin-top: 2.4em; font-size: 1.65em; }
+  .prose-lg h3 { margin-top: 1.9em; font-size: 1.35em; }
+  .prose-lg ul, .prose-lg ol { margin-block: 1.35em; }
+}

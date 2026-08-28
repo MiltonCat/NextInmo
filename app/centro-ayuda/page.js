@@ -25,7 +25,7 @@ const faqs = [
   {
     categoria: "Compra",
     question: "¿Qué impuestos y gastos tiene una compra en la zona?",
-    answer: "Los gastos de escritura rondan el 3–4% del valor de venta (honorarios del escribano, sellos e impuestos provinciales). El impuesto a la transferencia de inmuebles (ITI) es del 1,5% a cargo del vendedor. Te detallo todos los costos antes de avanzar.",
+    answer: "Del lado del comprador, los gastos de escrituración suelen sumar entre el 7% y el 10% del valor de la propiedad: impuesto de sellos (3% sobre el precio o la valuación fiscal, que por costumbre se divide 50/50 entre las partes y es negociable), honorarios del escribano (alrededor del 2% + IVA), inscripción registral (≈0,6%) y certificados y gestión (≈0,2%). Si firmás boleto de compraventa, sella el 1,4% y se toma a cuenta del 3% de la escritura. El ITI (impuesto a la transferencia de inmuebles, 1,5% al vendedor) fue derogado por la Ley 27.743 en julio de 2024, así que ya no se paga. Para vivienda única y familiar existe una exención de sellos con tope: confirmá el monto vigente con tu escribano o en la DPR de Neuquén. Te detallamos todos los costos antes de avanzar.",
   },
   {
     categoria: "Inversión",
