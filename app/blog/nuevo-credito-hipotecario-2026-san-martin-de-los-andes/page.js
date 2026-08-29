@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
+import PodcastPlayer from "@/components/PodcastPlayer";
 import mercado, {
   VALOR_M2_CASA,
   VALOR_M2_DEPTO,
@@ -158,6 +159,15 @@ const articleJsonLd = {
     logo: { "@type": "ImageObject", url: `${SITE_URL}/logoMC.webp` },
   },
   mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  // Versión escuchada del artículo (ver components/PodcastPlayer).
+  audio: {
+    "@type": "AudioObject",
+    name: "Nuevo crédito hipotecario: alcanza para 17.000 familias — versión en audio",
+    contentUrl: `${SITE_URL}/podcast/nuevo-credito-hipotecario-2026-san-martin-de-los-andes.mp3`,
+    encodingFormat: "audio/mpeg",
+    duration: "PT35M52S",
+    uploadDate: "2026-08-29",
+  },
 };
 
 const faqJsonLd = {
@@ -223,6 +233,8 @@ export default function NuevoCreditoHipotecarioPage() {
             />
           </div>
         </header>
+
+        <PodcastPlayer slug="nuevo-credito-hipotecario-2026-san-martin-de-los-andes" />
 
         <div className="prose prose-lg max-w-none text-gray-700">
           <div className="not-prose rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
