@@ -13,7 +13,10 @@ import mercado, {
 
 const slug = "/blog/nuevo-credito-hipotecario-2026-san-martin-de-los-andes";
 const url = canonicalUrl(slug);
-const coverImage = `${SITE_URL}/hipotecario.jpeg`;
+// Placa social 1200x630 (la proporcion que piden LinkedIn, Facebook y X).
+// NO es la foto de portada del articulo: /hipotecario.jpeg es vertical
+// (736x1105) y en una tarjeta apaisada queda recortada a un cuadradito.
+const coverImage = `${SITE_URL}/og-credito-hipotecario.jpg`;
 
 // ─── Condiciones del anuncio del 26/08/2026 ────────────────────────────────
 // Fuente primaria: argentina.gob.ar (gacetilla oficial del Ministerio de
@@ -129,7 +132,7 @@ export const metadata = {
         url: coverImage,
         width: 1200,
         height: 630,
-        alt: "Crédito hipotecario para comprar en San Martín de los Andes",
+        alt: "Nuevo crédito hipotecario: 32 m² es lo que compra en San Martín de los Andes",
       },
     ],
   },
