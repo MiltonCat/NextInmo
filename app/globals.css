@@ -475,3 +475,18 @@ form:hover .nav-icon-search {
   .prose-lg h3 { margin-top: 1.9em; font-size: 1.35em; }
   .prose-lg ul, .prose-lg ol { margin-block: 1.35em; }
 }
+
+/* Puntitos del asistente Lucía (components/ChatBot.jsx). Indicador gráfico:
+   sube la sensación de presencia sin caer en el "escribiendo…" textual. */
+@keyframes lucia-typing {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.lucia-dot {
+  animation: lucia-typing 1.3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lucia-dot { animation: none; opacity: 0.55; }
+}

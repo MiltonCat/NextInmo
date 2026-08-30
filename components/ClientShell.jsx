@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import Toast from "./Toast";
 import ScrollToTop from "./ScrollToTop";
-import WhatsAppFloat from "./WhatsAppFloat";
 import FavoritesAccountPrompt from "./FavoritesAccountPrompt";
 
 const ChatBot = dynamic(() => import("./ChatBot"), { ssr: false });
@@ -29,11 +28,11 @@ export default function ClientShell() {
           />
         </div>
       )}
-      <div className="hidden md:block">
-        <ChatBot />
-      </div>
+      {/* Único botón flotante del sitio: Lucía atiende y también deriva a
+          WhatsApp desde adentro del chat. El WhatsAppFloat quedó desmontado a
+          propósito (el componente sigue en components/ si hay que volver). */}
+      <ChatBot />
       <ScrollToTop />
-      <WhatsAppFloat />
       <FavoritesAccountPrompt />
     </>
   );
