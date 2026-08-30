@@ -32,6 +32,7 @@ const DETALLE_LABEL = {
   operacion: "Operación", ubicacion: "Ubicación", precio: "Precio", link: "Link",
   dia: "Día", horario: "Horario",
   monto: "Monto", objetivo: "Objetivo", plazo: "Plazo",
+  origen_visita: "Llegó desde",
 };
 
 function formatFecha(iso) {

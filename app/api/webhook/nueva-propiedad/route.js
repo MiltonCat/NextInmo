@@ -2,6 +2,9 @@
 // Dispara emails a usuarios cuando se crea una propiedad nueva
 
 import { notifyUsersAboutNewProperty } from "@/lib/emailNuevaPropiedad";
+import { avisarIndexNow } from "@/lib/indexNow";
+import { getPropertySlug } from "@/data/properties";
+import { canonicalUrl } from "@/config";
 
 // Token secreto para verificar que la llamada viene del admin.
 //
@@ -80,6 +83,20 @@ export async function POST(request) {
       soloA: testEmail,
     });
 
+    // Aviso a los buscadores. En una prueba no se manda: no tiene sentido
+    // pedirle a Bing que recorra una URL que capaz ni existe todavía.
+    let indexNow = null;
+    if (!esPrueba) {
+      indexNow = await avisarIndexNow([
+        canonicalUrl(`/propiedades/${getPropertySlug(property)}`),
+        canonicalUrl("/propiedades"),
+        canonicalUrl("/"),
+      ]);
+      console.log(
+        `[nueva-propiedad] IndexNow ${indexNow.ok ? "aceptado" : "rechazado"} (${indexNow.status})`
+      );
+    }
+
     return Response.json(
       {
         ok: true,
@@ -88,6 +105,7 @@ export async function POST(request) {
         modo: resultado.modo,
         destinatarios_reales: resultado.destinatarios,
         correos_enviados: resultado.enviados,
+        indexnow: indexNow,
       },
       { status: 200 }
     );

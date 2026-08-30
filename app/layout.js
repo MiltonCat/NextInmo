@@ -12,7 +12,7 @@ import {
   PHONE_DISPLAY,
   CONTACT_EMAIL,
   DEFAULT_OG_IMAGE,
-  GOOGLE_SITE_VERIFICATION,
+  GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION,
   canonicalUrl,
 } from "@/config";
 
@@ -90,6 +90,9 @@ export const metadata = {
   },
   verification: {
     google: GOOGLE_SITE_VERIFICATION,
+    // Bing no tiene campo propio en Next: va como meta suelto. `other` omite
+    // las claves undefined, así que sin la variable no se renderiza nada.
+    other: BING_SITE_VERIFICATION ? { "msvalidate.01": BING_SITE_VERIFICATION } : undefined,
   },
   icons: {
     icon: [{ url: "/favicon.svg?v=winter-brand-v2", type: "image/svg+xml" }],

@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import ScrollToTop from "./ScrollToTop";
+import OrigenVisita from "./OrigenVisita";
 import FavoritesAccountPrompt from "./FavoritesAccountPrompt";
 
 const ChatBot = dynamic(() => import("./ChatBot"), { ssr: false });
@@ -18,6 +19,7 @@ export default function ClientShell() {
           página donde está el visitante y abre una conversación. Dos avisos
           compitiendo en la misma esquina se anulaban entre sí.
           El componente sigue en components/Toast.jsx. */}
+      <OrigenVisita />
       <ChatBot />
       <ScrollToTop />
       <FavoritesAccountPrompt />

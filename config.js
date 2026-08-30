@@ -24,6 +24,18 @@ export const BUSINESS_HOURS = "Lun–Vie: 9:30 a 19:00 · Sáb: 10:00 a 13:00";
 // Si la variable no está definida, el meta no se renderiza.
 export const GOOGLE_SITE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined;
 
+// Ídem para Bing Webmaster Tools. Bing importa desde Search Console solo las
+// propiedades de tipo prefijo de URL, y la nuestra es de dominio (sc-domain),
+// así que el importador no la lista y la verificación va a mano.
+//
+// Este va escrito acá y no en una variable de entorno, a diferencia del de
+// Google: el token se publica en el HTML de cada página, así que cualquiera que
+// mire el código fuente del sitio ya lo tiene. No es un secreto, y tenerlo acá
+// ahorra configurarlo en Vercel y en .env.local. La variable de entorno sigue
+// teniendo prioridad por si algún día hay que rotarlo sin tocar el repo.
+export const BING_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "76D90350937BA5499E9B26BCA8CCF203";
+
 // URL absoluta de la imagen por defecto para Open Graph / Twitter (1200x630).
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/hero-montana.webp`;
 
