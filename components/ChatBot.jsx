@@ -120,13 +120,13 @@ function contextualGreeting(pathname = "/") {
   const segmentos = path.split("/").filter(Boolean);
 
   if (path.startsWith("/blog/")) {
-    return [SOY, "Si la nota te dejó con alguna duda, Milton te la contesta. ¿O preferís que busquemos una propiedad?"];
+    return [SOY, "Si la nota te dejó con alguna duda, Milton te la contesta. ¿Con qué te ayudo?"];
   }
   if (path.startsWith("/inversiones")) {
     return [SOY, "¿Estás mirando para invertir? Contame qué tenés en mente y vemos qué hay disponible."];
   }
   if (path.startsWith("/tasacion") || path.startsWith("/vender")) {
-    return [SOY, "Si estás pensando en vender, Milton te da una asesoría sin cargo. ¿Querés que te ponga en contacto?"];
+    return [SOY, "Si estás pensando en vender, Milton te da una asesoría sin cargo. ¿Arrancamos por ahí?"];
   }
   if (path.startsWith("/precio-m2")) {
     return [SOY, "¿Querés que veamos qué hay publicado en la zona que estabas mirando?"];
@@ -138,10 +138,10 @@ function contextualGreeting(pathname = "/") {
     return [SOY, "¿Querés que Milton te ayude a comparar las que guardaste?"];
   }
   if (path.startsWith("/desarrollos")) {
-    return [SOY, "Los emprendimientos los comercializamos nosotros. ¿Te paso con Milton o preferís ver propiedades?"];
+    return [SOY, "Los emprendimientos los comercializamos nosotros. ¿Con qué te ayudo?"];
   }
   if (segmentos[0] === "propiedades" && segmentos.length > 1) {
-    return [SOY, "¿Querés que busquemos otras parecidas a esta, o preferís hablar directo con Milton?"];
+    return [SOY, "Si querés te busco otras parecidas a esta. ¿O necesitás otra cosa?"];
   }
   if (path.startsWith("/propiedades") || path.startsWith("/alquileres")) {
     return [SOY, "Te ayudo a filtrar entre todo lo que hay publicado. ¿Arrancamos?"];
@@ -151,7 +151,7 @@ function contextualGreeting(pathname = "/") {
   }
   return [
     "¡Hola! Soy Lucía, la asistente de Catalán Propiedades.",
-    "¿Te ayudo a encontrar tu propiedad en San Martín de los Andes?",
+    "¿Con qué te doy una mano?",
   ];
 }
 
@@ -163,11 +163,111 @@ function reaccionResultados(n) {
   return `Hay ${n}, así que tenés de dónde elegir. Te dejo las primeras cuatro:`;
 }
 
+// Las secciones del sitio a las que Lucía puede derivar. Cada texto sale de lo
+// que esa página realmente hace: si se agrega una sección nueva, se agrega acá,
+// y si una se da de baja hay que sacarla o Lucía manda a un 404.
+const RECURSOS = {
+  tasacion: {
+    href: "/tasacion/",
+    titulo: "Tasación online",
+    detalle: "Cargás los datos de tu propiedad y te da un valor estimado.",
+  },
+  vender: {
+    href: "/vender/",
+    titulo: "Vender tu propiedad",
+    detalle: "Cómo trabajamos la venta y qué hace falta para publicar.",
+  },
+  precio: {
+    href: "/precio-m2/",
+    titulo: "Precio del m² por barrio",
+    detalle: "Cuánto vale el metro en cada zona, actualizado a 2026.",
+  },
+  credito: {
+    href: "/simulador-credito/",
+    titulo: "Simulador de crédito UVA",
+    detalle: "Para hacerte una idea del presupuesto con el que contás.",
+  },
+  inversion: {
+    href: "/inversiones/",
+    titulo: "Invertir en San Martín",
+    detalle: "Rentabilidad por zona, calculadora de retorno y comparaciones.",
+  },
+  barrios: {
+    href: "/barrios/",
+    titulo: "Guía de barrios",
+    detalle: "Precio del m², servicios y acceso en invierno, barrio por barrio.",
+  },
+  vecinos: {
+    href: "/experiencia-barrio/",
+    titulo: "Opiniones de vecinos",
+    detalle: "Cómo es vivir en cada barrio, contado por los que viven ahí.",
+  },
+  desarrollos: {
+    href: "/desarrollos/",
+    titulo: "Desarrollos",
+    detalle: "Emprendimientos en pozo, en obra y terminados, con plan de cuotas.",
+  },
+  alquileres: {
+    href: "/alquileres/",
+    titulo: "Alquileres permanentes",
+    detalle: "Lo que hay publicado para alquilar todo el año.",
+  },
+  ayuda: {
+    href: "/centro-ayuda/",
+    titulo: "Centro de ayuda",
+    detalle: "El proceso de compra en Neuquén, los papeles, los impuestos y los gastos.",
+  },
+  blog: {
+    href: "/blog/",
+    titulo: "Notas del blog",
+    detalle: "Crédito hipotecario, mercado y lo que va cambiando en el rubro.",
+  },
+};
+
 const STEPS = {
   welcome: {
+    // Este texto solo se usa cuando se vuelve al inicio desde adentro: la
+    // primera vez el saludo lo arma contextualGreeting() según la página.
+    text: "¿Con qué otra cosa te ayudo?",
     options: [
-      { label: "🏠 Estoy buscando una propiedad", next: "ask_type" },
-      { label: "📱 Quiero hablar con un asesor", next: "whatsapp" },
+      { label: "Estoy buscando para comprar", icono: "buscar", next: "ask_type" },
+      { label: "Busco alquiler permanente", icono: "llave", next: "guia_alquilar" },
+      { label: "Quiero vender o tasar", icono: "casa", next: "guia_vender" },
+      { label: "Estoy averiguando cómo está el mercado", icono: "grafico", next: "menu_info" },
+      { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
+    ],
+  },
+
+  guia_vender: {
+    text: "¿Por dónde querés arrancar?",
+    options: [
+      { label: "Cuánto vale mi propiedad", comentario: "Te dejo el tasador. Es gratis y no hace falta que dejes datos para verlo.", recursos: ["tasacion"], next: "guia_vender" },
+      { label: "Cómo es el proceso y qué gastos tiene", comentario: "Esto está explicado en el centro de ayuda, con los porcentajes de Neuquén.", recursos: ["ayuda"], next: "guia_vender" },
+      { label: "Quiero publicar con ustedes", comentario: "Acá está cómo trabajamos la venta.", recursos: ["vender"], next: "guia_vender" },
+      { label: "Que me contacte Milton", icono: "whatsapp", next: "whatsapp" },
+      { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
+    ],
+  },
+
+  guia_alquilar: {
+    text: "Lo que publicamos es alquiler permanente, para vivir todo el año.",
+    options: [
+      { label: "Ver lo que hay disponible", comentario: "Ahí tenés todo lo que está publicado ahora.", recursos: ["alquileres"], next: "guia_alquilar" },
+      { label: "Avisame si entra algo", icono: "campana", next: "lead" },
+      { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
+      { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
+    ],
+  },
+
+  menu_info: {
+    text: "¿Qué te interesa mirar?",
+    options: [
+      { label: "Cuánto vale el m² por barrio", comentario: "Este es el número que más se consulta. Está abierto por zona.", recursos: ["precio"], next: "menu_info" },
+      { label: "Con cuánto podría contar", comentario: "El simulador de crédito UVA te ayuda a ponerle un número al presupuesto.", recursos: ["credito"], next: "menu_info" },
+      { label: "Si conviene invertir acá", comentario: "Acá está el análisis con la rentabilidad por zona y la calculadora de retorno.", recursos: ["inversion"], next: "menu_info" },
+      { label: "En qué barrio me conviene", comentario: "Dos miradas del mismo tema: los datos por un lado, y lo que cuentan los vecinos por el otro.", recursos: ["barrios", "vecinos"], next: "menu_info" },
+      { label: "Cómo viene el mercado", comentario: "En el blog vamos siguiendo el crédito y los movimientos del rubro.", recursos: ["blog"], next: "menu_info" },
+      { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
   },
   ask_type: {
@@ -177,6 +277,7 @@ const STEPS = {
       { label: "Un departamento o PH", filter: { types: ["Departamento", "PH", "Monoambiente"] }, next: "ask_budget" },
       { label: "Una cabaña", filter: { types: ["Cabaña", "Cabañas"] }, next: "ask_budget" },
       { label: "Un lote para construir", filter: { types: ["Lote"] }, next: "ask_budget" },
+      { label: "Un emprendimiento en pozo", comentario: "Los emprendimientos van aparte del listado, porque se compran en cuotas.", recursos: ["desarrollos"], next: "ask_type" },
       { label: "Todavía no lo tengo claro", filter: {}, next: "ask_budget" },
     ],
   },
@@ -202,22 +303,32 @@ const STEPS = {
   after_results: {
     text: "¿Seguimos?",
     options: [
-      { label: "🔔 Avisame si entra algo así", next: "lead" },
-      { label: "🔄 Buscar otra cosa", next: "ask_type" },
-      { label: "📱 Prefiero hablar con Milton", next: "whatsapp" },
+      { label: "Avisame si entra algo así", icono: "campana", next: "lead" },
+      { label: "Buscar otra cosa", icono: "reiniciar", next: "ask_type" },
+      { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
   // Paso de captura: no tiene botones, renderiza el formulario de contacto.
   lead: { form: true },
   after_lead: {
     options: [
-      { label: "🔄 Buscar otra cosa", next: "ask_type" },
-      { label: "📱 Hablar con Milton", next: "whatsapp" },
+      { label: "Buscar otra cosa", icono: "reiniciar", next: "ask_type" },
+      { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
 };
 
 const AIRBNB = "#FF5A5F";
+
+// El isotipo de la marca reemplaza al emoji que hacía de avatar y al ícono
+// genérico del botón flotante: es lo que separa un asistente propio de un
+// widget bajado de una plantilla.
+const ISOTIPO = "/iso1.webp";
+
+// La burbuja de invitación aparece una sola vez por visita. Si la cierran, no
+// vuelve en toda la sesión del navegador.
+const INVITACION_KEY = "lucia-invitacion-cerrada";
+const INVITACION_MS = 12000;
 
 // Demoras cortas. La investigación dice que lo que sostiene la percepción es
 // el indicador visible, no la espera: esperar de más se lee como lento, no
@@ -235,6 +346,8 @@ export default function ChatBot() {
   const [dataset, setDataset] = useState(fallbackProperties);
   const [leadSent, setLeadSent] = useState(false);
   const [atencion, setAtencion] = useState(null);
+  const [invitacion, setInvitacion] = useState(null);
+  const [invitacionCerrada, setInvitacionCerrada] = useState(false);
   const messagesEndRef = useRef(null);
   const pathname = usePathname();
   const { trackEvent, trackWhatsAppClick } = useAnalytics();
@@ -271,7 +384,7 @@ export default function ChatBot() {
       const ultima = i === bubbles.length - 1;
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: bubble.text, results: bubble.results, stepKey: ultima ? stepKey : undefined },
+        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, stepKey: ultima ? stepKey : undefined },
       ]);
       if (ultima) setTyping(false);
     }
@@ -336,6 +449,35 @@ export default function ChatBot() {
     setAtencion(estadoAtencion());
   }, [open]);
 
+  // Burbuja de invitación: a los 12 segundos Lucía asoma al lado del botón con
+  // la misma frase con la que saludaría en esta página. Reemplaza al Toast que
+  // vivía en ClientShell, que decía algo parecido pero igual para todo el
+  // sitio y llevaba a un listado en vez de a una conversación.
+  useEffect(() => {
+    if (open || invitacionCerrada || invitacion) return;
+    try {
+      if (sessionStorage.getItem(INVITACION_KEY) === "1") return;
+    } catch (e) {
+      // Navegador con el almacenamiento bloqueado: se muestra igual.
+    }
+    const id = setTimeout(() => {
+      const saludo = contextualGreeting(pathname);
+      setInvitacion(saludo[saludo.length - 1]);
+    }, INVITACION_MS);
+    return () => clearTimeout(id);
+  }, [open, invitacionCerrada, invitacion, pathname]);
+
+  const descartarInvitacion = () => {
+    setInvitacion(null);
+    setInvitacionCerrada(true);
+    try {
+      sessionStorage.setItem(INVITACION_KEY, "1");
+    } catch (e) {
+      // Sin almacenamiento no se recuerda el descarte, pero tampoco molesta:
+      // la invitación ya no vuelve mientras la página siga abierta.
+    }
+  };
+
   const saludar = () => {
     cancelPending();
     const saludo = contextualGreeting(pathname);
@@ -348,6 +490,7 @@ export default function ChatBot() {
 
   const abrirChat = () => {
     setOpen(true);
+    descartarInvitacion();
     if (messages.length === 0 && !typing) saludar();
   };
 
@@ -386,6 +529,19 @@ export default function ChatBot() {
           { text: "Necesito tu nombre y un WhatsApp donde ubicarte." },
         ],
         "lead"
+      );
+      return;
+    }
+
+    // Derivación a una sección del sitio: Lucía comenta y deja la tarjeta. Los
+    // botones que vuelven son los del mismo menú, para poder mirar otra cosa
+    // sin repetir la pregunta.
+    if (opt.recursos) {
+      trackEvent("chatbot_guia", { recursos: opt.recursos.join(",") });
+      setActiveStep(opt.next);
+      sendBot(
+        [{ text: opt.comentario, recursos: opt.recursos.map((clave) => RECURSOS[clave]) }],
+        opt.next
       );
       return;
     }
@@ -465,7 +621,7 @@ export default function ChatBot() {
     <>
       {open && (
         <div
-          className="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 z-50 sm:w-96 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100"
+          className="lucia-panel fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 z-50 sm:w-96 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100"
           style={{ height: "min(32rem, 70vh)" }}
         >
           <div
@@ -473,8 +629,16 @@ export default function ChatBot() {
             style={{ backgroundColor: AIRBNB, flexShrink: 0 }}
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-xl flex-shrink-0">
-                👩‍💼
+              <div className="relative flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <img src={ISOTIPO} alt="Catalán Propiedades" className="w-6 h-6 object-contain" />
+                </div>
+                {atencion?.abierto && (
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
+                    style={{ borderColor: AIRBNB }}
+                  />
+                )}
               </div>
               <div className="min-w-0">
                 <p className="font-semibold text-sm leading-tight">Asistente Lucía</p>
@@ -513,6 +677,25 @@ export default function ChatBot() {
                     </div>
                   </div>
 
+                  {msg.recursos && msg.recursos.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {msg.recursos.map((recurso) => (
+                        <Link
+                          key={recurso.href}
+                          href={recurso.href}
+                          onClick={() => setOpen(false)}
+                          className="block bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition border border-gray-100"
+                        >
+                          <p className="text-xs font-semibold text-gray-800 leading-snug">{recurso.titulo}</p>
+                          <p className="text-[11px] text-gray-500 leading-snug mt-0.5">{recurso.detalle}</p>
+                          <span className="text-[11px] font-semibold mt-1.5 inline-block" style={{ color: AIRBNB }}>
+                            Abrir →
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
                   {msg.results && msg.results.length > 0 && (
                     <div className="mt-2 space-y-2">
                       {msg.results.map((prop) => (
@@ -520,13 +703,13 @@ export default function ChatBot() {
                           key={prop.id}
                           href={`/propiedades/${getPropertySlug(prop)}`}
                           onClick={() => setOpen(false)}
-                          className="flex gap-2 bg-white rounded-xl p-2 shadow-sm hover:shadow-md transition border border-gray-100"
+                          className="flex gap-3 bg-white rounded-xl p-2.5 shadow-sm hover:shadow-md transition border border-gray-100"
                         >
-                          <img src={prop.image} alt={prop.title} className="w-16 h-14 object-cover rounded-lg flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold text-gray-800 leading-tight line-clamp-2">{prop.title}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">{prop.location.split(",")[1]?.trim() || prop.location}</p>
-                            <p className="text-xs font-bold mt-0.5" style={{ color: AIRBNB }}>USD {prop.price.toLocaleString("es-AR")}</p>
+                          <img src={prop.image} alt={prop.title} className="w-20 h-16 object-cover rounded-lg flex-shrink-0" />
+                          <div className="min-w-0 flex flex-col justify-center gap-0.5">
+                            <p className="text-xs font-semibold text-gray-800 leading-snug line-clamp-2">{prop.title}</p>
+                            <p className="text-[11px] text-gray-400 leading-tight">{prop.location.split(",")[1]?.trim() || prop.location}</p>
+                            <p className="text-xs font-bold" style={{ color: AIRBNB }}>USD {prop.price.toLocaleString("es-AR")}</p>
                           </div>
                         </Link>
                       ))}
@@ -538,7 +721,7 @@ export default function ChatBot() {
                       {stepOptions
                         .filter((opt) => !(opt.next === "lead" && leadSent))
                         .map((opt, j) => (
-                          <QuickReply key={j} label={opt.label} onClick={() => handleOption(opt, filters)} />
+                          <QuickReply key={j} label={opt.label} icono={opt.icono} onClick={() => handleOption(opt, filters)} />
                         ))}
                     </div>
                   )}
@@ -573,13 +756,40 @@ export default function ChatBot() {
         </div>
       )}
 
+      {!open && invitacion && (
+        <div className="lucia-invitacion fixed bottom-24 right-4 sm:right-6 z-50 flex items-start gap-2" style={{ maxWidth: "18rem" }}>
+          <button
+            onClick={abrirChat}
+            className="text-left bg-white text-gray-800 rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-3.5 py-3 hover:shadow-2xl transition"
+          >
+            <span className="block text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: AIRBNB }}>
+              Asistente Lucía
+            </span>
+            <span className="block text-sm leading-snug">{invitacion}</span>
+          </button>
+          <button
+            onClick={descartarInvitacion}
+            aria-label="Cerrar el aviso"
+            className="mt-1 w-6 h-6 flex-shrink-0 rounded-full bg-white border border-gray-100 shadow text-gray-400 hover:text-gray-700 text-base leading-none"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <button
         onClick={() => (open ? setOpen(false) : abrirChat())}
-        className="fixed bottom-6 right-4 sm:right-6 z-50 text-white p-4 rounded-full shadow-2xl transition-all duration-200 hover:scale-110"
-        style={{ backgroundColor: AIRBNB }}
+        className="fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full bg-white flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110"
+        style={{ boxShadow: "0 10px 30px rgba(255,90,95,.30), 0 2px 8px rgba(0,0,0,.12)" }}
         aria-label={open ? "Cerrar chat" : "Abrir chat"}
       >
-        {open ? <CloseIcon /> : <ChatIcon />}
+        {open ? <CloseIcon /> : <img src={ISOTIPO} alt="" className="w-8 h-8 object-contain" />}
+        {!open && invitacion && (
+          <span
+            className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white"
+            style={{ backgroundColor: AIRBNB }}
+          />
+        )}
       </button>
     </>
   );
@@ -651,33 +861,55 @@ function LeadForm({ onSubmit }) {
   );
 }
 
-function QuickReply({ label, onClick }) {
+function QuickReply({ label, icono, onClick }) {
   const [hovered, setHovered] = useState(false);
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="text-xs px-3 py-1.5 rounded-full border transition-all"
+      className="text-xs px-3 py-1.5 rounded-full border transition-all inline-flex items-center gap-1.5"
       style={{ borderColor: AIRBNB, backgroundColor: hovered ? AIRBNB : "white", color: hovered ? "white" : AIRBNB }}
     >
+      {icono && <OpcionIcono nombre={icono} />}
       {label}
     </button>
   );
+}
+
+// Íconos de línea del mismo grosor que el resto del sitio. Reemplazan a los
+// emojis, que leían como plantilla y encima cambian de dibujo en cada sistema.
+function OpcionIcono({ nombre }) {
+  const comun = { className: "w-3.5 h-3.5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
+  if (nombre === "whatsapp") {
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
+      </svg>
+    );
+  }
+  if (nombre === "llave") {
+    return <svg {...comun}><circle cx="8" cy="15" r="4" /><path d="M10.9 12.1L21 2" /><path d="M17.5 5.5L20 8" /></svg>;
+  }
+  if (nombre === "casa") {
+    return <svg {...comun}><path d="M3 10.5L12 3l9 7.5" /><path d="M5.5 9.5V21h13V9.5" /></svg>;
+  }
+  if (nombre === "grafico") {
+    return <svg {...comun}><path d="M4 20v-8" /><path d="M10 20V5" /><path d="M16 20v-6" /><path d="M2 20h20" /></svg>;
+  }
+  if (nombre === "campana") {
+    return <svg {...comun}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>;
+  }
+  if (nombre === "reiniciar") {
+    return <svg {...comun}><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3H21" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3H3" /><path d="M3 21v-5h5" /></svg>;
+  }
+  return <svg {...comun}><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6" /></svg>;
 }
 
 function WhatsAppIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
       <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-      <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z" clipRule="evenodd" />
     </svg>
   );
 }

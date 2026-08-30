@@ -490,3 +490,27 @@ form:hover .nav-icon-search {
 @media (prefers-reduced-motion: reduce) {
   .lucia-dot { animation: none; opacity: 0.55; }
 }
+
+/* El panel del asistente entra desde el botón flotante, no aparece de golpe. */
+@keyframes lucia-abrir {
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.lucia-panel {
+  animation: lucia-abrir .2s ease-out;
+  transform-origin: bottom right;
+}
+
+/* La burbuja de invitación entra más despacio: es una interrupción, conviene
+   que se note que llegó y no que estaba ahí desde siempre. */
+@keyframes lucia-invitar {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.lucia-invitacion { animation: lucia-invitar .32s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lucia-panel, .lucia-invitacion { animation: none; }
+}
