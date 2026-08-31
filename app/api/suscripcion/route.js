@@ -10,18 +10,22 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const INTERESES = new Set(["comprar", "alquilar", "invertir", "mirar"]);
-// Orígenes válidos del alta: el sitio propio, el tasador (tasador-sma)
-// y el test de perfil inversor de /inversiones.
-const SOURCES = new Set(["web", "tasador", "test-inversor"]);
+// Orígenes válidos del alta: el sitio propio, el tasador (tasador-sma),
+// el test de perfil inversor de /inversiones y el asistente Lucía, que da de
+// alta al visitante que dejó su email al pedir "avisame si entra algo".
+const SOURCES = new Set(["web", "tasador", "test-inversor", "chatbot"]);
 // Validación de email simple y suficiente (formato básico).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const TIPOS = new Set(["casa", "departamento", "lote", "comercial"]);
+// "cabaña" entró con el asistente: es una de las cuatro opciones que ofrece
+// el chat y una parte real del catálogo de San Martín.
+const TIPOS = new Set(["casa", "departamento", "cabaña", "lote", "comercial"]);
 
 function notasDeBusqueda(body) {
   const partes = [
     TIPOS.has(body.tipo) ? `Tipo: ${body.tipo}` : null,
     clamp(body.zona, 120) ? `Zona: ${clamp(body.zona, 120)}` : null,
     clamp(body.presupuesto, 120) ? `Presupuesto: ${clamp(body.presupuesto, 120)}` : null,
+    clamp(body.dormitorios, 60) ? `Dormitorios: ${clamp(body.dormitorios, 60)}` : null,
     clamp(body.whatsapp, 60) ? `WhatsApp: ${clamp(body.whatsapp, 60)}` : null,
   ].filter(Boolean);
   return partes.length ? partes.join(" · ") : null;

@@ -174,6 +174,49 @@ function describeFilters(filters = {}) {
   ].filter(Boolean);
 }
 
+// ── Alta en la lista de avisos ──────────────────────────────────────────────
+// Hasta acá el lead del chat moría en el CRM: una consulta más para contestar a
+// mano, y si el visitante no volvía, se perdía. Con el email entra además a
+// `subscribers`, la misma lista del Radar de la home, con su búsqueda anotada.
+//
+// OJO con la copy: el aviso de propiedad nueva que sale solo (lib/emailNuevaPropiedad)
+// cruza `client_favorites` —hace falta cuenta y un favorito en ese barrio—, NO
+// esta lista. Al suscriptor le llega el correo de bienvenida y después los que
+// Milton manda desde /admin/suscriptores. Por eso Lucía dice "te sumo a la lista
+// de avisos" y no "te llega solo".
+//
+// Estas tres funciones traducen los filtros del chat a los campos que espera
+// /api/suscripcion, que los guarda como notas del suscriptor.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function tipoDeSuscripcion(filters = {}) {
+  // El endpoint valida contra una lista corta de tipos. El primero del grupo es
+  // el que lo representa: "Departamento" por Departamento/PH/Monoambiente.
+  const tipo = filters.types?.[0];
+  return tipo ? tipo.toLowerCase() : null;
+}
+
+function presupuestoTexto(filters = {}) {
+  const usd = (n) => `USD ${n.toLocaleString("es-AR")}`;
+  const { minPrice, maxPrice } = filters;
+  if (minPrice && maxPrice) return `${usd(minPrice)} a ${maxPrice.toLocaleString("es-AR")}`;
+  if (maxPrice) return `hasta ${usd(maxPrice)}`;
+  if (minPrice) return `más de ${usd(minPrice)}`;
+  // El embudo de alquiler no pregunta presupuesto: ahí no hay nada que decir.
+  return null;
+}
+
+function dormitoriosTexto(filters = {}) {
+  const { minBedrooms, maxBedrooms } = filters;
+  if (maxBedrooms === 0) return "monoambiente";
+  if (minBedrooms !== undefined && maxBedrooms !== undefined) {
+    return minBedrooms === maxBedrooms ? `${minBedrooms}` : `${minBedrooms} a ${maxBedrooms}`;
+  }
+  if (maxBedrooms !== undefined) return `hasta ${maxBedrooms}`;
+  if (minBedrooms !== undefined) return `${minBedrooms} o más`;
+  return null;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Horario de atención
 // ────────────────────────────────────────────────────────────────────────────
@@ -399,7 +442,7 @@ const STEPS = {
     options: [
       { label: "Buscar entre lo que hay", icono: "buscar", reinicia: true, next: "ask_alq_type" },
       { label: "Ver todos los publicados", comentario: "Ahí está todo lo que hay para alquilar ahora mismo.", recursos: ["alquileres"], next: "guia_alquilar" },
-      { label: "Avisame si entra algo", icono: "campana", next: "lead" },
+      { label: "Avisame si entra algo", icono: "campana", operacion: "alquiler", next: "lead" },
       { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
@@ -718,12 +761,22 @@ export default function ChatBot() {
     }
 
     if (opt.next === "lead") {
+      // Al aviso se puede llegar sin haber buscado nada, desde el menú de
+      // alquiler. Sin esta marca el alta entraría como interés de compra, que
+      // es justo lo contrario de lo que pidió.
+      const contexto =
+        opt.operacion && !lastSearchFilters.operacion
+          ? { ...lastSearchFilters, operacion: opt.operacion }
+          : lastSearchFilters;
+      if (contexto !== lastSearchFilters) setLastSearchFilters(contexto);
       setActiveStep("lead");
-      trackEvent("chatbot_lead_form", { operacion: lastSearchFilters.operacion || "venta", has_search_filters: Object.keys(lastSearchFilters).length > 0 });
+      trackEvent("chatbot_lead_form", { operacion: contexto.operacion || "venta", has_search_filters: Object.keys(contexto).length > 0 });
       sendBot(
         [
           { text: "Dale, te aviso apenas entre una que encaje con lo que buscás." },
-          { text: "Necesito tu nombre y un WhatsApp donde ubicarte." },
+          {
+            text: "Necesito tu nombre y un WhatsApp donde ubicarte. Si me dejás el email, te sumo también a la lista de avisos de propiedades nuevas.",
+          },
         ],
         "lead"
       );
@@ -829,7 +882,7 @@ export default function ChatBot() {
 
   // Envío optimista: registrarConsulta es fire-and-forget, igual que el resto
   // de los formularios del sitio.
-  const handleLeadSubmit = ({ nombre, telefono }) => {
+  const handleLeadSubmit = ({ nombre, telefono, email }) => {
     cancelPending();
     registrarConsulta({
       tipo: "propiedad",
@@ -842,16 +895,50 @@ export default function ChatBot() {
         origen: "chatbot",
         filtros: lastSearchFilters,
         busqueda: describeFilters(lastSearchFilters),
+        ...(email ? { email } : {}),
       },
     });
-    trackEvent("chatbot_lead", { operacion: lastSearchFilters.operacion || "venta", has_search_filters: Object.keys(lastSearchFilters).length > 0 });
+    // Alta en la lista de avisos automáticos. Va aparte de la consulta y
+    // también fire-and-forget: si falla, el lead ya quedó en el CRM igual.
+    // Con barra final a propósito, ver la regla de trailingSlash del proyecto.
+    if (email) {
+      const alquiler = lastSearchFilters.operacion === "alquiler";
+      fetch("/api/suscripcion/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          email,
+          nombre,
+          interes: alquiler ? "alquilar" : "comprar",
+          source: "chatbot",
+          tipo: tipoDeSuscripcion(lastSearchFilters),
+          presupuesto: presupuestoTexto(lastSearchFilters),
+          dormitorios: dormitoriosTexto(lastSearchFilters),
+          whatsapp: telefono,
+        }),
+      }).catch(() => {});
+      trackEvent("chatbot_suscripcion", { operacion: alquiler ? "alquiler" : "venta" });
+    }
+    trackEvent("chatbot_lead", {
+      operacion: lastSearchFilters.operacion || "venta",
+      has_search_filters: Object.keys(lastSearchFilters).length > 0,
+      con_email: Boolean(email),
+    });
     setLeadSent(true);
     setActiveStep("after_lead");
-    setMessages((prev) => [...prev, { role: "user", text: `${nombre} · ${telefono}` }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: [nombre, telefono, email].filter(Boolean).join(" · ") },
+    ]);
     sendBot(
       [
         { text: `¡Listo, ${nombre.split(" ")[0]}! Ya quedaste anotado.` },
-        { text: "Te escribo apenas entre algo que encaje. ¿Querés seguir mirando mientras tanto?" },
+        {
+          text: email
+            ? "Quedaste también en la lista de avisos por mail. Te escribo apenas entre algo que encaje. ¿Seguimos mirando mientras tanto?"
+            : "Te escribo apenas entre algo que encaje. ¿Querés seguir mirando mientras tanto?",
+        },
       ],
       "after_lead"
     );
@@ -1084,18 +1171,28 @@ function Miniatura({ prop }) {
   return <img src={foto} alt={prop.title} className="w-20 h-16 object-cover rounded-lg flex-shrink-0" />;
 }
 
+// El email es opcional a propósito: es lo que engancha al visitante con los
+// avisos automáticos, pero pedirlo como obligatorio sumaba un campo más a un
+// formulario dentro de un chat. El que no lo quiera dar llega al CRM igual.
 function LeadForm({ onSubmit }) {
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [email, setEmail] = useState("");
   const [enviado, setEnviado] = useState(false);
 
-  const listo = nombre.trim().length >= 2 && telefono.trim().length >= 6;
+  const emailLimpio = email.trim().toLowerCase();
+  const emailValido = emailLimpio === "" || EMAIL_RE.test(emailLimpio);
+  const listo = nombre.trim().length >= 2 && telefono.trim().length >= 6 && emailValido;
 
   const enviar = (e) => {
     e.preventDefault();
     if (!listo || enviado) return;
     setEnviado(true);
-    onSubmit({ nombre: nombre.trim(), telefono: telefono.trim() });
+    onSubmit({
+      nombre: nombre.trim(),
+      telefono: telefono.trim(),
+      email: emailLimpio || null,
+    });
   };
 
   return (
@@ -1121,6 +1218,21 @@ function LeadForm({ onSubmit }) {
         maxLength={40}
         className="w-full text-sm px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-400"
       />
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Tu email (opcional)"
+        autoComplete="email"
+        inputMode="email"
+        maxLength={120}
+        aria-invalid={!emailValido}
+        className={`w-full text-sm px-3 py-2 rounded-xl border focus:outline-none ${
+          emailValido
+            ? "border-gray-200 focus:border-gray-400"
+            : "border-red-300 focus:border-red-400"
+        }`}
+      />
       <button
         type="submit"
         disabled={!listo || enviado}
@@ -1130,7 +1242,8 @@ function LeadForm({ onSubmit }) {
         {enviado ? "Enviando…" : "Avisame"}
       </button>
       <p className="text-[11px] text-gray-400 leading-tight">
-        Solo lo usamos para avisarte de propiedades como la que buscás.
+        Solo lo usamos para avisarte de propiedades como la que buscás. Con el email
+        entrás además a la lista de avisos.
       </p>
     </form>
   );
