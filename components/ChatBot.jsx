@@ -8,16 +8,152 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
 import { registrarConsulta } from "@/lib/registrarConsulta";
 
+// ────────────────────────────────────────────────────────────────────────────
+// Lectura del catálogo
+// ────────────────────────────────────────────────────────────────────────────
+// El chat consulta la base desde el navegador, así que NO pasa por
+// lib/properties.js, que es server-only y normaliza cada fila. Todo lo que ese
+// archivo garantiza —número donde tiene que haber número, una foto elegida— hay
+// que resolverlo acá, o una fila incompleta llega tal cual hasta la tarjeta.
+
+// ── Venta vs. alquiler ──────────────────────────────────────────────────────
+// El sitio entero separa las dos operaciones por UN solo campo: `modalidad`.
+// Lo usan el listado (`PropertiesClient`), /alquileres, la ficha, PropertyCard,
+// favoritos, precio-m2 y lib/whatsapp.js. `operation` NO es un segundo criterio:
+// el panel lo deriva de él —`modalidad = operation === "alquiler" ?
+// "alquiler_permanente" : operation`— y además tiene el valor "ambas", una
+// propiedad que se vende Y se alquila, que sí tiene que entrar al embudo de
+// compra. Preguntar por `operation === "alquiler"` es inventar un criterio
+// paralelo: acá se pregunta por modalidad y por nada más.
+//
+// En plata: lo que está en dólares se vende, lo que está en pesos se alquila.
+// El alquiler permanente guarda su precio en precioAlquilerARS y deja `price`
+// en 0; si se cuela en el embudo de compra, Lucía lo ofrece como "USD 0".
+const esVenta = (p) => p.modalidad !== "alquiler_permanente";
+
+// Las que la ficha manda a 404 (mismo criterio que app/propiedades/[slug]/page.js).
+// Ofrecerlas sería mandar al visitante a una página que no existe.
+// `reservada` y `alquilada` NO entran acá a propósito: una propiedad en venta
+// que hoy está alquilada o reservada sigue estando en venta, y su ficha abre.
+const tieneFicha = (p) => !p.vendida && !p.noDisponible && p.status !== "no_disponible";
+
+// Primera foto disponible. Las filas migradas guardan la galería en `images` y
+// pueden tener `image` vacío; sin esto la tarjeta queda con la imagen rota.
+function fotoDe(p) {
+  if (p.image) return p.image;
+  const primera = Array.isArray(p.images) ? p.images.find((i) => i?.url) : null;
+  return primera?.url || null;
+}
+
+// Precio de venta en dólares, o null. `price` es siempre USD y siempre de
+// venta; el alquiler no pasa por acá. Una propiedad de venta sin precio cargado
+// no puede responder la pregunta del presupuesto: queda afuera en vez de
+// aparecer con un precio vacío.
+function precioDe(p) {
+  const n = Number(p.price);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+// Precio de alquiler mensual, en PESOS. El equivalente de precioDe() para la
+// otra operación: son campos distintos y nunca se cruzan.
+function alquilerDe(p) {
+  const n = Number(p.precioAlquilerARS);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+// El precio que le corresponde a esa propiedad según su operación. Es el único
+// lugar donde se decide qué campo y qué moneda se muestran, así que no hay
+// forma de dibujar un alquiler en dólares ni una venta en pesos. Mismo formato
+// que FavoritosClient.
+function precioTexto(p) {
+  if (esVenta(p)) {
+    const usd = precioDe(p);
+    return usd === null ? null : `USD ${usd.toLocaleString("es-AR")}`;
+  }
+  const ars = alquilerDe(p);
+  return ars === null ? null : `$${ars.toLocaleString("es-AR")}/mes`;
+}
+
+function numeroDe(valor) {
+  const n = Number(valor);
+  return Number.isFinite(n) ? n : null;
+}
+
+// El barrio, que es lo que sirve en una tarjeta chica. Si location viene vacío
+// devuelve null y la línea no se dibuja.
+function zonaDe(p) {
+  const partes = String(p.location || "").split(",").map((t) => t.trim()).filter(Boolean);
+  return partes[1] || partes[0] || null;
+}
+
 function filterProps(filters, list) {
   return list.filter((p) => {
-    if (p.vendida) return false;
-    if (filters.types?.length && !filters.types.some((t) => p.type.toLowerCase().includes(t.toLowerCase()))) return false;
-    if (filters.minPrice && p.price < filters.minPrice) return false;
-    if (filters.maxPrice && p.price > filters.maxPrice) return false;
-    if (filters.minBedrooms !== undefined && p.bedrooms < filters.minBedrooms) return false;
-    if (filters.maxBedrooms !== undefined && p.bedrooms > filters.maxBedrooms) return false;
+    if (!esVenta(p) || !tieneFicha(p)) return false;
+
+    const precio = precioDe(p);
+    if (precio === null) return false;
+
+    if (filters.types?.length) {
+      const tipo = String(p.type || "").toLowerCase();
+      if (!filters.types.some((t) => tipo.includes(t.toLowerCase()))) return false;
+    }
+    if (filters.minPrice && precio < filters.minPrice) return false;
+    if (filters.maxPrice && precio > filters.maxPrice) return false;
+
+    if (filters.minBedrooms !== undefined || filters.maxBedrooms !== undefined) {
+      const dormitorios = numeroDe(p.bedrooms);
+      if (dormitorios === null) return false;
+      if (filters.minBedrooms !== undefined && dormitorios < filters.minBedrooms) return false;
+      if (filters.maxBedrooms !== undefined && dormitorios > filters.maxBedrooms) return false;
+    }
     return true;
   });
+}
+
+// Buscador de alquileres permanentes. Es el espejo de filterProps para la otra
+// cartera: mismo tipo y dormitorios, pero SIN pregunta de presupuesto —el
+// precio va en pesos y se mueve, y la cartera de alquiler es chica, así que
+// filtrar por monto deja casi todo afuera. Si la cartera crece, acá va la
+// pregunta, con los tramos en pesos y leyendo precioAlquilerARS.
+//
+// Ojo con la asimetría: `alquilada` SÍ descalifica a un alquiler (está ocupado)
+// y NO a una venta (una casa alquilada se sigue vendiendo).
+function filterAlquileres(filters, list) {
+  return list.filter((p) => {
+    if (esVenta(p) || !tieneFicha(p)) return false;
+    if (p.alquilada) return false;
+    if (alquilerDe(p) === null) return false;
+
+    if (filters.types?.length) {
+      const tipo = String(p.type || "").toLowerCase();
+      if (!filters.types.some((t) => tipo.includes(t.toLowerCase()))) return false;
+    }
+    if (filters.minBedrooms !== undefined || filters.maxBedrooms !== undefined) {
+      const dormitorios = numeroDe(p.bedrooms);
+      if (dormitorios === null) return false;
+      if (filters.minBedrooms !== undefined && dormitorios < filters.minBedrooms) return false;
+      if (filters.maxBedrooms !== undefined && dormitorios > filters.maxBedrooms) return false;
+    }
+    return true;
+  });
+}
+
+// Link al listado con la misma búsqueda ya aplicada. El listado de venta lee
+// `type`, `priceMin`, `priceMax` y `bedrooms` de la URL
+// (app/propiedades/PropertiesClient.js), así que el chat no reimplementa nada.
+// /alquileres no lee parámetros: va pelado, sin inventar filtros que ese
+// listado no aplica.
+function urlDelListado(filters = {}) {
+  if (filters.operacion === "alquiler") return "/alquileres/";
+  const params = new URLSearchParams();
+  // `type` compara contra un solo tipo; con varios se manda sin filtrar.
+  if (filters.types?.length === 1) params.set("type", filters.types[0]);
+  if (filters.minPrice) params.set("priceMin", String(filters.minPrice));
+  if (filters.maxPrice) params.set("priceMax", String(filters.maxPrice));
+  // El listado interpreta `bedrooms` como mínimo, así que solo va el mínimo.
+  if (filters.minBedrooms) params.set("bedrooms", String(filters.minBedrooms));
+  const q = params.toString();
+  return q ? `/propiedades/?${q}` : "/propiedades/";
 }
 
 // Si lo ponés en false, las salidas a WhatsApp de visitantes que todavía no
@@ -29,6 +165,7 @@ const REGISTRAR_SALIDAS_WHATSAPP = true;
 // WhatsApp y el detalle del lead, así siempre describen lo mismo.
 function describeFilters(filters = {}) {
   return [
+    filters.operacion === "alquiler" ? "Operación: alquiler permanente" : "",
     filters.types?.length ? `Tipo: ${filters.types.join(", ")}` : "",
     filters.minPrice ? `Presupuesto mínimo: USD ${filters.minPrice.toLocaleString("es-AR")}` : "",
     filters.maxPrice ? `Presupuesto máximo: USD ${filters.maxPrice.toLocaleString("es-AR")}` : "",
@@ -163,6 +300,14 @@ function reaccionResultados(n) {
   return `Hay ${n}, así que tenés de dónde elegir. Te dejo las primeras cuatro:`;
 }
 
+// La cartera de alquiler es chica y se mueve rápido: el comentario lo dice en
+// vez de fingir abundancia.
+function reaccionAlquileres(n) {
+  if (n === 1) return "Hay uno solo disponible en este momento:";
+  if (n <= 3) return `Tengo ${n} disponibles ahora:`;
+  return `Tengo ${n} disponibles. Te dejo los primeros cuatro:`;
+}
+
 // Las secciones del sitio a las que Lucía puede derivar. Cada texto sale de lo
 // que esa página realmente hace: si se agrega una sección nueva, se agrega acá,
 // y si una se da de baja hay que sacarla o Lucía manda a un 404.
@@ -230,7 +375,7 @@ const STEPS = {
     // primera vez el saludo lo arma contextualGreeting() según la página.
     text: "¿Con qué otra cosa te ayudo?",
     options: [
-      { label: "Estoy buscando para comprar", icono: "buscar", next: "ask_type" },
+      { label: "Estoy buscando para comprar", icono: "buscar", reinicia: true, next: "ask_type" },
       { label: "Busco alquiler permanente", icono: "llave", next: "guia_alquilar" },
       { label: "Quiero vender o tasar", icono: "casa", next: "guia_vender" },
       { label: "Estoy averiguando cómo está el mercado", icono: "grafico", next: "menu_info" },
@@ -252,10 +397,39 @@ const STEPS = {
   guia_alquilar: {
     text: "Lo que publicamos es alquiler permanente, para vivir todo el año.",
     options: [
-      { label: "Ver lo que hay disponible", comentario: "Ahí tenés todo lo que está publicado ahora.", recursos: ["alquileres"], next: "guia_alquilar" },
+      { label: "Buscar entre lo que hay", icono: "buscar", reinicia: true, next: "ask_alq_type" },
+      { label: "Ver todos los publicados", comentario: "Ahí está todo lo que hay para alquilar ahora mismo.", recursos: ["alquileres"], next: "guia_alquilar" },
       { label: "Avisame si entra algo", icono: "campana", next: "lead" },
       { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
+    ],
+  },
+
+  // El embudo de alquiler no pregunta presupuesto: ver filterAlquileres().
+  ask_alq_type: {
+    text: "¿Qué estás buscando para alquilar?",
+    options: [
+      { label: "Una casa", filter: { types: ["Casa"] }, next: "ask_alq_bedrooms" },
+      { label: "Un departamento o PH", filter: { types: ["Departamento", "PH", "Monoambiente"] }, next: "ask_alq_bedrooms" },
+      { label: "Una cabaña", filter: { types: ["Cabaña", "Cabañas"] }, next: "ask_alq_bedrooms" },
+      { label: "Me da igual el tipo", filter: {}, next: "ask_alq_bedrooms" },
+    ],
+  },
+  ask_alq_bedrooms: {
+    text: "¿Cuántos dormitorios necesitás?",
+    options: [
+      { label: "Con uno me alcanza", filter: { maxBedrooms: 1 }, next: "results_alquiler" },
+      { label: "Dos", filter: { minBedrooms: 2, maxBedrooms: 2 }, next: "results_alquiler" },
+      { label: "Tres o más", filter: { minBedrooms: 3 }, next: "results_alquiler" },
+      { label: "Eso me da igual", filter: {}, next: "results_alquiler" },
+    ],
+  },
+  after_results_alquiler: {
+    text: "¿Seguimos?",
+    options: [
+      { label: "Avisame si entra otro así", icono: "campana", next: "lead" },
+      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_alq_type" },
+      { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
 
@@ -304,7 +478,7 @@ const STEPS = {
     text: "¿Seguimos?",
     options: [
       { label: "Avisame si entra algo así", icono: "campana", next: "lead" },
-      { label: "Buscar otra cosa", icono: "reiniciar", next: "ask_type" },
+      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_type" },
       { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
@@ -384,7 +558,7 @@ export default function ChatBot() {
       const ultima = i === bubbles.length - 1;
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, stepKey: ultima ? stepKey : undefined },
+        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, stepKey: ultima ? stepKey : undefined },
       ]);
       if (ultima) setTyping(false);
     }
@@ -431,7 +605,15 @@ export default function ChatBot() {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, open]);
 
-  useEffect(() => {
+  // El catálogo fresco se pide recién cuando alguien abre el chat. Antes se
+  // bajaba entero en cada carga de página, lo abriera o no: una consulta de más
+  // para la enorme mayoría de las visitas. Mientras tanto el array estático de
+  // respaldo ya alcanza para contestar, y las demoras del ritmo dan tiempo de
+  // sobra a que llegue antes de la primera búsqueda.
+  const catalogoPedido = useRef(false);
+  const cargarCatalogo = () => {
+    if (catalogoPedido.current) return;
+    catalogoPedido.current = true;
     const supabase = supabaseBrowser();
     if (!supabase) return;
     supabase
@@ -441,7 +623,7 @@ export default function ChatBot() {
       .then(({ data, error }) => {
         if (!error && data?.length) setDataset(data);
       });
-  }, []);
+  };
 
   // El horario se calcula en el cliente (nunca en el HTML del servidor, que se
   // cachea) y se refresca cada vez que se abre el chat.
@@ -463,11 +645,16 @@ export default function ChatBot() {
     const id = setTimeout(() => {
       const saludo = contextualGreeting(pathname);
       setInvitacion(saludo[saludo.length - 1]);
+      trackEvent("chatbot_invitacion_vista", { page_path: pathname });
     }, INVITACION_MS);
     return () => clearTimeout(id);
   }, [open, invitacionCerrada, invitacion, pathname]);
 
-  const descartarInvitacion = () => {
+  // `medir` separa las dos formas de que la burbuja desaparezca: la cruz (el
+  // visitante la rechaza) y abrir el chat (la burbuja cumplió). Solo la primera
+  // cuenta como descarte.
+  const descartarInvitacion = ({ medir = true } = {}) => {
+    if (medir && invitacion) trackEvent("chatbot_invitacion_cerrada", { page_path: pathname });
     setInvitacion(null);
     setInvitacionCerrada(true);
     try {
@@ -488,15 +675,25 @@ export default function ChatBot() {
     );
   };
 
-  const abrirChat = () => {
+  // `origen` distingue el clic en el botón flotante del clic en la burbuja de
+  // invitación. Sin este evento no hay denominador: chatbot_lead solo cuenta a
+  // los que ya habían abierto, y no se puede saber si la burbuja suma o molesta.
+  const abrirChat = (origen = "boton") => {
     setOpen(true);
-    descartarInvitacion();
+    cargarCatalogo();
+    trackEvent("chatbot_open", { origen, page_path: pathname });
+    descartarInvitacion({ medir: false });
     if (messages.length === 0 && !typing) saludar();
   };
 
   const handleOption = (opt, currentFilters) => {
     cancelPending();
     setMessages((prev) => [...prev, { role: "user", text: opt.label }]);
+
+    // Un evento por paso, con de dónde viene y a dónde va. Es lo que dibuja el
+    // embudo completo en GA4: entre chatbot_open y chatbot_lead antes no había
+    // nada, así que no se podía ver en qué pregunta se cae la gente.
+    trackEvent("chatbot_paso", { desde: activeStep, paso: opt.next, opcion: opt.label });
 
     if (opt.next === "whatsapp") {
       const searchContext = Object.keys(currentFilters || {}).length ? currentFilters : lastSearchFilters;
@@ -522,7 +719,7 @@ export default function ChatBot() {
 
     if (opt.next === "lead") {
       setActiveStep("lead");
-      trackEvent("chatbot_lead_form", { has_search_filters: Object.keys(lastSearchFilters).length > 0 });
+      trackEvent("chatbot_lead_form", { operacion: lastSearchFilters.operacion || "venta", has_search_filters: Object.keys(lastSearchFilters).length > 0 });
       sendBot(
         [
           { text: "Dale, te aviso apenas entre una que encaje con lo que buscás." },
@@ -546,7 +743,11 @@ export default function ChatBot() {
       return;
     }
 
-    const merged = opt.filter ? { ...currentFilters, ...opt.filter } : currentFilters;
+    // Las opciones que arrancan un embudo limpian lo que haya quedado del
+    // anterior: si no, una búsqueda de compra se filtraba dentro de la de
+    // alquiler y viceversa.
+    const base = opt.reinicia ? {} : currentFilters || {};
+    const merged = opt.filter ? { ...base, ...opt.filter } : base;
 
     if (opt.next === "results") {
       const found = filterProps(merged, dataset);
@@ -555,7 +756,7 @@ export default function ChatBot() {
       setFilters({});
 
       if (found.length === 0) {
-        trackEvent("chatbot_sin_resultados", { busqueda: describeFilters(merged).join(" · ") });
+        trackEvent("chatbot_sin_resultados", { operacion: "venta", busqueda: describeFilters(merged).join(" · ") });
         // La única pausa larga del chat: cuando la noticia es mala, la demora
         // con lenguaje empático se recibe mejor que la respuesta instantánea.
         sendBot(
@@ -568,9 +769,55 @@ export default function ChatBot() {
         return;
       }
 
+      const mostradas = found.slice(0, 4);
+      trackEvent("chatbot_resultados", { operacion: "venta", cantidad: found.length });
       sendBot(
-        [{ text: reaccionResultados(found.length), results: found.slice(0, 4) }],
+        [{
+          text: reaccionResultados(found.length),
+          results: mostradas,
+          // El que quiere ver el resto se iba del chat y arrancaba de cero.
+          listado: found.length > mostradas.length
+            ? { href: urlDelListado(merged), total: found.length }
+            : undefined,
+        }],
         "after_results"
+      );
+      return;
+    }
+
+    // Mismo motor, la otra cartera. La búsqueda se guarda con
+    // `operacion: "alquiler"` para que el lead, el resumen de WhatsApp y el
+    // link al listado sepan de qué operación se está hablando.
+    if (opt.next === "results_alquiler") {
+      const busqueda = { ...merged, operacion: "alquiler" };
+      const found = filterAlquileres(busqueda, dataset);
+      setLastSearchFilters(busqueda);
+      setActiveStep("after_results_alquiler");
+      setFilters({});
+
+      if (found.length === 0) {
+        trackEvent("chatbot_sin_resultados", { operacion: "alquiler", busqueda: describeFilters(busqueda).join(" · ") });
+        sendBot(
+          [
+            { text: "Ahora mismo no tengo ningún alquiler permanente con esas características.", delay: 1800 },
+            { text: "Acá los alquileres permanentes son escasos y duran días. Si me dejás tus datos, te aviso apenas entre uno." },
+          ],
+          "after_results_alquiler"
+        );
+        return;
+      }
+
+      const mostrados = found.slice(0, 4);
+      trackEvent("chatbot_resultados", { operacion: "alquiler", cantidad: found.length });
+      sendBot(
+        [{
+          text: reaccionAlquileres(found.length),
+          results: mostrados,
+          listado: found.length > mostrados.length
+            ? { href: urlDelListado(busqueda), total: found.length }
+            : undefined,
+        }],
+        "after_results_alquiler"
       );
       return;
     }
@@ -588,14 +835,16 @@ export default function ChatBot() {
       tipo: "propiedad",
       nombre,
       telefono,
-      mensaje: "Pidió que le avisemos cuando entre una propiedad como la que buscaba (asistente Lucía).",
+      mensaje: lastSearchFilters.operacion === "alquiler"
+        ? "Pidió que le avisemos cuando entre un alquiler permanente como el que buscaba (asistente Lucía)."
+        : "Pidió que le avisemos cuando entre una propiedad como la que buscaba (asistente Lucía).",
       detalle: {
         origen: "chatbot",
         filtros: lastSearchFilters,
         busqueda: describeFilters(lastSearchFilters),
       },
     });
-    trackEvent("chatbot_lead", { has_search_filters: Object.keys(lastSearchFilters).length > 0 });
+    trackEvent("chatbot_lead", { operacion: lastSearchFilters.operacion || "venta", has_search_filters: Object.keys(lastSearchFilters).length > 0 });
     setLeadSent(true);
     setActiveStep("after_lead");
     setMessages((prev) => [...prev, { role: "user", text: `${nombre} · ${telefono}` }]);
@@ -705,15 +954,33 @@ export default function ChatBot() {
                           onClick={() => setOpen(false)}
                           className="flex gap-3 bg-white rounded-xl p-2.5 shadow-sm hover:shadow-md transition border border-gray-100"
                         >
-                          <img src={prop.image} alt={prop.title} className="w-20 h-16 object-cover rounded-lg flex-shrink-0" />
+                          <Miniatura prop={prop} />
                           <div className="min-w-0 flex flex-col justify-center gap-0.5">
                             <p className="text-xs font-semibold text-gray-800 leading-snug line-clamp-2">{prop.title}</p>
-                            <p className="text-[11px] text-gray-400 leading-tight">{prop.location.split(",")[1]?.trim() || prop.location}</p>
-                            <p className="text-xs font-bold" style={{ color: AIRBNB }}>USD {prop.price.toLocaleString("es-AR")}</p>
+                            {zonaDe(prop) && (
+                              <p className="text-[11px] text-gray-400 leading-tight">{zonaDe(prop)}</p>
+                            )}
+                            <p className="text-xs font-bold" style={{ color: AIRBNB }}>
+                              {precioTexto(prop)}
+                            </p>
                           </div>
                         </Link>
                       ))}
                     </div>
+                  )}
+
+                  {msg.listado && (
+                    <Link
+                      href={msg.listado.href}
+                      onClick={() => {
+                        trackEvent("chatbot_ver_listado", { total: msg.listado.total, href: msg.listado.href });
+                        setOpen(false);
+                      }}
+                      className="mt-2 block text-center bg-white rounded-xl py-2 shadow-sm hover:shadow-md transition border border-gray-100 text-xs font-semibold"
+                      style={{ color: AIRBNB }}
+                    >
+                      Ver las {msg.listado.total} en el listado →
+                    </Link>
                   )}
 
                   {msg.role === "bot" && isLast && !typing && stepOptions && (
@@ -759,7 +1026,7 @@ export default function ChatBot() {
       {!open && invitacion && (
         <div className="lucia-invitacion fixed bottom-24 right-4 sm:right-6 z-50 flex items-start gap-2" style={{ maxWidth: "18rem" }}>
           <button
-            onClick={abrirChat}
+            onClick={() => abrirChat("invitacion")}
             className="text-left bg-white text-gray-800 rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-3.5 py-3 hover:shadow-2xl transition"
           >
             <span className="block text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: AIRBNB }}>
@@ -768,7 +1035,7 @@ export default function ChatBot() {
             <span className="block text-sm leading-snug">{invitacion}</span>
           </button>
           <button
-            onClick={descartarInvitacion}
+            onClick={() => descartarInvitacion()}
             aria-label="Cerrar el aviso"
             className="mt-1 w-6 h-6 flex-shrink-0 rounded-full bg-white border border-gray-100 shadow text-gray-400 hover:text-gray-700 text-base leading-none"
           >
@@ -807,6 +1074,14 @@ function TypingDots() {
       </div>
     </div>
   );
+}
+
+// La fila puede venir sin `image` (galería migrada a `images`) o sin ninguna
+// foto cargada. En ese caso va un bloque neutro, no una imagen rota.
+function Miniatura({ prop }) {
+  const foto = fotoDe(prop);
+  if (!foto) return <div className="w-20 h-16 rounded-lg flex-shrink-0 bg-gray-100" aria-hidden="true" />;
+  return <img src={foto} alt={prop.title} className="w-20 h-16 object-cover rounded-lg flex-shrink-0" />;
 }
 
 function LeadForm({ onSubmit }) {
