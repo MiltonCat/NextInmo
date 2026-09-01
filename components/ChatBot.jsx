@@ -481,6 +481,10 @@ const RECURSOS = {
     titulo: "Guía de barrios",
     detalle: "Precio del m², servicios y acceso en invierno, barrio por barrio.",
   },
+  // SIN USO desde el 01/09/2026: Milton pidió sacar las opiniones de vecinos de
+  // Lucía. La sección /experiencia-barrio/ sigue viva en el sitio; lo que se
+  // quitó son las derivaciones del chat. Se deja la entrada acá para que vuelva
+  // agregando `recursos: ["vecinos"]` a una opción, sin reescribir el detalle.
   vecinos: {
     href: "/experiencia-barrio/",
     titulo: "Opiniones de vecinos",
@@ -578,7 +582,6 @@ const STEPS = {
     options: [
       { label: "Cómo está el clima ahora", icono: "clima", next: "clima" },
       { label: "Cómo es cada barrio", comentario: "Acá está cada zona con lo que la caracteriza, los servicios y las distancias.", recursos: ["barrios"], next: "menu_vivir" },
-      { label: "Qué dicen los que viven ahí", comentario: "Esto lo escriben los vecinos, no nosotros.", recursos: ["vecinos"], next: "menu_vivir" },
       { label: "Ver qué hay publicado", icono: "buscar", reinicia: true, next: "ask_type" },
       { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
@@ -591,7 +594,7 @@ const STEPS = {
       { label: "Cuánto vale el m² por barrio", comentario: "Este es el número que más se consulta. Está abierto por zona.", recursos: ["precio"], next: "menu_info" },
       { label: "Con cuánto podría contar", comentario: "El simulador de crédito UVA te ayuda a ponerle un número al presupuesto.", recursos: ["credito"], next: "menu_info" },
       { label: "Si conviene invertir acá", comentario: "Acá está el análisis con la rentabilidad por zona y la calculadora de retorno.", recursos: ["inversion"], next: "menu_info" },
-      { label: "En qué barrio me conviene", comentario: "Dos miradas del mismo tema: los datos por un lado, y lo que cuentan los vecinos por el otro.", recursos: ["barrios", "vecinos"], next: "menu_info" },
+      { label: "En qué barrio me conviene", comentario: "Acá está cada zona con los datos: precio del m², servicios y cómo se accede en invierno.", recursos: ["barrios"], next: "menu_info" },
       { label: "Cómo viene el mercado", comentario: "En el blog vamos siguiendo el crédito y los movimientos del rubro.", recursos: ["blog"], next: "menu_info" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
