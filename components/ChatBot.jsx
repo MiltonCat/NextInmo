@@ -138,6 +138,79 @@ function filterAlquileres(filters, list) {
   });
 }
 
+// ── Lo más parecido cuando no hay nada exacto ─────────────────────
+// Hasta acá, una búsqueda sin resultados era un callejón: Lucía pedía los datos
+// y la conversación moría ahí, con el catálogo entero ya cargado en memoria.
+// Esto reintenta la misma búsqueda cediendo DE A UN criterio por vez y devuelve
+// el primer intento que sí encuentra algo, junto con el motivo exacto por el
+// que no es lo pedido.
+//
+// El orden no es arbitrario: primero se cede lo que el visitante puede
+// negociar (dormitorios, tipo) y último el presupuesto, que es lo único que
+// puede no depender de él. Y el presupuesto se estira hasta +15% y ni un dólar
+// más: mostrarle una casa del doble de lo que dijo no es acercarse, es no
+// haberlo escuchado.
+//
+// El motivo se redacta SIEMPRE invariante al número ("el tipo no es el que me
+// pediste", no "son de otro tipo"), porque la misma frase acompaña a una sola
+// propiedad o a diez. Y va dicho: una propiedad que no cumple, mostrada sin
+// aclarar en qué no cumple, es peor que no mostrarla.
+const TOLERANCIA_PRECIO = 0.15;
+
+const sinDormitorios = (f) => {
+  const { minBedrooms, maxBedrooms, ...resto } = f;
+  return resto;
+};
+const sinTipo = (f) => {
+  const { types, ...resto } = f;
+  return resto;
+};
+const pidioDormitorios = (f) => f.minBedrooms !== undefined || f.maxBedrooms !== undefined;
+
+function aflojarFiltros(filters = {}, list = [], buscar = filterProps) {
+  const intentos = [];
+
+  if (pidioDormitorios(filters)) {
+    intentos.push({
+      filtros: sinDormitorios(filters),
+      motivo: "la cantidad de dormitorios no es la que me pediste.",
+    });
+  }
+  if (filters.types?.length) {
+    intentos.push({
+      filtros: sinTipo(filters),
+      motivo: "el tipo de propiedad no es el que me pediste.",
+    });
+  }
+  if (pidioDormitorios(filters) && filters.types?.length) {
+    intentos.push({
+      filtros: sinTipo(sinDormitorios(filters)),
+      motivo: "ni el tipo ni la cantidad de dormitorios coinciden con lo que me pediste.",
+    });
+  }
+  // Recién acá se toca la plata, y siempre con el número a la vista.
+  if (filters.maxPrice) {
+    const estirado = Math.round(filters.maxPrice * (1 + TOLERANCIA_PRECIO));
+    const techo = `USD ${estirado.toLocaleString("es-AR")}`;
+    intentos.push({
+      filtros: { ...filters, maxPrice: estirado },
+      motivo: `el precio se va un poco por encima de tu presupuesto, hasta ${techo}.`,
+    });
+    if (pidioDormitorios(filters)) {
+      intentos.push({
+        filtros: { ...sinDormitorios(filters), maxPrice: estirado },
+        motivo: `el precio llega hasta ${techo} y la cantidad de dormitorios tampoco coincide.`,
+      });
+    }
+  }
+
+  for (const intento of intentos) {
+    const found = buscar(intento.filtros, list);
+    if (found.length) return { ...intento, found };
+  }
+  return null;
+}
+
 // Link al listado con la misma búsqueda ya aplicada. El listado de venta lee
 // `type`, `priceMin`, `priceMax` y `bedrooms` de la URL
 // (app/propiedades/PropertiesClient.js), así que el chat no reimplementa nada.
@@ -351,6 +424,29 @@ function reaccionAlquileres(n) {
   return `Tengo ${n} disponibles. Te dejo los primeros cuatro:`;
 }
 
+// ── Cómo se cuenta el clima ────────────────────────────────────────────────
+// Los datos llegan ya redondeados y validados desde lib/clima.js: acá solo se
+// arma la frase. Cada pedazo se dibuja únicamente si vino, así que un campo que
+// falte se nota como una frase más corta y nunca como un "undefined°".
+function textoClimaAhora(a) {
+  // La sensación térmica solo se dice cuando aporta algo. En la montaña suele
+  // separarse varios grados de la real; cuando no, repetirla es ruido.
+  const sensacion =
+    a.sensacion !== null && Math.abs(a.sensacion - a.temperatura) >= 2
+      ? ` (sensación ${a.sensacion}°)`
+      : "";
+  const estado = a.estado ? `, ${a.estado}` : "";
+  return `En San Martín de los Andes ahora hay ${a.temperatura}°${sensacion}${estado}.`;
+}
+
+function textoClimaDias(dias) {
+  if (!dias?.length) return null;
+  const lineas = dias
+    .map((d) => `${d.nombre}: ${d.min}° a ${d.max}°${d.estado ? `, ${d.estado}` : ""}`)
+    .join("\n");
+  return `Cómo sigue:\n${lineas}`;
+}
+
 // Las secciones del sitio a las que Lucía puede derivar. Cada texto sale de lo
 // que esa página realmente hace: si se agrega una sección nueva, se agrega acá,
 // y si una se da de baja hay que sacarla o Lucía manda a un 404.
@@ -484,6 +580,9 @@ const STEPS = {
       { label: "Si conviene invertir acá", comentario: "Acá está el análisis con la rentabilidad por zona y la calculadora de retorno.", recursos: ["inversion"], next: "menu_info" },
       { label: "En qué barrio me conviene", comentario: "Dos miradas del mismo tema: los datos por un lado, y lo que cuentan los vecinos por el otro.", recursos: ["barrios", "vecinos"], next: "menu_info" },
       { label: "Cómo viene el mercado", comentario: "En el blog vamos siguiendo el crédito y los movimientos del rubro.", recursos: ["blog"], next: "menu_info" },
+      // No es un dato del rubro, y por eso está acá abajo: el que compra desde
+      // afuera pregunta por el invierno antes que por los metros cuadrados.
+      { label: "Cómo está el clima allá", icono: "clima", next: "clima" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
   },
@@ -498,23 +597,35 @@ const STEPS = {
       { label: "Todavía no lo tengo claro", filter: {}, next: "ask_budget" },
     ],
   },
+  // El embudo de compra pregunta DOS cosas antes de mostrar algo, no tres. La
+  // de dormitorios era la tercera y empujaba la primera foto a unos 5 segundos
+  // (dos burbujas por pregunta, más el ritmo). Ahora sale después del
+  // presupuesto y los dormitorios quedan como refinamiento, ya con propiedades
+  // a la vista: si la primera tanda alcanza, se ahorró la pregunta entera.
   ask_budget: {
     text: "¿Con qué presupuesto te estás manejando, en dólares?",
     options: [
-      { label: "Hasta USD 100.000", filter: { maxPrice: 100000 }, next: "ask_bedrooms" },
-      { label: "Entre 100 y 200 mil", filter: { minPrice: 100000, maxPrice: 200000 }, next: "ask_bedrooms" },
-      { label: "Entre 200 y 400 mil", filter: { minPrice: 200000, maxPrice: 400000 }, next: "ask_bedrooms" },
-      { label: "Más de USD 400.000", filter: { minPrice: 400000 }, next: "ask_bedrooms" },
-      { label: "Prefiero no definirlo todavía", filter: {}, next: "ask_bedrooms" },
+      { label: "Hasta USD 100.000", filter: { maxPrice: 100000 }, next: "results" },
+      { label: "Entre 100 y 200 mil", filter: { minPrice: 100000, maxPrice: 200000 }, next: "results" },
+      { label: "Entre 200 y 400 mil", filter: { minPrice: 200000, maxPrice: 400000 }, next: "results" },
+      { label: "Más de USD 400.000", filter: { minPrice: 400000 }, next: "results" },
+      { label: "Prefiero no definirlo todavía", filter: {}, next: "results" },
     ],
   },
-  ask_bedrooms: {
-    text: "¿Cuántos dormitorios necesitás?",
+  // Los mismos botones que after_results, con el refinamiento por dormitorios
+  // adelante. Solo se usa cuando el visitante TODAVÍA no eligió dormitorios y
+  // hay resultados de sobra: si no, refinar no le sirve de nada. Ojo: los
+  // filtros de la búsqueda no se limpian al llegar acá, o el refinamiento
+  // buscaría los dormitorios en el catálogo entero.
+  after_results_refinar: {
+    text: "¿Te la afino por dormitorios?",
     options: [
       { label: "Con un monoambiente me alcanza", filter: { maxBedrooms: 0 }, next: "results" },
       { label: "Uno o dos", filter: { minBedrooms: 1, maxBedrooms: 2 }, next: "results" },
       { label: "Tres o más", filter: { minBedrooms: 3 }, next: "results" },
-      { label: "Eso me da igual", filter: {}, next: "results" },
+      { label: "Avisame si entra algo así", icono: "campana", next: "lead" },
+      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_type" },
+      { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
   after_results: {
@@ -708,6 +819,46 @@ export default function ChatBot() {
     }
   };
 
+  // El único paso del chat que espera a un tercero. El fetch va primero y las
+  // burbujas después: si Open-Meteo no contesta, Lucía lo dice y no pasa nada
+  // más. Nunca se publica un número que no vino de la API (ver lib/clima.js).
+  const mostrarClima = async () => {
+    // Si el visitante toca otro botón mientras esto viaja, la respuesta llega
+    // tarde a una conversación que ya siguió: se descarta, igual que hace
+    // sendBot con las secuencias viejas.
+    const flow = flowRef.current;
+    setTyping(true);
+
+    let clima = null;
+    try {
+      // Con la barra final: trailingSlash está en true y sin ella hay redirect.
+      const res = await fetch("/api/clima/");
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.ok) clima = json;
+      }
+    } catch (e) {
+      // Sin red o endpoint caído: se trata igual que un "no hay dato".
+    }
+
+    if (flowRef.current !== flow) return;
+    setTyping(false);
+    trackEvent("chatbot_clima", { ok: Boolean(clima) });
+
+    if (!clima) {
+      sendBot(
+        [{ text: "Justo ahora no puedo traer el clima. Probá de nuevo en un rato." }],
+        "menu_info"
+      );
+      return;
+    }
+
+    const burbujas = [{ text: textoClimaAhora(clima.ahora) }];
+    const pronostico = textoClimaDias(clima.dias);
+    if (pronostico) burbujas.push({ text: pronostico });
+    sendBot(burbujas, "menu_info");
+  };
+
   const saludar = () => {
     cancelPending();
     const saludo = contextualGreeting(pathname);
@@ -783,6 +934,14 @@ export default function ChatBot() {
       return;
     }
 
+    // El clima no es una sección del sitio ni una búsqueda: es el único paso
+    // que trae un dato de afuera. Vuelve al mismo menú, como las derivaciones.
+    if (opt.next === "clima") {
+      setActiveStep("menu_info");
+      mostrarClima();
+      return;
+    }
+
     // Derivación a una sección del sitio: Lucía comenta y deja la tarjeta. Los
     // botones que vuelven son los del mismo menú, para poder mirar otra cosa
     // sin repetir la pregunta.
@@ -805,13 +964,43 @@ export default function ChatBot() {
     if (opt.next === "results") {
       const found = filterProps(merged, dataset);
       setLastSearchFilters(merged);
-      setActiveStep("after_results");
-      setFilters({});
 
       if (found.length === 0) {
         trackEvent("chatbot_sin_resultados", { operacion: "venta", busqueda: describeFilters(merged).join(" · ") });
-        // La única pausa larga del chat: cuando la noticia es mala, la demora
-        // con lenguaje empático se recibe mejor que la respuesta instantánea.
+        setActiveStep("after_results");
+        setFilters({});
+
+        // Antes de pedir los datos, mirar si hay algo cerca. El catálogo ya
+        // está en memoria, así que no cuesta una consulta más.
+        const cerca = aflojarFiltros(merged, dataset, filterProps);
+        if (cerca) {
+          const aproximadas = cerca.found.slice(0, 3);
+          trackEvent("chatbot_resultados_aproximados", {
+            operacion: "venta",
+            cantidad: cerca.found.length,
+            cedido: cerca.motivo,
+          });
+          sendBot(
+            [
+              { text: "Uf. Exactamente eso no lo tengo publicado en este momento.", delay: 1800 },
+              {
+                text: `Te muestro lo más parecido que hay hoy. Ojo: ${cerca.motivo}`,
+                results: aproximadas,
+                listado: cerca.found.length > aproximadas.length
+                  ? { href: urlDelListado(cerca.filtros), total: cerca.found.length }
+                  : undefined,
+              },
+              { text: "Y si preferís esperar por lo exacto, dejame tus datos y te aviso apenas entre." },
+            ],
+            "after_results"
+          );
+          return;
+        }
+
+        // Ni aflojando hay nada: acá sí es un catálogo que no tiene con qué
+        // responderle. La única pausa larga del chat: cuando la noticia es
+        // mala, la demora con lenguaje empático se recibe mejor que la
+        // respuesta instantánea.
         sendBot(
           [
             { text: "Uf. Con esos filtros exactos no tengo nada publicado en este momento.", delay: 1800 },
@@ -822,8 +1011,17 @@ export default function ChatBot() {
         return;
       }
 
+      // El refinamiento por dormitorios se ofrece solo si todavía no los eligió
+      // y hay de dónde recortar. Con cuatro resultados o menos ya los está
+      // viendo a todos: preguntar ahí es hacerle perder el tiempo de nuevo.
+      const puedeRefinar = !pidioDormitorios(merged) && found.length > 4;
+      const destino = puedeRefinar ? "after_results_refinar" : "after_results";
+      setActiveStep(destino);
+      // Los filtros sobreviven solo si el paso siguiente los va a usar.
+      setFilters(puedeRefinar ? merged : {});
+
       const mostradas = found.slice(0, 4);
-      trackEvent("chatbot_resultados", { operacion: "venta", cantidad: found.length });
+      trackEvent("chatbot_resultados", { operacion: "venta", cantidad: found.length, refina: puedeRefinar });
       sendBot(
         [{
           text: reaccionResultados(found.length),
@@ -833,7 +1031,7 @@ export default function ChatBot() {
             ? { href: urlDelListado(merged), total: found.length }
             : undefined,
         }],
-        "after_results"
+        destino
       );
       return;
     }
@@ -850,6 +1048,34 @@ export default function ChatBot() {
 
       if (found.length === 0) {
         trackEvent("chatbot_sin_resultados", { operacion: "alquiler", busqueda: describeFilters(busqueda).join(" · ") });
+
+        // Mismo criterio que en venta, con la otra cartera. Acá el aflojado
+        // nunca toca el precio, porque este embudo no lo pregunta.
+        const cerca = aflojarFiltros(busqueda, dataset, filterAlquileres);
+        if (cerca) {
+          const aproximados = cerca.found.slice(0, 3);
+          trackEvent("chatbot_resultados_aproximados", {
+            operacion: "alquiler",
+            cantidad: cerca.found.length,
+            cedido: cerca.motivo,
+          });
+          sendBot(
+            [
+              { text: "Ahora mismo no tengo ningún alquiler permanente con esas características.", delay: 1800 },
+              {
+                text: `Esto es lo más parecido que tengo disponible. Ojo: ${cerca.motivo}`,
+                results: aproximados,
+                listado: cerca.found.length > aproximados.length
+                  ? { href: urlDelListado(cerca.filtros), total: cerca.found.length }
+                  : undefined,
+              },
+              { text: "Y si buscás justo lo otro, dejame tus datos: acá los alquileres permanentes duran días y te aviso apenas entre uno." },
+            ],
+            "after_results_alquiler"
+          );
+          return;
+        }
+
         sendBot(
           [
             { text: "Ahora mismo no tengo ningún alquiler permanente con esas características.", delay: 1800 },
@@ -1002,7 +1228,7 @@ export default function ChatBot() {
                 <div key={i}>
                   <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                      className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
                         msg.role === "user"
                           ? "text-white rounded-br-sm"
                           : "bg-white text-gray-800 shadow-sm rounded-bl-sm"
@@ -1287,6 +1513,9 @@ function OpcionIcono({ nombre }) {
   }
   if (nombre === "campana") {
     return <svg {...comun}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>;
+  }
+  if (nombre === "clima") {
+    return <svg {...comun}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="M5 5l1.5 1.5" /><path d="M17.5 17.5L19 19" /><path d="M19 5l-1.5 1.5" /><path d="M6.5 17.5L5 19" /></svg>;
   }
   if (nombre === "reiniciar") {
     return <svg {...comun}><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3H21" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3H3" /><path d="M3 21v-5h5" /></svg>;
