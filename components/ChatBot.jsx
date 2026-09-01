@@ -649,6 +649,12 @@ const STEPS = {
       { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_goal" },
     ],
   },
+  after_ai_capture: {
+    options: [
+      { label: "Sí, avisame", icono: "campana", next: "lead" },
+      { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
+    ],
+  },
   // Paso de captura: no tiene botones, renderiza el formulario de contacto.
   lead: { form: true },
   after_lead: {
@@ -714,6 +720,9 @@ export default function ChatBot() {
   const flowRef = useRef(0);
   const timersRef = useRef([]);
   const lastRecommendationsRef = useRef([]);
+  // La invitación comercial aparece una sola vez y únicamente después de una
+  // consulta con intención inmobiliaria. Así Lucía ayuda antes de pedir datos.
+  const aiLeadInviteShownRef = useRef(false);
 
   useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
 
@@ -1267,11 +1276,25 @@ export default function ChatBot() {
         detalle: item.detail,
       }));
       trackEvent("chatbot_ia_respuesta", { ok: true, fuentes: resources.length });
-      sendBot([{
-        text: body.answer,
-        recursos: resources,
-        feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
-      }], activeStep);
+      const commercialIntent = /\b(compr|alquil|vend|tas|invert|propiedad|casa|departamento|depto|lote|terreno|precio|mercado|credito|hipoteca)\w*/i.test(text);
+      const shouldInvite = commercialIntent && !leadSent && !aiLeadInviteShownRef.current;
+      if (shouldInvite) {
+        aiLeadInviteShownRef.current = true;
+        trackEvent("chatbot_lead_invitacion", { origen: "respuesta_ia" });
+      }
+      sendBot(
+        [
+          {
+            text: body.answer,
+            recursos: resources,
+            feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
+          },
+          ...(shouldInvite
+            ? [{ text: "¿Querés que te avise cuando aparezca una propiedad que encaje con lo que buscás?" }]
+            : []),
+        ],
+        shouldInvite ? "after_ai_capture" : activeStep
+      );
     } catch {
       if (flowRef.current !== requestFlow) return;
       setTyping(false);
