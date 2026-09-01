@@ -444,7 +444,7 @@ function textoClimaDias(dias) {
   const lineas = dias
     .map((d) => `${d.nombre}: ${d.min}° a ${d.max}°${d.estado ? `, ${d.estado}` : ""}`)
     .join("\n");
-  return `Cómo sigue:\n${lineas}`;
+  return `Cómo sigue:\n${lineas}\n\nDatos de Open-Meteo.`;
 }
 
 // Las secciones del sitio a las que Lucía puede derivar. Cada texto sale de lo
@@ -518,6 +518,7 @@ const STEPS = {
       { label: "Busco alquiler permanente", icono: "llave", next: "guia_alquilar" },
       { label: "Quiero vender o tasar", icono: "casa", next: "guia_vender" },
       { label: "Estoy averiguando cómo está el mercado", icono: "grafico", next: "menu_info" },
+      { label: "Cómo es vivir en San Martín", icono: "montana", next: "menu_vivir" },
       { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
@@ -572,6 +573,18 @@ const STEPS = {
     ],
   },
 
+  menu_vivir: {
+    text: "¿Qué querés saber de San Martín?",
+    options: [
+      { label: "Cómo está el clima ahora", icono: "clima", next: "clima" },
+      { label: "Cómo es cada barrio", comentario: "Acá está cada zona con lo que la caracteriza, los servicios y las distancias.", recursos: ["barrios"], next: "menu_vivir" },
+      { label: "Qué dicen los que viven ahí", comentario: "Esto lo escriben los vecinos, no nosotros.", recursos: ["vecinos"], next: "menu_vivir" },
+      { label: "Ver qué hay publicado", icono: "buscar", reinicia: true, next: "ask_type" },
+      { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
+      { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
+    ],
+  },
+
   menu_info: {
     text: "¿Qué te interesa mirar?",
     options: [
@@ -580,9 +593,6 @@ const STEPS = {
       { label: "Si conviene invertir acá", comentario: "Acá está el análisis con la rentabilidad por zona y la calculadora de retorno.", recursos: ["inversion"], next: "menu_info" },
       { label: "En qué barrio me conviene", comentario: "Dos miradas del mismo tema: los datos por un lado, y lo que cuentan los vecinos por el otro.", recursos: ["barrios", "vecinos"], next: "menu_info" },
       { label: "Cómo viene el mercado", comentario: "En el blog vamos siguiendo el crédito y los movimientos del rubro.", recursos: ["blog"], next: "menu_info" },
-      // No es un dato del rubro, y por eso está acá abajo: el que compra desde
-      // afuera pregunta por el invierno antes que por los metros cuadrados.
-      { label: "Cómo está el clima allá", icono: "clima", next: "clima" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
   },
@@ -674,6 +684,7 @@ export default function ChatBot() {
   const [dataset, setDataset] = useState(fallbackProperties);
   const [leadSent, setLeadSent] = useState(false);
   const [atencion, setAtencion] = useState(null);
+  const [clima, setClima] = useState(null);
   const [invitacion, setInvitacion] = useState(null);
   const [invitacionCerrada, setInvitacionCerrada] = useState(false);
   const messagesEndRef = useRef(null);
@@ -779,6 +790,33 @@ export default function ChatBot() {
       });
   };
 
+  // El clima se pide una sola vez por montaje y lo comparten el chip del header
+  // y el paso `clima` del menú. Se guarda la PROMESA, no solo el resultado: si
+  // el visitante toca "cómo está el clima" mientras el pedido del chip todavía
+  // viaja, se cuelga de ese mismo pedido en vez de disparar otro.
+  const promesaClima = useRef(null);
+  const pedirClima = () => {
+    if (!promesaClima.current) {
+      promesaClima.current = (async () => {
+        try {
+          // Con la barra final: trailingSlash está en true y sin ella hay redirect.
+          const res = await fetch("/api/clima/");
+          if (!res.ok) return null;
+          const json = await res.json();
+          return json?.ok ? json : null;
+        } catch (e) {
+          // Sin red o endpoint caído: se trata igual que un "no hay dato" y el
+          // chip no se dibuja.
+          return null;
+        }
+      })().then((dato) => {
+        setClima(dato);
+        return dato;
+      });
+    }
+    return promesaClima.current;
+  };
+
   // El horario se calcula en el cliente (nunca en el HTML del servidor, que se
   // cachea) y se refresca cada vez que se abre el chat.
   useEffect(() => {
@@ -829,34 +867,24 @@ export default function ChatBot() {
     const flow = flowRef.current;
     setTyping(true);
 
-    let clima = null;
-    try {
-      // Con la barra final: trailingSlash está en true y sin ella hay redirect.
-      const res = await fetch("/api/clima/");
-      if (res.ok) {
-        const json = await res.json();
-        if (json?.ok) clima = json;
-      }
-    } catch (e) {
-      // Sin red o endpoint caído: se trata igual que un "no hay dato".
-    }
+    const dato = await pedirClima();
 
     if (flowRef.current !== flow) return;
     setTyping(false);
-    trackEvent("chatbot_clima", { ok: Boolean(clima) });
+    trackEvent("chatbot_clima", { ok: Boolean(dato) });
 
-    if (!clima) {
+    if (!dato) {
       sendBot(
         [{ text: "Justo ahora no puedo traer el clima. Probá de nuevo en un rato." }],
-        "menu_info"
+        "menu_vivir"
       );
       return;
     }
 
-    const burbujas = [{ text: textoClimaAhora(clima.ahora) }];
-    const pronostico = textoClimaDias(clima.dias);
+    const burbujas = [{ text: textoClimaAhora(dato.ahora) }];
+    const pronostico = textoClimaDias(dato.dias);
     if (pronostico) burbujas.push({ text: pronostico });
-    sendBot(burbujas, "menu_info");
+    sendBot(burbujas, "menu_vivir");
   };
 
   const saludar = () => {
@@ -875,9 +903,18 @@ export default function ChatBot() {
   const abrirChat = (origen = "boton") => {
     setOpen(true);
     cargarCatalogo();
+    pedirClima();
     trackEvent("chatbot_open", { origen, page_path: pathname });
     descartarInvitacion({ medir: false });
     if (messages.length === 0 && !typing) saludar();
+  };
+
+  const climaDesdeHeader = () => {
+    cancelPending();
+    setMessages((prev) => [...prev, { role: "user", text: "¿Cómo está el clima?" }]);
+    trackEvent("chatbot_paso", { desde: activeStep, paso: "clima", opcion: "chip del header" });
+    setActiveStep("menu_vivir");
+    mostrarClima();
   };
 
   const handleOption = (opt, currentFilters) => {
@@ -937,7 +974,7 @@ export default function ChatBot() {
     // El clima no es una sección del sitio ni una búsqueda: es el único paso
     // que trae un dato de afuera. Vuelve al mismo menú, como las derivaciones.
     if (opt.next === "clima") {
-      setActiveStep("menu_info");
+      setActiveStep("menu_vivir");
       mostrarClima();
       return;
     }
@@ -1213,7 +1250,17 @@ export default function ChatBot() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              {clima && (
+                <button
+                  onClick={climaDesdeHeader}
+                  title={`San Martín de los Andes: ${clima.ahora.temperatura}°${clima.ahora.estado ? `, ${clima.ahora.estado}` : ""}`}
+                  className="flex items-center gap-1 rounded-full bg-white/20 hover:bg-white/30 px-2 py-1 text-xs font-semibold leading-none transition"
+                >
+                  <ClimaIcono nombre={clima.ahora.icono} />
+                  {clima.ahora.temperatura}°
+                </button>
+              )}
               <button onClick={resetChat} className="text-white/70 hover:text-white text-base leading-none" title="Reiniciar chat">↺</button>
               <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white text-2xl leading-none" aria-label="Cerrar">×</button>
             </div>
@@ -1315,23 +1362,6 @@ export default function ChatBot() {
 
             {typing && <TypingDots />}
             <div ref={messagesEndRef} />
-          </div>
-
-          <div className="px-3 pt-2 pb-3 bg-white" style={{ flexShrink: 0 }}>
-            <a
-              href={advisorMessage(lastSearchFilters)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                registrarSalidaWhatsApp(lastSearchFilters, "chatbot_footer");
-                trackWhatsAppClick(null, "chatbot_footer");
-                trackEvent("chatbot_whatsapp", { has_search_filters: Object.keys(lastSearchFilters).length > 0 });
-              }}
-              className="flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium transition"
-            >
-              <WhatsAppIcon />
-              Hablar con un asesor
-            </a>
           </div>
         </div>
       )}
@@ -1493,6 +1523,28 @@ function QuickReply({ label, icono, onClick }) {
 
 // Íconos de línea del mismo grosor que el resto del sitio. Reemplazan a los
 // emojis, que leían como plantilla y encima cambian de dibujo en cada sistema.
+// El ícono del chip del header. `nombre` sale del código WMO en lib/clima.js,
+// nunca de leer la descripción en castellano.
+function ClimaIcono({ nombre }) {
+  const comun = { className: "w-3.5 h-3.5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
+  const nube = <path d="M6.5 18a4 4 0 01.3-8 5.5 5.5 0 0110.6 1.3A3.4 3.4 0 0117 18z" />;
+  if (nombre === "sol") {
+    return <svg {...comun}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="M5 5l1.5 1.5" /><path d="M17.5 17.5L19 19" /><path d="M19 5l-1.5 1.5" /><path d="M6.5 17.5L5 19" /></svg>;
+  }
+  if (nombre === "nube") return <svg {...comun}>{nube}</svg>;
+  if (nombre === "lluvia") {
+    return <svg {...comun}><path d="M6.5 15a4 4 0 01.3-8 5.5 5.5 0 0110.6 1.3A3.4 3.4 0 0117 15z" /><path d="M8 19l-1 2" /><path d="M12 19l-1 2" /><path d="M16 19l-1 2" /></svg>;
+  }
+  if (nombre === "nieve") {
+    return <svg {...comun}><path d="M6.5 15a4 4 0 01.3-8 5.5 5.5 0 0110.6 1.3A3.4 3.4 0 0117 15z" /><path d="M9 19h.01" /><path d="M12.5 20.5h.01" /><path d="M16 19h.01" /></svg>;
+  }
+  if (nombre === "tormenta") {
+    return <svg {...comun}><path d="M6.5 15a4 4 0 01.3-8 5.5 5.5 0 0110.6 1.3A3.4 3.4 0 0117 15z" /><path d="M13 17l-2.5 3.5h3L11 24" /></svg>;
+  }
+  // Código sin familia asignada: el termómetro no afirma nada del cielo.
+  return <svg {...comun}><path d="M10 13.5V5a2 2 0 114 0v8.5a4 4 0 11-4 0z" /></svg>;
+}
+
 function OpcionIcono({ nombre }) {
   const comun = { className: "w-3.5 h-3.5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
   if (nombre === "whatsapp") {
@@ -1514,6 +1566,9 @@ function OpcionIcono({ nombre }) {
   if (nombre === "campana") {
     return <svg {...comun}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>;
   }
+  if (nombre === "montana") {
+    return <svg {...comun}><path d="M3 20l6.5-11 4 6 2.5-4L21 20z" /><path d="M9.5 9l2 3.5" /></svg>;
+  }
   if (nombre === "clima") {
     return <svg {...comun}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="M5 5l1.5 1.5" /><path d="M17.5 17.5L19 19" /><path d="M19 5l-1.5 1.5" /><path d="M6.5 17.5L5 19" /></svg>;
   }
@@ -1521,14 +1576,6 @@ function OpcionIcono({ nombre }) {
     return <svg {...comun}><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3H21" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3H3" /><path d="M3 21v-5h5" /></svg>;
   }
   return <svg {...comun}><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6" /></svg>;
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-    </svg>
-  );
 }
 
 function CloseIcon() {
