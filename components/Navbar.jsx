@@ -210,21 +210,17 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Chip — Compartí tu barrio.
-              Vuelve recién en xl: entre 1024 y 1279 px la barra tiene que
-              elegir entre este chip y la cuarta pestaña, y gana la pestaña.
-              Sin esto el botón "Tasar mi propiedad" se cortaba contra el
-              borde justo a 1024. El chip sigue en el menú. */}
-          <Link
-            href="/experiencia-barrio"
-            className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 text-xs font-semibold hover:border-gray-300 hover:text-gray-900 transition-colors flex-shrink-0 whitespace-nowrap"
-          >
-            {/* El puntito se queda quieto. El animate-ping que tenia antes
-                pedia atencion todo el tiempo desde todas las paginas. */}
-            <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-rose-500" />
-            <PinIcon />
-            Compartí tu barrio
-          </Link>
+          {/* Acá vivía el chip "Compartí tu barrio". Se bajó el 01/09/2026: la
+              sección tiene el instrumento entero —formulario de 13 preguntas,
+              moderación, agregados por barrio— y CERO opiniones publicadas. El
+              lugar más caro de la barra, con puntito de novedad, apuntaba a la
+              página que menos tiene para mostrar y le comía el clic a Comprar,
+              Alquilar e Invertir.
+
+              La sección no se tocó: sigue en el menú desplegable, en /barrios y
+              en el blog. El chip vuelve cuando haya 10 o más opiniones
+              aprobadas — está en el historial de git, con su ícono y su
+              breakpoint xl. */}
 
           {/* Lupa compacta — solo visible al scrollear */}
           {scrolled && (
@@ -588,14 +584,6 @@ function TabBuildingIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
-    </svg>
-  );
-}
-function PinIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );
 }
