@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientShell from "@/components/ClientShell";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import LuciaProvider from "@/components/LuciaProvider";
 import {
   SITE_URL,
   PHONE_DISPLAY,
@@ -206,11 +207,13 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`flex flex-col min-h-screen antialiased ${plusJakarta.variable}`}>
         <Navbar />
-        <main className="flex-grow pt-[104px] pb-20 md:pt-[120px] md:pb-0">
-          {children}
-        </main>
-        <Footer />
-        <ClientShell />
+        <LuciaProvider>
+          <main className="flex-grow pt-[104px] pb-20 md:pt-[120px] md:pb-0">
+            {children}
+          </main>
+          <Footer />
+          <ClientShell />
+        </LuciaProvider>
         <SpeedInsights />
         <Analytics />
         {/* Google Analytics: excluye /admin y los dispositivos con "no contarme". */}
@@ -219,5 +222,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
 

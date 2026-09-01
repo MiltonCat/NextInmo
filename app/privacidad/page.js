@@ -25,11 +25,13 @@ Para cualquier consulta sobre esta política o sobre tus datos personales, podé
   {
     id: "que-datos",
     title: "Qué datos recopilamos",
-    content: `Recopilamos dos tipos de información:
+    content: `Recopilamos tres tipos de información:
 
 1. Datos que nos das vos mismo. Cuando completás un formulario de contacto, una consulta sobre una propiedad, un pedido de tasación o te suscribís a nuestras novedades, nos proporcionás datos como tu nombre, correo electrónico, teléfono y el mensaje o preferencias que decidas incluir.
 
-2. Datos de navegación (automáticos). Cuando visitás el sitio, se registran de forma automática y agregada datos como las páginas que ves, el tipo de dispositivo (celular, computadora o tablet), el navegador, la ubicación aproximada (ciudad o región) y la forma en que llegaste al sitio (buscador, redes sociales, enlace directo). Estos datos son estadísticos y no te identifican por nombre.`,
+2. Consultas a Lucía. Cuando escribís una pregunta libre, el texto y hasta los últimos ocho mensajes de esa conversación se envían a OpenAI para generar una respuesta. Catalán Propiedades no guarda ese texto en su base de datos y envía el pedido con el almacenamiento de respuestas desactivado; OpenAI puede conservar datos temporalmente según sus políticas de seguridad y prevención de abuso. No incluyas datos personales ni información sensible en el chat.
+
+3. Datos de navegación (automáticos). Cuando visitás el sitio, se registran de forma automática y agregada datos como las páginas que ves, el tipo de dispositivo (celular, computadora o tablet), el navegador, la ubicación aproximada (ciudad o región) y la forma en que llegaste al sitio (buscador, redes sociales, enlace directo). Estos datos son estadísticos y no te identifican por nombre.`,
   },
   {
     id: "analytics-cookies",
@@ -53,6 +55,7 @@ Para más información sobre cómo Google trata los datos, consultá la polític
 - Brindarte asesoramiento inmobiliario y mostrarte propiedades que puedan interesarte.
 - Enviarte novedades, si te suscribiste voluntariamente.
 - Analizar de forma estadística el uso del sitio para mejorarlo.
+- Responder preguntas mediante Lucía y medir si sus respuestas resultan útiles. Los votos guardan únicamente la valoración, un motivo y un comentario opcional, sin la conversación ni la identidad del visitante.
 
 No tomamos decisiones automatizadas que produzcan efectos jurídicos sobre vos.`,
   },
@@ -63,6 +66,7 @@ No tomamos decisiones automatizadas que produzcan efectos jurídicos sobre vos.`
 
 Compartimos información solamente en estos casos:
 - Con Google, como proveedor de Google Analytics, en la medida descrita más arriba y de forma agregada.
+- Con OpenAI, únicamente cuando escribís una consulta libre a Lucía, para generar la respuesta solicitada. El pedido se envía con el almacenamiento del proveedor desactivado.
 - Cuando una ley o una autoridad competente nos lo requiera.
 
 No transferimos tus datos a terceros con fines comerciales ajenos a la prestación de nuestros servicios.`,
@@ -126,7 +130,7 @@ export default function PrivacidadPage() {
             Política de Privacidad
           </h1>
           <p className="text-gray-400 text-base">
-            Última actualización: 23 de junio de 2026
+            Última actualización: 1 de septiembre de 2026
           </p>
         </div>
       </section>

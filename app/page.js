@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import SuscripcionForm from "@/components/SuscripcionForm";
 import TrackedLink from "@/components/TrackedLink";
+import LuciaHomePrompt from "@/components/LuciaHomePrompt";
 import { RELEVADAS_PUBLICO } from "@/lib/mercado";
 import { getProperties } from "@/lib/properties";
 
@@ -87,8 +88,10 @@ export default async function Home() {
     <div>
       <Hero />
 
-      {/* El catálogo aparece primero: es la razón principal por la que la
-          mayoría llega a la home y la acción con menor fricción. */}
+      <LuciaHomePrompt />
+
+      {/* Después de la orientación inicial, el catálogo aporta opciones reales
+          y mantiene la acción de menor fricción a un scroll de distancia. */}
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

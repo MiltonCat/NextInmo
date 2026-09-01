@@ -1,12 +1,21 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useEffectEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { properties as fallbackProperties, getPropertySlug } from "@/data/properties";
+import { getPropertySlug } from "@/data/properties";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
 import { registrarConsulta } from "@/lib/registrarConsulta";
+import { useLucia } from "@/components/LuciaProvider";
+import {
+  comparisonRows,
+  decorateRecommendations,
+  eligibleProperties,
+  nextLuciaStep,
+  parseLuciaText,
+  recommendProperties,
+} from "@/lib/luciaAdvisor.mjs";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Lectura del catálogo
@@ -30,12 +39,6 @@ import { registrarConsulta } from "@/lib/registrarConsulta";
 // El alquiler permanente guarda su precio en precioAlquilerARS y deja `price`
 // en 0; si se cuela en el embudo de compra, Lucía lo ofrece como "USD 0".
 const esVenta = (p) => p.modalidad !== "alquiler_permanente";
-
-// Las que la ficha manda a 404 (mismo criterio que app/propiedades/[slug]/page.js).
-// Ofrecerlas sería mandar al visitante a una página que no existe.
-// `reservada` y `alquilada` NO entran acá a propósito: una propiedad en venta
-// que hoy está alquilada o reservada sigue estando en venta, y su ficha abre.
-const tieneFicha = (p) => !p.vendida && !p.noDisponible && p.status !== "no_disponible";
 
 // Primera foto disponible. Las filas migradas guardan la galería en `images` y
 // pueden tener `image` vacío; sin esto la tarjeta queda con la imagen rota.
@@ -74,11 +77,6 @@ function precioTexto(p) {
   return ars === null ? null : `$${ars.toLocaleString("es-AR")}/mes`;
 }
 
-function numeroDe(valor) {
-  const n = Number(valor);
-  return Number.isFinite(n) ? n : null;
-}
-
 // El barrio, que es lo que sirve en una tarjeta chica. Si location viene vacío
 // devuelve null y la línea no se dibuja.
 function zonaDe(p) {
@@ -87,27 +85,7 @@ function zonaDe(p) {
 }
 
 function filterProps(filters, list) {
-  return list.filter((p) => {
-    if (!esVenta(p) || !tieneFicha(p)) return false;
-
-    const precio = precioDe(p);
-    if (precio === null) return false;
-
-    if (filters.types?.length) {
-      const tipo = String(p.type || "").toLowerCase();
-      if (!filters.types.some((t) => tipo.includes(t.toLowerCase()))) return false;
-    }
-    if (filters.minPrice && precio < filters.minPrice) return false;
-    if (filters.maxPrice && precio > filters.maxPrice) return false;
-
-    if (filters.minBedrooms !== undefined || filters.maxBedrooms !== undefined) {
-      const dormitorios = numeroDe(p.bedrooms);
-      if (dormitorios === null) return false;
-      if (filters.minBedrooms !== undefined && dormitorios < filters.minBedrooms) return false;
-      if (filters.maxBedrooms !== undefined && dormitorios > filters.maxBedrooms) return false;
-    }
-    return true;
-  });
+  return eligibleProperties(filters, list);
 }
 
 // Buscador de alquileres permanentes. Es el espejo de filterProps para la otra
@@ -119,23 +97,7 @@ function filterProps(filters, list) {
 // Ojo con la asimetría: `alquilada` SÍ descalifica a un alquiler (está ocupado)
 // y NO a una venta (una casa alquilada se sigue vendiendo).
 function filterAlquileres(filters, list) {
-  return list.filter((p) => {
-    if (esVenta(p) || !tieneFicha(p)) return false;
-    if (p.alquilada) return false;
-    if (alquilerDe(p) === null) return false;
-
-    if (filters.types?.length) {
-      const tipo = String(p.type || "").toLowerCase();
-      if (!filters.types.some((t) => tipo.includes(t.toLowerCase()))) return false;
-    }
-    if (filters.minBedrooms !== undefined || filters.maxBedrooms !== undefined) {
-      const dormitorios = numeroDe(p.bedrooms);
-      if (dormitorios === null) return false;
-      if (filters.minBedrooms !== undefined && dormitorios < filters.minBedrooms) return false;
-      if (filters.maxBedrooms !== undefined && dormitorios > filters.maxBedrooms) return false;
-    }
-    return true;
-  });
+  return eligibleProperties({ ...filters, operacion: "alquiler" }, list);
 }
 
 // ── Lo más parecido cuando no hay nada exacto ─────────────────────
@@ -237,13 +199,18 @@ const REGISTRAR_SALIDAS_WHATSAPP = true;
 // Traduce los filtros de la búsqueda a texto legible. Lo usan el mensaje de
 // WhatsApp y el detalle del lead, así siempre describen lo mismo.
 function describeFilters(filters = {}) {
+  const objetivos = { vivir: "vivir", invertir: "invertir", construir: "construir", explorar: "explorar opciones" };
+  const prioridades = { exterior: "espacio exterior", garage: "cochera", center: "ubicación céntrica", space: "mayor superficie" };
   return [
     filters.operacion === "alquiler" ? "Operación: alquiler permanente" : "",
+    filters.objective ? `Objetivo: ${objetivos[filters.objective] || filters.objective}` : "",
     filters.types?.length ? `Tipo: ${filters.types.join(", ")}` : "",
     filters.minPrice ? `Presupuesto mínimo: USD ${filters.minPrice.toLocaleString("es-AR")}` : "",
     filters.maxPrice ? `Presupuesto máximo: USD ${filters.maxPrice.toLocaleString("es-AR")}` : "",
     filters.minBedrooms !== undefined ? `Dormitorios desde: ${filters.minBedrooms}` : "",
     filters.maxBedrooms !== undefined ? `Dormitorios hasta: ${filters.maxBedrooms}` : "",
+    filters.priority ? `Prioridad: ${prioridades[filters.priority] || filters.priority}` : "",
+    filters.cta ? `Próximo paso: ${filters.cta}` : "",
   ].filter(Boolean);
 }
 
@@ -412,8 +379,8 @@ function contextualGreeting(pathname = "/") {
 function reaccionResultados(n) {
   if (n === 1) return "Tengo una sola que encaja con eso, y es bastante puntual:";
   if (n <= 3) return `Tengo ${n} que entran justo en lo que buscás:`;
-  if (n <= 8) return `Encontré ${n} opciones. Te dejo las cuatro que mejor encajan:`;
-  return `Hay ${n}, así que tenés de dónde elegir. Te dejo las primeras cuatro:`;
+  if (n <= 8) return `Encontré ${n} opciones. Te dejo las tres que mejor encajan:`;
+  return `Hay ${n}, así que tenés de dónde elegir. Te dejo las tres con mayor afinidad:`;
 }
 
 // La cartera de alquiler es chica y se mueve rápido: el comentario lo dice en
@@ -421,7 +388,7 @@ function reaccionResultados(n) {
 function reaccionAlquileres(n) {
   if (n === 1) return "Hay uno solo disponible en este momento:";
   if (n <= 3) return `Tengo ${n} disponibles ahora:`;
-  return `Tengo ${n} disponibles. Te dejo los primeros cuatro:`;
+  return `Tengo ${n} disponibles. Te dejo los tres que mejor encajan:`;
 }
 
 // ── Cómo se cuenta el clima ────────────────────────────────────────────────
@@ -518,7 +485,7 @@ const STEPS = {
     // primera vez el saludo lo arma contextualGreeting() según la página.
     text: "¿Con qué otra cosa te ayudo?",
     options: [
-      { label: "Estoy buscando para comprar", icono: "buscar", reinicia: true, next: "ask_type" },
+      { label: "Estoy buscando para comprar", icono: "buscar", reinicia: true, next: "ask_goal" },
       { label: "Busco alquiler permanente", icono: "llave", next: "guia_alquilar" },
       { label: "Quiero vender o tasar", icono: "casa", next: "guia_vender" },
       { label: "Estoy averiguando cómo está el mercado", icono: "grafico", next: "menu_info" },
@@ -562,15 +529,26 @@ const STEPS = {
   ask_alq_bedrooms: {
     text: "¿Cuántos dormitorios necesitás?",
     options: [
-      { label: "Con uno me alcanza", filter: { maxBedrooms: 1 }, next: "results_alquiler" },
-      { label: "Dos", filter: { minBedrooms: 2, maxBedrooms: 2 }, next: "results_alquiler" },
-      { label: "Tres o más", filter: { minBedrooms: 3 }, next: "results_alquiler" },
-      { label: "Eso me da igual", filter: {}, next: "results_alquiler" },
+      { label: "Con uno me alcanza", filter: { maxBedrooms: 1 }, next: "ask_alq_priority" },
+      { label: "Dos", filter: { minBedrooms: 2, maxBedrooms: 2 }, next: "ask_alq_priority" },
+      { label: "Tres o más", filter: { minBedrooms: 3 }, next: "ask_alq_priority" },
+      { label: "Eso me da igual", filter: {}, next: "ask_alq_priority" },
+    ],
+  },
+  ask_alq_priority: {
+    text: "¿Qué sería más importante para vos?",
+    options: [
+      { label: "Espacio exterior", filter: { priority: "exterior" }, next: "results_alquiler" },
+      { label: "Cochera", filter: { priority: "garage" }, next: "results_alquiler" },
+      { label: "Una ubicación céntrica", filter: { priority: "center" }, next: "results_alquiler" },
+      { label: "No tengo otra prioridad", filter: {}, next: "results_alquiler" },
     ],
   },
   after_results_alquiler: {
     text: "¿Seguimos?",
     options: [
+      { label: "Comparar estas opciones", icono: "grafico", next: "compare" },
+      { label: "Quiero visitar uno", icono: "casa", next: "whatsapp" },
       { label: "Avisame si entra otro así", icono: "campana", next: "lead" },
       { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_alq_type" },
       { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
@@ -582,7 +560,7 @@ const STEPS = {
     options: [
       { label: "Cómo está el clima ahora", icono: "clima", next: "clima" },
       { label: "Cómo es cada barrio", comentario: "Acá está cada zona con lo que la caracteriza, los servicios y las distancias.", recursos: ["barrios"], next: "menu_vivir" },
-      { label: "Ver qué hay publicado", icono: "buscar", reinicia: true, next: "ask_type" },
+      { label: "Ver qué hay publicado", icono: "buscar", reinicia: true, next: "ask_goal" },
       { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
@@ -599,10 +577,19 @@ const STEPS = {
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
   },
+  ask_goal: {
+    text: "Primero quiero entender para qué la buscás. ¿Cuál es tu objetivo?",
+    options: [
+      { label: "Para vivir", filter: { objective: "vivir" }, next: "ask_type" },
+      { label: "Para invertir", filter: { objective: "invertir" }, next: "ask_type" },
+      { label: "Un lote para construir", filter: { objective: "construir", types: ["Lote"] }, next: "ask_budget" },
+      { label: "Estoy explorando opciones", filter: { objective: "explorar" }, next: "ask_type" },
+    ],
+  },
   ask_type: {
     text: "¿Qué estás buscando?",
     options: [
-      { label: "Una casa para vivir", filter: { types: ["Casa"] }, next: "ask_budget" },
+      { label: "Una casa", filter: { types: ["Casa"] }, next: "ask_budget" },
       { label: "Un departamento o PH", filter: { types: ["Departamento", "PH", "Monoambiente"] }, next: "ask_budget" },
       { label: "Una cabaña", filter: { types: ["Cabaña", "Cabañas"] }, next: "ask_budget" },
       { label: "Un lote para construir", filter: { types: ["Lote"] }, next: "ask_budget" },
@@ -618,42 +605,55 @@ const STEPS = {
   ask_budget: {
     text: "¿Con qué presupuesto te estás manejando, en dólares?",
     options: [
-      { label: "Hasta USD 100.000", filter: { maxPrice: 100000 }, next: "results" },
-      { label: "Entre 100 y 200 mil", filter: { minPrice: 100000, maxPrice: 200000 }, next: "results" },
-      { label: "Entre 200 y 400 mil", filter: { minPrice: 200000, maxPrice: 400000 }, next: "results" },
-      { label: "Más de USD 400.000", filter: { minPrice: 400000 }, next: "results" },
-      { label: "Prefiero no definirlo todavía", filter: {}, next: "results" },
+      { label: "Hasta USD 100.000", filter: { maxPrice: 100000 }, next: "after_budget" },
+      { label: "Entre 100 y 200 mil", filter: { minPrice: 100000, maxPrice: 200000 }, next: "after_budget" },
+      { label: "Entre 200 y 400 mil", filter: { minPrice: 200000, maxPrice: 400000 }, next: "after_budget" },
+      { label: "Más de USD 400.000", filter: { minPrice: 400000 }, next: "after_budget" },
+      { label: "Prefiero no definirlo todavía", filter: {}, next: "after_budget" },
     ],
   },
-  // Los mismos botones que after_results, con el refinamiento por dormitorios
-  // adelante. Solo se usa cuando el visitante TODAVÍA no eligió dormitorios y
-  // hay resultados de sobra: si no, refinar no le sirve de nada. Ojo: los
-  // filtros de la búsqueda no se limpian al llegar acá, o el refinamiento
-  // buscaría los dormitorios en el catálogo entero.
-  after_results_refinar: {
-    text: "¿Te la afino por dormitorios?",
+  ask_bedrooms: {
+    text: "¿Cuántos dormitorios necesitás?",
     options: [
-      { label: "Con un monoambiente me alcanza", filter: { maxBedrooms: 0 }, next: "results" },
-      { label: "Uno o dos", filter: { minBedrooms: 1, maxBedrooms: 2 }, next: "results" },
-      { label: "Tres o más", filter: { minBedrooms: 3 }, next: "results" },
-      { label: "Avisame si entra algo así", icono: "campana", next: "lead" },
-      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_type" },
-      { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
+      { label: "Monoambiente", filter: { minBedrooms: 0, maxBedrooms: 0 }, next: "ask_priority" },
+      { label: "Uno o dos", filter: { minBedrooms: 1, maxBedrooms: 2 }, next: "ask_priority" },
+      { label: "Tres o más", filter: { minBedrooms: 3 }, next: "ask_priority" },
+      { label: "No es decisivo", filter: {}, next: "ask_priority" },
+    ],
+  },
+  ask_priority: {
+    text: "¿Qué preferís priorizar si hay que elegir?",
+    options: [
+      { label: "Espacio exterior", filter: { priority: "exterior" }, next: "results" },
+      { label: "Cochera", filter: { priority: "garage" }, next: "results" },
+      { label: "Una ubicación céntrica", filter: { priority: "center" }, next: "results" },
+      { label: "La mayor superficie", filter: { priority: "space" }, next: "results" },
+      { label: "No tengo otra prioridad", filter: {}, next: "results" },
+    ],
+  },
+  ask_priority_lote: {
+    text: "¿Qué querés priorizar en el lote?",
+    options: [
+      { label: "Una ubicación céntrica", filter: { priority: "center" }, next: "results" },
+      { label: "La mayor superficie", filter: { priority: "space" }, next: "results" },
+      { label: "No tengo otra prioridad", filter: {}, next: "results" },
     ],
   },
   after_results: {
     text: "¿Seguimos?",
     options: [
+      { label: "Comparar estas opciones", icono: "grafico", next: "compare" },
+      { label: "Quiero visitar una", icono: "casa", next: "whatsapp" },
+      { label: "Que Milton me ayude a elegir", icono: "whatsapp", next: "whatsapp" },
       { label: "Avisame si entra algo así", icono: "campana", next: "lead" },
-      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_type" },
-      { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
+      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_goal" },
     ],
   },
   // Paso de captura: no tiene botones, renderiza el formulario de contacto.
   lead: { form: true },
   after_lead: {
     options: [
-      { label: "Buscar otra cosa", icono: "reiniciar", next: "ask_type" },
+      { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_goal" },
       { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
@@ -661,15 +661,25 @@ const STEPS = {
 
 const AIRBNB = "#FF5A5F";
 
-// El isotipo de la marca reemplaza al emoji que hacía de avatar y al ícono
-// genérico del botón flotante: es lo que separa un asistente propio de un
-// widget bajado de una plantilla.
-const ISOTIPO = "/iso1.webp";
+// Retrato propio de Lucía. Es una copia WebP recortada para conservar nitidez
+// tanto en el encabezado como en el botón flotante de 56 px.
+const LUCIA_AVATAR = "/lucia-avatar.webp";
 
 // La burbuja de invitación aparece una sola vez por visita. Si la cierran, no
 // vuelve en toda la sesión del navegador.
 const INVITACION_KEY = "lucia-invitacion-cerrada";
 const INVITACION_MS = 12000;
+const ANSWER_BY_STEP = {
+  ask_goal: "goal",
+  ask_type: "type",
+  ask_alq_type: "type",
+  ask_budget: "budget",
+  ask_bedrooms: "bedrooms",
+  ask_alq_bedrooms: "bedrooms",
+  ask_priority: "priority",
+  ask_priority_lote: "priority",
+  ask_alq_priority: "priority",
+};
 
 // Demoras cortas. La investigación dice que lo que sostiene la percepción es
 // el indicador visible, no la espera: esperar de más se lee como lento, no
@@ -683,22 +693,27 @@ export default function ChatBot() {
   const [activeStep, setActiveStep] = useState("welcome");
   const [filters, setFilters] = useState({});
   const [lastSearchFilters, setLastSearchFilters] = useState({});
-  // Arranca con el array estático de respaldo y se actualiza con datos frescos de la base.
-  const [dataset, setDataset] = useState(fallbackProperties);
+  const [writtenAnswers, setWrittenAnswers] = useState({});
+  // Una recomendación comercial se hace solo con disponibilidad confirmada.
+  const [dataset, setDataset] = useState([]);
   const [leadSent, setLeadSent] = useState(false);
   const [atencion, setAtencion] = useState(null);
   const [clima, setClima] = useState(null);
   const [invitacion, setInvitacion] = useState(null);
   const [invitacionCerrada, setInvitacionCerrada] = useState(false);
+  const [composerDraft, setComposerDraft] = useState(null);
   const messagesEndRef = useRef(null);
+  const handledCommandRef = useRef(0);
   const pathname = usePathname();
   const { trackEvent, trackWhatsAppClick } = useAnalytics();
+  const { command } = useLucia();
 
   // Una secuencia de burbujas puede quedar a mitad de camino cuando el
   // visitante reinicia o elige otra opción. flowRef marca cuál es la vigente y
   // las viejas se descartan sin llegar a escribir.
   const flowRef = useRef(0);
   const timersRef = useRef([]);
+  const lastRecommendationsRef = useRef([]);
 
   useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
 
@@ -726,7 +741,7 @@ export default function ChatBot() {
       const ultima = i === bubbles.length - 1;
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, stepKey: ultima ? stepKey : undefined },
+        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, feedback: bubble.feedback, stepKey: ultima ? stepKey : undefined },
       ]);
       if (ultima) setTyping(false);
     }
@@ -741,7 +756,7 @@ export default function ChatBot() {
   // Guarda en el CRM la salida a WhatsApp de alguien que todavía no dejó datos,
   // para no perder al que abre WhatsApp y después nunca escribe. Queda marcado
   // con sin_datos_de_contacto para poder separarlo de los leads reales.
-  const registrarSalidaWhatsApp = (searchFilters, origen) => {
+  const registrarSalidaWhatsApp = (searchFilters, origen, recommendations = []) => {
     if (!REGISTRAR_SALIDAS_WHATSAPP || leadSent) return;
     registrarConsulta({
       tipo: "contacto",
@@ -752,20 +767,25 @@ export default function ChatBot() {
         sin_datos_de_contacto: true,
         filtros: searchFilters || {},
         busqueda: describeFilters(searchFilters),
+        recomendaciones: recommendations.map((property) => ({ id: property.id, titulo: property.title })),
       },
     });
   };
 
-  const advisorMessage = (searchFilters = {}) => {
+  const advisorMessage = (searchFilters = {}, recommendations = []) => {
     const details = describeFilters(searchFilters);
 
     // Sin búsqueda hecha el mensaje lo arma el contexto de la página, igual que
     // hacía el botón flotante de WhatsApp que este chat reemplazó.
     if (!details.length) return whatsappUrl(contextualPageMessage(pathname));
 
+    const finalists = recommendations.length
+      ? `\n\nLas opciones que vi:\n${recommendations.map((property) => `• ${property.title}: ${window.location.origin}/propiedades/${getPropertySlug(property)}/`).join("\n")}`
+      : "";
+
     return whatsappUrl(
       `Hola Milton, usé el asistente de búsqueda de la web y quisiera que me ayudes a encontrar una propiedad.` +
-      `\n\nMi búsqueda:\n${details.map((item) => `• ${item}`).join("\n")}`
+      `\n\nMi búsqueda:\n${details.map((item) => `• ${item}`).join("\n")}${finalists}`
     );
   };
 
@@ -773,24 +793,25 @@ export default function ChatBot() {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, open]);
 
-  // El catálogo fresco se pide recién cuando alguien abre el chat. Antes se
-  // bajaba entero en cada carga de página, lo abriera o no: una consulta de más
-  // para la enorme mayoría de las visitas. Mientras tanto el array estático de
-  // respaldo ya alcanza para contestar, y las demoras del ritmo dan tiempo de
-  // sobra a que llegue antes de la primera búsqueda.
-  const catalogoPedido = useRef(false);
+  // El catálogo fresco se pide recién cuando alguien abre el chat. La promesa se
+  // comparte con el paso de resultados: Lucía espera esa confirmación y nunca
+  // presenta el respaldo estático como disponibilidad actual.
+  const catalogoPedido = useRef(null);
   const cargarCatalogo = () => {
-    if (catalogoPedido.current) return;
-    catalogoPedido.current = true;
+    if (catalogoPedido.current) return catalogoPedido.current;
     const supabase = supabaseBrowser();
-    if (!supabase) return;
-    supabase
+    if (!supabase) return Promise.resolve(null);
+    catalogoPedido.current = supabase
       .from("properties")
       .select("*")
       .order("sort_order", { ascending: true })
       .then(({ data, error }) => {
-        if (!error && data?.length) setDataset(data);
-      });
+        if (error || !data?.length) return null;
+        setDataset(data);
+        return data;
+      })
+      .catch(() => null);
+    return catalogoPedido.current;
   };
 
   // El clima se pide una sola vez por montaje y lo comparten el chip del header
@@ -920,21 +941,27 @@ export default function ChatBot() {
     mostrarClima();
   };
 
-  const handleOption = (opt, currentFilters) => {
+  const handleOption = async (opt, currentFilters) => {
     cancelPending();
     setMessages((prev) => [...prev, { role: "user", text: opt.label }]);
 
     // Un evento por paso, con de dónde viene y a dónde va. Es lo que dibuja el
     // embudo completo en GA4: entre chatbot_open y chatbot_lead antes no había
     // nada, así que no se podía ver en qué pregunta se cae la gente.
-    trackEvent("chatbot_paso", { desde: activeStep, paso: opt.next, opcion: opt.label });
+    trackEvent("chatbot_paso", {
+      desde: activeStep,
+      paso: opt.next,
+      opcion: opt.written ? "texto_libre" : opt.label,
+    });
 
     if (opt.next === "whatsapp") {
-      const searchContext = Object.keys(currentFilters || {}).length ? currentFilters : lastSearchFilters;
-      registrarSalidaWhatsApp(searchContext, "chatbot");
+      const baseContext = Object.keys(currentFilters || {}).length ? currentFilters : lastSearchFilters;
+      const searchContext = { ...baseContext, cta: opt.label };
+      const recommendations = lastRecommendationsRef.current;
+      registrarSalidaWhatsApp(searchContext, "chatbot", recommendations);
       trackWhatsAppClick(null, "chatbot");
       trackEvent("chatbot_whatsapp", { has_search_filters: Object.keys(searchContext).length > 0 });
-      window.open(advisorMessage(searchContext), "_blank");
+      window.open(advisorMessage(searchContext, recommendations), "_blank");
       setActiveStep("after_results");
       setFilters({});
       sendBot(
@@ -947,6 +974,19 @@ export default function ChatBot() {
           },
         ],
         "after_results"
+      );
+      return;
+    }
+
+    if (opt.next === "compare") {
+      const recommendations = lastRecommendationsRef.current;
+      const destination = lastSearchFilters.operacion === "alquiler" ? "after_results_alquiler" : "after_results";
+      setActiveStep(destination);
+      sendBot(
+        recommendations.length > 1
+          ? [{ text: "Te las comparo con los datos publicados. La mejor depende de qué quieras priorizar:", comparison: comparisonRows(recommendations) }]
+          : [{ text: "Hay una sola finalista, así que por ahora no tengo otra equivalente para compararla." }],
+        destination
       );
       return;
     }
@@ -1000,9 +1040,36 @@ export default function ChatBot() {
     // alquiler y viceversa.
     const base = opt.reinicia ? {} : currentFilters || {};
     const merged = opt.filter ? { ...base, ...opt.filter } : base;
+    const answerKey = ANSWER_BY_STEP[activeStep];
+    if (opt.reinicia) setWrittenAnswers({});
+    else if (answerKey) setWrittenAnswers((previous) => ({ ...previous, [answerKey]: true }));
+
+    if (opt.next === "after_budget") {
+      const next = merged.objective === "construir" || merged.types?.some((type) => type.toLowerCase() === "lote")
+        ? "ask_priority_lote"
+        : "ask_bedrooms";
+      setActiveStep(next);
+      setFilters(merged);
+      sendBot(bubblesOf(STEPS[next]), next);
+      return;
+    }
 
     if (opt.next === "results") {
-      const found = filterProps(merged, dataset);
+      lastRecommendationsRef.current = [];
+      setTyping(true);
+      const catalog = dataset.length ? dataset : await cargarCatalogo();
+      setTyping(false);
+      if (!catalog) {
+        setActiveStep("after_results");
+        setFilters({});
+        sendBot(
+          [{ text: "No pude confirmar la disponibilidad actual del catálogo. Prefiero no recomendarte algo que podría ya no estar disponible. Si querés, Milton puede revisar tu búsqueda." }],
+          "after_results"
+        );
+        return;
+      }
+
+      const found = filterProps(merged, catalog);
       setLastSearchFilters(merged);
 
       if (found.length === 0) {
@@ -1012,9 +1079,10 @@ export default function ChatBot() {
 
         // Antes de pedir los datos, mirar si hay algo cerca. El catálogo ya
         // está en memoria, así que no cuesta una consulta más.
-        const cerca = aflojarFiltros(merged, dataset, filterProps);
+        const cerca = aflojarFiltros(merged, catalog, filterProps);
         if (cerca) {
-          const aproximadas = cerca.found.slice(0, 3);
+          const aproximadas = decorateRecommendations(cerca.found, merged, 3);
+          lastRecommendationsRef.current = aproximadas;
           trackEvent("chatbot_resultados_aproximados", {
             operacion: "venta",
             cantidad: cerca.found.length,
@@ -1051,17 +1119,13 @@ export default function ChatBot() {
         return;
       }
 
-      // El refinamiento por dormitorios se ofrece solo si todavía no los eligió
-      // y hay de dónde recortar. Con cuatro resultados o menos ya los está
-      // viendo a todos: preguntar ahí es hacerle perder el tiempo de nuevo.
-      const puedeRefinar = !pidioDormitorios(merged) && found.length > 4;
-      const destino = puedeRefinar ? "after_results_refinar" : "after_results";
+      const destino = "after_results";
       setActiveStep(destino);
-      // Los filtros sobreviven solo si el paso siguiente los va a usar.
-      setFilters(puedeRefinar ? merged : {});
+      setFilters({});
 
-      const mostradas = found.slice(0, 4);
-      trackEvent("chatbot_resultados", { operacion: "venta", cantidad: found.length, refina: puedeRefinar });
+      const mostradas = recommendProperties(merged, catalog, 3);
+      lastRecommendationsRef.current = mostradas;
+      trackEvent("chatbot_resultados", { operacion: "venta", cantidad: found.length, refina: false });
       sendBot(
         [{
           text: reaccionResultados(found.length),
@@ -1080,8 +1144,22 @@ export default function ChatBot() {
     // `operacion: "alquiler"` para que el lead, el resumen de WhatsApp y el
     // link al listado sepan de qué operación se está hablando.
     if (opt.next === "results_alquiler") {
+      lastRecommendationsRef.current = [];
       const busqueda = { ...merged, operacion: "alquiler" };
-      const found = filterAlquileres(busqueda, dataset);
+      setTyping(true);
+      const catalog = dataset.length ? dataset : await cargarCatalogo();
+      setTyping(false);
+      if (!catalog) {
+        setActiveStep("after_results_alquiler");
+        setFilters({});
+        sendBot(
+          [{ text: "No pude confirmar qué alquileres siguen disponibles. Prefiero no mostrarte uno ocupado o reservado. Milton puede revisarlo por vos." }],
+          "after_results_alquiler"
+        );
+        return;
+      }
+
+      const found = filterAlquileres(busqueda, catalog);
       setLastSearchFilters(busqueda);
       setActiveStep("after_results_alquiler");
       setFilters({});
@@ -1091,9 +1169,10 @@ export default function ChatBot() {
 
         // Mismo criterio que en venta, con la otra cartera. Acá el aflojado
         // nunca toca el precio, porque este embudo no lo pregunta.
-        const cerca = aflojarFiltros(busqueda, dataset, filterAlquileres);
+        const cerca = aflojarFiltros(busqueda, catalog, filterAlquileres);
         if (cerca) {
-          const aproximados = cerca.found.slice(0, 3);
+          const aproximados = decorateRecommendations(cerca.found, busqueda, 3);
+          lastRecommendationsRef.current = aproximados;
           trackEvent("chatbot_resultados_aproximados", {
             operacion: "alquiler",
             cantidad: cerca.found.length,
@@ -1126,7 +1205,8 @@ export default function ChatBot() {
         return;
       }
 
-      const mostrados = found.slice(0, 4);
+      const mostrados = recommendProperties(busqueda, catalog, 3);
+      lastRecommendationsRef.current = mostrados;
       trackEvent("chatbot_resultados", { operacion: "alquiler", cantidad: found.length });
       sendBot(
         [{
@@ -1146,6 +1226,102 @@ export default function ChatBot() {
     sendBot(bubblesOf(STEPS[opt.next]), opt.next);
   };
 
+  const askLuciaAI = async (text) => {
+    cancelPending();
+    const requestFlow = flowRef.current;
+    const history = messages
+      .filter((message) => message.text && (message.role === "user" || message.role === "bot"))
+      .slice(-8)
+      .map((message) => ({ role: message.role === "bot" ? "assistant" : "user", content: message.text }));
+
+    setMessages((previous) => [...previous, { role: "user", text }]);
+    setTyping(true);
+    trackEvent("chatbot_ia_pregunta", { paso: activeStep, largo: text.length });
+
+    try {
+      const response = await fetch("/api/lucia/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text, history }),
+      });
+      const body = await response.json().catch(() => null);
+      if (flowRef.current !== requestFlow) return;
+      setTyping(false);
+
+      if (!response.ok || !body?.ok || !body.answer) {
+        trackEvent("chatbot_ia_respuesta", { ok: false, error: body?.error || `http_${response.status}` });
+        sendBot(
+          [{
+            text: body?.error === "not_configured"
+              ? "La parte conversacional todavía no tiene conectada la clave de OpenAI. Mientras tanto puedo buscar y comparar propiedades con el asistente guiado."
+              : "No pude consultar mi conocimiento ahora mismo. Puedo seguir buscando propiedades con las opciones guiadas o pasarte con Milton.",
+          }],
+          activeStep
+        );
+        return;
+      }
+
+      const resources = (body.sources || []).map((item) => ({
+        titulo: item.title,
+        href: item.href,
+        detalle: item.detail,
+      }));
+      trackEvent("chatbot_ia_respuesta", { ok: true, fuentes: resources.length });
+      sendBot([{
+        text: body.answer,
+        recursos: resources,
+        feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
+      }], activeStep);
+    } catch {
+      if (flowRef.current !== requestFlow) return;
+      setTyping(false);
+      trackEvent("chatbot_ia_respuesta", { ok: false, error: "network_error" });
+      sendBot(
+        [{ text: "Me quedé sin conexión para responder eso. La búsqueda guiada sigue disponible y Milton también puede ayudarte." }],
+        activeStep
+      );
+    }
+  };
+
+  const handleText = (text) => {
+    const parsed = parseLuciaText(text, activeStep);
+    const startsFresh = activeStep === "welcome" || activeStep.startsWith("after_results");
+    const base = startsFresh ? {} : filters;
+    const plain = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const explicitSearch = /\bbusco\b|estoy buscando|quiero (comprar|alquilar|una casa|un departamento|un depto|un lote)|necesito (una casa|un departamento|un depto|un lote)/.test(plain);
+    const openQuestion = text.includes("?") || /^(como|que|cual|donde|cuando|cuanto|por que|conviene|puedo|sabes|contame)/.test(plain.trim());
+    const guidedStep = activeStep.startsWith("ask_");
+
+    if (!guidedStep && (!parsed.searchIntent || (openQuestion && !explicitSearch))) {
+      askLuciaAI(text);
+      return;
+    }
+
+    const merged = { ...base, ...parsed.filters };
+    const answers = startsFresh
+      ? parsed.answered
+      : { ...writtenAnswers, ...parsed.answered };
+    const next = nextLuciaStep(merged, answers);
+    setWrittenAnswers(answers);
+    handleOption({ label: text, filter: parsed.filters, next, written: true }, base);
+  };
+
+  const receiveCommand = useEffectEvent((nextCommand) => {
+    handledCommandRef.current = nextCommand.id;
+    abrirChat(nextCommand.source || "internal");
+    if (!nextCommand.question) return;
+    if (nextCommand.autoSubmit) handleText(nextCommand.question);
+    else setComposerDraft({ id: nextCommand.id, text: nextCommand.question });
+  });
+
+  // El comando vive en el provider, por lo que tampoco se pierde si el widget
+  // dinámico termina de cargar después del clic hecho en la portada.
+  useEffect(() => {
+    if (!command || command.id === handledCommandRef.current) return;
+    const timer = setTimeout(() => receiveCommand(command), 0);
+    return () => clearTimeout(timer);
+  }, [command]);
+
   // Envío optimista: registrarConsulta es fire-and-forget, igual que el resto
   // de los formularios del sitio.
   const handleLeadSubmit = ({ nombre, telefono, email }) => {
@@ -1154,6 +1330,7 @@ export default function ChatBot() {
       tipo: "propiedad",
       nombre,
       telefono,
+      email,
       mensaje: lastSearchFilters.operacion === "alquiler"
         ? "Pidió que le avisemos cuando entre un alquiler permanente como el que buscaba (asistente Lucía)."
         : "Pidió que le avisemos cuando entre una propiedad como la que buscaba (asistente Lucía).",
@@ -1161,7 +1338,11 @@ export default function ChatBot() {
         origen: "chatbot",
         filtros: lastSearchFilters,
         busqueda: describeFilters(lastSearchFilters),
-        ...(email ? { email } : {}),
+        recomendaciones: lastRecommendationsRef.current.map((property) => ({
+          id: property.id,
+          titulo: property.title,
+          motivos: property.luciaReasons || [],
+        })),
       },
     });
     // Alta en la lista de avisos automáticos. Va aparte de la consulta y
@@ -1216,6 +1397,9 @@ export default function ChatBot() {
     cancelPending();
     setMessages([]);
     setFilters({});
+    setLastSearchFilters({});
+    setWrittenAnswers({});
+    lastRecommendationsRef.current = [];
     saludar();
   };
 
@@ -1232,8 +1416,8 @@ export default function ChatBot() {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
-                  <img src={ISOTIPO} alt="Catalán Propiedades" className="w-6 h-6 object-contain" />
+                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden ring-2 ring-white/30">
+                  <img src={LUCIA_AVATAR} alt="Lucía" className="h-full w-full object-cover" />
                 </div>
                 {atencion?.abierto && (
                   <span
@@ -1243,10 +1427,10 @@ export default function ChatBot() {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-sm leading-tight">Asistente Lucía</p>
+                <p className="font-semibold text-sm leading-tight">Lucía</p>
                 <p className="text-xs text-white/70 leading-tight truncate">
                   {atencion === null
-                    ? "Asistente de Catalán Propiedades"
+                    ? "Catalán Propiedades"
                     : atencion.abierto
                       ? `En línea · Milton atiende hasta las ${atencion.cierra}`
                       : `Milton atiende ${atencion.proximo}`}
@@ -1314,6 +1498,7 @@ export default function ChatBot() {
                         <Link
                           key={prop.id}
                           href={`/propiedades/${getPropertySlug(prop)}`}
+                          data-lucia-property={prop.id}
                           onClick={() => setOpen(false)}
                           className="flex gap-3 bg-white rounded-xl p-2.5 shadow-sm hover:shadow-md transition border border-gray-100"
                         >
@@ -1323,13 +1508,28 @@ export default function ChatBot() {
                             {zonaDe(prop) && (
                               <p className="text-[11px] text-gray-400 leading-tight">{zonaDe(prop)}</p>
                             )}
-                            <p className="text-xs font-bold" style={{ color: AIRBNB }}>
-                              {precioTexto(prop)}
-                            </p>
+                           <p className="text-xs font-bold" style={{ color: AIRBNB }}>
+                             {precioTexto(prop)}
+                           </p>
+                            {prop.luciaReasons?.length > 0 && (
+                              <ul className="mt-1 space-y-0.5 text-[10px] leading-snug text-gray-500">
+                                {prop.luciaReasons.map((reason) => <li key={reason}>• {reason}</li>)}
+                              </ul>
+                            )}
                           </div>
                         </Link>
                       ))}
                     </div>
+                  )}
+
+                  {msg.comparison?.length > 0 && <LuciaComparison rows={msg.comparison} />}
+
+                  {msg.feedback && (
+                    <LuciaFeedback
+                      feedback={msg.feedback}
+                      pagePath={pathname}
+                      onTracked={(rating) => trackEvent("chatbot_feedback", { rating })}
+                    />
                   )}
 
                   {msg.listado && (
@@ -1366,6 +1566,12 @@ export default function ChatBot() {
             {typing && <TypingDots />}
             <div ref={messagesEndRef} />
           </div>
+          <LuciaComposer
+            key={composerDraft?.id || "composer"}
+            onSubmit={handleText}
+            disabled={typing}
+            initialText={composerDraft?.text || ""}
+          />
         </div>
       )}
 
@@ -1376,7 +1582,7 @@ export default function ChatBot() {
             className="text-left bg-white text-gray-800 rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-3.5 py-3 hover:shadow-2xl transition"
           >
             <span className="block text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: AIRBNB }}>
-              Asistente Lucía
+              Lucía
             </span>
             <span className="block text-sm leading-snug">{invitacion}</span>
           </button>
@@ -1392,11 +1598,11 @@ export default function ChatBot() {
 
       <button
         onClick={() => (open ? setOpen(false) : abrirChat())}
-        className="fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full bg-white flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110"
+        className="fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full bg-white p-1 flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110"
         style={{ boxShadow: "0 10px 30px rgba(255,90,95,.30), 0 2px 8px rgba(0,0,0,.12)" }}
         aria-label={open ? "Cerrar chat" : "Abrir chat"}
       >
-        {open ? <CloseIcon /> : <img src={ISOTIPO} alt="" className="w-8 h-8 object-contain" />}
+        {open ? <CloseIcon /> : <img src={LUCIA_AVATAR} alt="" className="h-full w-full rounded-full object-cover" />}
         {!open && invitacion && (
           <span
             className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white"
@@ -1405,6 +1611,153 @@ export default function ChatBot() {
         )}
       </button>
     </>
+  );
+}
+
+function LuciaComposer({ onSubmit, disabled, initialText }) {
+  const [text, setText] = useState(initialText);
+
+  const submit = (event) => {
+    event.preventDefault();
+    const value = text.trim();
+    if (!value || disabled) return;
+    setText("");
+    onSubmit(value);
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-shrink-0 gap-2 border-t border-gray-100 bg-white p-2.5">
+      <input
+        autoFocus={Boolean(initialText)}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        placeholder="Escribile a Lucía..."
+        aria-label="Mensaje para Lucía"
+        maxLength={300}
+        className="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+      />
+      <button
+        type="submit"
+        disabled={disabled || !text.trim()}
+        className="rounded-full px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+        style={{ backgroundColor: AIRBNB }}
+      >
+        Enviar
+      </button>
+    </form>
+  );
+}
+
+function LuciaFeedback({ feedback, pagePath, onTracked }) {
+  const [state, setState] = useState("idle");
+  const [showDetails, setShowDetails] = useState(false);
+  const [reason, setReason] = useState("");
+  const [comment, setComment] = useState("");
+
+  const send = async (rating, selectedReason = null) => {
+    if (state === "sending" || state === "sent") return;
+    setState("sending");
+    try {
+      const response = await fetch("/api/lucia-feedback/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          answerId: feedback.answerId,
+          rating,
+          reason: selectedReason,
+          comment,
+          model: feedback.model,
+          pagePath,
+        }),
+      });
+      if (!response.ok) throw new Error("feedback_error");
+      setState("sent");
+      onTracked(rating);
+    } catch {
+      setState("error");
+    }
+  };
+
+  if (state === "sent") {
+    return <p className="mt-2 pl-1 text-[11px] font-medium text-emerald-700">Gracias, esto nos ayuda a mejorar a Lucía.</p>;
+  }
+
+  if (showDetails) {
+    return (
+      <div className="mt-2 rounded-xl border border-gray-100 bg-white p-2.5 text-[11px] text-gray-600">
+        <p className="font-semibold text-gray-700">¿Qué faltó?</p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {[
+            ["incorrect", "Dato incorrecto"],
+            ["outdated", "Desactualizada"],
+            ["not_understood", "No entendió"],
+            ["incomplete", "Le faltó información"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setReason(value)}
+              className={`rounded-full border px-2 py-1 ${reason === value ? "border-rose-300 bg-rose-50 text-rose-700" : "border-gray-200 hover:border-gray-300"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <label htmlFor={`lucia-feedback-${feedback.answerId}`} className="mt-2 block font-semibold text-gray-700">
+          Comentario <span className="font-normal text-gray-400">opcional</span>
+        </label>
+        <textarea
+          id={`lucia-feedback-${feedback.answerId}`}
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+          maxLength={500}
+          rows={2}
+          placeholder="No incluyas datos personales."
+          className="mt-1.5 w-full resize-none rounded-lg border border-gray-200 p-2 outline-none focus:border-rose-300"
+        />
+        <div className="mt-1.5 flex items-center gap-2">
+          <button onClick={() => send(-1, reason || null)} disabled={state === "sending"} className="rounded-full bg-gray-900 px-3 py-1.5 font-semibold text-white disabled:opacity-50">
+            {state === "sending" ? "Enviando..." : "Enviar"}
+          </button>
+          {state === "error" && <span className="text-rose-600">No se pudo enviar.</span>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1.5 flex items-center gap-1 pl-1 text-[11px] text-gray-400">
+      <span>¿Te sirvió?</span>
+      <button onClick={() => send(1)} disabled={state === "sending"} aria-label="La respuesta fue útil" className="rounded px-1.5 py-0.5 hover:bg-white hover:text-gray-700 disabled:opacity-50">Sí</button>
+      <button onClick={() => setShowDetails(true)} aria-label="La respuesta no fue útil" className="rounded px-1.5 py-0.5 hover:bg-white hover:text-gray-700">No</button>
+      {state === "error" && <button onClick={() => send(1)} className="text-rose-600">Reintentar</button>}
+    </div>
+  );
+}
+
+function LuciaComparison({ rows }) {
+  const value = (number, suffix = "") => number === null ? "Sin dato" : `${number.toLocaleString("es-AR")}${suffix}`;
+  const price = (row) => row.price === null
+    ? "Consultar"
+    : row.currency === "USD"
+      ? `USD ${row.price.toLocaleString("es-AR")}`
+      : `$${row.price.toLocaleString("es-AR")}/mes`;
+
+  return (
+    <div aria-label="Comparación de propiedades" className="mt-2 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+      {rows.map((row, index) => (
+        <div key={row.id} className={`p-2.5 ${index ? "border-t border-gray-100" : ""}`}>
+          <p className="text-[11px] font-semibold leading-snug text-gray-800">{row.title}</p>
+          <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-gray-500">
+            <span>{price(row)}</span>
+            <span>{value(row.area, " m²")}</span>
+            <span>{value(row.bedrooms, " dorm.")}</span>
+            <span>{value(row.bathrooms, " baños")}</span>
+            {row.roi !== null && <span>ROI informado: {value(row.roi, "%")}</span>}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

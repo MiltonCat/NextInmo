@@ -16,6 +16,17 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Lucía con OpenAI
+
+Las preguntas libres de Lucía usan la Responses API desde el servidor. Configurá estas variables en `.env.local` y también en el entorno de producción:
+
+```bash
+OPENAI_API_KEY=tu_clave_secreta
+OPENAI_LUCIA_MODEL=gpt-5.6-luna
+```
+
+`OPENAI_LUCIA_MODEL` es opcional y permite cambiar el modelo sin modificar código. La clave no debe llevar el prefijo `NEXT_PUBLIC_` porque nunca puede llegar al navegador.
+
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
