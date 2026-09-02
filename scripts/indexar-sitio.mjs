@@ -13,6 +13,7 @@
 // Necesita internet: correlo desde PowerShell, no desde la shell montada.
 import { readFileSync } from "node:fs";
 import { indexarSitio } from "../lib/indexadorSitio.mjs";
+import { respuestasIndexables } from "../data/respuestasDeLaCasa.js";
 
 const raw = readFileSync(new URL("../.env.local", import.meta.url), "utf8");
 for (const line of raw.split("\n")) {
@@ -26,6 +27,7 @@ try {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     secret: process.env.SUPABASE_SECRET_KEY,
     openaiKey: process.env.OPENAI_API_KEY,
+    respuestasDeLaCasa: respuestasIndexables(),
     todo: process.argv.includes("--todo"),
     soloVer: process.argv.includes("--ver"),
     log: (linea) => console.log(linea),
@@ -34,7 +36,8 @@ try {
   for (const omitida of resumen.omitidas) console.log(`  omitida ${omitida}`);
   console.log(
     `\n${resumen.indexadas} paginas indexadas, ${resumen.fragmentos} fragmentos, ` +
-    `${resumen.sinCambios} sin cambios, ${resumen.omitidas.length} omitidas (${resumen.segundos}s)`
+    `${resumen.sinCambios} sin cambios, ${resumen.omitidas.length} omitidas, ` +
+    `${resumen.retiradas} retiradas (${resumen.segundos}s)`
   );
 } catch (error) {
   console.error("Error:", error.message);

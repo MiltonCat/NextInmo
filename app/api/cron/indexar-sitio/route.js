@@ -14,6 +14,7 @@
 import "server-only";
 import { SITE_URL } from "@/config";
 import { indexarSitio } from "@/lib/indexadorSitio.mjs";
+import { respuestasIndexables } from "@/data/respuestasDeLaCasa";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,6 +40,7 @@ export async function GET(request) {
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
       secret: process.env.SUPABASE_SECRET_KEY,
       openaiKey: process.env.OPENAI_API_KEY,
+      respuestasDeLaCasa: respuestasIndexables(),
       maxPaginas: MAX_PAGINAS,
       msDisponibles: MS_DISPONIBLES,
       log: (linea) => console.info("[indexar-sitio]", linea),
@@ -48,6 +50,7 @@ export async function GET(request) {
       indexadas: resumen.indexadas,
       fragmentos: resumen.fragmentos,
       sinCambios: resumen.sinCambios,
+      retiradas: resumen.retiradas,
       pendientes: resumen.pendientes,
       omitidas: resumen.omitidas,
       segundos: resumen.segundos,
