@@ -17,6 +17,7 @@ import { notFound } from "next/navigation";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { barriosConPerfil, getBarrio, barrioDePropiedad } from "@/lib/barrios";
 import { getPerfilBarrio } from "@/lib/barriosPerfil";
+import { getDistancias } from "@/data/distanciasBarrios";
 import { medianaDeBarrio } from "@/lib/precioZonas";
 import { getOpinionesPublicas } from "@/lib/barrioOpiniones";
 import { DIMENSIONES, nivelDePublicacion, formatearProporcion } from "@/lib/barrioEncuesta";
@@ -99,6 +100,7 @@ export default async function BarrioPage({ params }) {
   // ejemplo "costanera") todavía no es una página: 404 antes que página vacía.
   if (!barrio || !perfil || barrio.slug !== slug) notFound();
 
+  const distancias = getDistancias(slug);
   const mediana = medianaDeBarrio(slug);
   const { agregado, citas } = await getOpinionesPublicas(slug);
 
@@ -229,6 +231,39 @@ export default async function BarrioPage({ params }) {
             </Link>.
           </p>
         </section>
+
+        {/* ── Distancias ───────────────────────────────────────────
+            Solo se dibuja cuando el dato está cargado en
+            data/distanciasBarrios.js. Un barrio sin cargar no muestra la
+            sección: nada de tiempos aproximados. */}
+        {distancias && (
+          <section>
+            <h2 className="text-2xl font-black text-gray-900 font-jakarta mb-1">
+              A qué distancia está de todo
+            </h2>
+            <p className="text-sm text-gray-500 mb-5">{distancias.referencia}</p>
+            <div className="rounded-2xl border border-gray-200 px-6">
+              {distancias.centro && (
+                <Dato
+                  label="Al centro"
+                  detalle={[
+                    distancias.centro.autoMin !== undefined ? `${distancias.centro.autoMin} min en auto` : null,
+                    distancias.centro.aPieMin !== undefined ? `${distancias.centro.aPieMin} min a pie` : null,
+                  ].filter(Boolean).join(" · ")}
+                />
+              )}
+              {distancias.lago && (
+                <Dato
+                  label={`Al lago${distancias.lago.nombre ? ` ${distancias.lago.nombre}` : ""}`}
+                  detalle={[
+                    distancias.lago.autoMin !== undefined ? `${distancias.lago.autoMin} min en auto` : null,
+                    distancias.lago.aPieMin !== undefined ? `${distancias.lago.aPieMin} min a pie` : null,
+                  ].filter(Boolean).join(" · ")}
+                />
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ── Datos duros ──────────────────────────────────────────── */}
         <section>
