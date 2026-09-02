@@ -57,14 +57,16 @@ const team = [
     name: "Milton Catalán",
     role: "Asesor inmobiliario · Fundador",
     photo: "/Milton.webp",
+    credencial: "Más de 10 años en el mercado de San Martín de los Andes",
     desc: "Administrador de empresas con pasado en Wealth Management. Más de 10 años en San Martín de los Andes analizando propiedades como activos financieros.",
     links: [{ label: "Hablemos", href: "/contacto/" }],
   },
   {
     name: "Carolina Godoy",
-    role: "Abogada",
+    role: "Socia · Asesora Legal Inmobiliaria",
     photo: "/carolina-godoy.jpeg",
-    desc: "Respaldo legal del equipo. Revisión y redacción de contratos de locación, y control de la documentación en cada operación. Autora de la guía legal de alquileres del sitio.",
+    credencial: "Abogada matriculada en Neuquén — Mat. Pcial. N° 344",
+    desc: "Socia de Catalán Propiedades desde 2020. Redacta y revisa los contratos de compraventa, los boletos de reserva y los de alquiler, y controla la documentación de cada operación. También lleva sucesiones de inmuebles, administración de consorcios y conflictos entre propietarios, inquilinos y consorcios.",
     links: [
       { label: "Llamar al 2944-630649", href: "tel:2944630649" },
       { label: "Ver la guía legal", href: "/blog/alquileres-san-martin-de-los-andes-2026/" },
@@ -211,7 +213,7 @@ export default function NosotrosClient() {
           <div className="text-center mb-14">
             <p className="text-primary-500 text-xs font-semibold tracking-widest uppercase mb-3">Quiénes somos</p>
             <h2 className="text-3xl font-bold text-[#222222] font-jakarta">El equipo</h2>
-            <p className="text-[#717171] text-sm mt-3 max-w-xl mx-auto">Criterio financiero para decidir y respaldo legal para firmar.</p>
+            <p className="text-[#717171] text-sm mt-3 max-w-xl mx-auto">Criterio financiero para decidir y una abogada matriculada para firmar tranquilo.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {team.map((member) => (
@@ -222,6 +224,9 @@ export default function NosotrosClient() {
                 <div className="min-w-0">
                   <h3 className="text-base font-semibold text-[#222222] font-jakarta">{member.name}</h3>
                   <p className="text-primary-600 text-xs font-semibold tracking-wide uppercase mt-0.5">{member.role}</p>
+                  {member.credencial && (
+                    <p className="text-[#717171] text-[11px] leading-snug mt-1.5">{member.credencial}</p>
+                  )}
                   <p className="text-[#717171] text-sm leading-relaxed mt-3">{member.desc}</p>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4">
                     {member.links.map((link) => (
