@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { randomUUID } from "node:crypto";
 import { buildLuciaKnowledge } from "@/lib/luciaKnowledge";
 import { askOpenAILucia } from "@/lib/luciaOpenAI";
+import { registrarPregunta } from "@/lib/luciaPreguntas";
 import { clamp, getClientIp, rateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -42,18 +43,38 @@ export async function POST(request) {
   }
 
   const history = cleanHistory(body?.history);
+  const pagePath = clamp(body?.pagePath, 240) || null;
   const knowledge = await buildLuciaKnowledge(question);
   const answer = await askOpenAILucia({ question, history, context: knowledge.context });
 
+  // Cada pregunta es una búsqueda real sobre San Martín escrita por una
+  // persona: es el insumo para decidir qué contenido falta en el sitio. Se
+  // guarda también cuando la respuesta falla — esas son las que más interesan.
+  //
+  // Va dentro de after(): la escritura corre DESPUÉS de que la respuesta salió,
+  // así el visitante no espera por la base, pero la función no se congela antes
+  // de terminarla —que es lo que pasa con un fire-and-forget suelto en Vercel—.
+  // registrarPregunta además no lanza nunca.
+  const guardar = (extra) => after(() => registrarPregunta({ pregunta: question, pagePath, ...extra }));
+
   if (!answer.ok) {
+    guardar({ respondida: false, error: answer.reason });
     const status = answer.reason === "not_configured" ? 503 : 502;
     return NextResponse.json({ ok: false, error: answer.reason }, { status });
   }
 
+  const answerId = randomUUID();
+  guardar({
+    respondida: true,
+    answerId,
+    fuentes: knowledge.sources.length,
+    model: answer.model,
+  });
+
   return NextResponse.json({
     ok: true,
     answer: answer.text,
-    answerId: randomUUID(),
+    answerId,
     model: answer.model,
     sources: knowledge.sources,
   });

@@ -1283,7 +1283,7 @@ export default function ChatBot() {
       const response = await fetch("/api/lucia/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, history }),
+        body: JSON.stringify({ question: text, history, pagePath: pathname }),
       });
       const body = await response.json().catch(() => null);
       if (flowRef.current !== requestFlow) return;
