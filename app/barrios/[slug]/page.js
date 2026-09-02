@@ -101,6 +101,11 @@ export default async function BarrioPage({ params }) {
   if (!barrio || !perfil || barrio.slug !== slug) notFound();
 
   const distancias = getDistancias(slug);
+  const hayServicios = Boolean(
+    perfil.internet || perfil.transporte || perfil.cloacas || perfil.calles ||
+    perfil.seguridad || perfil.autoObligatorio !== null && perfil.autoObligatorio !== undefined ||
+    perfil.petFriendly !== null && perfil.petFriendly !== undefined
+  );
   const mediana = medianaDeBarrio(slug);
   const { agregado, citas } = await getOpinionesPublicas(slug);
 
@@ -265,28 +270,38 @@ export default async function BarrioPage({ params }) {
           </section>
         )}
 
-        {/* ── Datos duros ──────────────────────────────────────────── */}
-        <section>
-          <h2 className="text-2xl font-black text-gray-900 font-jakarta mb-5">
-            Servicios e infraestructura
-          </h2>
-          <div className="rounded-2xl border border-gray-200 px-6">
-            <Dato label="Internet" nivel={perfil.internet.nivel} detalle={perfil.internet.detalle} />
-            <Dato label="Transporte público" nivel={perfil.transporte.nivel} detalle={perfil.transporte.detalle} />
-            <Dato label="Cloacas" nivel={perfil.cloacas.nivel} detalle={perfil.cloacas.estado} />
-            <Dato label="Estado de las calles" nivel={perfil.calles.nivel} detalle={perfil.calles.estado} />
-            <Dato label="Seguridad" nivel={perfil.seguridad.nivel} detalle={perfil.seguridad.detalle} />
-            <Dato
-              label="¿Se puede vivir sin auto?"
-              detalle={perfil.autoObligatorio
-                ? "No. El auto es indispensable para todo."
-                : "Sí, se puede resolver el día a día sin auto."}
-            />
-            <Dato label="Pet friendly" detalle={perfil.petFriendly ? "Sí" : "Con limitaciones"} />
-          </div>
-        </section>
+        {/* ── Datos duros ──────────────────────────────────────────
+            Cada fila se dibuja sola. Un barrio recién cargado puede tener
+            descripción y nada más: entonces esta sección entera no aparece, en
+            vez de mostrar filas vacías o un "sin datos" repetido siete veces. */}
+        {hayServicios && (
+          <section>
+            <h2 className="text-2xl font-black text-gray-900 font-jakarta mb-5">
+              Servicios e infraestructura
+            </h2>
+            <div className="rounded-2xl border border-gray-200 px-6">
+              {perfil.internet && <Dato label="Internet" nivel={perfil.internet.nivel} detalle={perfil.internet.detalle} />}
+              {perfil.transporte && <Dato label="Transporte público" nivel={perfil.transporte.nivel} detalle={perfil.transporte.detalle} />}
+              {perfil.cloacas && <Dato label="Cloacas" nivel={perfil.cloacas.nivel} detalle={perfil.cloacas.estado} />}
+              {perfil.calles && <Dato label="Estado de las calles" nivel={perfil.calles.nivel} detalle={perfil.calles.estado} />}
+              {perfil.seguridad && <Dato label="Seguridad" nivel={perfil.seguridad.nivel} detalle={perfil.seguridad.detalle} />}
+              {perfil.autoObligatorio !== null && perfil.autoObligatorio !== undefined && (
+                <Dato
+                  label="¿Se puede vivir sin auto?"
+                  detalle={perfil.autoObligatorio
+                    ? "No. El auto es indispensable para todo."
+                    : "Sí, se puede resolver el día a día sin auto."}
+                />
+              )}
+              {perfil.petFriendly !== null && perfil.petFriendly !== undefined && (
+                <Dato label="Pet friendly" detalle={perfil.petFriendly ? "Sí" : "Con limitaciones"} />
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ── Salud ────────────────────────────────────────────────── */}
+        {perfil.hospital?.items?.length > 0 && (
         <section>
           <h2 className="text-2xl font-black text-gray-900 font-jakarta mb-1">
             A qué distancia está la atención médica
@@ -306,8 +321,12 @@ export default async function BarrioPage({ params }) {
             ))}
           </ul>
         </section>
+        )}
 
-        {/* ── Ventajas y desventajas ───────────────────────────────── */}
+        {/* ── Ventajas y desventajas ─────────────────────────────
+            Las dos columnas van juntas o no van: "A favor" solo, sin nada en
+            contra, se lee como publicidad y le baja credibilidad a la ficha. */}
+        {perfil.ventajas.length > 0 && perfil.desventajas.length > 0 && (
         <section className="grid gap-6 sm:grid-cols-2">
           <div className="rounded-2xl border border-green-200 bg-green-50 p-6">
             <h2 className="text-lg font-black text-green-900 font-jakarta mb-3">A favor</h2>
@@ -332,8 +351,10 @@ export default async function BarrioPage({ params }) {
             </ul>
           </div>
         </section>
+        )}
 
         {/* ── Para quién ───────────────────────────────────────────── */}
+        {perfil.perfil.length > 0 && (
         <section>
           <h2 className="text-2xl font-black text-gray-900 font-jakarta mb-4">Para quién funciona</h2>
           <div className="flex flex-wrap gap-2">
@@ -344,6 +365,7 @@ export default async function BarrioPage({ params }) {
             ))}
           </div>
         </section>
+        )}
 
         {/* ── Qué dicen los vecinos ────────────────────────────────── */}
         <section>
