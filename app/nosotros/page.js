@@ -4,7 +4,7 @@ const NosotrosClient = dynamic(() => import("./NosotrosClient"));
 
 export const metadata = {
   title: "Nosotros — San Martín de los Andes",
-  description: "Conocé a Milton Catalán, asesor inmobiliario con más de 10 años de experiencia en San Martín de los Andes. Criterio financiero y datos reales para decisiones inmobiliarias en la Patagonia.",
+  description: "El equipo de Catalán Propiedades en San Martín de los Andes: Milton Catalán, asesor inmobiliario con más de 10 años de experiencia y criterio financiero, y Carolina Godoy, abogada, que respalda los contratos y la documentación de cada operación.",
   openGraph: {
     title: "Sobre Catalán Propiedades — Milton Catalán",
     description: "Asesor inmobiliario con criterio financiero y más de 10 años en San Martín de los Andes.",

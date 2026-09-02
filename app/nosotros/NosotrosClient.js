@@ -50,6 +50,28 @@ const services = [
   { title: "Acompañamiento en la compra", desc: "Te acompaño en cada etapa: búsqueda, visita, negociación y documentación. Sin atajos y con criterio en cada paso.", icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> },
 ];
 
+// El equipo. Carolina firma la guia legal de alquileres del blog: la foto y el
+// telefono son los mismos que ya estan publicados ahi.
+const team = [
+  {
+    name: "Milton Catalán",
+    role: "Asesor inmobiliario · Fundador",
+    photo: "/Milton.webp",
+    desc: "Administrador de empresas con pasado en Wealth Management. Más de 10 años en San Martín de los Andes analizando propiedades como activos financieros.",
+    links: [{ label: "Hablemos", href: "/contacto/" }],
+  },
+  {
+    name: "Carolina Godoy",
+    role: "Abogada",
+    photo: "/carolina-godoy.jpeg",
+    desc: "Respaldo legal del equipo. Revisión y redacción de contratos de locación, y control de la documentación en cada operación. Autora de la guía legal de alquileres del sitio.",
+    links: [
+      { label: "Llamar al 2944-630649", href: "tel:2944630649" },
+      { label: "Ver la guía legal", href: "/blog/alquileres-san-martin-de-los-andes-2026/" },
+    ],
+  },
+];
+
 const gridStyle = { backgroundImage: `linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px)`, backgroundSize: "48px 48px" };
 
 export default function NosotrosClient() {
@@ -178,6 +200,37 @@ export default function NosotrosClient() {
                 <h3 className="text-base font-semibold text-[#222222] mb-2 font-jakarta">{s.title}</h3>
                 <p className="text-[#717171] text-sm leading-relaxed mb-4">{s.desc}</p>
                 <a href="/contacto" className="inline-flex items-center gap-1 text-primary-600 text-xs font-semibold hover:text-primary-500 hover:gap-2 transition-all duration-200">Conocer más <span>→</span></a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 border-t border-gray-100 bg-transparent">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-primary-500 text-xs font-semibold tracking-widest uppercase mb-3">Quiénes somos</p>
+            <h2 className="text-3xl font-bold text-[#222222] font-jakarta">El equipo</h2>
+            <p className="text-[#717171] text-sm mt-3 max-w-xl mx-auto">Criterio financiero para decidir y respaldo legal para firmar.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {team.map((member) => (
+              <div key={member.name} className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col sm:flex-row gap-5 hover:border-primary-200 hover:shadow-md transition-all duration-300">
+                <div className="w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-gray-100">
+                  <img src={member.photo} alt={member.name} className="w-full h-full object-cover object-top" loading="lazy" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base font-semibold text-[#222222] font-jakarta">{member.name}</h3>
+                  <p className="text-primary-600 text-xs font-semibold tracking-wide uppercase mt-0.5">{member.role}</p>
+                  <p className="text-[#717171] text-sm leading-relaxed mt-3">{member.desc}</p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4">
+                    {member.links.map((link) => (
+                      <a key={link.href} href={link.href} className="inline-flex items-center gap-1 text-primary-600 text-xs font-semibold hover:text-primary-500 hover:gap-2 transition-all duration-200">
+                        {link.label} <span>→</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

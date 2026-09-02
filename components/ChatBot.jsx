@@ -472,6 +472,16 @@ const RECURSOS = {
     titulo: "Centro de ayuda",
     detalle: "El proceso de compra en Neuquén, los papeles, los impuestos y los gastos.",
   },
+  nosotros: {
+    href: "/nosotros/",
+    titulo: "Quiénes somos",
+    detalle: "El equipo: Milton y Carolina Godoy, la abogada que respalda las operaciones.",
+  },
+  legal: {
+    href: "/blog/alquileres-san-martin-de-los-andes-2026/",
+    titulo: "Guía legal de alquileres",
+    detalle: "Escrita por Carolina Godoy, la abogada del equipo: qué mirar antes de firmar.",
+  },
   blog: {
     href: "/blog/",
     titulo: "Notas del blog",
@@ -511,6 +521,7 @@ const STEPS = {
       { label: "Buscar entre lo que hay", icono: "buscar", reinicia: true, next: "ask_alq_type" },
       { label: "Ver todos los publicados", comentario: "Ahí está todo lo que hay para alquilar ahora mismo.", recursos: ["alquileres"], next: "guia_alquilar" },
       { label: "Avisame si entra algo", icono: "campana", operacion: "alquiler", next: "lead" },
+      { label: "Dudas con el contrato", comentario: "El contrato lo mira Carolina Godoy, la abogada del equipo. Escribió esta guía sobre qué revisar antes de firmar, y podés llamarla al 2944-630649.", recursos: ["legal"], next: "guia_alquilar" },
       { label: "Hablar con Milton", icono: "whatsapp", next: "whatsapp" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
@@ -574,6 +585,7 @@ const STEPS = {
       { label: "Si conviene invertir acá", comentario: "Acá está el análisis con la rentabilidad por zona y la calculadora de retorno.", recursos: ["inversion"], next: "menu_info" },
       { label: "En qué barrio me conviene", comentario: "Acá está cada zona con los datos: precio del m², servicios y cómo se accede en invierno.", recursos: ["barrios"], next: "menu_info" },
       { label: "Cómo viene el mercado", comentario: "En el blog vamos siguiendo el crédito y los movimientos del rubro.", recursos: ["blog"], next: "menu_info" },
+      { label: "Quiénes están detrás", comentario: "Somos Milton, que hace más de diez años analiza este mercado, y Carolina Godoy, la abogada del equipo, que revisa los contratos y la documentación de cada operación.", recursos: ["nosotros"], next: "menu_info" },
       { label: "Volver al inicio", icono: "reiniciar", next: "welcome" },
     ],
   },
