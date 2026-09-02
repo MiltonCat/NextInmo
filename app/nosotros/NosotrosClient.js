@@ -58,7 +58,7 @@ const team = [
     role: "Asesor inmobiliario · Fundador",
     photo: "/Milton.webp",
     credencial: "Más de 10 años en el mercado de San Martín de los Andes",
-    desc: "Administrador de empresas con pasado en Wealth Management. Más de 10 años en San Martín de los Andes analizando propiedades como activos financieros.",
+    desc: "Administrador de empresas, con carrera previa en Wealth Management en ING y en proyecciones de mercado para Brasil y Estados Unidos. Analiza cada propiedad como un activo: rentabilidad esperada, riesgo y proyección de valor. Desarrolla un modelo predictivo propio del metro cuadrado de San Martín de los Andes hasta 2031.",
     links: [{ label: "Hablemos", href: "/contacto/" }],
   },
   {
