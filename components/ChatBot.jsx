@@ -721,6 +721,10 @@ export default function ChatBot() {
   const [invitacionCerrada, setInvitacionCerrada] = useState(false);
   const [composerDraft, setComposerDraft] = useState(null);
   const messagesEndRef = useRef(null);
+  // El contenedor scrolleable y el arranque de la última tanda de Lucía. Ver el
+  // efecto de scroll: no siempre conviene bajar hasta el fondo.
+  const messagesBoxRef = useRef(null);
+  const turnStartRef = useRef(null);
   const handledCommandRef = useRef(0);
   const pathname = usePathname();
   const { trackEvent, trackWhatsAppClick } = useAnalytics();
@@ -810,8 +814,22 @@ export default function ChatBot() {
     );
   };
 
+  // El chat NO baja siempre hasta el fondo: alinea el comienzo de lo que Lucía
+  // acaba de responder. Bajando al fondo, una respuesta larga quedaba arriba de
+  // la pantalla y abajo se veían solo los botones — el visitante apurado se iba
+  // creyendo que no le contestó. El clamp contra el máximo hace que, cuando
+  // todo entra en pantalla, el resultado sea el de antes: el fondo.
   useEffect(() => {
-    if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!open) return;
+    const box = messagesBoxRef.current;
+    const target = turnStartRef.current;
+    if (!box || !target) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    const desde = target.getBoundingClientRect().top - box.getBoundingClientRect().top;
+    const tope = Math.max(box.scrollHeight - box.clientHeight, 0);
+    box.scrollTo({ top: Math.min(box.scrollTop + desde - 12, tope), behavior: "smooth" });
   }, [messages, typing, open]);
 
   // El catálogo fresco se pide recién cuando alguien abre el chat. La promesa se
@@ -1438,6 +1456,19 @@ export default function ChatBot() {
     saludar();
   };
 
+  // Dónde arranca la respuesta actual de Lucía: el primer mensaje suyo después
+  // del último del visitante. Cada camino del chat —botón, texto libre, chip del
+  // clima, formulario— deja antes un mensaje del visitante, así que este índice
+  // siempre cae en el lugar correcto. Vale -1 mientras no haya respuesta todavía.
+  const turnStartIndex = (() => {
+    let ultimoDelVisitante = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") { ultimoDelVisitante = i; break; }
+    }
+    const inicio = ultimoDelVisitante + 1;
+    return inicio < messages.length && messages[inicio].role === "bot" ? inicio : -1;
+  })();
+
   return (
     <>
       {open && (
@@ -1488,13 +1519,13 @@ export default function ChatBot() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
+          <div ref={messagesBoxRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const stepOptions = msg.stepKey ? STEPS[msg.stepKey]?.options : null;
 
               return (
-                <div key={i}>
+                <div key={i} ref={i === turnStartIndex ? turnStartRef : null}>
                   <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
                       className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
