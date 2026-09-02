@@ -15,6 +15,7 @@ import {
   nextLuciaStep,
   parseLuciaText,
   recommendProperties,
+  rutaDelTexto,
 } from "@/lib/luciaAdvisor.mjs";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1338,19 +1339,39 @@ export default function ChatBot() {
     }
   };
 
+  // Sin await y con keepalive: es telemetria, no puede demorar ni romper el
+  // chat. Si falla, se pierde esa frase y nada mas.
+  const registrarFraseGuiada = (text) => {
+    try {
+      fetch("/api/lucia-frase/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text, pagePath: pathname }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  };
+
   const handleText = (text) => {
     const parsed = parseLuciaText(text, activeStep);
     const startsFresh = activeStep === "welcome" || activeStep.startsWith("after_results");
     const base = startsFresh ? {} : filters;
-    const plain = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    const explicitSearch = /\bbusco\b|estoy buscando|quiero (comprar|alquilar|una casa|un departamento|un depto|un lote)|necesito (una casa|un departamento|un depto|un lote)/.test(plain);
-    const openQuestion = text.includes("?") || /^(como|que|cual|donde|cuando|cuanto|por que|conviene|puedo|sabes|contame)/.test(plain.trim());
-    const guidedStep = activeStep.startsWith("ask_");
 
-    if (!guidedStep && (!parsed.searchIntent || (openQuestion && !explicitSearch))) {
+    // Quien decide es rutaDelTexto (lib/luciaAdvisor.mjs), que es una funcion
+    // pura y con pruebas. Antes la regla vivia suelta aca y se apoyaba en que la
+    // gente escribiera bien: sin \b, "queremos comprar" entraba por "que" y se iba
+    // a la IA, y "me conviene comprar ahora" —sin signos y sin arrancar con un
+    // interrogativo— caia en el arbol, que no sabe responder eso.
+    if (rutaDelTexto(text, activeStep, parsed) === "ia") {
       askLuciaAI(text);
       return;
     }
+
+    // La frase se va por el arbol guiado, asi que no va a pasar por /api/lucia y
+    // no quedaria registrada en ningun lado. Se guarda igual: son busquedas
+    // escritas con las palabras de una persona, y sirven tanto como las
+    // preguntas para saber que falta en el sitio.
+    registrarFraseGuiada(text);
 
     const merged = { ...base, ...parsed.filters };
     const answers = startsFresh

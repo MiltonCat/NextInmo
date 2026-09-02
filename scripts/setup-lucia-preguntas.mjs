@@ -23,7 +23,10 @@ create table if not exists public.lucia_preguntas (
   created_at  timestamptz not null default now(),
   pregunta    text not null check (char_length(pregunta) <= 600),
   answer_id   uuid unique,
-  respondida  boolean not null default true,
+  -- "ia" = paso por el modelo. "guiado" = el router la mando al arbol de
+  -- botones y nunca hubo respuesta de IA; en esas filas respondida va en null.
+  ruta        text not null default 'ia' check (ruta in ('ia', 'guiado')),
+  respondida  boolean default true,
   error       text,
   fuentes     smallint not null default 0,
   page_path   text,
@@ -38,6 +41,16 @@ create index if not exists lucia_preguntas_created_at_idx
 create index if not exists lucia_preguntas_texto_idx
   on public.lucia_preguntas using gin (to_tsvector('spanish', pregunta));
 alter table public.lucia_preguntas enable row level security;
+
+-- Migracion para la tabla que ya existe (creada el 02/09/2026 sin estas dos):
+alter table public.lucia_preguntas add column if not exists ruta text not null default 'ia';
+alter table public.lucia_preguntas alter column respondida drop not null;
+do $$ begin
+  alter table public.lucia_preguntas add constraint lucia_preguntas_ruta_check
+    check (ruta in ('ia', 'guiado'));
+exception when duplicate_object then null; end $$;
+create index if not exists lucia_preguntas_ruta_idx
+  on public.lucia_preguntas (ruta, created_at desc);
 `;
 
 const client = new Client({
