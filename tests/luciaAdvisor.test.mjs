@@ -4,6 +4,7 @@ import {
   comparisonRows,
   eligibleProperties,
   nextLuciaStep,
+  pareceRelatoPersonal,
   parseLuciaText,
   recommendProperties,
   rutaDelTexto,
@@ -113,4 +114,25 @@ test("una búsqueda familiar con recomendación recibe respuesta conversacional"
 
   assert.equal(rutaDelTexto(consulta, "welcome", parsed), "ia");
   assert.equal(parsed.filters.minBedrooms, 3);
+});
+
+// Lo que Milton vio: quien cuenta su situacion sin signo de pregunta recibia el
+// cuestionario, y le preguntaba dormitorios que ya habia dicho.
+test("un relato personal sin signo de pregunta va a la IA", () => {
+  const relato = "somos una familia con dos chicos, buscamos casa de tres dormitorios hasta 220 mil, tranquila y con buen internet porque trabajo desde casa";
+
+  assert.equal(pareceRelatoPersonal(relato), true);
+  assert.equal(rutaDelTexto(relato, "welcome"), "ia");
+  assert.equal(parseLuciaText(relato).filters.minBedrooms, 3);
+});
+
+test("una busqueda corta por filtros sigue en el arbol guiado", () => {
+  assert.equal(rutaDelTexto("busco casa de 3 dormitorios", "welcome"), "guiado");
+  assert.equal(rutaDelTexto("busco un departamento chico", "welcome"), "guiado");
+});
+
+test("adentro del embudo el relato sigue leyendose como respuesta al paso", () => {
+  const relato = "somos una familia con dos chicos y queremos algo tranquilo para vivir";
+
+  assert.equal(rutaDelTexto(relato, "ask_goal"), "guiado");
 });

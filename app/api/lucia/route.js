@@ -45,7 +45,12 @@ export async function POST(request) {
   const history = cleanHistory(body?.history);
   const pagePath = clamp(body?.pagePath, 240) || null;
   const knowledge = await buildLuciaKnowledge(question);
-  const answer = await askOpenAILucia({ question, history, context: knowledge.context });
+  const answer = await askOpenAILucia({
+    question,
+    history,
+    context: knowledge.context,
+    primeraRespuesta: body?.primeraRespuesta === true,
+  });
 
   // Cada pregunta es una búsqueda real sobre San Martín escrita por una
   // persona: es el insumo para decidir qué contenido falta en el sitio. Se

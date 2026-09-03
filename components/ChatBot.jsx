@@ -742,6 +742,9 @@ export default function ChatBot() {
   // La invitación comercial aparece una sola vez y únicamente después de una
   // consulta con intención inmobiliaria. Así Lucía ayuda antes de pedir datos.
   const aiLeadInviteShownRef = useRef(false);
+  // La bienvenida del widget viaja en el historial como mensaje de Lucía, así que
+  // el modelo no puede saber por ahí si ya habló en la charla. Acá sí se sabe.
+  const yaRespondioIaRef = useRef(false);
 
   useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
 
@@ -955,6 +958,7 @@ export default function ChatBot() {
 
   const saludar = () => {
     cancelPending();
+    yaRespondioIaRef.current = false;
     const saludo = contextualGreeting(pathname);
     setActiveStep("welcome");
     sendBot(
@@ -1284,7 +1288,12 @@ export default function ChatBot() {
       const response = await fetch("/api/lucia/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, history, pagePath: pathname }),
+        body: JSON.stringify({
+          question: text,
+          history,
+          pagePath: pathname,
+          primeraRespuesta: !yaRespondioIaRef.current,
+        }),
       });
       const body = await response.json().catch(() => null);
       if (flowRef.current !== requestFlow) return;
@@ -1309,6 +1318,7 @@ export default function ChatBot() {
         detalle: item.detail,
       }));
       trackEvent("chatbot_ia_respuesta", { ok: true, fuentes: resources.length });
+      yaRespondioIaRef.current = true;
       const commercialIntent = /\b(compr|alquil|vend|tas|invert|propiedad|casa|departamento|depto|lote|terreno|precio|mercado|credito|hipoteca)\w*/i.test(text);
       const shouldInvite = commercialIntent && !leadSent && !aiLeadInviteShownRef.current;
       if (shouldInvite) {
