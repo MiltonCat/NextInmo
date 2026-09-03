@@ -6,6 +6,7 @@ import {
   nextLuciaStep,
   parseLuciaText,
   recommendProperties,
+  rutaDelTexto,
 } from "../lib/luciaAdvisor.mjs";
 
 const property = (id, overrides = {}) => ({
@@ -96,4 +97,20 @@ test("si faltan datos continúa calificando en vez de recomendar todo", () => {
   const parsed = parseLuciaText("Busco una casa");
 
   assert.equal(nextLuciaStep(parsed.filters, parsed.answered), "ask_goal");
+});
+
+test("entiende dormitorios escritos con palabras", () => {
+  const parsed = parseLuciaText("Buscamos una casa de tres dormitorios hasta USD 220.000");
+
+  assert.equal(parsed.filters.minBedrooms, 3);
+  assert.equal(parsed.filters.maxBedrooms, 3);
+  assert.equal(parsed.answered.bedrooms, true);
+});
+
+test("una búsqueda familiar con recomendación recibe respuesta conversacional", () => {
+  const consulta = "Somos una pareja con dos chicos. Buscamos una casa de tres dormitorios, tranquila y con buen internet. ¿Qué zonas recomendarías?";
+  const parsed = parseLuciaText(consulta);
+
+  assert.equal(rutaDelTexto(consulta, "welcome", parsed), "ia");
+  assert.equal(parsed.filters.minBedrooms, 3);
 });
