@@ -72,6 +72,17 @@ Compartimos información solamente en estos casos:
 No transferimos tus datos a terceros con fines comerciales ajenos a la prestación de nuestros servicios.`,
   },
   {
+    id: "app-ia",
+    title: "Nuestra app en asistentes de IA",
+    content: `Publicamos una app para asistentes de inteligencia artificial (por ejemplo, ChatGPT) que permite consultar el catálogo de propiedades, el valor del metro cuadrado por barrio y los perfiles de barrio de este sitio.
+
+Esa app es de solo lectura y no pide ni almacena datos personales: no tiene cuentas, no te pide iniciar sesión y no recibe tu nombre, tu correo ni tu teléfono. Solo devuelve información que ya está publicada en este sitio, con la fecha del relevamiento y el enlace a la ficha correspondiente.
+
+Para evitar abusos, contamos en memoria la cantidad de consultas por dirección IP durante un minuto. Ese conteo no se guarda ni se asocia a ninguna persona.
+
+Lo que escribas dentro del asistente se rige por la política de privacidad de quien lo provee, no por esta.`,
+  },
+  {
     id: "derechos",
     title: "Tus derechos",
     content: `De acuerdo con la Ley N.º 25.326 de Protección de Datos Personales de Argentina, tenés derecho a acceder a tus datos personales, a rectificarlos cuando sean inexactos y a solicitar su actualización o supresión.

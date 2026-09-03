@@ -45,6 +45,28 @@ const nextConfig = {
 
   async headers() {
     return [
+      // El token con el que OpenAI verifica que el dominio es nuestro, para
+      // publicar la app en el directorio de ChatGPT. El archivo vive en
+      // public/.well-known/openai-apps-challenge.
+      //
+      // Dos cosas que lo rompen y por eso está acá:
+      //  - El verificador pide la URL SIN barra final y exige un 200. Como el
+      //    proyecto tiene trailingSlash:true, una ruta de app/ contestaría un
+      //    308 y podría no seguirlo. Por eso es un archivo estático de public/,
+      //    que se sirve en la ruta exacta y no pasa por ese redirect.
+      //  - Sin extensión, el archivo se sirve como octet-stream. Se fuerza
+      //    text/plain, y no-store para que un token viejo no quede cacheado
+      //    entre un intento y el siguiente.
+      //
+      // OpenAI siempre lo busca en la RAÍZ del dominio, aunque el servidor MCP
+      // esté en /api/mcp/: no soporta .well-known fuera de la raíz.
+      {
+        source: "/.well-known/openai-apps-challenge",
+        headers: [
+          { key: "Content-Type", value: "text/plain; charset=utf-8" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
