@@ -8,6 +8,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
 import { registrarConsulta } from "@/lib/registrarConsulta";
 import { useLucia } from "@/components/LuciaProvider";
+import LuciaGrafico from "@/components/LuciaGrafico";
 import {
   comparisonRows,
   decorateRecommendations,
@@ -560,7 +561,6 @@ const STEPS = {
   after_results_alquiler: {
     text: "¿Seguimos?",
     options: [
-      { label: "Comparar estas opciones", icono: "grafico", next: "compare" },
       { label: "Quiero visitar uno", icono: "casa", next: "whatsapp" },
       { label: "Avisame si entra otro así", icono: "campana", next: "lead" },
       { label: "Buscar otra cosa", icono: "reiniciar", reinicia: true, next: "ask_alq_type" },
@@ -656,7 +656,6 @@ const STEPS = {
   after_results: {
     text: "¿Seguimos?",
     options: [
-      { label: "Comparar estas opciones", icono: "grafico", next: "compare" },
       { label: "Quiero visitar una", icono: "casa", next: "whatsapp" },
       { label: "Que Milton me ayude a elegir", icono: "whatsapp", next: "whatsapp" },
       { label: "Avisame si entra algo así", icono: "campana", next: "lead" },
@@ -772,7 +771,7 @@ export default function ChatBot() {
       const ultima = i === bubbles.length - 1;
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, feedback: bubble.feedback, stepKey: ultima ? stepKey : undefined },
+        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, grafico: bubble.grafico, feedback: bubble.feedback, stepKey: ultima ? stepKey : undefined },
       ]);
       if (ultima) setTyping(false);
     }
@@ -1024,19 +1023,6 @@ export default function ChatBot() {
       return;
     }
 
-    if (opt.next === "compare") {
-      const recommendations = lastRecommendationsRef.current;
-      const destination = lastSearchFilters.operacion === "alquiler" ? "after_results_alquiler" : "after_results";
-      setActiveStep(destination);
-      sendBot(
-        recommendations.length > 1
-          ? [{ text: "Te las comparo con los datos publicados. La mejor depende de qué quieras priorizar:", comparison: comparisonRows(recommendations) }]
-          : [{ text: "Hay una sola finalista, así que por ahora no tengo otra equivalente para compararla." }],
-        destination
-      );
-      return;
-    }
-
     if (opt.next === "lead") {
       // Al aviso se puede llegar sin haber buscado nada, desde el menú de
       // alquiler. Sin esta marca el alta entraría como interés de compra, que
@@ -1140,6 +1126,7 @@ export default function ChatBot() {
               {
                 text: `Te muestro lo más parecido que hay hoy. Ojo: ${cerca.motivo}`,
                 results: aproximadas,
+                comparison: aproximadas.length > 1 ? comparisonRows(aproximadas) : undefined,
                 listado: cerca.found.length > aproximadas.length
                   ? { href: urlDelListado(cerca.filtros), total: cerca.found.length }
                   : undefined,
@@ -1176,6 +1163,7 @@ export default function ChatBot() {
         [{
           text: reaccionResultados(found.length),
           results: mostradas,
+          comparison: mostradas.length > 1 ? comparisonRows(mostradas) : undefined,
           // El que quiere ver el resto se iba del chat y arrancaba de cero.
           listado: found.length > mostradas.length
             ? { href: urlDelListado(merged), total: found.length }
@@ -1230,6 +1218,7 @@ export default function ChatBot() {
               {
                 text: `Esto es lo más parecido que tengo disponible. Ojo: ${cerca.motivo}`,
                 results: aproximados,
+                comparison: aproximados.length > 1 ? comparisonRows(aproximados) : undefined,
                 listado: cerca.found.length > aproximados.length
                   ? { href: urlDelListado(cerca.filtros), total: cerca.found.length }
                   : undefined,
@@ -1258,6 +1247,7 @@ export default function ChatBot() {
         [{
           text: reaccionAlquileres(found.length),
           results: mostrados,
+          comparison: mostrados.length > 1 ? comparisonRows(mostrados) : undefined,
           listado: found.length > mostrados.length
             ? { href: urlDelListado(busqueda), total: found.length }
             : undefined,
@@ -1330,6 +1320,7 @@ export default function ChatBot() {
           {
             text: body.answer,
             recursos: resources,
+            grafico: body.grafico || null,
             feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
           },
           ...(shouldInvite
@@ -1622,6 +1613,8 @@ export default function ChatBot() {
                   )}
 
                   {msg.comparison?.length > 0 && <LuciaComparison rows={msg.comparison} />}
+
+                  {msg.grafico && <LuciaGrafico grafico={msg.grafico} />}
 
                   {msg.feedback && (
                     <LuciaFeedback

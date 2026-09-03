@@ -3,7 +3,51 @@ import { randomUUID } from "node:crypto";
 import { buildLuciaKnowledge } from "@/lib/luciaKnowledge";
 import { askOpenAILucia } from "@/lib/luciaOpenAI";
 import { registrarPregunta } from "@/lib/luciaPreguntas";
+import { barriosDelGrafico, graficoParaConsulta, serieDelGrafico } from "@/lib/luciaGraficos";
+import {
+  EVOLUCION_SERIE,
+  EVOLUCION_VARIACION_TOTAL,
+  M2_POR_BARRIO,
+  MERCADO_GENERADO,
+} from "@/lib/mercado";
 import { clamp, getClientIp, rateLimit } from "@/lib/rateLimit";
+
+// Un grafico se manda solo cuando la pregunta es de las que un grafico contesta
+// mejor que una frase, y siempre al lado de la respuesta escrita. La nota al pie
+// no es decorativa: sin la fecha y el respaldo, una mediana de agosto se lee
+// como el precio de hoy.
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const [ANIO_DATOS, MES_DATOS] = (MERCADO_GENERADO || "").split("-").map(Number);
+const FECHA_DATOS = MES_DATOS ? `${MESES[MES_DATOS - 1]} de ${ANIO_DATOS}` : "el ultimo relevamiento";
+
+function graficoParaRespuesta(question) {
+  const tipo = graficoParaConsulta(question);
+  if (!tipo) return null;
+
+  if (tipo === "evolucion") {
+    const serie = serieDelGrafico(EVOLUCION_SERIE);
+    if (serie.length < 2) return null;
+    const variacion = EVOLUCION_VARIACION_TOTAL;
+    return {
+      tipo,
+      titulo: "Precio del m² publicado, año a año",
+      serie,
+      nota: variacion
+        ? `Serie de referencia de mercado · ${String(variacion).replace(".", ",")} % entre ${serie[0].anio} y ${serie[serie.length - 1].anio}`
+        : "Serie de referencia de mercado",
+    };
+  }
+
+  const barrios = barriosDelGrafico(M2_POR_BARRIO, question);
+  if (barrios.length < 2) return null;
+  const relevadas = barrios.reduce((total, b) => total + (b.relevadas || 0), 0);
+  return {
+    tipo,
+    titulo: "Precio del m² publicado, por barrio",
+    barrios,
+    nota: `Mediana de publicación sobre ${relevadas.toLocaleString("es-AR")} propiedades relevadas · ${FECHA_DATOS}. Son precios publicados, no de cierre.`,
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -82,5 +126,6 @@ export async function POST(request) {
     answerId,
     model: answer.model,
     sources: knowledge.sources,
+    grafico: graficoParaRespuesta(question),
   });
 }
