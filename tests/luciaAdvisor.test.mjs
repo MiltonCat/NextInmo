@@ -136,3 +136,37 @@ test("adentro del embudo el relato sigue leyendose como respuesta al paso", () =
 
   assert.equal(rutaDelTexto(relato, "ask_goal"), "guiado");
 });
+
+// ── El 04/09: "si pregunto si quiero invertir no me da datos de la seccion
+// inversiones". Eran dos cosas encimadas y ninguna estaba en el prompt.
+test("querer invertir va a la IA: el objetivo solo no es una busqueda", () => {
+  // `objective` dice PARA QUE busca, no QUE busca. Sin tipo, presupuesto,
+  // dormitorios ni operacion no hay nada que filtrar, y el embudo contestaba con
+  // un cuestionario mientras el contenido de /inversiones quedaba sin cargar.
+  for (const frase of ["quiero invertir", "estoy pensando en invertir", "invertir", "quiero construir"]) {
+    assert.equal(rutaDelTexto(frase, "welcome"), "ia", frase);
+    assert.equal(parseLuciaText(frase).searchIntent, false, frase);
+  }
+});
+
+test("decir que buscas algo ya no cancela la pregunta", () => {
+  // Sin signos y arrancando con "me interesa", esto caia en el arbol de botones.
+  assert.equal(rutaDelTexto("me interesa invertir, que rentabilidad tiene", "welcome"), "ia");
+  assert.equal(rutaDelTexto("quiero comprar, cuanto necesito de entrada", "welcome"), "ia");
+});
+
+test("pero la busqueda pelada sigue en el embudo, aunque traiga signos", () => {
+  // Esta es la razon de ser del veto y no se toca: el signo solo no convierte
+  // una busqueda en una pregunta.
+  assert.equal(rutaDelTexto("busco casa hasta 200 mil??", "welcome"), "guiado");
+  assert.equal(rutaDelTexto("busco departamento 2 dormitorios", "welcome"), "guiado");
+  assert.equal(rutaDelTexto("quiero comprar una casa", "welcome"), "guiado");
+});
+
+test("el interrogativo tiene que abrir la oracion, no ser un relativo", () => {
+  // "que" adentro de la frase es un relativo y no la vuelve pregunta; despues de
+  // una coma, si. Sin esta distincion volvia el defecto de agosto: media docena
+  // de busquedas mandadas a la IA por un "que" suelto.
+  assert.equal(rutaDelTexto("busco casa que tenga jardin", "welcome"), "guiado");
+  assert.equal(rutaDelTexto("busco casa, que barrios me recomendas", "welcome"), "ia");
+});
