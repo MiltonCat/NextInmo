@@ -51,6 +51,12 @@ export default async function AdminPage() {
               Suscriptores
             </Link>
             <Link
+              href="/admin/lucia"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              Lucía
+            </Link>
+            <Link
               href="/admin/barrios"
               className="text-sm text-gray-600 hover:text-gray-900"
             >
