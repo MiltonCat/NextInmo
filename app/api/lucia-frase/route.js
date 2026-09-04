@@ -28,6 +28,7 @@ export async function POST(request) {
       pregunta: question,
       pagePath: clamp(body?.pagePath, 240) || null,
       ruta: "guiado",
+      interno: body?.interno === true,
     });
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -104,7 +104,9 @@ export async function POST(request) {
   // así el visitante no espera por la base, pero la función no se congela antes
   // de terminarla —que es lo que pasa con un fire-and-forget suelto en Vercel—.
   // registrarPregunta además no lanza nunca.
-  const guardar = (extra) => after(() => registrarPregunta({ pregunta: question, pagePath, ...extra }));
+  const interno = body?.interno === true;
+  const guardar = (extra) =>
+    after(() => registrarPregunta({ pregunta: question, pagePath, interno, ...extra }));
 
   if (!answer.ok) {
     guardar({ respondida: false, error: answer.reason });

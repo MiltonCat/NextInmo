@@ -688,6 +688,37 @@ const LUCIA_AVATAR = "/lucia-avatar.webp";
 // La burbuja de invitación aparece una sola vez por visita. Si la cierran, no
 // vuelve en toda la sesión del navegador.
 const INVITACION_KEY = "lucia-invitacion-cerrada";
+
+// ── Modo prueba ─────────────────────────────────────────────────────────────
+// Cuando Milton se pone a probar el chat, sus frases se guardan igual que las de
+// un visitante y al dia siguiente aparecen en /admin/lucia mezcladas con las
+// reales — y repetidas, porque una prueba se escribe cinco veces seguidas. Con
+// entrar UNA vez con ?lucia=prueba, este navegador queda marcado y lo que
+// escriba se guarda aparte. Se apaga con ?lucia=cliente.
+//
+// Se guarda del lado del navegador y no en una cuenta a proposito: prueba desde
+// el celular, desde una ventana de incognito y desde su maquina, y ninguna de
+// las tres tiene sesion de admin.
+const MODO_PRUEBA_KEY = "lucia-modo-prueba";
+
+function leerModoPrueba() {
+  if (typeof window === "undefined") return false;
+  try {
+    const param = new URLSearchParams(window.location.search).get("lucia");
+    if (param === "prueba") {
+      localStorage.setItem(MODO_PRUEBA_KEY, "1");
+      return true;
+    }
+    if (param === "cliente") {
+      localStorage.removeItem(MODO_PRUEBA_KEY);
+      return false;
+    }
+    return localStorage.getItem(MODO_PRUEBA_KEY) === "1";
+  } catch (e) {
+    // Navegador con el almacenamiento bloqueado: se comporta como un visitante.
+    return false;
+  }
+}
 const INVITACION_MS = 12000;
 const ANSWER_BY_STEP = {
   ask_goal: "goal",
@@ -729,6 +760,13 @@ export default function ChatBot() {
   const turnStartRef = useRef(null);
   const handledCommandRef = useRef(0);
   const pathname = usePathname();
+  // Se lee en un efecto y no en el render: localStorage no existe en el
+  // servidor, y leerlo durante el render deja el HTML del servidor distinto al
+  // del cliente.
+  const [modoPrueba, setModoPrueba] = useState(false);
+  useEffect(() => {
+    setModoPrueba(leerModoPrueba());
+  }, [pathname]);
   const { trackEvent, trackWhatsAppClick } = useAnalytics();
   const { command } = useLucia();
 
@@ -1283,6 +1321,7 @@ export default function ChatBot() {
           history,
           pagePath: pathname,
           primeraRespuesta: !yaRespondioIaRef.current,
+          interno: modoPrueba,
         }),
       });
       const body = await response.json().catch(() => null);
@@ -1347,7 +1386,7 @@ export default function ChatBot() {
       fetch("/api/lucia-frase/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, pagePath: pathname }),
+        body: JSON.stringify({ question: text, pagePath: pathname, interno: modoPrueba }),
         keepalive: true,
       }).catch(() => {});
     } catch {}

@@ -51,6 +51,13 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 create index if not exists lucia_preguntas_ruta_idx
   on public.lucia_preguntas (ruta, created_at desc);
+
+-- Migracion del 04/09/2026: las pruebas de Milton se guardan igual, para ver si
+-- el router acerto, pero marcadas. Una prueba se escribe cinco veces seguidas;
+-- sin esta columna serian el tema mas preguntado del panel /admin/lucia.
+alter table public.lucia_preguntas add column if not exists interno boolean not null default false;
+create index if not exists lucia_preguntas_interno_idx
+  on public.lucia_preguntas (interno, created_at desc);
 `;
 
 const client = new Client({

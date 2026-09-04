@@ -76,7 +76,10 @@ export default async function LuciaPage({ searchParams }) {
 
       <div className="max-w-4xl mx-auto px-4 py-6">
         <p className="text-sm text-gray-500 mb-4">
-          Las últimas {VENTANA} preguntas escritas a mano. Todo lo de abajo se cuenta sobre esas:{" "}
+          {filtro === "prueba"
+            ? "Tus pruebas, las que escribiste con ?lucia=prueba activo. No entran en ninguna otra vista."
+            : `Las últimas ${VENTANA} preguntas escritas a mano por visitantes, sin tus pruebas.`}{" "}
+          Todo lo de abajo se cuenta sobre esas:{" "}
           <strong className="font-medium text-gray-700">{resumen.pulgarAbajo}</strong> con pulgar
           abajo, <strong className="font-medium text-gray-700">{resumen.sinResponder}</strong> que no
           se pudieron responder y{" "}
