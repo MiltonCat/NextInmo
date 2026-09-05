@@ -12,7 +12,7 @@
 // El precio a pagar es que hay más clics. Se compensa de tres formas: Enter
 // avanza, elegir una opción única avanza sola, y ningún paso vuelve a pedir
 // algo que ya se contestó.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { EXTRAS_TASADOR, LIMITES, TIPOS_TASADOR } from "@/lib/tasadorOpciones";
 import { referenciaBarrio } from "@/lib/mercado";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -89,6 +89,7 @@ function Stepper({ label, ayuda, valor, onChange, min, max }) {
 // Con buscador se escribe "chape" y aparecen los tres del Chapelco.
 function SelectorBarrio({ barrios, valor, onChange }) {
   const [busqueda, setBusqueda] = useState("");
+  const buscadorId = useId();
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -98,7 +99,7 @@ function SelectorBarrio({ barrios, valor, onChange }) {
 
   return (
     <div>
-      <label htmlFor="buscador-barrio" className="sr-only">
+      <label htmlFor={buscadorId} className="sr-only">
         Buscar barrio
       </label>
       <div className="relative">
@@ -106,7 +107,7 @@ function SelectorBarrio({ barrios, valor, onChange }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
         </svg>
         <input
-          id="buscador-barrio"
+          id={buscadorId}
           type="search"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
@@ -209,7 +210,8 @@ const ESTADO_INICIAL = {
   extras: [],
 };
 
-export default function TasadorWizard({ barrios = [] }) {
+export default function TasadorWizard({ barrios = [], compacto = false, onResultado }) {
+  const camposId = useId();
   const [form, setForm] = useState(ESTADO_INICIAL);
   const [paso, setPaso] = useState(0);
   const [cargando, setCargando] = useState(false);
@@ -350,6 +352,7 @@ export default function TasadorWizard({ barrios = [] }) {
         }
 
         setRespuesta(data);
+        if (!data.bloqueado && data.resultado) onResultado?.({ resultado: data.resultado, datos: { tipo: form.tipo, barrio: form.barrio, superficie: superficieNum } });
         trackEvent(data.bloqueado ? "tasador_muro_email" : "tasador_resultado", {
           barrio: form.barrio,
           tipo: form.tipo,
@@ -361,7 +364,7 @@ export default function TasadorWizard({ barrios = [] }) {
         setCargando(false);
       }
     },
-    [form, superficieNum, esCasa, trackEvent]
+    [form, superficieNum, esCasa, trackEvent, onResultado]
   );
 
   const avanzar = () => {
@@ -399,6 +402,7 @@ export default function TasadorWizard({ barrios = [] }) {
     return (
       <div ref={tope}>
         <TasadorResultado
+          compacto={compacto}
           resultado={respuesta.resultado}
           contexto={respuesta.contexto}
           bloqueado={respuesta.bloqueado}
@@ -451,7 +455,7 @@ export default function TasadorWizard({ barrios = [] }) {
         />
       </div>
 
-      <div className="px-5 pb-5 pt-7 sm:px-8 sm:pb-8 sm:pt-9" onKeyDown={onKeyDown}>
+      <div className={compacto ? "p-3" : "px-5 pb-5 pt-7 sm:px-8 sm:pb-8 sm:pt-9"} onKeyDown={onKeyDown}>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
           Paso {paso + 1} de {PASOS.length}
         </p>
@@ -466,7 +470,7 @@ export default function TasadorWizard({ barrios = [] }) {
               elegida grite más que la pregunta. El padding baja un píxel para
               compensar el borde que engorda y que la tarjeta no salte. */}
           {actual.id === "tipo" && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className={compacto ? "grid grid-cols-1 gap-3" : "grid grid-cols-1 gap-3 sm:grid-cols-2"}>
               {TIPOS_TASADOR.map((t) => {
                 const activo = form.tipo === t.valor;
                 return (
@@ -508,7 +512,7 @@ export default function TasadorWizard({ barrios = [] }) {
           {actual.id === "superficie" && (
             <div className="space-y-6">
               <CampoMetros
-                id="superficie-cubierta"
+                id={`${camposId}-superficie-cubierta`}
                 label="Superficie cubierta"
                 valor={form.superficie}
                 onChange={(v) => set("superficie", v)}
@@ -517,7 +521,7 @@ export default function TasadorWizard({ barrios = [] }) {
               />
               {esCasa && (
                 <CampoMetros
-                  id="superficie-terreno"
+                  id={`${camposId}-superficie-terreno`}
                   label="Superficie del terreno"
                   ayuda="Opcional, pero en casas mueve bastante la estimación."
                   valor={form.superficieTerreno}

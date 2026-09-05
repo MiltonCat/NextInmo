@@ -222,6 +222,7 @@ function MuroCorreo({ contexto, onEnviar, enviando, error }) {
 }
 
 export default function TasadorResultado({
+  compacto = false,
   resultado,
   contexto,
   datos,
@@ -260,7 +261,7 @@ export default function TasadorResultado({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.06)] sm:p-8">
+      <div className={`rounded-2xl border border-gray-200 bg-white shadow-[0_2px_20px_rgba(0,0,0,0.06)] ${compacto ? "p-3" : "p-6 sm:p-8"}`}>
         <Etiqueta>Valor estimado · {datos.tipo} en {datos.barrio}</Etiqueta>
 
         {/* La estimación va primero y sola. Antes el titular era el rango, y un
@@ -268,7 +269,7 @@ export default function TasadorResultado({
             que quiera vender: la persona igual termina buscando un número, y si
             no se lo damos se lo inventa. Este número no es un promedio armado
             acá — es la predicción del modelo. */}
-        <p className="mt-3 text-[38px] font-semibold leading-[1.05] tracking-[-0.025em] text-gray-900 tabular-nums sm:text-[52px]">
+        <p className={`mt-3 font-semibold leading-[1.05] tracking-[-0.025em] text-gray-900 tabular-nums ${compacto ? "text-[30px]" : "text-[38px] sm:text-[52px]"}`}>
           {usd(valorTotal)}
         </p>
 

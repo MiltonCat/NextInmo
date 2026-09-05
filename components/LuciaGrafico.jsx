@@ -26,9 +26,9 @@ function BarrasPorBarrio({ barrios }) {
     <div className="space-y-2.5">
       {barrios.map((b) => (
         <div key={b.barrio}>
-          <div className="flex items-baseline justify-between gap-2">
+          <div className="flex min-w-0 items-baseline justify-between gap-2">
             <span
-              className={`truncate text-[11px] leading-tight ${
+              className={`min-w-0 break-words text-[11px] leading-snug ${
                 b.destacado ? "font-semibold text-gray-900" : "text-gray-600"
               }`}
             >
@@ -65,7 +65,7 @@ export default function LuciaGrafico({ grafico }) {
 
   const cuerpo =
     tipo === "evolucion" && grafico.serie?.length > 1 ? (
-      <EvolucionChart data={grafico.serie} alto="h-40" />
+      <EvolucionChart data={grafico.serie} alto="h-40" compacto />
     ) : tipo === "m2_barrio" && grafico.barrios?.length > 1 ? (
       <BarrasPorBarrio barrios={grafico.barrios} />
     ) : null;
@@ -73,7 +73,7 @@ export default function LuciaGrafico({ grafico }) {
   if (!cuerpo) return null;
 
   return (
-    <figure className="mt-2 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
+    <figure className="mt-2 w-full min-w-0 max-w-full rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
       {titulo && (
         <figcaption className="mb-2.5 text-[11px] font-semibold leading-snug text-gray-800">
           {titulo}
@@ -82,7 +82,7 @@ export default function LuciaGrafico({ grafico }) {
       {cuerpo}
       {/* De cuándo es el dato y sobre cuántas propiedades: sin eso, un gráfico
           de precios se lee como si fuera de hoy y de todo el mercado. */}
-      {nota && <p className="mt-2.5 text-[10px] leading-snug text-gray-400">{nota}</p>}
+      {nota && <p className="mt-2.5 break-words text-[10px] leading-snug text-gray-400">{nota}</p>}
     </figure>
   );
 }

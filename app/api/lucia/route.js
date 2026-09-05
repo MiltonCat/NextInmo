@@ -88,7 +88,7 @@ export async function POST(request) {
 
   const history = cleanHistory(body?.history);
   const pagePath = clamp(body?.pagePath, 240) || null;
-  const knowledge = await buildLuciaKnowledge(question);
+  const knowledge = await buildLuciaKnowledge(question, history);
   const answer = await askOpenAILucia({
     question,
     history,

@@ -1,0 +1,59 @@
+/* Adaptación al ancho del chat, incluso en pantallas de escritorio. */
+.compacto {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.compacto h2,
+.compacto h3 {
+  margin-top: 6px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.compacto :global(.text-sm),
+.compacto :global(.text-\[15px\]),
+.compacto :global(.text-\[17px\]) {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.compacto :global(.text-\[20px\]) { font-size: 16px; }
+.compacto :global(.text-\[30px\]) { font-size: 24px; }
+
+.compacto input {
+  min-height: 42px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  /* Evita que iOS amplíe el chat al enfocar un campo. */
+  font-size: 16px;
+}
+
+.compacto [role="listbox"] { max-height: 160px; }
+.compacto [role="option"] { padding: 10px; }
+
+.compacto :global(.mt-7),
+.compacto :global(.mt-6),
+.compacto :global(.mt-5) { margin-top: 12px; }
+
+.compacto :global(.space-y-6) > :not(:last-child) { margin-block-end: 14px; }
+.compacto :global(.gap-4) { gap: 10px; }
+.compacto :global(.p-5),
+.compacto :global(.p-6),
+.compacto :global(.p-\[19px\]) { padding: 12px; }
+.compacto :global(.px-5),
+.compacto :global(.px-6),
+.compacto :global(.px-7) { padding-inline: 12px; }
+.compacto :global(.py-4),
+.compacto :global(.py-3\.5) { padding-block: 10px; }
+
+.compacto :global(.min-w-\[170px\]) { min-width: 116px; }
+.compacto :global(.h-7) { height: 22px; }
+.compacto :global(.w-7) { width: 22px; }
+.compacto :global(.h-11) { height: 36px; }
+.compacto :global(.w-11) { width: 36px; }
+.compacto :global(.h-\[72px\]) { height: 40px; }
+.compacto :global(.w-\[92px\]) { width: 52px; }
+
+/* El resultado sigue apilado: el breakpoint de la página no mide el chat. */
+.compacto :global(.sm\:flex-row) { flex-direction: column; }

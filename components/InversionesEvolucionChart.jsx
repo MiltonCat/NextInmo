@@ -1,4 +1,5 @@
 "use client";
+import { useId } from "react";
 import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
@@ -18,20 +19,20 @@ import {
 //
 // Va con `aria-hidden`: todo lo que dice la tira ya está en el texto que la
 // rodea, así que para un lector de pantalla es ruido.
-export default function InversionesEvolucionChart({ data, alto = "h-48 sm:h-72", variante = "completo" }) {
+export default function InversionesEvolucionChart({ data, alto = "h-48 sm:h-72", variante = "completo", compacto = false }) {
   const esTira = variante === "tira";
 
   // El id del degradado no puede repetirse en el documento: en /inversiones
   // conviven la tira y el gráfico completo (dentro del desplegable), y dos
   // `<linearGradient>` con el mismo id hacen que el segundo se ignore.
-  const gradId = `colorPrecio-${variante}`;
+  const gradId = `colorPrecio-${useId()}`;
 
   return (
-    <div className={`${alto} w-full`} aria-hidden={esTira ? "true" : undefined}>
-      <ResponsiveContainer width="100%" height="100%" minHeight={esTira ? 96 : 176} minWidth={0}>
+    <div className={`${alto} w-full min-w-0`} aria-hidden={esTira ? "true" : undefined}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={esTira ? 96 : compacto ? 160 : 176} minWidth={0}>
         <AreaChart
           data={data}
-          margin={esTira ? { top: 4, right: 0, left: 0, bottom: 0 } : { top: 10, right: 5, left: 0, bottom: 0 }}
+          margin={esTira ? { top: 4, right: 0, left: 0, bottom: 0 } : { top: 10, right: compacto ? 12 : 5, left: 0, bottom: 0 }}
         >
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
@@ -58,11 +59,13 @@ export default function InversionesEvolucionChart({ data, alto = "h-48 sm:h-72",
           />
           {!esTira && (
           <Tooltip
+            allowEscapeViewBox={{ x: false, y: false }}
+            wrapperStyle={compacto ? { maxWidth: "100%", zIndex: 1 } : undefined}
             formatter={(value, _name, props) => {
               const item = props.payload;
               return [
                 <div key="tooltip" className="text-center">
-                  <div className="text-lg font-semibold text-gray-900">USD {value.toLocaleString()}/m²</div>
+                  <div className={`${compacto ? "text-sm" : "text-lg"} font-semibold text-gray-900`}>USD {value.toLocaleString()}/m²</div>
                   {item.variacion && <div className="font-medium text-emerald-600">+{item.variacion}% vs año anterior</div>}
                   <div className="mt-1 text-xs text-gray-500">{item.contexto}</div>
                   <div className="mt-2 border-t border-gray-100 pt-2 text-xs text-gray-400">{item.fuente}</div>
@@ -72,7 +75,7 @@ export default function InversionesEvolucionChart({ data, alto = "h-48 sm:h-72",
             }}
             /* Tooltip claro: este componente lo usan /inversiones y /precio-m2,
                y las dos son de fondo blanco desde 2026-08-09. */
-            contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", background: "#ffffff", boxShadow: "0 4px 24px rgba(0,0,0,0.10)", padding: "12px" }}
+            contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", background: "#ffffff", boxShadow: "0 4px 24px rgba(0,0,0,0.10)", padding: compacto ? "8px" : "12px", ...(compacto ? { width: "180px", maxWidth: "100%", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: "11px" } : {}) }}
           />
           )}
           <Area

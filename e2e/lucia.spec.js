@@ -18,7 +18,6 @@ test("Lucía califica, recomienda hasta tres opciones y las compara", async ({ p
   expect(await cards.count()).toBeLessThanOrEqual(3);
   await expect(cards.first().locator("li").first()).toBeVisible();
 
-  await page.getByRole("button", { name: "Comparar estas opciones" }).click();
   await expect(page.getByLabel("Comparación de propiedades")).toBeVisible();
   expect(erroresJS).toEqual([]);
 });
@@ -35,7 +34,7 @@ test("Lucía entiende una búsqueda escrita", async ({ page }) => {
   const cards = page.locator(".lucia-panel [data-lucia-property]");
   await expect(cards.first()).toBeVisible();
   expect(await cards.count()).toBeLessThanOrEqual(3);
-  await expect(page.getByRole("button", { name: "Comparar estas opciones" })).toBeVisible();
+  await expect(page.getByLabel("Comparación de propiedades")).toBeVisible();
 });
 
 test("Lucía responde preguntas libres con conocimiento del sitio", async ({ page }) => {

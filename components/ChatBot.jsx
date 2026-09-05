@@ -9,6 +9,11 @@ import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
 import { registrarConsulta } from "@/lib/registrarConsulta";
 import { useLucia } from "@/components/LuciaProvider";
 import LuciaGrafico from "@/components/LuciaGrafico";
+import LuciaAudio from "@/components/LuciaAudio";
+import LuciaRespuesta from "@/components/LuciaRespuesta";
+import dynamic from "next/dynamic";
+import { pideTasacion } from "@/lib/luciaContexto.mjs";
+const LuciaTasador = dynamic(() => import("@/components/LuciaTasador"), { loading: () => <p>Preparando el tasador…</p> });
 import {
   comparisonRows,
   decorateRecommendations,
@@ -1025,6 +1030,10 @@ export default function ChatBot() {
   };
 
   const handleOption = async (opt, currentFilters) => {
+    if (opt.recursos?.includes("tasacion")) {
+      handleText("Quiero tasar mi propiedad");
+      return;
+    }
     cancelPending();
     setMessages((prev) => [...prev, { role: "user", text: opt.label }]);
 
@@ -1393,6 +1402,12 @@ export default function ChatBot() {
   };
 
   const handleText = (text) => {
+    if (pideTasacion(text)) {
+      cancelPending();
+      setTyping(false);
+      setMessages((prev) => [...prev, { role: "user", text }, { role: "bot", text: "Podemos tasarla acá mismo. Completá los datos y te muestro la estimación de nuestro tasador.", tasador: crypto.randomUUID() }]);
+      return;
+    }
     const parsed = parseLuciaText(text, activeStep);
     const startsFresh = activeStep === "welcome" || activeStep.startsWith("after_results");
     const base = startsFresh ? {} : filters;
@@ -1591,19 +1606,31 @@ export default function ChatBot() {
                 <div key={i} ref={i === turnStartIndex ? turnStartRef : null}>
                   <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+                      className={`min-w-0 px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
                         msg.role === "user"
-                          ? "text-white rounded-br-sm"
-                          : "bg-white text-gray-800 shadow-sm rounded-bl-sm"
+                          ? "max-w-[82%] text-white rounded-br-sm"
+                          : "max-w-[92%] bg-white text-gray-800 shadow-sm rounded-bl-sm"
                       }`}
                       style={msg.role === "user" ? { backgroundColor: AIRBNB } : {}}
                     >
-                      {msg.text}
+                      {msg.role === "bot" ? <LuciaRespuesta texto={msg.text} /> : msg.text}
                     </div>
                   </div>
 
+                  {msg.role === "bot" && (
+                    <LuciaAudio
+                      texto={msg.text}
+                      origen={msg.feedback ? "ia" : "arbol"}
+                      onPlay={({ origen, largo }) => trackEvent("lucia_audio_play", { origen, largo })}
+                    />
+                  )}
+
                   {msg.recursos && msg.recursos.length > 0 && (
                     <div className="mt-2 space-y-2">
+                      {msg.feedback && <p className="text-[11px] font-semibold text-gray-500">Referencias de la web</p>}
+                      {msg.recursos.some((item) => item.href === "/tasacion/") && (
+                        <button type="button" disabled={typing} onClick={() => handleText("Quiero tasar mi propiedad")} className="w-full rounded-xl bg-white p-3 text-sm font-semibold text-rose-600 border border-rose-200 disabled:opacity-50">Tasar acá con Lucía</button>
+                      )}
                       {msg.recursos.map((recurso) => (
                         <Link
                           key={recurso.href}
@@ -1652,6 +1679,16 @@ export default function ChatBot() {
                   )}
 
                   {msg.comparison?.length > 0 && <LuciaComparison rows={msg.comparison} />}
+
+                  {msg.tasador && (
+                    <div className="mt-2">
+                      <LuciaTasador onResultado={({ resultado, datos }) => {
+                        const usd = (n) => Number.isFinite(n) ? `USD ${Math.round(n).toLocaleString("es-AR")}` : "sin informar";
+                        const resumen = `Tasación orientativa de ${datos.tipo} en ${datos.barrio}, ${datos.superficie} m²: estimación ${usd(resultado.valorTotal)}, rango ${usd(resultado.rangoMin)} a ${usd(resultado.rangoMax)}, ${usd(resultado.valorM2)}/m². No es un precio de cierre ni un retorno de inversión. ${(resultado.advertencias || []).join(" ")}`;
+                        setMessages((prev) => prev.map((item) => item.tasador === msg.tasador ? { ...item, text: resumen } : item));
+                      }} />
+                    </div>
+                  )}
 
                   {msg.grafico && <LuciaGrafico grafico={msg.grafico} />}
 

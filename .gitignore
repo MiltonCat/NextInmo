@@ -41,6 +41,9 @@ next_dev_*.log
 # scripts de prueba descartables
 scripts/_*.mjs
 
+# MP3 de muestra que genera scripts/probar-voz-lucia.mjs
+audio-prueba/
+
 # env files (can opt-in for committing if needed)
 .env*
 
