@@ -143,7 +143,7 @@ export default function Navbar() {
         <div className="flex items-center h-14 md:h-16 gap-3 md:gap-4">
 
           {/* Logo */}
-          <Link href="/" className="relative flex-shrink-0 isolate">
+          <Link href="/" className="relative flex-shrink-0 isolate w-9 h-9 rounded-full overflow-hidden md:w-auto md:h-auto md:rounded-none md:overflow-visible">
             <picture>
               <source media="(max-width: 767px)" srcSet="/fondoMarca.webp" width="1200" height="1200" />
               <img src="/logo-catalan.png" alt="Catalán Propiedades" width="1230" height="142" className="block w-9 h-9 object-contain md:w-[145px] md:h-auto xl:w-[175px]" />
