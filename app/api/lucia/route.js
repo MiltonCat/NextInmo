@@ -88,6 +88,52 @@ export async function POST(request) {
 
   const history = cleanHistory(body?.history);
   const pagePath = clamp(body?.pagePath, 240) || null;
+  if (body?.stream === true) {
+    const encoder = new TextEncoder();
+    const abort = new AbortController();
+    const answerId = randomUUID();
+    let result = { respondida: false, error: "cancelled" };
+    let finish;
+    const finished = new Promise((resolve) => { finish = resolve; });
+    after(async () => {
+      await finished;
+      await registrarPregunta({ pregunta: question, pagePath, interno: body?.interno === true, ...result });
+    });
+    const stream = new ReadableStream({
+      async start(controller) {
+        const emit = (event) => {
+          if (!abort.signal.aborted) controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+        };
+        try {
+          emit({ type: "status", text: "Consultando información de la web" });
+          const knowledge = await buildLuciaKnowledge(question, history);
+          if (abort.signal.aborted || request.signal.aborted) return;
+          emit({ type: "status", text: "Preparando tu respuesta" });
+          const answer = await askOpenAILucia({
+            question, history, context: knowledge.context,
+            primeraRespuesta: body?.primeraRespuesta === true,
+            signal: AbortSignal.any([abort.signal, request.signal]),
+            onDelta: (text) => emit({ type: "delta", text }),
+          });
+          if (!answer.ok) {
+            result = { respondida: false, error: answer.reason };
+            emit({ type: "error", error: answer.reason });
+          } else {
+            result = { respondida: true, answerId, fuentes: knowledge.sources.length, model: answer.model };
+            emit({ type: "done", ok: true, answer: answer.text, answerId, model: answer.model, sources: knowledge.sources, grafico: graficoParaRespuesta(question) });
+          }
+        } catch {
+          result = { respondida: false, error: "stream_error" };
+          if (!abort.signal.aborted) emit({ type: "error", error: "stream_error" });
+        } finally {
+          finish();
+          if (!abort.signal.aborted) controller.close();
+        }
+      },
+      cancel() { abort.abort(); },
+    });
+    return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
+  }
   const knowledge = await buildLuciaKnowledge(question, history);
   const answer = await askOpenAILucia({
     question,

@@ -6,6 +6,7 @@ import { getPropertySlug } from "@/data/properties";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
+import { readLines } from "@/lib/luciaStream.mjs";
 import { registrarConsulta } from "@/lib/registrarConsulta";
 import { useLucia } from "@/components/LuciaProvider";
 import LuciaGrafico from "@/components/LuciaGrafico";
@@ -746,6 +747,10 @@ export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [typing, setTyping] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [activity, setActivity] = useState("Lucía está preparando tu respuesta");
+  const aiRequestRef = useRef(null);
+  const [handoff, setHandoff] = useState(null);
   const [activeStep, setActiveStep] = useState("welcome");
   const [filters, setFilters] = useState({});
   const [lastSearchFilters, setLastSearchFilters] = useState({});
@@ -788,7 +793,7 @@ export default function ChatBot() {
   // el modelo no puede saber por ahí si ya habló en la charla. Acá sí se sabe.
   const yaRespondioIaRef = useRef(false);
 
-  useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
+  useEffect(() => () => { timersRef.current.forEach(clearTimeout); aiRequestRef.current?.abort(); }, []);
 
   const wait = (ms) =>
     new Promise((resolve) => {
@@ -796,6 +801,9 @@ export default function ChatBot() {
     });
 
   const cancelPending = () => {
+    aiRequestRef.current?.abort();
+    aiRequestRef.current = null;
+    setMessages((prev) => prev.map((message) => message.streaming ? { ...message, streaming: false, interrupted: true } : message));
     flowRef.current += 1;
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
@@ -807,6 +815,7 @@ export default function ChatBot() {
   const sendBot = async (bubbles, stepKey) => {
     const flow = ++flowRef.current;
     setTyping(true);
+    setActivity("Lucía está preparando tu respuesta");
     for (let i = 0; i < bubbles.length; i++) {
       const bubble = bubbles[i];
       await wait(bubble.delay ?? beat());
@@ -814,7 +823,7 @@ export default function ChatBot() {
       const ultima = i === bubbles.length - 1;
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: bubble.text, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, grafico: bubble.grafico, feedback: bubble.feedback, stepKey: ultima ? stepKey : undefined },
+        { role: "bot", text: bubble.text, clima: bubble.clima, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, grafico: bubble.grafico, feedback: bubble.feedback, stepKey: ultima ? stepKey : undefined },
       ]);
       if (ultima) setTyping(false);
     }
@@ -878,7 +887,11 @@ export default function ChatBot() {
     const desde = target.getBoundingClientRect().top - box.getBoundingClientRect().top;
     const tope = Math.max(box.scrollHeight - box.clientHeight, 0);
     box.scrollTo({ top: Math.min(box.scrollTop + desde - 12, tope), behavior: "smooth" });
-  }, [messages, typing, open]);
+  }, [messages.length, typing, open]);
+
+  useEffect(() => {
+    if (handoff) messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [handoff]);
 
   // El catálogo fresco se pide recién cuando alguien abre el chat. La promesa se
   // comparte con el paso de resultados: Lucía espera esa confirmación y nunca
@@ -977,6 +990,7 @@ export default function ChatBot() {
     // sendBot con las secuencias viejas.
     const flow = flowRef.current;
     setTyping(true);
+    setActivity("Consultando el clima de San Martín");
 
     const dato = await pedirClima();
 
@@ -992,7 +1006,7 @@ export default function ChatBot() {
       return;
     }
 
-    const burbujas = [{ text: textoClimaAhora(dato.ahora) }];
+    const burbujas = [{ text: textoClimaAhora(dato.ahora), clima: dato }];
     const pronostico = textoClimaDias(dato.dias);
     if (pronostico) burbujas.push({ text: pronostico });
     sendBot(burbujas, "menu_vivir");
@@ -1050,15 +1064,17 @@ export default function ChatBot() {
       const baseContext = Object.keys(currentFilters || {}).length ? currentFilters : lastSearchFilters;
       const searchContext = { ...baseContext, cta: opt.label };
       const recommendations = lastRecommendationsRef.current;
-      registrarSalidaWhatsApp(searchContext, "chatbot", recommendations);
-      trackWhatsAppClick(null, "chatbot");
-      trackEvent("chatbot_whatsapp", { has_search_filters: Object.keys(searchContext).length > 0 });
-      window.open(advisorMessage(searchContext, recommendations), "_blank");
+      let draft = new URL(advisorMessage(searchContext, recommendations)).searchParams.get("text") || "";
+      if (!describeFilters(baseContext).length) {
+        const consulta = messages.filter((message) => message.role === "user").at(-1)?.text;
+        if (consulta) draft += `\n\nMi consulta: ${consulta}`;
+      }
+      setHandoff({ text: draft, searchContext, recommendations });
       setActiveStep("after_results");
       setFilters({});
       sendBot(
         [
-          { text: "Te abrí WhatsApp con el resumen de tu búsqueda." },
+          { text: "Te dejo el resumen para Milton. Podés editarlo antes de abrir WhatsApp." },
           {
             text: atencion && !atencion.abierto
               ? `Ojo que ahora estamos fuera de horario, así que puede que Milton te conteste ${atencion.proximo}. Te responde él, no un automático.`
@@ -1136,7 +1152,10 @@ export default function ChatBot() {
     if (opt.next === "results") {
       lastRecommendationsRef.current = [];
       setTyping(true);
+      setActivity("Buscando propiedades disponibles");
+      const searchFlow = flowRef.current;
       const catalog = dataset.length ? dataset : await cargarCatalogo();
+      if (searchFlow !== flowRef.current) return;
       setTyping(false);
       if (!catalog) {
         setActiveStep("after_results");
@@ -1228,7 +1247,10 @@ export default function ChatBot() {
       lastRecommendationsRef.current = [];
       const busqueda = { ...merged, operacion: "alquiler" };
       setTyping(true);
+      setActivity("Buscando alquileres disponibles");
+      const searchFlow = flowRef.current;
       const catalog = dataset.length ? dataset : await cargarCatalogo();
+      if (searchFlow !== flowRef.current) return;
       setTyping(false);
       if (!catalog) {
         setActiveStep("after_results_alquiler");
@@ -1311,6 +1333,9 @@ export default function ChatBot() {
 
   const askLuciaAI = async (text) => {
     cancelPending();
+    const controller = new AbortController();
+    aiRequestRef.current = controller;
+    const streamId = crypto.randomUUID();
     const requestFlow = flowRef.current;
     const history = messages
       .filter((message) => message.text && (message.role === "user" || message.role === "bot"))
@@ -1319,11 +1344,13 @@ export default function ChatBot() {
 
     setMessages((previous) => [...previous, { role: "user", text }]);
     setTyping(true);
+    setActivity("Consultando información de la web");
     trackEvent("chatbot_ia_pregunta", { paso: activeStep, largo: text.length });
 
     try {
       const response = await fetch("/api/lucia/", {
         method: "POST",
+        signal: controller.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: text,
@@ -1331,13 +1358,32 @@ export default function ChatBot() {
           pagePath: pathname,
           primeraRespuesta: !yaRespondioIaRef.current,
           interno: modoPrueba,
+          stream: true,
         }),
       });
-      const body = await response.json().catch(() => null);
+      let body = null;
+      if (response.ok && response.headers.get("content-type")?.includes("application/x-ndjson")) {
+        await readLines(response.body, (line) => {
+          if (!line.trim() || flowRef.current !== requestFlow) return;
+          const event = JSON.parse(line);
+          if (event.type === "status") setActivity(event.text);
+          if (event.type === "delta") {
+            setActivity("Lucía está respondiendo");
+            setMessages((prev) => {
+              const found = prev.some((msg) => msg.id === streamId);
+              return found ? prev.map((msg) => msg.id === streamId ? { ...msg, text: msg.text + event.text } : msg)
+                : [...prev, { id: streamId, role: "bot", text: event.text, streaming: true }];
+            });
+          }
+          if (event.type === "done") body = event;
+          if (event.type === "error") body = { ok: false, error: event.error };
+        });
+      } else body = await response.json().catch(() => null);
       if (flowRef.current !== requestFlow) return;
       setTyping(false);
 
       if (!response.ok || !body?.ok || !body.answer) {
+        setMessages((prev) => prev.map((msg) => msg.id === streamId ? { ...msg, streaming: false, interrupted: true } : msg));
         trackEvent("chatbot_ia_respuesta", { ok: false, error: body?.error || `http_${response.status}` });
         sendBot(
           [{
@@ -1363,14 +1409,15 @@ export default function ChatBot() {
         aiLeadInviteShownRef.current = true;
         trackEvent("chatbot_lead_invitacion", { origen: "respuesta_ia" });
       }
-      sendBot(
+      setMessages((prev) => {
+        const completed = { id: streamId, role: "bot", text: body.answer, recursos: resources, grafico: body.grafico || null,
+          feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
+          stepKey: shouldInvite ? undefined : activeStep, aiSuggestions: true,
+          followUp: /barrio|zona/i.test(text) ? "¿Qué diferencias hay entre esas zonas para vivir?" : /invert|renta|mercado/i.test(text) ? "¿Qué aspectos debería comparar para decidir en mi caso?" : "Contame un poco más sobre lo que acabás de explicar" };
+        return prev.some((msg) => msg.id === streamId) ? prev.map((msg) => msg.id === streamId ? completed : msg) : [...prev, completed];
+      });
+      if (shouldInvite) sendBot(
         [
-          {
-            text: body.answer,
-            recursos: resources,
-            grafico: body.grafico || null,
-            feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
-          },
           ...(shouldInvite
             ? [{ text: "¿Querés que te avise cuando aparezca una propiedad que encaje con lo que buscás?" }]
             : []),
@@ -1379,12 +1426,15 @@ export default function ChatBot() {
       );
     } catch {
       if (flowRef.current !== requestFlow) return;
+      setMessages((prev) => prev.map((msg) => msg.id === streamId ? { ...msg, streaming: false, interrupted: true } : msg));
       setTyping(false);
       trackEvent("chatbot_ia_respuesta", { ok: false, error: "network_error" });
       sendBot(
         [{ text: "Me quedé sin conexión para responder eso. La búsqueda guiada sigue disponible y Milton también puede ayudarte." }],
         activeStep
       );
+    } finally {
+      if (aiRequestRef.current === controller) aiRequestRef.current = null;
     }
   };
 
@@ -1525,6 +1575,7 @@ export default function ChatBot() {
   // leadSent no se resetea a propósito: a quien ya dejó sus datos no se los
   // volvemos a pedir aunque reinicie el chat.
   const resetChat = () => {
+    setHandoff(null);
     cancelPending();
     setMessages([]);
     setFilters({});
@@ -1551,28 +1602,27 @@ export default function ChatBot() {
     <>
       {open && (
         <div
-          className="lucia-panel fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 z-50 sm:w-96 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100"
-          style={{ height: "min(32rem, 70vh)" }}
+          className={`lucia-panel fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 ${expanded ? "lucia-panel-expanded" : "sm:w-96"}`}
+          style={{ height: expanded ? "min(48rem, calc(100dvh - 8rem))" : "min(32rem, 70vh)" }}
         >
           <div
-            className="text-white px-4 py-3 flex items-center justify-between"
-            style={{ backgroundColor: AIRBNB, flexShrink: 0 }}
+            className="lucia-header px-4 py-3 flex items-center justify-between gap-2"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden ring-2 ring-white/30">
+                <div className="lucia-header-avatar w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
                   <img src={LUCIA_AVATAR} alt="Lucía" className="h-full w-full object-cover" />
                 </div>
                 {atencion?.abierto && (
                   <span
                     className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
-                    style={{ borderColor: AIRBNB }}
+                    style={{ borderColor: "var(--color-primary-50)" }}
                   />
                 )}
               </div>
               <div className="min-w-0">
                 <p className="font-semibold text-sm leading-tight">Lucía</p>
-                <p className="text-xs text-white/70 leading-tight truncate">
+                <p className="lucia-header-subtitle text-xs leading-tight truncate">
                   {atencion === null
                     ? "Catalán Propiedades"
                     : atencion.abierto
@@ -1581,43 +1631,47 @@ export default function ChatBot() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button type="button" onClick={() => setExpanded((value) => !value)} aria-label={expanded ? "Reducir chat" : "Ampliar chat"} aria-pressed={expanded} className="lucia-header-action">{expanded ? "↙" : "↗"}</button>
               {clima && (
                 <button
                   onClick={climaDesdeHeader}
                   title={`San Martín de los Andes: ${clima.ahora.temperatura}°${clima.ahora.estado ? `, ${clima.ahora.estado}` : ""}`}
-                  className="flex items-center gap-1 rounded-full bg-white/20 hover:bg-white/30 px-2 py-1 text-xs font-semibold leading-none transition"
+                  className="lucia-weather-chip flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold leading-none transition"
                 >
                   <ClimaIcono nombre={clima.ahora.icono} />
                   {clima.ahora.temperatura}°
                 </button>
               )}
-              <button onClick={resetChat} className="text-white/70 hover:text-white text-base leading-none" title="Reiniciar chat">↺</button>
-              <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white text-2xl leading-none" aria-label="Cerrar">×</button>
+              <button onClick={resetChat} className="lucia-header-action" title="Reiniciar chat">↺</button>
+              <button onClick={() => setOpen(false)} className="lucia-header-action" aria-label="Cerrar">×</button>
             </div>
           </div>
 
-          <div ref={messagesBoxRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
+          <div ref={messagesBoxRef} className="lucia-conversation flex-1 overflow-y-auto p-3 space-y-4">
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const stepOptions = msg.stepKey ? STEPS[msg.stepKey]?.options : null;
 
               return (
-                <div key={i} ref={i === turnStartIndex ? turnStartRef : null}>
-                  <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className="lucia-message-entry" key={i} ref={i === turnStartIndex ? turnStartRef : null}>
+                  {msg.clima ? <LuciaClima dato={msg.clima} /> : <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`min-w-0 px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+                      className={`lucia-message min-w-0 text-sm leading-relaxed whitespace-pre-line ${
                         msg.role === "user"
-                          ? "max-w-[82%] text-white rounded-br-sm"
-                          : "max-w-[92%] bg-white text-gray-800 shadow-sm rounded-bl-sm"
+                          ? "lucia-message-user max-w-[82%]"
+                          : "lucia-message-bot max-w-[92%]"
                       }`}
-                      style={msg.role === "user" ? { backgroundColor: AIRBNB } : {}}
                     >
                       {msg.role === "bot" ? <LuciaRespuesta texto={msg.text} /> : msg.text}
+                      {msg.interrupted && <p className="mt-2 text-xs text-gray-500">Respuesta interrumpida.</p>}
+                      {msg.feedback && msg.recursos?.length > 0 && <div className="mt-2 flex flex-wrap gap-2" aria-label="Fuentes de la respuesta">
+                        {msg.recursos.map((source) => <Link key={source.href} href={source.href} onClick={() => setOpen(false)} className="text-xs underline text-primary-700">{source.titulo}</Link>)}
+                      </div>}
                     </div>
-                  </div>
+                  </div>}
 
-                  {msg.role === "bot" && (
+                  {msg.role === "bot" && !msg.streaming && !msg.interrupted && (
                     <LuciaAudio
                       texto={msg.text}
                       origen={msg.feedback ? "ia" : "arbol"}
@@ -1625,7 +1679,7 @@ export default function ChatBot() {
                     />
                   )}
 
-                  {msg.recursos && msg.recursos.length > 0 && (
+                  {!msg.feedback && msg.recursos && msg.recursos.length > 0 && (
                     <div className="mt-2 space-y-2">
                       {msg.feedback && <p className="text-[11px] font-semibold text-gray-500">Referencias de la web</p>}
                       {msg.recursos.some((item) => item.href === "/tasacion/") && (
@@ -1636,7 +1690,7 @@ export default function ChatBot() {
                           key={recurso.href}
                           href={recurso.href}
                           onClick={() => setOpen(false)}
-                          className="block bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition border border-gray-100"
+                          className="lucia-content-card block p-3"
                         >
                           <p className="text-xs font-semibold text-gray-800 leading-snug">{recurso.titulo}</p>
                           <p className="text-[11px] text-gray-500 leading-snug mt-0.5">{recurso.detalle}</p>
@@ -1656,7 +1710,7 @@ export default function ChatBot() {
                           href={`/propiedades/${getPropertySlug(prop)}`}
                           data-lucia-property={prop.id}
                           onClick={() => setOpen(false)}
-                          className="flex gap-3 bg-white rounded-xl p-2.5 shadow-sm hover:shadow-md transition border border-gray-100"
+                          className="lucia-content-card flex gap-3 p-3"
                         >
                           <Miniatura prop={prop} />
                           <div className="min-w-0 flex flex-col justify-center gap-0.5">
@@ -1678,7 +1732,14 @@ export default function ChatBot() {
                     </div>
                   )}
 
-                  {msg.comparison?.length > 0 && <LuciaComparison rows={msg.comparison} />}
+                  {msg.comparison?.length > 0 && <LuciaComparison rows={msg.comparison} disabled={typing} onConsult={(rows) => {
+                    const chosen = (msg.results || []).filter((property) => rows.some((row) => row.id === property.id));
+                    const names = rows.map((row) => {
+                      const property = chosen.find((item) => item.id === row.id);
+                      return property ? `${row.title}: ${window.location.origin}/propiedades/${getPropertySlug(property)}/` : row.title;
+                    }).join("\n");
+                    setHandoff({ text: `Hola Milton, me interesan estas propiedades que vi con Lucía:\n${names}\nQuisiera consultar una visita.`, searchContext: lastSearchFilters, recommendations: chosen });
+                  }} />}
 
                   {msg.tasador && (
                     <div className="mt-2">
@@ -1714,7 +1775,15 @@ export default function ChatBot() {
                     </Link>
                   )}
 
-                  {msg.role === "bot" && isLast && !typing && stepOptions && (
+                  {msg.role === "bot" && isLast && !typing && activeStep.startsWith("after_results") && (
+                    <LuciaSearchAdjust key={JSON.stringify(lastSearchFilters)} filters={lastSearchFilters} onApply={(filter) => handleOption({ label: "Actualizar mi búsqueda", filter, next: activeStep === "after_results_alquiler" ? "results_alquiler" : "results" }, filter)} />
+                  )}
+                  {msg.aiSuggestions && isLast && !typing && <div className="mt-2 flex flex-wrap gap-2">
+                    <QuickReply label={msg.followUp?.includes("zonas") ? "Comparar las zonas" : msg.followUp?.includes("aspectos") ? "Qué debería comparar" : "Contame más"} onClick={() => askLuciaAI(msg.followUp)} />
+                    <QuickReply label="Buscar propiedades" icono="buscar" onClick={() => handleOption({ label: "Buscar propiedades", next: "ask_goal", reinicia: true }, {})} />
+                    <QuickReply label="Hablar con Milton" icono="whatsapp" onClick={() => handleOption({ label: "Hablar con Milton", next: "whatsapp" }, filters)} />
+                  </div>}
+                  {msg.role === "bot" && isLast && !typing && stepOptions && !msg.aiSuggestions && (
                     <div className="mt-2 flex flex-wrap gap-1.5 pl-1">
                       {stepOptions
                         .filter((opt) => !(opt.next === "lead" && leadSent))
@@ -1731,7 +1800,12 @@ export default function ChatBot() {
               );
             })}
 
-            {typing && <TypingDots />}
+            {typing && <div className="flex items-center gap-2"><LuciaThinking text={activity} /><button type="button" onClick={cancelPending} className="lucia-quick-reply px-3 py-2 text-xs">Detener</button></div>}
+            {handoff && <LuciaHandoff key={handoff.text} initialText={handoff.text} onCancel={() => setHandoff(null)} onOpen={() => {
+              registrarSalidaWhatsApp(handoff.searchContext, "chatbot", handoff.recommendations);
+              trackWhatsAppClick(null, "chatbot");
+              trackEvent("chatbot_whatsapp", { has_search_filters: Object.keys(handoff.searchContext || {}).length > 0 });
+            }} />}
             <div ref={messagesEndRef} />
           </div>
           <LuciaComposer
@@ -1794,7 +1868,7 @@ function LuciaComposer({ onSubmit, disabled, initialText }) {
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-shrink-0 gap-2 border-t border-gray-100 bg-white p-2.5">
+    <form onSubmit={submit} className="lucia-composer flex flex-shrink-0 items-center gap-2 p-3">
       <input
         autoFocus={Boolean(initialText)}
         value={text}
@@ -1802,15 +1876,15 @@ function LuciaComposer({ onSubmit, disabled, initialText }) {
         placeholder="Escribile a Lucía..."
         aria-label="Mensaje para Lucía"
         maxLength={300}
-        className="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+        className="lucia-composer-input min-w-0 flex-1"
       />
       <button
         type="submit"
         disabled={disabled || !text.trim()}
-        className="rounded-full px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
-        style={{ backgroundColor: AIRBNB }}
+        className="lucia-send"
+        aria-label="Enviar"
       >
-        Enviar
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" /></svg>
       </button>
     </form>
   );
@@ -1903,7 +1977,50 @@ function LuciaFeedback({ feedback, pagePath, onTracked }) {
   );
 }
 
-function LuciaComparison({ rows }) {
+function LuciaHandoff({ initialText, onCancel, onOpen }) {
+  const [text, setText] = useState(initialText);
+  return <section className="lucia-tool">
+    <label className="block text-sm font-medium">Tu mensaje para Milton
+      <textarea value={text} onChange={(event) => setText(event.target.value)} maxLength={3000} rows={5} className="lucia-tool-input mt-2" />
+    </label>
+    <p className="my-2 text-xs text-gray-600">Revisalo. El envío lo hacés vos desde WhatsApp.</p>
+    <div className="flex flex-wrap gap-2">
+      {text.trim() && <a href={whatsappUrl(text)} target="_blank" rel="noopener noreferrer" onClick={onOpen} className="lucia-quick-reply px-3 py-2 text-xs">Abrir WhatsApp</a>}
+      <button type="button" onClick={onCancel} className="lucia-quick-reply px-3 py-2 text-xs">Cerrar resumen</button>
+    </div>
+  </section>;
+}
+
+function LuciaSearchAdjust({ filters, onApply }) {
+  const [budget, setBudget] = useState(filters.maxPrice || "");
+  const [bedrooms, setBedrooms] = useState(filters.minBedrooms ?? "");
+  const alquiler = filters.operacion === "alquiler";
+  return <details className="lucia-tool mt-2">
+    <summary className="cursor-pointer text-xs font-medium">Ajustar mi búsqueda</summary>
+    <form className="mt-3 space-y-3" onSubmit={(event) => {
+      event.preventDefault();
+      const next = { ...filters };
+      if (!alquiler) { delete next.minPrice; delete next.maxPrice; if (budget !== "") next.maxPrice = Number(budget); }
+      delete next.minBedrooms; delete next.maxBedrooms;
+      if (bedrooms !== "") next.minBedrooms = Number(bedrooms);
+      onApply(next);
+    }}>
+      {!alquiler && <label className="block text-xs">Presupuesto máximo en USD
+        <input type="number" min="1" step="1" value={budget} onChange={(event) => setBudget(event.target.value)} placeholder="Sin máximo" className="lucia-tool-input mt-1" />
+      </label>}
+      <label className="block text-xs">Dormitorios desde
+        <select value={bedrooms} onChange={(event) => setBedrooms(event.target.value)} className="lucia-tool-input mt-1">
+          <option value="">Indistinto</option>{[0, 1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n === 0 ? "Monoambiente o más" : `${n} o más`}</option>)}
+        </select>
+      </label>
+      <button type="submit" className="lucia-quick-reply px-3 py-2 text-xs">Ver opciones actualizadas</button>
+    </form>
+  </details>;
+}
+
+function LuciaComparison({ rows, onConsult, disabled }) {
+  const [selected, setSelected] = useState(() => rows.slice(0, 2).map((row) => row.id));
+  const [onlySelected, setOnlySelected] = useState(false);
   const value = (number, suffix = "") => number === null ? "Sin dato" : `${number.toLocaleString("es-AR")}${suffix}`;
   const price = (row) => row.price === null
     ? "Consultar"
@@ -1912,10 +2029,12 @@ function LuciaComparison({ rows }) {
       : `$${row.price.toLocaleString("es-AR")}/mes`;
 
   return (
-    <div aria-label="Comparación de propiedades" className="mt-2 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-      {rows.map((row, index) => (
+    <div aria-label="Comparación de propiedades" className="lucia-content-card mt-2 overflow-hidden">
+      <p className="px-3 pt-3 text-xs font-medium">Elegí las que te interesan para consultar</p>
+      <button type="button" className="lucia-quick-reply mx-3 mt-2 px-3 py-2 text-xs" disabled={!selected.length} onClick={() => setOnlySelected((value) => !value)}>{onlySelected ? "Mostrar todas" : "Comparar solo seleccionadas"}</button>
+      {rows.filter((row) => !onlySelected || selected.includes(row.id)).map((row, index) => (
         <div key={row.id} className={`p-2.5 ${index ? "border-t border-gray-100" : ""}`}>
-          <p className="text-[11px] font-semibold leading-snug text-gray-800">{row.title}</p>
+          <label className="flex items-center gap-2 text-xs font-semibold leading-snug text-gray-800"><input type="checkbox" checked={selected.includes(row.id)} disabled={disabled} onChange={() => setSelected((prev) => prev.includes(row.id) ? prev.filter((id) => id !== row.id) : [...prev, row.id])} />{row.title}</label>
           <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-gray-500">
             <span>{price(row)}</span>
             <span>{value(row.area, " m²")}</span>
@@ -1925,20 +2044,19 @@ function LuciaComparison({ rows }) {
           </div>
         </div>
       ))}
+      <button type="button" disabled={disabled || !selected.length} onClick={() => onConsult(rows.filter((row) => selected.includes(row.id)))} className="lucia-quick-reply m-3 px-3 py-2 text-xs disabled:opacity-50">Consultar {selected.length === 1 ? "esta propiedad" : "las seleccionadas"}</button>
     </div>
   );
 }
 
-// Indicador gráfico, no textual: los tres puntitos suben la sensación de
-// presencia, mientras que la palabra "escribiendo…" no tuvo efecto medible.
-function TypingDots() {
+function LuciaThinking({ text = "Lucía está preparando tu respuesta" }) {
   return (
-    <div className="flex justify-start" aria-label="Lucía está escribiendo" role="status">
-      <div className="bg-white shadow-sm rounded-2xl rounded-bl-sm px-3.5 py-3 flex items-center gap-1">
-        <span className="lucia-dot block w-1.5 h-1.5 rounded-full bg-gray-400" />
-        <span className="lucia-dot block w-1.5 h-1.5 rounded-full bg-gray-400" style={{ animationDelay: "0.18s" }} />
-        <span className="lucia-dot block w-1.5 h-1.5 rounded-full bg-gray-400" style={{ animationDelay: "0.36s" }} />
+    <div className="flex items-center gap-3 px-1 py-2" role="status" aria-live="polite" aria-atomic="true">
+      <div className="relative h-9 w-9 shrink-0" aria-hidden="true">
+        <span className="lucia-thinking-ring absolute -inset-1 rounded-full" />
+        <img src={LUCIA_AVATAR} alt="" className="h-full w-full rounded-full object-cover" />
       </div>
+      <p className="text-xs leading-relaxed text-gray-600">{text}</p>
     </div>
   );
 }
@@ -2029,15 +2147,36 @@ function LeadForm({ onSubmit }) {
   );
 }
 
+function LuciaClima({ dato }) {
+  const { ahora, dias } = dato;
+  const hoy = dias?.find((dia) => dia.nombre === "Hoy");
+  return (
+    <section className="lucia-weather" aria-label="Clima de San Martín de los Andes">
+      <p className="lucia-weather-location">San Martín de los Andes</p>
+      <div className="lucia-weather-main">
+        <div>
+          <p className="lucia-weather-temperature">{ahora.temperatura}<span aria-label="grados Celsius">°</span></p>
+          {ahora.estado && <p className="lucia-weather-condition">{ahora.estado}</p>}
+        </div>
+        <div className="lucia-weather-symbol"><ClimaIcono nombre={ahora.icono} /></div>
+      </div>
+      {(ahora.sensacion != null || hoy) && (
+        <dl className="lucia-weather-details">
+          {ahora.sensacion != null && <div><dt>Sensación</dt><dd>{ahora.sensacion} °C</dd></div>}
+          {hoy && <><div><dt>Mínima hoy</dt><dd>{hoy.min} °C</dd></div><div><dt>Máxima hoy</dt><dd>{hoy.max} °C</dd></div></>}
+        </dl>
+      )}
+      <p className="lucia-weather-source">Datos de Open-Meteo</p>
+    </section>
+  );
+}
+
 function QuickReply({ label, icono, onClick }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <button
+      type="button"
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="text-xs px-3 py-1.5 rounded-full border transition-all inline-flex items-center gap-1.5"
-      style={{ borderColor: AIRBNB, backgroundColor: hovered ? AIRBNB : "white", color: hovered ? "white" : AIRBNB }}
+      className="lucia-quick-reply text-xs px-3 py-2 inline-flex items-center gap-2 text-left"
     >
       {icono && <OpcionIcono nombre={icono} />}
       {label}

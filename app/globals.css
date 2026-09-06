@@ -476,19 +476,108 @@ form:hover .nav-icon-search {
   .prose-lg ul, .prose-lg ol { margin-block: 1.35em; }
 }
 
-/* Puntitos del asistente Lucía (components/ChatBot.jsx). Indicador gráfico:
-   sube la sensación de presencia sin caer en el "escribiendo…" textual. */
-@keyframes lucia-typing {
-  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-3px); }
+.lucia-header { flex-shrink: 0; background: var(--color-primary-50); color: #492735; border-bottom: 1px solid var(--color-primary-100); }
+.lucia-header-subtitle { color: #825665; }
+.lucia-header-avatar { outline: 2px solid var(--color-primary-500); outline-offset: 3px; }
+.lucia-weather-chip { color: #92213f; background: var(--color-primary-100); min-height: 32px; }
+.lucia-conversation { background: #fffafb; }
+.lucia-message { padding: 12px 15px; overflow-wrap: anywhere; }
+.lucia-message-bot { background: white; border: 1px solid #f5e7ec; border-radius: 22px 22px 22px 7px; color: #492735; }
+.lucia-message-user { background: var(--color-primary-100); border-radius: 22px 22px 7px 22px; color: #592438; }
+.lucia-content-card { background: white; border: 1px solid var(--color-primary-100); border-radius: 22px 22px 22px 7px; }
+a.lucia-content-card { transition: background-color 160ms ease, border-color 160ms ease; }
+a.lucia-content-card:hover { background: var(--color-primary-50); border-color: var(--color-primary-200); }
+.lucia-composer { background: white; border-top: 1px solid var(--color-primary-100); }
+.lucia-composer-input { min-height: 46px; background: var(--color-primary-50); border: 1px solid var(--color-primary-100); border-radius: 23px 23px 8px 23px; padding: 11px 15px; font-size: 16px; color: #492735; }
+.lucia-composer-input::placeholder { color: #926477; }
+.lucia-composer-input:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+.lucia-send { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 0; border-radius: 50%; background: var(--color-primary-500); color: white; cursor: pointer; transition: background-color 160ms ease, transform 160ms ease; }
+.lucia-send:hover:not(:disabled) { background: var(--color-primary-700); }
+.lucia-send:active:not(:disabled) { transform: scale(.95); }
+.lucia-send:disabled { background: var(--color-primary-100); color: #a64c68; cursor: default; }
+@keyframes lucia-message-enter { from { opacity: .3; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.lucia-message-entry { animation: lucia-message-enter 180ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .lucia-message-entry { animation: none; }
+  .lucia-send, a.lucia-content-card { transition: none; }
+  .lucia-send:active:not(:disabled) { transform: none; }
 }
 
-.lucia-dot {
-  animation: lucia-typing 1.3s ease-in-out infinite;
+.lucia-weather {
+  width: 100%;
+  padding: 20px;
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  border-radius: 26px 26px 26px 8px;
+  color: #33252b;
+}
+.lucia-panel-expanded { width: min(46rem, calc(100vw - 2rem)); }
+.lucia-header-action { min-width: 28px; min-height: 32px; color: #92213f; font-size: 20px; border-radius: 8px; cursor: pointer; }
+.lucia-header-action:hover { background: var(--color-primary-100); }
+.lucia-tool { padding: 16px; border: 1px solid var(--color-primary-100); border-radius: 22px 22px 22px 7px; background: var(--color-primary-50); color: #33252b; }
+.lucia-tool-input { display: block; width: 100%; padding: 10px; border: 1px solid var(--color-primary-200); border-radius: 10px; background: white; color: #33252b; font-size: 16px; }
+.lucia-weather-location { margin: 0; font-size: 14px; font-weight: 500; }
+.lucia-weather-main { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 22px 0; }
+.lucia-weather-temperature { margin: 0; font-size: 58px; line-height: 1; letter-spacing: -2px; }
+.lucia-weather-condition { margin: 8px 0 0; font-size: 13px; }
+.lucia-weather-condition::first-letter { text-transform: uppercase; }
+.lucia-weather-symbol { display: grid; place-items: center; flex-shrink: 0; width: 72px; height: 72px; border-radius: 50%; background: var(--color-primary-100); color: var(--color-primary-500); }
+.lucia-weather-symbol svg { width: 42px; height: 42px; stroke-width: 1.5; }
+.lucia-weather-details { display: flex; flex-wrap: wrap; gap: 14px; margin: 0; padding-top: 16px; border-top: 1px solid var(--color-primary-100); }
+.lucia-weather-details > div { flex: 1; min-width: 60px; }
+.lucia-weather-details dt { font-size: 11px; color: #825665; }
+.lucia-weather-details dd { margin: 5px 0 0; font-size: 14px; }
+.lucia-weather-source { margin: 16px 0 0; font-size: 11px; color: #825665; }
+
+.lucia-quick-reply {
+  min-height: 36px;
+  background-color: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  border-radius: 18px 18px 18px 6px;
+  color: #92213f;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.lucia-quick-reply svg { color: var(--color-primary-700); }
+
+@media (hover: hover) {
+  .lucia-quick-reply:hover {
+    background-color: var(--color-primary-100);
+    border-color: var(--color-primary-200);
+  }
+}
+
+.lucia-quick-reply:active {
+  background-color: var(--color-primary-100);
+  border-color: var(--color-primary-200);
+  transform: scale(0.98);
+}
+
+.lucia-quick-reply:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lucia-dot { animation: none; opacity: 0.55; }
+  .lucia-quick-reply { transition: none; }
+  .lucia-quick-reply:active { transform: none; }
+}
+
+/* Un pulso suave alrededor del retrato acompaña la espera de Lucía. */
+@keyframes lucia-thinking {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 2px var(--color-primary-100); }
+  50% { transform: scale(1.1); box-shadow: 0 0 0 5px var(--color-primary-100); }
+}
+
+.lucia-thinking-ring {
+  display: block;
+  border: 3px solid var(--color-primary-500);
+  animation: lucia-thinking 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lucia-thinking-ring { animation: none; box-shadow: 0 0 0 2px var(--color-primary-100); }
 }
 
 /* El panel del asistente entra desde el botón flotante, no aparece de golpe. */
