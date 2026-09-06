@@ -6,7 +6,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-7 sm:px-6 sm:py-12 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8">
           <div className="col-span-2">
-            <img src="/marca1.png" alt="Catalan Propiedades" className="h-9 w-auto mb-4" />
+            <picture>
+              <source media="(max-width: 767px)" srcSet="/fondoMarca.webp" width="1200" height="1200" />
+              <img src="/logo-catalan.png" alt="Catalán Propiedades" width="1230" height="142" className="block w-12 h-12 object-contain md:w-[210px] md:h-auto max-w-full mb-4" />
+            </picture>
             <p className="text-sm text-gray-500 mb-6 font-dm max-w-xs">
               Asesoría inmobiliaria de alto valor en San Martín de los Andes, Patagonia.
             </p>

@@ -96,8 +96,8 @@ export const metadata = {
     other: BING_SITE_VERIFICATION ? { "msvalidate.01": BING_SITE_VERIFICATION } : undefined,
   },
   icons: {
-    icon: [{ url: "/favicon.svg?v=winter-brand-v2", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg?v=winter-brand-v2",
+    icon: [{ url: "/favicon.svg?v=catalan-brand-v3", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg?v=catalan-brand-v3",
     apple: "/icon.png",
   },
 };
@@ -117,7 +117,7 @@ const realEstateAgentJsonLd = {
   description:
     "Asesoría inmobiliaria en San Martín de los Andes, Patagonia Argentina. Venta, alquiler permanente e inversiones.",
   url: canonicalUrl("/"),
-  logo: `${SITE_URL}/logoMC.webp`,
+  logo: `${SITE_URL}/logo-catalan.png`,
   image: DEFAULT_OG_IMAGE,
   telephone: PHONE_DISPLAY,
   email: CONTACT_EMAIL,
@@ -186,8 +186,8 @@ export default function RootLayout({ children }) {
         <Script id="ga-guard" strategy="beforeInteractive">
           {gaGuardScript}
         </Script>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=winter-brand-v2" id="favicon" />
-        <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=winter-brand-v2" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=catalan-brand-v3" id="favicon" />
+        <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=catalan-brand-v3" />
         {/* Acá NO va un <link rel="canonical">. Este layout envuelve todas las
             páginas, así que un canónico fijo salía en todas apuntando a la home
             y chocaba con el que cada página declara en su `alternates`. Google
@@ -222,4 +222,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-

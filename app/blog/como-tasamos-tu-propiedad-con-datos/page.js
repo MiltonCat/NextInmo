@@ -45,7 +45,7 @@ const articleJsonLd = {
   publisher: {
     "@type": "Organization",
     name: "Catalán Propiedades",
-    logo: { "@type": "ImageObject", url: `${SITE_URL}/logoMC.webp` },
+    logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-catalan.png` },
   },
   mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl("/blog/como-tasamos-tu-propiedad-con-datos") },
 };

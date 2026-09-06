@@ -43,7 +43,7 @@ const articleJsonLd = {
   description: "Guía legal sobre reserva, seña, boleto de compraventa y locación cuando el inquilino compra la propiedad que ocupa.",
   image, datePublished: "2026-08-12", dateModified: "2026-08-12",
   author: { "@type": "Person", name: "Carolina Godoy", image: `${SITE_URL}${carolinaImage}`, telephone: "2944-630649", sameAs: [linkedin] },
-  publisher: { "@type": "Organization", name: "Catalán Propiedades", logo: { "@type": "ImageObject", url: `${SITE_URL}/logoMC.webp` } },
+  publisher: { "@type": "Organization", name: "Catalán Propiedades", logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-catalan.png` } },
   mainEntityOfPage: { "@type": "WebPage", "@id": url },
 };
 

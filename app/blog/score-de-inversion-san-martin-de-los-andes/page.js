@@ -64,7 +64,7 @@ const articleJsonLd = {
     name: "Catalán Propiedades",
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/logoMC.webp`,
+      url: `${SITE_URL}/logo-catalan.png`,
     },
   },
   mainEntityOfPage: {
