@@ -1,21 +1,12 @@
 "use client";
-import { Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import PropertyCard from "@/components/PropertyCard";
-import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 
 function AlquileresContent({ properties = [] }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("default");
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
 
   const filteredProperties = properties
     .filter((p) => {
@@ -70,11 +61,7 @@ function AlquileresContent({ properties = [] }) {
           />
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} />)}
-          </div>
-        ) : filteredProperties.length > 0 ? (
+        {filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
@@ -92,8 +79,6 @@ function AlquileresContent({ properties = [] }) {
 
 export default function AlquileresClient({ properties = [] }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white pt-24 flex items-center justify-center"><div className="text-gray-400">Cargando...</div></div>}>
-      <AlquileresContent properties={properties} />
-    </Suspense>
+    <AlquileresContent properties={properties} />
   );
 }

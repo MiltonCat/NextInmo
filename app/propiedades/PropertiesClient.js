@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -320,8 +320,6 @@ function PropertiesContent({ properties = [], tipoFiltro, tipoLabel }) {
 
 export default function PropertiesClient({ properties = [], tipoFiltro, tipoLabel } = {}) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white pt-24 flex items-center justify-center"><div className="text-gray-400">Cargando...</div></div>}>
-      <PropertiesContent properties={properties} tipoFiltro={tipoFiltro} tipoLabel={tipoLabel} />
-    </Suspense>
+    <PropertiesContent properties={properties} tipoFiltro={tipoFiltro} tipoLabel={tipoLabel} />
   );
 }

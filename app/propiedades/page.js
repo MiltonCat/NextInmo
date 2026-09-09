@@ -1,7 +1,7 @@
-import dynamic from "next/dynamic";
+import { connection } from "next/server";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { getProperties } from "@/lib/properties";
-const PropertiesClient = dynamic(() => import("./PropertiesClient"));
+import PropertiesClient from "./PropertiesClient";
 
 export const revalidate = 300;
 
@@ -30,6 +30,8 @@ const breadcrumbJsonLd = {
 };
 
 export default async function PropertiesPage() {
+  // Los filtros de URL deben resolverse también en el HTML del servidor.
+  await connection();
   const properties = await getProperties();
   return (
     <>

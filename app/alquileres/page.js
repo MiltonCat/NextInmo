@@ -1,7 +1,7 @@
-import dynamic from "next/dynamic";
+import { connection } from "next/server";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { getProperties } from "@/lib/properties";
-const AlquileresClient = dynamic(() => import("./AlquileresClient"));
+import AlquileresClient from "./AlquileresClient";
 
 export const revalidate = 300;
 
@@ -30,6 +30,7 @@ const breadcrumbJsonLd = {
 };
 
 export default async function AlquileresPage() {
+  await connection();
   const properties = await getProperties();
   return (
     <>

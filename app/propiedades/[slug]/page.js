@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import Link from "next/link";
 import PropertyDetailClient from "@/components/PropertyDetailClient";
 import { getPropertySlug } from "@/data/properties";
 import { getProperties, getPropertyById } from "@/lib/properties";
 import { SITE_URL, canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
-import dynamic from "next/dynamic";
-
-const PropertiesClient = dynamic(() => import("../PropertiesClient"));
+import PropertiesClient from "../PropertiesClient";
 
 // Refresca desde la base cada 5 minutos. Las propiedades nuevas (no incluidas
 // en generateStaticParams) se renderizan bajo demanda gracias a dynamicParams.
@@ -119,6 +118,9 @@ export default async function PropiedadesSlugPage({ params }) {
   // Página por tipo
   const tipoConfig = TIPO_MAP[slug];
   if (tipoConfig) {
+    // Evita que useSearchParams sustituya todo el catálogo por su fallback.
+    // Las fichas individuales conservan su generación estática.
+    await connection();
     const breadcrumbJsonLd = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
