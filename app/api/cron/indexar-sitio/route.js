@@ -22,10 +22,16 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // La funcion se corta a los 60 s. Se corta sola a los 45 para alcanzar a
-// responder, y como maximo toca 8 paginas por corrida: lo que quede pendiente
-// entra manana. Un reindexado completo se hace a mano con `npm run
+// responder, y como maximo ESCRIBE 12 paginas por corrida: lo que quede
+// pendiente entra manana. Un reindexado completo se hace a mano con `npm run
 // indexar-sitio -- --todo`, que no tiene este techo.
-const MAX_PAGINAS = 8;
+//
+// Eran 8 cuando el indexador leia de a una pagina por vez y la lectura se comia
+// el presupuesto: el recorrido moria siempre en el mismo punto del sitemap y lo
+// que estaba mas abajo no se revisaba nunca. Ahora lee todo el sitio en
+// paralelo antes de escribir nada, asi que el tiempo queda para los embeddings.
+// Este numero ya no decide QUE paginas se miran, solo cuantas se escriben.
+const MAX_PAGINAS = 12;
 const MS_DISPONIBLES = 45_000;
 
 export async function GET(request) {

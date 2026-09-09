@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { getPanelDeLucia, FILTROS, VENTANA } from "@/lib/luciaPanel";
 import { contarPorTema, temaDePregunta, etiquetaDeTema } from "@/lib/luciaTemas.mjs";
 import { signOut } from "../actions";
+import BotonIndexar from "./BotonIndexar";
 
 // El panel siempre muestra datos frescos (no cacheado).
 export const dynamic = "force-dynamic";
@@ -75,6 +76,10 @@ export default async function LuciaPage({ searchParams }) {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Va arriba de todo a proposito: es la unica accion de esta pantalla.
+            El resto es lectura. */}
+        <BotonIndexar />
+
         <p className="text-sm text-gray-500 mb-4">
           {filtro === "prueba"
             ? "Tus pruebas, las que escribiste con ?lucia=prueba activo. No entran en ninguna otra vista."
