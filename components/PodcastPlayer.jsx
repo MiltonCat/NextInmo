@@ -21,7 +21,8 @@ export default function PodcastPlayer({ slug, transcripcion }) {
   if (!post?.audio) return null;
 
   const { duracion } = post.audio;
-  const src = `/podcast/${post.id}.mp3`;
+  const src = post.audio.src || `/podcast/${post.id}.mp3`;
+  const type = post.audio.type || "audio/mpeg";
 
   return (
     <section
@@ -51,7 +52,7 @@ export default function PodcastPlayer({ slug, transcripcion }) {
             controlsList="nodownload"
             className="mt-4 w-full"
           >
-            <source src={src} type="audio/mpeg" />
+            <source src={src} type={type} />
             Tu navegador no puede reproducir audio.{" "}
             <a href={src} className="underline">Abrir el audio</a>.
           </audio>

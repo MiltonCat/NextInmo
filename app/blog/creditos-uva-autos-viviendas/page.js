@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import PodcastPlayer from "@/components/PodcastPlayer";
 import { SITE_URL, canonicalUrl } from "@/config";
 import { blogPosts } from "@/lib/blogPosts";
 
@@ -137,6 +138,7 @@ export default function CreditosUvaAutosViviendasPage() {
           <div className="relative mt-8 aspect-[16/8.43] overflow-hidden rounded-2xl bg-gray-100">
             <Image src={post.image} alt="Financiación para acceder a una vivienda" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" />
           </div>
+          <PodcastPlayer slug="creditos-uva-autos-viviendas" />
         </header>
 
         <div className="text-base leading-relaxed text-gray-700 sm:text-lg [&_p]:mb-5">
