@@ -54,8 +54,59 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const RESPUESTAS_DE_LA_CASA = [
-  // Vacío a propósito: una respuesta escrita por mí no sería la palabra de la
-  // casa, sería una invención con la firma de Milton. Las escribe él.
+  // Los siete huecos salen del banco de pruebas (node scripts/evaluar-lucia-nivel2.mjs):
+  // son las preguntas que ninguna herramienta puede resolver porque el dato no
+  // existe en ninguna página del sitio. Las de "· real" las preguntó gente.
+  //
+  // Están con la respuesta vacía a propósito: respuestasIndexables() descarta
+  // las que no tienen las tres partes, así que una a medio escribir no le llega
+  // a Lucía. Completá la que quieras, cuando quieras, y reindexá.
+  //
+  // El texto lo escribe Milton. Una respuesta redactada por el asistente no
+  // sería la palabra de la casa, sería una invención con su firma.
+
+  {
+    id: "papeles-de-la-compra",
+    pregunta: "¿Quién revisa los papeles de la compra?", // · real, 3/9
+    respuesta: "",
+    href: "/nosotros/",
+  },
+  {
+    id: "inquilino-quiere-comprar",
+    pregunta: "¿Qué pasa si el inquilino quiere comprar la casa que alquila?", // · real, 2/9
+    respuesta: "",
+    href: null,
+  },
+  {
+    id: "comision-al-comprador",
+    pregunta: "¿Cuánto cobra la inmobiliaria al comprador?",
+    respuesta: "",
+    href: "/centro-ayuda/",
+  },
+  {
+    id: "comprador-extranjero",
+    pregunta: "¿Puede comprar una propiedad una persona extranjera?",
+    respuesta: "",
+    href: null,
+  },
+  {
+    id: "publicar-con-nosotros",
+    pregunta: "¿Qué necesito para publicar mi propiedad con Catalán Propiedades?",
+    respuesta: "",
+    href: "/vender/",
+  },
+  {
+    id: "lote-o-departamento",
+    pregunta: "¿Conviene comprar un lote o un departamento?",
+    respuesta: "", // Acá va un CRITERIO, no cifras: plazos, liquidez, esfuerzo.
+    href: "/inversiones/",
+  },
+  {
+    id: "comprar-ahora-o-esperar",
+    pregunta: "¿Conviene comprar ahora o esperar?", // · real, la más preguntada: 4+ veces
+    respuesta: "", // Tu criterio para decidir, no un pronóstico del mercado.
+    href: null,
+  },
 ];
 
 // Se exporta armado para que el indexador no tenga que conocer la forma de cada
