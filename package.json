@@ -12,7 +12,8 @@
     "deploy": "next build && node scripts/zip-out.js",
     "revision-web": "node --import ./scripts/resolve-next.mjs scripts/revision-web.mjs",
     "revision-web:datos": "node scripts/revision-web-datos.mjs",
-    "indexar-sitio": "node scripts/indexar-sitio.mjs"
+    "indexar-sitio": "node scripts/indexar-sitio.mjs",
+    "evaluar-lucia": "node scripts/evaluar-lucia.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
