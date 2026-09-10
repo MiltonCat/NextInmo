@@ -235,30 +235,59 @@ form:hover .nav-icon-search {
   animation: nav-search-active 0.6s ease-in-out infinite;
 }
 
+/* La portada respira: un acercamiento de 30 segundos, tan lento que no se lo ve
+   moverse pero saca a la foto del estado de postal. Es transform puro, lo
+   resuelve el compositor y no cuesta nada en un teléfono viejo. No suma un solo
+   byte: la imagen ya está descargada, que es la razón de elegir esto antes que
+   un video de fondo.
+   `alternate` evita el salto: en vez de cortar y volver a empezar, se aleja con
+   la misma lentitud con la que se acercó. */
 @keyframes hero-kenburns {
   0%   { transform: scale(1) translate(0, 0); }
-  100% { transform: scale(1.15) translate(-1.5%, -1%); }
+  100% { transform: scale(1.08) translate(-1%, -0.6%); }
 }
 
 .hero-kenburns {
-  animation: hero-kenburns 18s ease-out infinite alternate;
+  animation: hero-kenburns 30s ease-in-out infinite alternate;
   will-change: transform;
 }
 
+/* El texto entra escalonado y el último elemento termina antes del segundo.
+   El H1 se pinta desde el servidor y acá solo se anima su opacidad, así que la
+   frase con la que se busca la inmobiliaria no llega tarde. */
 @keyframes hero-fade-up {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .hero-fade-in {
   opacity: 0;
-  animation: hero-fade-up 0.8s ease-out forwards;
+  animation: hero-fade-up 0.55s ease-out forwards;
 }
 
-.hero-delay-1 { animation-delay: 0.15s; }
-.hero-delay-2 { animation-delay: 0.30s; }
-.hero-delay-3 { animation-delay: 0.45s; }
-.hero-delay-4 { animation-delay: 0.60s; }
+.hero-delay-1 { animation-delay: 0.08s; }
+.hero-delay-2 { animation-delay: 0.16s; }
+.hero-delay-3 { animation-delay: 0.24s; }
+.hero-delay-4 { animation-delay: 0.32s; }
+
+/* Cada barrio medido aterriza sobre la línea, del más barato al más caro. */
+@keyframes hero-punto-entrar {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.hero-punto {
+  transform: translate(-50%, -50%);
+  animation: hero-punto-entrar .4s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+/* Con movimiento reducido la portada queda quieta y el texto visible desde el
+   primer cuadro: nada de opacidad 0 esperando una animación que no va a correr. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-kenburns { animation: none; }
+  .hero-fade-in { opacity: 1; animation: none; }
+  .hero-punto { animation: none; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
 
 @keyframes btn-barrio-shine {
   0%   { transform: translateX(-150%); opacity: 0; }
