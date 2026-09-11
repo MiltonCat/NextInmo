@@ -105,3 +105,11 @@ docs/debug-ficha.html
 # pesan; al repo va la suite, no sus resultados.
 /test-results/
 /playwright-report/
+
+# Artefactos de las sesiones de trabajo: puntos de retorno del hero con sus
+# .mp4, los snapshots de verificar-fotos.mjs y borradores de investigacion. Son
+# 25 MB que se regeneran y que ninguna pagina del sitio consume, y los puntos de
+# retorno solo sirven mientras dura la sesion que los creo. Siguen en disco: lo
+# que no queda es su copia en el historial.
+/outputs/
+/Claude outputs/
