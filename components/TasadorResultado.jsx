@@ -235,6 +235,31 @@ export default function TasadorResultado({
   onReiniciar,
 }) {
   const { trackEvent, trackWhatsAppClick } = useAnalytics();
+  const [descargandoPdf, setDescargandoPdf] = useState(false);
+
+  async function descargarPdf() {
+    setDescargandoPdf(true);
+    try {
+      const response = await fetch("/api/tasacion/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datos, resultado, contexto }),
+      });
+      if (!response.ok) throw new Error("pdf");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = `Reporte_Tasacion_${datos.barrio || "inmueble"}.pdf`;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      URL.revokeObjectURL(url);
+      trackEvent("tasador_resultado_pdf", { barrio: datos.barrio, tipo: datos.tipo });
+    } finally {
+      setDescargandoPdf(false);
+    }
+  }
 
   if (bloqueado) {
     return (
@@ -336,7 +361,7 @@ export default function TasadorResultado({
           resultado de esta tasación para que no tengas que escribir todo de nuevo.
         </p>
 
-        <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <a
             href={waHref}
             target="_blank"
@@ -345,20 +370,31 @@ export default function TasadorResultado({
               trackEvent("tasador_resultado_whatsapp", { barrio: datos.barrio, tipo: datos.tipo });
               trackWhatsAppClick(null, "tasador_resultado");
             }}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500"
+            className="order-2 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 sm:flex-none"
           >
             <svg className="h-[18px] w-[18px]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.122 1.528 5.855L.057 23.882l6.186-1.622A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.658-.518-5.168-1.418l-.371-.22-3.673.963.981-3.585-.242-.38A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
             </svg>
-            Pedir revisión por WhatsApp
+            WhatsApp
           </a>
+          <button
+            type="button"
+            onClick={descargarPdf}
+            disabled={descargandoPdf}
+            className="order-1 inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-500 hover:bg-gray-50"
+          >
+            <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 8.25V4.5h10.5v3.75M6 18.75h12A1.5 1.5 0 0019.5 17.25v-5.5A1.5 1.5 0 0018 10.25H6a1.5 1.5 0 00-1.5 1.5v5.5A1.5 1.5 0 006 18.75zM7.5 14.25h9v5.25h-9v-5.25z" />
+            </svg>
+            {descargandoPdf ? "Generando PDF..." : "Guardar PDF"}
+          </button>
           <button
             type="button"
             onClick={() => {
               trackEvent("tasador_otra_propiedad", {});
               onReiniciar();
             }}
-            className="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400"
+            className="order-3 inline-flex items-center justify-center rounded-lg border border-transparent px-4 py-2.5 text-xs font-semibold text-gray-500 transition-colors hover:border-gray-300 hover:bg-gray-50 sm:flex-none"
           >
             Tasar otra propiedad
           </button>
