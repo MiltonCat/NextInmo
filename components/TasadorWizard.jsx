@@ -210,7 +210,7 @@ const ESTADO_INICIAL = {
   extras: [],
 };
 
-export default function TasadorWizard({ barrios = [], compacto = false, onResultado }) {
+export default function TasadorWizard({ barrios = [], compacto = false, onResultado, ciudad = "sma" }) {
   const camposId = useId();
   const [form, setForm] = useState(ESTADO_INICIAL);
   const [paso, setPaso] = useState(0);
@@ -332,6 +332,7 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            ciudad,
             tipo: form.tipo,
             barrio: form.barrio,
             superficie: superficieNum,
@@ -364,7 +365,7 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
         setCargando(false);
       }
     },
-    [form, superficieNum, esCasa, trackEvent, onResultado]
+    [form, superficieNum, esCasa, trackEvent, onResultado, ciudad]
   );
 
   const avanzar = () => {

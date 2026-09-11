@@ -1,6 +1,6 @@
 import Image from "next/image";
 import CarruselDecoracion from "@/components/CarruselDecoracion";
-import TasadorWizard from "@/components/TasadorWizard";
+import TasacionProfesionalClient from "@/components/TasacionProfesionalClient";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { getBarrios } from "@/lib/tasador";
 import { barriosConMediana } from "@/lib/precioZonas";
@@ -403,7 +403,7 @@ export default async function TasacionPage() {
             sentido de la frase, así el color subraya lo que diferencia a este
             tasador de cualquier otro: que sabe de San Martín y no del país. */}
         <h1 className="text-[34px] font-semibold leading-[1.08] tracking-[-0.025em] text-gray-900 md:text-[52px]">
-          ¿Cuánto vale tu propiedad <span className="text-rose-600">en San Martín de los Andes</span>?
+          ¿Cuánto vale tu propiedad?
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-500 md:text-lg">
           Contestá cinco preguntas y el modelo te da un rango de valor con datos reales del mercado
@@ -440,7 +440,7 @@ export default async function TasacionPage() {
       </section>
 
       <div id="tasador" className="mx-auto mt-10 max-w-3xl scroll-mt-24 px-4 sm:px-6 md:mt-12 lg:px-8">
-        <TasadorWizard barrios={barrios} />
+        <TasacionProfesionalClient barriosIniciales={barrios} />
       </div>
 
       <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 lg:px-8 md:py-20">

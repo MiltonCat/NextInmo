@@ -101,7 +101,9 @@ export async function POST(request) {
     const pareceBot = Boolean(body.trampa);
     if (pareceBot) console.warn("[/api/tasar] campo trampa completado; no se da de alta el suscriptor");
 
-    const entrada = normalizarEntrada(body);
+    const ciudadesValidas = new Set(["sma", "neuquen", "villa-la-angostura", "bariloche"]);
+    const ciudad = ciudadesValidas.has(String(body.ciudad)) ? String(body.ciudad) : "sma";
+    const entrada = normalizarEntrada(body, ciudad);
     if (!entrada.ok) {
       return NextResponse.json({ ok: false, error: entrada.error }, { status: 400 });
     }
