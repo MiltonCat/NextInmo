@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { buildLuciaKnowledge } from "@/lib/luciaKnowledge";
 import { askOpenAILucia } from "@/lib/luciaOpenAI";
 import { registrarPregunta } from "@/lib/luciaPreguntas";
+import { normalizarTasacion } from "@/lib/luciaTasacion.mjs";
 import { barriosDelGrafico, graficoParaConsulta, serieDelGrafico } from "@/lib/luciaGraficos";
 import {
   EVOLUCION_SERIE,
@@ -88,6 +89,10 @@ export async function POST(request) {
 
   const history = cleanHistory(body?.history);
   const pagePath = clamp(body?.pagePath, 240) || null;
+  // La tasación la manda el navegador, así que se valida campo por campo como
+  // cualquier otra entrada. Si no pasa, vale null y la charla sigue sin ella:
+  // preferible a que Lucía hable de "tu tasación" con datos a medias.
+  const tasacion = normalizarTasacion(body?.tasacion);
   if (body?.stream === true) {
     const encoder = new TextEncoder();
     const abort = new AbortController();
@@ -106,7 +111,7 @@ export async function POST(request) {
         };
         try {
           emit({ type: "status", text: "Consultando información de la web" });
-          const knowledge = await buildLuciaKnowledge(question, history);
+          const knowledge = await buildLuciaKnowledge(question, history, { tasacion });
           if (abort.signal.aborted || request.signal.aborted) return;
           emit({ type: "status", text: "Preparando tu respuesta" });
           const answer = await askOpenAILucia({
@@ -134,7 +139,7 @@ export async function POST(request) {
     });
     return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
   }
-  const knowledge = await buildLuciaKnowledge(question, history);
+  const knowledge = await buildLuciaKnowledge(question, history, { tasacion });
   const answer = await askOpenAILucia({
     question,
     history,

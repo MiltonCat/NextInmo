@@ -792,6 +792,11 @@ export default function ChatBot() {
   // La bienvenida del widget viaja en el historial como mensaje de Lucía, así que
   // el modelo no puede saber por ahí si ya habló en la charla. Acá sí se sabe.
   const yaRespondioIaRef = useRef(false);
+  // La tasación que trajo quien abrió el chat desde el resultado del tasador.
+  // Queda para toda la charla y no solo para el primer botón: la repregunta
+  // ("¿y si la refacciono?") es sobre la misma propiedad, y si el dato no viaja
+  // con ella Lucía contesta como si nunca hubiera visto ese número.
+  const tasacionRef = useRef(null);
 
   useEffect(() => () => { timersRef.current.forEach(clearTimeout); aiRequestRef.current?.abort(); }, []);
 
@@ -1358,6 +1363,7 @@ export default function ChatBot() {
           pagePath: pathname,
           primeraRespuesta: !yaRespondioIaRef.current,
           interno: modoPrueba,
+          tasacion: tasacionRef.current || undefined,
           stream: true,
         }),
       });
@@ -1489,10 +1495,16 @@ export default function ChatBot() {
 
   const receiveCommand = useEffectEvent((nextCommand) => {
     handledCommandRef.current = nextCommand.id;
+    if (nextCommand.tasacion) tasacionRef.current = nextCommand.tasacion;
     abrirChat(nextCommand.source || "internal");
     if (!nextCommand.question) return;
-    if (nextCommand.autoSubmit) handleText(nextCommand.question);
-    else setComposerDraft({ id: nextCommand.id, text: nextCommand.question });
+    // Con una tasación en la mano la pregunta va derecho a la IA. Por el árbol
+    // guiado terminaría en otro lado: "cuánto vale mi propiedad" abre el wizard
+    // del tasador —el que la persona acaba de completar— y una pregunta que no
+    // arranca con interrogativo cae en la búsqueda de propiedades.
+    if (!nextCommand.autoSubmit) setComposerDraft({ id: nextCommand.id, text: nextCommand.question });
+    else if (nextCommand.tasacion) askLuciaAI(nextCommand.question);
+    else handleText(nextCommand.question);
   });
 
   // El comando vive en el provider, por lo que tampoco se pierde si el widget
@@ -1582,6 +1594,9 @@ export default function ChatBot() {
     setLastSearchFilters({});
     setWrittenAnswers({});
     lastRecommendationsRef.current = [];
+    // Charla nueva, tasación afuera: si no, la propiedad de la persona seguiría
+    // pesando en el contexto de preguntas que ya no tienen nada que ver.
+    tasacionRef.current = null;
     saludar();
   };
 
