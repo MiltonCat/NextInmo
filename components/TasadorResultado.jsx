@@ -8,9 +8,11 @@
 // consulte a un segundo tasador. El rango dice la verdad y encima es más útil
 // para decidir a cuánto publicar.
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { WA_NUMBER } from "@/config";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useLucia } from "@/components/LuciaProvider";
 import CampoTrampa from "./CampoTrampa";
 
 const usd = (n) =>
@@ -112,6 +114,103 @@ function RangoEstimado({ min, max, valor }) {
         <span>{usd(min)}</span>
         <span className="px-2 text-[11px] uppercase tracking-wider">puede moverse entre</span>
         <span>{usd(max)}</span>
+      </p>
+    </div>
+  );
+}
+
+// Hasta acá el resultado terminaba en una pantalla muerta: el número, un botón
+// de WhatsApp que en 28 días no tocó nadie y el PDF. Este es el único momento
+// del sitio en que la persona tiene una duda concreta sobre su propia
+// propiedad, así que Lucía entra justo acá y a demanda: no abre nada sola ni le
+// suma un segundo de espera al resultado.
+//
+// Las preguntas se arman con los datos de esta tasación y el valor viaja
+// escrito adentro de la pregunta. No es adorno: en el celular el panel de Lucía
+// tapa la pantalla, y así el número queda a la vista arriba de la respuesta.
+function PreguntarleALucia({ resultado, contexto, datos }) {
+  const { openLucia } = useLucia();
+  const { trackEvent } = useAnalytics();
+  const { valorTotal, valorM2, rangoMin, rangoMax, errorPromedioPct, nEntrenamiento, advertencias } =
+    resultado;
+  const medianaBarrio = contexto?.medianaBarrio;
+
+  // Lo que se manda es el resultado, no un texto que lo describa. El servidor lo
+  // valida campo por campo igual (lib/luciaTasacion.mjs): esto sale del
+  // navegador y ahí cualquiera lo edita.
+  const tasacion = {
+    tipo: datos.tipo,
+    barrio: datos.barrio,
+    superficie: datos.superficie,
+    superficieTerreno: datos.superficieTerreno,
+    dormitorios: datos.dormitorios,
+    banos: datos.banos,
+    ambientes: datos.ambientes,
+    extras: datos.extras,
+    valorTotal,
+    valorM2,
+    rangoMin,
+    rangoMax,
+    errorPromedioPct,
+    nEntrenamiento,
+    advertencias,
+    medianaBarrio,
+    nBarrio: contexto?.nBarrio,
+  };
+
+  const preguntas = [
+    {
+      id: "por_que",
+      label: "¿Por qué me da este valor?",
+      texto: `¿Por qué mi propiedad en ${datos.barrio} da ${usd(valorTotal)}? ¿Qué pesa más en ese número?`,
+    },
+    valorM2 && medianaBarrio
+      ? {
+          id: "contra_el_barrio",
+          label: "¿Está caro o barato para el barrio?",
+          texto: `Mi m² da ${usd(valorM2)} y la mediana de ${datos.barrio} es ${usd(medianaBarrio)}. ¿Cómo se lee esa diferencia?`,
+        }
+      : null,
+    {
+      id: "lo_que_no_ve",
+      label: "¿Qué mira Milton que el modelo no ve?",
+      texto: `¿Qué mira Milton al tasar en ${datos.barrio} que el modelo no puede ver?`,
+    },
+  ].filter(Boolean);
+
+  const preguntar = ({ id, texto }) => {
+    trackEvent("tasador_lucia_pregunta", { boton: id, barrio: datos.barrio, tipo: datos.tipo });
+    openLucia({ question: texto, autoSubmit: true, source: "tasador_resultado", tasacion });
+  };
+
+  return (
+    <div className="rounded-xl border border-gray-200 p-5">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-gray-200">
+          <Image src="/lucia-avatar.webp" alt="Lucía" width={40} height={40} className="h-full w-full object-cover" />
+        </div>
+        <div>
+          <Etiqueta>Lucía</Etiqueta>
+          <p className="mt-0.5 text-sm font-semibold text-gray-900">Te explico de dónde sale este número</p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2">
+        {preguntas.map((pregunta) => (
+          <button
+            key={pregunta.id}
+            type="button"
+            onClick={() => preguntar(pregunta)}
+            className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-gray-800 transition-colors hover:border-gray-900 hover:bg-gray-50"
+          >
+            {pregunta.label}
+          </button>
+        ))}
+      </div>
+
+      <p className="mt-3 text-xs leading-relaxed text-gray-400">
+        Responde con los datos de esta tasación. Para decirte a cuánto publicarla hace falta que la
+        mire Milton.
       </p>
     </div>
   );
@@ -326,6 +425,9 @@ export default function TasadorResultado({
       </div>
 
       <ComparacionBarrio valorM2={valorM2} contexto={contexto} />
+
+      {/* Dentro del chat no va: ahí la persona ya está hablando con Lucía. */}
+      {!compacto && <PreguntarleALucia resultado={resultado} contexto={contexto} datos={datos} />}
 
       {advertencias?.length > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
