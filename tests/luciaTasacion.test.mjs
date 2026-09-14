@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { errorEnPorcentaje, normalizarTasacion } from "../lib/luciaTasacion.mjs";
+import { crearTasacionParaLucia, errorEnPorcentaje, normalizarTasacion } from "../lib/luciaTasacion.mjs";
 
 const VALIDA = {
   tipo: "Casa",
@@ -21,6 +21,31 @@ const VALIDA = {
   nBarrio: 87,
   advertencias: ["Pocas comparables en el barrio"],
 };
+
+test("el resultado enviado al chat conserva entradas, rango y comparación del tipo", () => {
+  const enviada = crearTasacionParaLucia({
+    datos: { ...VALIDA, cocheras: 2, extras: ["Vista al lago o cerro"] },
+    resultado: VALIDA,
+    contexto: { medianaBarrio: 2200, nBarrio: 87, medianaBarrioTipo: 2400, nBarrioTipo: 30 },
+  });
+  const recibida = normalizarTasacion(JSON.parse(JSON.stringify(enviada)));
+  assert.equal(recibida.cocheras, 2);
+  assert.equal(recibida.superficieTerrenoM2, 600);
+  assert.deepEqual(recibida.extras, ["Vista al lago o cerro"]);
+  assert.equal(recibida.medianaComparadaM2USD, 2400);
+  assert.equal(recibida.nBarrioTipoRelevadas, 30);
+  assert.equal(recibida.errorPromedioPct, 16.1);
+  assert.deepEqual(recibida.rangoUSD, { min: 265000, max: 360000 });
+  assert.deepEqual(recibida.advertenciasDelModelo, VALIDA.advertencias);
+});
+
+test("una nueva tasación sin contexto no hereda la comparación anterior", () => {
+  const recibida = normalizarTasacion(crearTasacionParaLucia({ datos: VALIDA, resultado: VALIDA }));
+  assert.equal(recibida.medianaComparadaM2USD, null);
+  assert.equal(recibida.cocheras, null);
+  assert.equal(normalizarTasacion({ ...VALIDA, cocheras: 99 }).cocheras, null);
+  assert.equal(normalizarTasacion({ ...VALIDA, cocheras: 0 }).cocheras, 0);
+});
 
 test("acepta una tasación completa y calcula el desvío contra la mediana", () => {
   const t = normalizarTasacion(VALIDA);
@@ -66,6 +91,61 @@ test("recorta el texto que llega de afuera", () => {
   assert.equal(t.barrio.length, 120);
   assert.equal(t.advertenciasDelModelo.length, 4);
   assert.equal(t.advertenciasDelModelo[0].length, 240);
+});
+
+// Los dos casos de abajo son reales: salieron del tasador el 13 y el 14/09/2026
+// con los datos de mercado_sma.json al 13/09. Son los que muestran para qué
+// sirve comparar contra el tipo y no contra el barrio entero.
+test("compara contra la mediana del tipo cuando el barrio la tiene", () => {
+  // Casa en el Centro. Contra la mediana mezclada del barrio (3393, que son
+  // casi puros departamentos: 280 contra 32 casas) daba -6%, como si estuviera
+  // en línea con el barrio. Contra las casas del Centro (2571) está 24% arriba.
+  const t = normalizarTasacion({
+    ...VALIDA,
+    barrio: "Centro",
+    valorM2: 3190,
+    medianaBarrio: 3393,
+    nBarrio: 312,
+    medianaBarrioTipo: 2571,
+    nBarrioTipo: 32,
+  });
+  assert.equal(t.desvioVsMedianaPct, 24.1, "el signo se da vuelta contra la mediana correcta");
+  assert.equal(t.medianaComparadaM2USD, 2571);
+  assert.equal(t.medianaBarrioM2USD, 3393, "la mezclada no se pierde");
+  assert.equal(t.nBarrioTipoRelevadas, 32);
+  assert.match(t.baseDeComparacion, /casas de Centro/);
+});
+
+test("cae a la mediana mezclada, pero la deja declarada", () => {
+  // Casa de 600 m² cubiertos en Chapelco Golf, sin desglose de casas del barrio.
+  const t = normalizarTasacion({
+    ...VALIDA,
+    barrio: "Chapelco Golf & Resort",
+    valorM2: 1356,
+    medianaBarrio: 3122,
+    nBarrio: 26,
+    medianaBarrioTipo: null,
+    nBarrioTipo: null,
+  });
+  assert.equal(t.desvioVsMedianaPct, -56.6);
+  assert.equal(t.medianaComparadaM2USD, 3122);
+  assert.equal(t.medianaBarrioTipoM2USD, null);
+  assert.match(t.baseDeComparacion, /casas y departamentos juntos/);
+});
+
+test("una mediana por tipo fuera de rango no arrastra a la mezclada", () => {
+  const t = normalizarTasacion({ ...VALIDA, medianaBarrioTipo: -5, nBarrioTipo: 0 });
+  assert.equal(t.medianaBarrioTipoM2USD, null);
+  assert.equal(t.nBarrioTipoRelevadas, null);
+  assert.equal(t.medianaComparadaM2USD, 2200, "vuelve a la del barrio");
+  assert.equal(t.desvioVsMedianaPct, 18.4);
+});
+
+test("sin ninguna mediana no hay desvío ni base de comparación", () => {
+  const t = normalizarTasacion({ ...VALIDA, medianaBarrio: null, medianaBarrioTipo: null });
+  assert.equal(t.desvioVsMedianaPct, null);
+  assert.equal(t.medianaComparadaM2USD, null);
+  assert.equal(t.baseDeComparacion, null);
 });
 
 test("lee el error del modelo venga como fracción o como porcentaje", () => {

@@ -10,7 +10,7 @@ import { NextResponse, after } from "next/server";
 import { cookies } from "next/headers";
 import { normalizarEntrada, tasar } from "@/lib/tasador";
 import { TASACIONES_LIBRES } from "@/lib/tasadorOpciones";
-import { referenciaBarrio, VALOR_M2 } from "@/lib/mercado";
+import { referenciaBarrio, referenciaBarrioPorTipo, VALOR_M2 } from "@/lib/mercado";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { insertSubscriber, subscriberExists } from "@/lib/suscriptores";
@@ -49,13 +49,23 @@ const cookieBase = {
 // resultado bloqueado: es lo que hace que el muro no sea una pared en blanco —
 // la persona ve que hay datos reales del otro lado antes de decidir si deja el
 // correo.
+//
+// Van las dos medianas del barrio y no una sola: `medianaBarrio` mezcla casas y
+// departamentos (es la que se publica cuando no se sabe de qué se habla) y
+// `medianaBarrioTipo` es la del tipo que la persona acaba de tasar. Acá SÍ se
+// sabe de qué se habla, así que la que manda es la segunda; la mezclada queda
+// como respaldo declarado para los barrios sin comparables suficientes de ese
+// tipo, nunca como sustituto silencioso.
 function contextoDeMercado(barrio, tipo) {
   const ref = referenciaBarrio(barrio);
+  const refTipo = referenciaBarrioPorTipo(barrio, tipo);
   return {
     barrio,
     tipo,
     medianaBarrio: ref?.medianaM2 ?? null,
     nBarrio: ref?.n ?? null,
+    medianaBarrioTipo: refTipo?.medianaM2 ?? null,
+    nBarrioTipo: refTipo?.n ?? null,
     medianaTipo: VALOR_M2?.[tipo] ?? null,
   };
 }

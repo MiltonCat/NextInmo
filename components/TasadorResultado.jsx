@@ -14,6 +14,7 @@ import { WA_NUMBER } from "@/config";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useLucia } from "@/components/LuciaProvider";
 import CampoTrampa from "./CampoTrampa";
+import { crearTasacionParaLucia } from "@/lib/luciaTasacion.mjs";
 
 const usd = (n) =>
   typeof n === "number" && Number.isFinite(n) ? `USD ${Math.round(n).toLocaleString("es-AR")}` : "—";
@@ -34,18 +35,38 @@ function Etiqueta({ children }) {
   );
 }
 
+// "Casa" → "casas". Los únicos dos tipos del tasador (TIPOS_TASADOR) y los
+// únicos dos con desglose en el JSON del modelo, así que no hace falta más.
+const PLURAL_TIPO = { Casa: "casas", Departamento: "departamentos" };
+
 // Comparación del m² de la propiedad contra la mediana de su barrio. Es la
 // parte del informe que más se mira: el total depende de los metros, pero el m²
 // es lo único comparable contra el vecino.
+//
+// Contra la mediana de SU TIPO, no contra la del barrio entero. La mediana de
+// barrio mezcla casas y departamentos, y son dos mercados distintos: en el
+// Centro hay 280 departamentos relevados contra 32 casas, así que la mediana
+// "del Centro" es casi la de los departamentos. Una casa comparada contra esa
+// mezcla daba -6% cuando contra las casas del barrio da +24% — el signo al
+// revés, en la única pantalla del sitio que promete datos verificables.
+//
+// Cuando el barrio no tiene suficientes propiedades relevadas de ese tipo, se
+// cae a la mezclada pero DICIÉNDOLO. Lo que no puede pasar es comparar contra
+// una cosa y nombrar otra.
 function ComparacionBarrio({ valorM2, contexto }) {
-  const { medianaBarrio, nBarrio, barrio } = contexto;
-  if (!valorM2 || !medianaBarrio) return null;
+  const { medianaBarrio, nBarrio, medianaBarrioTipo, nBarrioTipo, barrio, tipo } = contexto;
 
-  const diff = ((valorM2 - medianaBarrio) / medianaBarrio) * 100;
+  const porTipo = Boolean(medianaBarrioTipo);
+  const mediana = medianaBarrioTipo ?? medianaBarrio;
+  const n = porTipo ? nBarrioTipo : nBarrio;
+  const plural = PLURAL_TIPO[tipo] || "propiedades";
+  if (!valorM2 || !mediana) return null;
+
+  const diff = ((valorM2 - mediana) / mediana) * 100;
   const arriba = diff >= 0;
   // La barra se escala contra el doble de la mediana, así el 100% del ancho
   // representa "el doble del barrio" y las dos marcas casi nunca se superponen.
-  const pos = (v) => Math.min(96, Math.max(4, (v / (medianaBarrio * 2)) * 100));
+  const pos = (v) => Math.min(96, Math.max(4, (v / (mediana * 2)) * 100));
 
   return (
     <div className="rounded-xl border border-gray-200 p-5">
@@ -53,8 +74,9 @@ function ComparacionBarrio({ valorM2, contexto }) {
       <p className="mt-2 text-sm leading-relaxed text-gray-700">
         Tu m² da{" "}
         <span className="font-semibold text-gray-900 tabular-nums">{usd(valorM2)}</span>. La mediana
-        de <span className="font-medium">{barrio}</span> es{" "}
-        <span className="font-semibold text-gray-900 tabular-nums">{usd(medianaBarrio)}</span> —{" "}
+        de {porTipo ? `las ${plural} de ` : ""}
+        <span className="font-medium">{barrio}</span> es{" "}
+        <span className="font-semibold text-gray-900 tabular-nums">{usd(mediana)}</span> —{" "}
         <span className={arriba ? "font-semibold text-emerald-700" : "font-semibold text-amber-700"}>
           {arriba ? "+" : ""}
           {diff.toFixed(0)}%
@@ -62,10 +84,18 @@ function ComparacionBarrio({ valorM2, contexto }) {
         .
       </p>
 
+      {!porTipo && (
+        <p className="mt-2 text-xs leading-relaxed text-gray-400">
+          En {barrio} no tenemos suficientes {plural} relevadas para una mediana propia, así que la
+          comparación es contra el barrio entero: casas y departamentos juntos, que son dos mercados
+          distintos.
+        </p>
+      )}
+
       <div className="relative mt-5 mb-2 h-1.5 rounded-full bg-gray-100">
         <div
           className="absolute -top-1 h-3.5 w-0.5 rounded bg-gray-300"
-          style={{ left: `${pos(medianaBarrio)}%` }}
+          style={{ left: `${pos(mediana)}%` }}
           aria-hidden="true"
         />
         <div
@@ -75,8 +105,12 @@ function ComparacionBarrio({ valorM2, contexto }) {
         />
       </div>
       <div className="flex justify-between text-[11px] text-gray-400">
-        <span>mediana del barrio</span>
-        {nBarrio ? <span className="tabular-nums">{nBarrio} propiedades relevadas</span> : null}
+        <span>{porTipo ? `mediana de las ${plural} del barrio` : "mediana del barrio"}</span>
+        {n ? (
+          <span className="tabular-nums">
+            {n} {porTipo ? `${plural} relevadas` : "propiedades relevadas"}
+          </span>
+        ) : null}
       </div>
     </div>
   );
@@ -131,44 +165,33 @@ function RangoEstimado({ min, max, valor }) {
 function PreguntarleALucia({ resultado, contexto, datos }) {
   const { openLucia } = useLucia();
   const { trackEvent } = useAnalytics();
-  const { valorTotal, valorM2, rangoMin, rangoMax, errorPromedioPct, nEntrenamiento, advertencias } =
-    resultado;
+  const { valorTotal, valorM2 } = resultado;
   const medianaBarrio = contexto?.medianaBarrio;
+  // La misma mediana que ve en pantalla: la de su tipo si el barrio la tiene, y
+  // si no la mezclada. Si el botón preguntara contra un número distinto del que
+  // está leyendo, la respuesta de Lucía no le cerraría con el informe.
+  const medianaComparada = contexto?.medianaBarrioTipo ?? medianaBarrio;
+  const medianaEsDelTipo = Boolean(contexto?.medianaBarrioTipo);
+  const pluralTipo = PLURAL_TIPO[datos.tipo] || "propiedades";
 
   // Lo que se manda es el resultado, no un texto que lo describa. El servidor lo
   // valida campo por campo igual (lib/luciaTasacion.mjs): esto sale del
   // navegador y ahí cualquiera lo edita.
-  const tasacion = {
-    tipo: datos.tipo,
-    barrio: datos.barrio,
-    superficie: datos.superficie,
-    superficieTerreno: datos.superficieTerreno,
-    dormitorios: datos.dormitorios,
-    banos: datos.banos,
-    ambientes: datos.ambientes,
-    extras: datos.extras,
-    valorTotal,
-    valorM2,
-    rangoMin,
-    rangoMax,
-    errorPromedioPct,
-    nEntrenamiento,
-    advertencias,
-    medianaBarrio,
-    nBarrio: contexto?.nBarrio,
-  };
+  const tasacion = crearTasacionParaLucia({ resultado, contexto, datos });
 
   const preguntas = [
     {
       id: "por_que",
-      label: "¿Por qué me da este valor?",
-      texto: `¿Por qué mi propiedad en ${datos.barrio} da ${usd(valorTotal)}? ¿Qué pesa más en ese número?`,
+      label: "¿Cómo interpreto este resultado?",
+      texto: `Mi propiedad en ${datos.barrio} tiene una estimación de ${usd(valorTotal)}. ¿Cómo interpreto el valor y su rango?`,
     },
-    valorM2 && medianaBarrio
+    valorM2 && medianaComparada
       ? {
           id: "contra_el_barrio",
-          label: "¿Está caro o barato para el barrio?",
-          texto: `Mi m² da ${usd(valorM2)} y la mediana de ${datos.barrio} es ${usd(medianaBarrio)}. ¿Cómo se lee esa diferencia?`,
+          label: "¿Cómo se compara con el barrio?",
+          texto: `Mi m² da ${usd(valorM2)} y la mediana de ${
+            medianaEsDelTipo ? `las ${pluralTipo} de ${datos.barrio}` : `${datos.barrio} (casas y departamentos juntos)`
+          } es ${usd(medianaComparada)}. ¿Cómo se lee esa diferencia?`,
         }
       : null,
     {
@@ -191,7 +214,7 @@ function PreguntarleALucia({ resultado, contexto, datos }) {
         </div>
         <div>
           <Etiqueta>Lucía</Etiqueta>
-          <p className="mt-0.5 text-sm font-semibold text-gray-900">Te explico de dónde sale este número</p>
+          <p className="mt-0.5 text-sm font-semibold text-gray-900">Te ayudo a interpretar este resultado</p>
         </div>
       </div>
 

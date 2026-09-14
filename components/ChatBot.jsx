@@ -13,6 +13,7 @@ import LuciaGrafico from "@/components/LuciaGrafico";
 import LuciaAudio from "@/components/LuciaAudio";
 import LuciaRespuesta from "@/components/LuciaRespuesta";
 import dynamic from "next/dynamic";
+import { crearTasacionParaLucia } from "@/lib/luciaTasacion.mjs";
 import { pideTasacion } from "@/lib/luciaContexto.mjs";
 const LuciaTasador = dynamic(() => import("@/components/LuciaTasador"), { loading: () => <p>Preparando el tasador…</p> });
 import {
@@ -1758,7 +1759,8 @@ export default function ChatBot() {
 
                   {msg.tasador && (
                     <div className="mt-2">
-                      <LuciaTasador onResultado={({ resultado, datos }) => {
+                      <LuciaTasador onResultado={({ resultado, contexto, datos }) => {
+                        tasacionRef.current = crearTasacionParaLucia({ resultado, contexto, datos });
                         const usd = (n) => Number.isFinite(n) ? `USD ${Math.round(n).toLocaleString("es-AR")}` : "sin informar";
                         const resumen = `Tasación orientativa de ${datos.tipo} en ${datos.barrio}, ${datos.superficie} m²: estimación ${usd(resultado.valorTotal)}, rango ${usd(resultado.rangoMin)} a ${usd(resultado.rangoMax)}, ${usd(resultado.valorM2)}/m². No es un precio de cierre ni un retorno de inversión. ${(resultado.advertencias || []).join(" ")}`;
                         setMessages((prev) => prev.map((item) => item.tasador === msg.tasador ? { ...item, text: resumen } : item));

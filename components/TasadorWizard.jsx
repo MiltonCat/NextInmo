@@ -353,7 +353,21 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
         }
 
         setRespuesta(data);
-        if (!data.bloqueado && data.resultado) onResultado?.({ resultado: data.resultado, datos: { tipo: form.tipo, barrio: form.barrio, superficie: superficieNum } });
+        if (!data.bloqueado && data.resultado) onResultado?.({
+          resultado: data.resultado,
+          contexto: data.contexto,
+          datos: {
+            tipo: form.tipo,
+            barrio: form.barrio,
+            superficie: superficieNum,
+            superficieTerreno: esCasa ? parseFloat(form.superficieTerreno) || null : null,
+            dormitorios: form.dormitorios,
+            banos: form.banos,
+            ambientes: form.ambientes,
+            cocheras: form.cocheras,
+            extras: form.extras.map((id) => EXTRAS_TASADOR.find((e) => e.id === id)?.label).filter(Boolean),
+          },
+        });
         trackEvent(data.bloqueado ? "tasador_muro_email" : "tasador_resultado", {
           barrio: form.barrio,
           tipo: form.tipo,
@@ -419,6 +433,7 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
             dormitorios: form.dormitorios,
             banos: form.banos,
             ambientes: form.ambientes,
+            cocheras: form.cocheras,
             extras: etiquetasExtras,
           }}
           onDesbloquear={({ email, nombre, trampa }) => pedirTasacion({ email, nombre, trampa })}
