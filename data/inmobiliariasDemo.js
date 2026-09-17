@@ -4,11 +4,11 @@
 export const INMOBILIARIAS_DEMO = {
   piloto: {
     slug: "piloto",
-    nombre: "Inmobiliaria Piloto",
-    ciudad: "Tu ciudad",
+    nombre: "Tasador Online",
+    ciudad: "",
     color: "#1d4ed8",
     colorSuave: "#eff6ff",
-    iniciales: "IP",
+    iniciales: "TO",
   },
 };
 

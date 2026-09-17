@@ -39,13 +39,13 @@ export default function WidgetTasadorDemo({ inmobiliaria, widget = false }) {
     <div className="wd-card">
       <header className="wd-header">
         <div className="wd-brand"><span>{inmobiliaria.iniciales}</span><strong>{inmobiliaria.nombre}</strong></div>
-        {!widget && <small>Demo para inmobiliarias</small>}
+        {!widget && <small>Demo interactiva</small>}
       </header>
 
       {!widget && <div className="wd-intro">
-        <p className="wd-kicker">Tasador online con tu marca</p>
-        <h1>Convertí una consulta en una conversación.</h1>
-        <p>Esta es una experiencia de prueba. En una instalación real usa los datos, el WhatsApp y la zona de cada inmobiliaria.</p>
+        <p className="wd-kicker">Tasador online</p>
+        <h1>Probá cómo funciona un tasador online.</h1>
+        <p>Es una experiencia de prueba que se puede compartir por enlace o insertar dentro de cualquier web.</p>
       </div>}
 
       <div className="wd-tool">
@@ -59,13 +59,13 @@ export default function WidgetTasadorDemo({ inmobiliaria, widget = false }) {
 
         <section className="wd-result"><p>Rango de ejemplo para una {tipo.toLowerCase()} de {metros || 0} m²</p><strong>{USD.format(rango.min)} — {USD.format(rango.max)}</strong><small>El modelo real se calibra con los datos de mercado de cada ciudad.</small></section>
 
-        {enviado ? <div className="wd-success"><strong>¡Listo, {nombre || "gracias"}!</strong><p>En la versión de cada cliente, este pedido llega directo a su equipo comercial.</p></div> : <form className="wd-lead" onSubmit={(event) => { event.preventDefault(); setEnviado(true); }}>
+        {enviado ? <div className="wd-success"><strong>¡Listo, {nombre || "gracias"}!</strong><p>La versión conectada entrega este pedido al equipo que administra el tasador.</p></div> : <form className="wd-lead" onSubmit={(event) => { event.preventDefault(); setEnviado(true); }}>
           <label>Quiero que me contacten<input required value={nombre} onChange={(event) => setNombre(event.target.value)} placeholder="Tu nombre" /></label>
           <button type="submit">Solicitar una tasación real</button>
         </form>}
       </div>
 
-      {!widget && <section className="wd-integrar"><div><p className="wd-kicker">Para la web del cliente</p><h2>Un iframe y listo.</h2><p>El widget vive en tu plataforma; la inmobiliaria solo pega este bloque en su web.</p></div><button type="button" onClick={copiar}>{copiado ? "Código copiado" : "Copiar código del widget"}</button></section>}
+      {!widget && <section className="wd-integrar"><div><p className="wd-kicker">Para cualquier web</p><h2>Un iframe y listo.</h2><p>El tasador vive en un solo lugar; la otra web solo pega este bloque.</p></div><button type="button" onClick={copiar}>{copiado ? "Código copiado" : "Copiar código del widget"}</button></section>}
     </div>
     {!widget && <button className="wd-origin" type="button" onClick={() => setOrigen(window.location.origin)}>Preparar código para este dominio</button>}
   </main>;
