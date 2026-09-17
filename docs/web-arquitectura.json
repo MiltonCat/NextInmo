@@ -1,0 +1,364 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cómo está armada la web de Catalán Propiedades",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "external": {
+          "label": "Quién entra"
+        },
+        "frontend": {
+          "label": "El sitio"
+        },
+        "backend": {
+          "label": "Secciones y puertas"
+        },
+        "database": {
+          "label": "Datos y archivos"
+        },
+        "cloud": {
+          "label": "Servicios externos"
+        },
+        "security": {
+          "label": "Con clave"
+        }
+      }
+    }
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 5,
+    "cellW": 140,
+    "cellH": 64,
+    "gapX": 100,
+    "gapY": 56
+  },
+  "components": [
+    {
+      "id": "milton",
+      "type": "external",
+      "label": "Milton",
+      "sublabel": "carga y revisa",
+      "row": 0,
+      "col": 0,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "visitante",
+      "type": "external",
+      "label": "Visitante",
+      "sublabel": "navegador",
+      "row": 2,
+      "col": 0,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "asistentes",
+      "type": "external",
+      "label": "ChatGPT · Claude",
+      "sublabel": "vía MCP",
+      "row": 1,
+      "col": 0,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "monitor",
+      "type": "external",
+      "label": "Monitor externo",
+      "sublabel": "avisa si algo cae",
+      "row": 2,
+      "col": 4,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "admin",
+      "type": "security",
+      "label": "Panel de admin",
+      "sublabel": "9 pantallas",
+      "row": 0,
+      "col": 1,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "sitio",
+      "type": "frontend",
+      "label": "Sitio en Vercel",
+      "sublabel": "51 páginas",
+      "brand": "vercel",
+      "row": 2,
+      "col": 1,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "mcp",
+      "type": "backend",
+      "label": "Servidor MCP",
+      "sublabel": "2 herramientas",
+      "row": 1,
+      "col": 1,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "salud",
+      "type": "backend",
+      "label": "Sonda de salud",
+      "sublabel": "200 o 503",
+      "row": 1,
+      "col": 4,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "catalogo",
+      "type": "backend",
+      "label": "Catálogo",
+      "sublabel": "ventas y alquileres",
+      "row": 0,
+      "col": 2,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "tasador",
+      "type": "backend",
+      "label": "Tasador",
+      "sublabel": "gratis y profesional",
+      "row": 1,
+      "col": 2,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "lucia",
+      "type": "backend",
+      "label": "Lucía",
+      "sublabel": "asistente del sitio",
+      "row": 2,
+      "col": 2,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "herramientas",
+      "type": "backend",
+      "label": "Herramientas",
+      "sublabel": "m², crédito, barrio",
+      "row": 3,
+      "col": 2,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "supabase",
+      "type": "database",
+      "label": "Supabase",
+      "sublabel": "Postgres · 8 tablas",
+      "brand": "supabase",
+      "row": 0,
+      "col": 3,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "modelo",
+      "type": "cloud",
+      "label": "Modelo predictivo",
+      "sublabel": "API propia en Render",
+      "brand": "render",
+      "row": 1,
+      "col": 3,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "ia",
+      "type": "cloud",
+      "label": "Texto y voz",
+      "sublabel": "OpenAI · Fish Audio",
+      "brand": "openai",
+      "row": 2,
+      "col": 3,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "fragmentos",
+      "type": "database",
+      "label": "Índice semántico",
+      "sublabel": "se rearma de noche",
+      "row": 3,
+      "col": 3,
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "fotos",
+      "type": "database",
+      "label": "Fotos del catálogo",
+      "sublabel": "public/imgs",
+      "row": 0,
+      "col": 4,
+      "size": [
+        140,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "carga",
+      "from": "milton",
+      "to": "admin"
+    },
+    {
+      "id": "entra",
+      "from": "visitante",
+      "to": "sitio",
+      "variant": "emphasis"
+    },
+    {
+      "id": "consulta",
+      "from": "asistentes",
+      "to": "mcp"
+    },
+    {
+      "id": "chequea",
+      "from": "monitor",
+      "to": "salud"
+    },
+    {
+      "id": "edita",
+      "from": "admin",
+      "to": "catalogo",
+      "label": "carga y edita"
+    },
+    {
+      "id": "ve",
+      "from": "sitio",
+      "to": "catalogo",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tasa",
+      "from": "sitio",
+      "to": "tasador"
+    },
+    {
+      "id": "pregunta",
+      "from": "sitio",
+      "to": "lucia"
+    },
+    {
+      "id": "usa",
+      "from": "sitio",
+      "to": "herramientas"
+    },
+    {
+      "id": "lee-mcp",
+      "from": "mcp",
+      "to": "catalogo",
+      "label": "solo lectura",
+      "labelDx": -45
+    },
+    {
+      "id": "datos",
+      "from": "catalogo",
+      "to": "supabase",
+      "label": "propiedades",
+      "variant": "emphasis"
+    },
+    {
+      "id": "urls",
+      "from": "supabase",
+      "to": "fotos",
+      "label": "URL de cada foto",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pide",
+      "from": "tasador",
+      "to": "modelo",
+      "label": "POST /tasar"
+    },
+    {
+      "id": "habla",
+      "from": "lucia",
+      "to": "ia"
+    },
+    {
+      "id": "busca",
+      "from": "lucia",
+      "to": "fragmentos",
+      "label": "busca"
+    },
+    {
+      "id": "sonda",
+      "from": "salud",
+      "to": "supabase",
+      "label": "¿contesta?",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Las fotos: la base manda",
+      "items": [
+        "Los campos image e image1…image4 guardan la URL completa de cada foto",
+        "Renombrar o mover un archivo cruza las fotos entre propiedades",
+        "Antes y después de tocar una galería: scripts/verificar-fotos.mjs"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Lo que no se ve desde afuera",
+      "items": [
+        "El servidor MCP deja que ChatGPT o Claude consulten el catálogo sin entrar",
+        "El índice de Lucía se rearma cada noche y solo reindexa lo que cambió",
+        "Si una fuente cae, /api/salud devuelve 503 y el monitor avisa"
+      ]
+    }
+  ]
+}

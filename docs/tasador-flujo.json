@@ -1,0 +1,320 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Cómo funciona el tasador de Catalán Propiedades",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "external": {
+          "label": "La persona"
+        },
+        "frontend": {
+          "label": "En pantalla"
+        },
+        "backend": {
+          "label": "En el servidor"
+        },
+        "database": {
+          "label": "Datos guardados"
+        },
+        "cloud": {
+          "label": "Servicios externos"
+        },
+        "security": {
+          "label": "Cortes y muro"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "directo",
+      "label": "Entrada directa"
+    },
+    {
+      "id": "elmodelo",
+      "label": "El modelo predictivo · Render"
+    },
+    {
+      "id": "porlucia",
+      "label": "Entrada por Lucía"
+    },
+    {
+      "id": "sitio",
+      "label": "El sitio · Next.js en Vercel"
+    },
+    {
+      "id": "cortes",
+      "label": "Cortes y muro del correo",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "carga",
+      "label": "Carga los datos",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "permiso",
+      "label": "Control y permiso",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "entrega",
+      "label": "El número",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "visitante",
+    "wizard",
+    "api",
+    "modeloapi",
+    "resultado",
+    "pdf"
+  ],
+  "nodes": [
+    {
+      "id": "visitante",
+      "lane": "directo",
+      "col": 0,
+      "type": "external",
+      "label": "Visitante",
+      "sublabel": "abre el tasador",
+      "width": 150
+    },
+    {
+      "id": "wizard",
+      "lane": "directo",
+      "col": 1,
+      "type": "frontend",
+      "label": "Formulario",
+      "sublabel": "5 pasos, tipo a m²",
+      "width": 150
+    },
+    {
+      "id": "resultado",
+      "lane": "directo",
+      "col": 4,
+      "type": "frontend",
+      "label": "Resultado",
+      "sublabel": "valor y rango",
+      "width": 150
+    },
+    {
+      "id": "pdf",
+      "lane": "directo",
+      "col": 5,
+      "type": "backend",
+      "label": "PDF",
+      "sublabel": "se lo lleva impreso",
+      "width": 150
+    },
+    {
+      "id": "modeloapi",
+      "lane": "elmodelo",
+      "col": 3,
+      "type": "cloud",
+      "label": "API del modelo",
+      "sublabel": "2 intentos de 25 s",
+      "width": 150
+    },
+    {
+      "id": "charla",
+      "lane": "porlucia",
+      "col": 0,
+      "type": "external",
+      "label": "Charla con Lucía",
+      "sublabel": "cuenta su caso",
+      "width": 150
+    },
+    {
+      "id": "interpretar",
+      "lane": "porlucia",
+      "col": 1,
+      "type": "cloud",
+      "label": "Lectura con IA",
+      "sublabel": "esquema estricto",
+      "width": 150
+    },
+    {
+      "id": "api",
+      "lane": "sitio",
+      "col": 2,
+      "type": "backend",
+      "label": "POST /api/tasar",
+      "sublabel": "valida y traduce",
+      "width": 150
+    },
+    {
+      "id": "mercado",
+      "lane": "sitio",
+      "col": 4,
+      "type": "database",
+      "label": "Datos de mercado",
+      "sublabel": "medianas del barrio",
+      "width": 150
+    },
+    {
+      "id": "guardar",
+      "lane": "sitio",
+      "col": 5,
+      "type": "database",
+      "label": "saved_valuations",
+      "sublabel": "solo con sesión",
+      "width": 150
+    },
+    {
+      "id": "limite",
+      "lane": "cortes",
+      "col": 2,
+      "type": "security",
+      "label": "Límite por IP",
+      "sublabel": "20 por minuto",
+      "width": 150
+    },
+    {
+      "id": "muro",
+      "lane": "cortes",
+      "col": 3,
+      "type": "security",
+      "label": "¿Primera gratis?",
+      "sublabel": "después, el correo",
+      "width": 150
+    },
+    {
+      "id": "bloqueado",
+      "lane": "cortes",
+      "col": 4,
+      "type": "security",
+      "label": "Resultado bloqueado",
+      "sublabel": "sin llamar al modelo",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "abre",
+      "from": "visitante",
+      "to": "wizard",
+      "label": "abre /tasacion",
+      "variant": "default",
+      "role": "main"
+    },
+    {
+      "id": "cuenta",
+      "from": "charla",
+      "to": "interpretar",
+      "label": "manda la charla",
+      "variant": "default",
+      "role": "branch"
+    },
+    {
+      "id": "precarga",
+      "from": "interpretar",
+      "to": "wizard",
+      "label": "precarga los pasos",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "envia",
+      "from": "wizard",
+      "to": "api",
+      "label": "envía los 5 pasos",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "ratelimit",
+      "from": "api",
+      "to": "limite",
+      "label": "corta el raspado",
+      "variant": "security",
+      "role": "branch"
+    },
+    {
+      "id": "chequea",
+      "from": "api",
+      "to": "muro",
+      "label": "¿tiene derecho?",
+      "variant": "security",
+      "role": "branch"
+    },
+    {
+      "id": "sinnada",
+      "from": "muro",
+      "to": "bloqueado",
+      "label": "sin correo ni sesión",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "pide",
+      "from": "api",
+      "to": "modeloapi",
+      "label": "POST /tasar",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "devuelve",
+      "from": "modeloapi",
+      "to": "resultado",
+      "label": "valor + rango",
+      "variant": "emphasis",
+      "role": "return"
+    },
+    {
+      "id": "contexto",
+      "from": "mercado",
+      "to": "resultado",
+      "label": "contexto del barrio",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "imprime",
+      "from": "resultado",
+      "to": "pdf",
+      "label": "si lo pide",
+      "variant": "default",
+      "role": "main"
+    },
+    {
+      "id": "guarda",
+      "from": "resultado",
+      "to": "guardar",
+      "label": "si hay sesión",
+      "variant": "dashed",
+      "role": "async"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Las reglas del muro",
+      "items": [
+        "La primera es libre; de la segunda, hace falta un correo",
+        "Con sesión no hay muro y la tasación queda guardada",
+        "El correo entra a la lista y recibe la bienvenida"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Lo que no se ve",
+      "items": [
+        "Al abrir el formulario ya se despierta el contenedor",
+        "La lista de barrios corta a los 8 s y cae a la del repo",
+        "La profesional es el mismo camino, con 4 ciudades"
+      ]
+    }
+  ]
+}
