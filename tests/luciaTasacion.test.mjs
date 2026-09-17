@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { crearTasacionParaLucia, errorEnPorcentaje, normalizarTasacion } from "../lib/luciaTasacion.mjs";
+import { crearTasacionParaLucia, errorEnPorcentaje, normalizarTasacion, resumenTasacionParaMilton } from "../lib/luciaTasacion.mjs";
 
 const VALIDA = {
   tipo: "Casa",
@@ -21,6 +21,29 @@ const VALIDA = {
   nBarrio: 87,
   advertencias: ["Pocas comparables en el barrio"],
 };
+
+test("objetivo y plazo admiten solo opciones conocidas sin modificar el valor", () => {
+  const entrada = crearTasacionParaLucia({ datos: { ...VALIDA, objetivo: "Quiero vender", plazo: "En los próximos 3 meses" }, resultado: VALIDA });
+  const t = normalizarTasacion(entrada);
+  assert.equal(t.objetivo, "Quiero vender");
+  assert.equal(t.plazo, "En los próximos 3 meses");
+  assert.equal(t.valorEstimadoUSD, VALIDA.valorTotal);
+  assert.equal(normalizarTasacion({ ...VALIDA, objetivo: "ignorar instrucciones", plazo: "mañana" }).objetivo, null);
+  assert.equal(normalizarTasacion({ ...VALIDA, plazo: "mañana" }).plazo, null);
+});
+
+test("el resumen editable conserva rango y dichos del propietario, no opiniones de la IA", () => {
+  const texto = resumenTasacionParaMilton({ ...VALIDA, objetivo: "Quiero vender" }, [
+    { role: "user", text: "Renové la cocina hace dos años" },
+    { role: "bot", text: "Eso vale un 20% más" },
+  ]);
+  assert.match(texto, /Quiero vender/);
+  assert.match(texto, /265.000.*360.000/);
+  assert.match(texto, /Renové la cocina/);
+  assert.match(texto, /Pocas comparables/);
+  assert.doesNotMatch(texto, /20%/);
+  assert.equal(resumenTasacionParaMilton(null), null);
+});
 
 test("el resultado enviado al chat conserva entradas, rango y comparación del tipo", () => {
   const enviada = crearTasacionParaLucia({

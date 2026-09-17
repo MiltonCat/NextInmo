@@ -13,7 +13,7 @@ import LuciaGrafico from "@/components/LuciaGrafico";
 import LuciaAudio from "@/components/LuciaAudio";
 import LuciaRespuesta from "@/components/LuciaRespuesta";
 import dynamic from "next/dynamic";
-import { crearTasacionParaLucia } from "@/lib/luciaTasacion.mjs";
+import { crearTasacionParaLucia, resumenTasacionParaMilton } from "@/lib/luciaTasacion.mjs";
 import { pideTasacion } from "@/lib/luciaContexto.mjs";
 const LuciaTasador = dynamic(() => import("@/components/LuciaTasador"), { loading: () => <p>Preparando el tasador…</p> });
 import {
@@ -829,7 +829,7 @@ export default function ChatBot() {
       const ultima = i === bubbles.length - 1;
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: bubble.text, clima: bubble.clima, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, grafico: bubble.grafico, feedback: bubble.feedback, stepKey: ultima ? stepKey : undefined },
+        { role: "bot", text: bubble.text, clima: bubble.clima, results: bubble.results, recursos: bubble.recursos, listado: bubble.listado, comparison: bubble.comparison, grafico: bubble.grafico, feedback: bubble.feedback, aiSuggestions: bubble.aiSuggestions, sobreTasacion: bubble.sobreTasacion, stepKey: ultima ? stepKey : undefined },
       ]);
       if (ultima) setTyping(false);
     }
@@ -896,8 +896,8 @@ export default function ChatBot() {
   }, [messages.length, typing, open]);
 
   useEffect(() => {
-    if (handoff) messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [handoff]);
+    if (handoff && !typing) messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [handoff, typing]);
 
   // El catálogo fresco se pide recién cuando alguien abre el chat. La promesa se
   // comparte con el paso de resultados: Lucía espera esa confirmación y nunca
@@ -1050,6 +1050,7 @@ export default function ChatBot() {
   };
 
   const handleOption = async (opt, currentFilters) => {
+    if (opt.reinicia) tasacionRef.current = null;
     if (opt.recursos?.includes("tasacion")) {
       handleText("Quiero tasar mi propiedad");
       return;
@@ -1075,8 +1076,11 @@ export default function ChatBot() {
         const consulta = messages.filter((message) => message.role === "user").at(-1)?.text;
         if (consulta) draft += `\n\nMi consulta: ${consulta}`;
       }
-      setHandoff({ text: draft, searchContext, recommendations });
-      setActiveStep("after_results");
+      const resumenTasacion = resumenTasacionParaMilton(tasacionRef.current, messages);
+      if (resumenTasacion) trackEvent("tasador_lucia_revision", { origen: "chat" });
+      setHandoff({ text: resumenTasacion || draft, searchContext: resumenTasacion ? { cta: "revision_tasacion" } : searchContext, recommendations: resumenTasacion ? [] : recommendations });
+      const siguiente = resumenTasacion ? "tasacion_revision" : "after_results";
+      setActiveStep(siguiente);
       setFilters({});
       sendBot(
         [
@@ -1087,7 +1091,7 @@ export default function ChatBot() {
               : "Del otro lado te responde Milton, no un mensaje automático.",
           },
         ],
-        "after_results"
+        siguiente
       );
       return;
     }
@@ -1337,7 +1341,7 @@ export default function ChatBot() {
     sendBot(bubblesOf(STEPS[opt.next]), opt.next);
   };
 
-  const askLuciaAI = async (text) => {
+  const askLuciaAI = async (text, { automatico = false } = {}) => {
     cancelPending();
     const controller = new AbortController();
     aiRequestRef.current = controller;
@@ -1348,9 +1352,9 @@ export default function ChatBot() {
       .slice(-8)
       .map((message) => ({ role: message.role === "bot" ? "assistant" : "user", content: message.text }));
 
-    setMessages((previous) => [...previous, { role: "user", text }]);
+    if (!automatico) setMessages((previous) => [...previous, { role: "user", text }]);
     setTyping(true);
-    setActivity("Consultando información de la web");
+    setActivity(tasacionRef.current ? "Leyendo tu tasación" : "Consultando información de la web");
     trackEvent("chatbot_ia_pregunta", { paso: activeStep, largo: text.length });
 
     try {
@@ -1394,7 +1398,11 @@ export default function ChatBot() {
         trackEvent("chatbot_ia_respuesta", { ok: false, error: body?.error || `http_${response.status}` });
         sendBot(
           [{
-            text: body?.error === "not_configured"
+            aiSuggestions: Boolean(tasacionRef.current),
+            sobreTasacion: Boolean(tasacionRef.current),
+            text: tasacionRef.current
+              ? "Tu tasación quedó arriba. La explicación no salió esta vez; podemos volver a intentar o preparar el resumen para Milton."
+              : body?.error === "not_configured"
               ? "La parte conversacional todavía no tiene conectada la clave de OpenAI. Mientras tanto puedo buscar y comparar propiedades con el asistente guiado."
               : "No pude consultar mi conocimiento ahora mismo. Puedo seguir buscando propiedades con las opciones guiadas o pasarte con Milton.",
           }],
@@ -1411,7 +1419,7 @@ export default function ChatBot() {
       trackEvent("chatbot_ia_respuesta", { ok: true, fuentes: resources.length });
       yaRespondioIaRef.current = true;
       const commercialIntent = /\b(compr|alquil|vend|tas|invert|propiedad|casa|departamento|depto|lote|terreno|precio|mercado|credito|hipoteca)\w*/i.test(text);
-      const shouldInvite = commercialIntent && !leadSent && !aiLeadInviteShownRef.current;
+      const shouldInvite = commercialIntent && !tasacionRef.current && !/\bvend\w*/i.test(text) && !leadSent && !aiLeadInviteShownRef.current;
       if (shouldInvite) {
         aiLeadInviteShownRef.current = true;
         trackEvent("chatbot_lead_invitacion", { origen: "respuesta_ia" });
@@ -1419,7 +1427,7 @@ export default function ChatBot() {
       setMessages((prev) => {
         const completed = { id: streamId, role: "bot", text: body.answer, recursos: resources, grafico: body.grafico || null,
           feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
-          stepKey: shouldInvite ? undefined : activeStep, aiSuggestions: true,
+          stepKey: shouldInvite ? undefined : activeStep, aiSuggestions: true, sobreTasacion: Boolean(tasacionRef.current),
           followUp: /barrio|zona/i.test(text) ? "¿Qué diferencias hay entre esas zonas para vivir?" : /invert|renta|mercado/i.test(text) ? "¿Qué aspectos debería comparar para decidir en mi caso?" : "Contame un poco más sobre lo que acabás de explicar" };
         return prev.some((msg) => msg.id === streamId) ? prev.map((msg) => msg.id === streamId ? completed : msg) : [...prev, completed];
       });
@@ -1437,7 +1445,7 @@ export default function ChatBot() {
       setTyping(false);
       trackEvent("chatbot_ia_respuesta", { ok: false, error: "network_error" });
       sendBot(
-        [{ text: "Me quedé sin conexión para responder eso. La búsqueda guiada sigue disponible y Milton también puede ayudarte." }],
+        [{ text: tasacionRef.current ? "Tu resultado sigue arriba. Se cortó la explicación; podés volver a intentarlo o revisar la tasación con Milton." : "Me quedé sin conexión para responder eso. La búsqueda guiada sigue disponible y Milton también puede ayudarte.", aiSuggestions: Boolean(tasacionRef.current), sobreTasacion: Boolean(tasacionRef.current) }],
         activeStep
       );
     } finally {
@@ -1461,8 +1469,15 @@ export default function ChatBot() {
   const handleText = (text) => {
     if (pideTasacion(text)) {
       cancelPending();
+      tasacionRef.current = null;
       setTyping(false);
-      setMessages((prev) => [...prev, { role: "user", text }, { role: "bot", text: "Podemos tasarla acá mismo. Completá los datos y te muestro la estimación de nuestro tasador.", tasador: crypto.randomUUID() }]);
+      const ultimaTasacion = messages.findLastIndex((m) => m.tasador || m.sobreTasacion);
+      const antecedentes = messages.slice(ultimaTasacion + 1).filter((m) => m.role === "user").slice(-7).map((m) => m.text.slice(0, 1000));
+      setMessages((prev) => [...prev, { role: "user", text }, { role: "bot", text: "Vamos a tasarla. Primero revisamos los datos y después vemos el resultado juntos.", tasador: crypto.randomUUID(), mensajesTasacion: [...antecedentes, text.slice(0, 1000)] }]);
+      return;
+    }
+    if (tasacionRef.current) {
+      askLuciaAI(text);
       return;
     }
     const parsed = parseLuciaText(text, activeStep);
@@ -1759,11 +1774,13 @@ export default function ChatBot() {
 
                   {msg.tasador && (
                     <div className="mt-2">
-                      <LuciaTasador onResultado={({ resultado, contexto, datos }) => {
+                      <LuciaTasador mensajes={msg.mensajesTasacion} onResultado={({ resultado, contexto, datos }) => {
                         tasacionRef.current = crearTasacionParaLucia({ resultado, contexto, datos });
                         const usd = (n) => Number.isFinite(n) ? `USD ${Math.round(n).toLocaleString("es-AR")}` : "sin informar";
                         const resumen = `Tasación orientativa de ${datos.tipo} en ${datos.barrio}, ${datos.superficie} m²: estimación ${usd(resultado.valorTotal)}, rango ${usd(resultado.rangoMin)} a ${usd(resultado.rangoMax)}, ${usd(resultado.valorM2)}/m². No es un precio de cierre ni un retorno de inversión. ${(resultado.advertencias || []).join(" ")}`;
-                        setMessages((prev) => prev.map((item) => item.tasador === msg.tasador ? { ...item, text: resumen } : item));
+                        setMessages((prev) => prev.map((item) => item.tasador === msg.tasador ? { ...item, tasador: undefined, text: resumen, sobreTasacion: true, aiSuggestions: true } : item));
+                        trackEvent("tasador_lucia_interpretacion", { barrio: datos.barrio, tipo: datos.tipo });
+                        askLuciaAI("Ayudame a interpretar mi tasación según mi objetivo. Explicame el rango, qué comparación permite y qué dato de mi propiedad conviene revisar para avanzar.", { automatico: true });
                       }} />
                     </div>
                   )}
@@ -1796,9 +1813,9 @@ export default function ChatBot() {
                     <LuciaSearchAdjust key={JSON.stringify(lastSearchFilters)} filters={lastSearchFilters} onApply={(filter) => handleOption({ label: "Actualizar mi búsqueda", filter, next: activeStep === "after_results_alquiler" ? "results_alquiler" : "results" }, filter)} />
                   )}
                   {msg.aiSuggestions && isLast && !typing && <div className="mt-2 flex flex-wrap gap-2">
-                    <QuickReply label={msg.followUp?.includes("zonas") ? "Comparar las zonas" : msg.followUp?.includes("aspectos") ? "Qué debería comparar" : "Contame más"} onClick={() => askLuciaAI(msg.followUp)} />
+                    <QuickReply label={msg.sobreTasacion ? "Entender el rango" : msg.followUp?.includes("zonas") ? "Comparar las zonas" : msg.followUp?.includes("aspectos") ? "Qué debería comparar" : "Contame más"} onClick={() => askLuciaAI(msg.sobreTasacion ? "¿Cómo debo interpretar el rango de mi tasación?" : msg.followUp)} />
                     <QuickReply label="Buscar propiedades" icono="buscar" onClick={() => handleOption({ label: "Buscar propiedades", next: "ask_goal", reinicia: true }, {})} />
-                    <QuickReply label="Hablar con Milton" icono="whatsapp" onClick={() => handleOption({ label: "Hablar con Milton", next: "whatsapp" }, filters)} />
+                    <QuickReply label={msg.sobreTasacion ? "Revisar con Milton" : "Hablar con Milton"} icono="whatsapp" onClick={() => handleOption({ label: "Hablar con Milton", next: "whatsapp" }, filters)} />
                   </div>}
                   {msg.role === "bot" && isLast && !typing && stepOptions && !msg.aiSuggestions && (
                     <div className="mt-2 flex flex-wrap gap-1.5 pl-1">

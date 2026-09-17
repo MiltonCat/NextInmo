@@ -18,6 +18,7 @@ import { referenciaBarrio } from "@/lib/mercado";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import TasadorResultado from "./TasadorResultado";
 import MascotaModelo from "./MascotaModelo";
+import { pasoYaConfirmado } from "@/lib/luciaDatosTasacion.mjs";
 
 const usd = (n) =>
   typeof n === "number" && Number.isFinite(n) ? `USD ${Math.round(n).toLocaleString("es-AR")}` : "—";
@@ -210,9 +211,10 @@ const ESTADO_INICIAL = {
   extras: [],
 };
 
-export default function TasadorWizard({ barrios = [], compacto = false, onResultado, ciudad = "sma" }) {
+export default function TasadorWizard({ barrios = [], compacto = false, onResultado, ciudad = "sma", datosIniciales = null }) {
   const camposId = useId();
-  const [form, setForm] = useState(ESTADO_INICIAL);
+  const [confirmados, setConfirmados] = useState(datosIniciales || {});
+  const [form, setForm] = useState(() => ({ ...ESTADO_INICIAL, ...datosIniciales }));
   const [paso, setPaso] = useState(0);
   const [cargando, setCargando] = useState(false);
   const [lento, setLento] = useState(false);
@@ -246,8 +248,8 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
       },
       {
         id: "superficie",
-        titulo: "¿Cuántos metros tiene?",
-        bajada: "Cubiertos, sin contar balcones ni galerías abiertas.",
+        titulo: confirmados.superficie != null ? "¿Cuántos metros tiene el terreno?" : "¿Cuántos metros tiene?",
+        bajada: confirmados.superficie != null ? "Es opcional. Los metros cubiertos ya quedaron confirmados." : "Cubiertos, sin contar balcones ni galerías abiertas.",
         valido: () =>
           Number.isFinite(superficieNum) &&
           superficieNum >= LIMITES.superficie.min &&
@@ -265,8 +267,8 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
         bajada: "Marcá solo lo que tenga. Cada una afina la estimación; ninguna es obligatoria.",
         valido: () => true,
       },
-    ],
-    [form.tipo, form.barrio, superficieNum]
+    ].filter((p) => !pasoYaConfirmado(p.id, p.id === "superficie" ? { ...confirmados, tipo: form.tipo } : confirmados)),
+    [form.tipo, form.barrio, superficieNum, confirmados]
   );
 
   const ultimo = paso === PASOS.length - 1;
@@ -396,6 +398,7 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
     setRespuesta(null);
     setError("");
     setForm(ESTADO_INICIAL);
+    setConfirmados({});
     setPaso(0);
   };
 
@@ -527,15 +530,15 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
           {/* Paso 3 · Superficie */}
           {actual.id === "superficie" && (
             <div className="space-y-6">
-              <CampoMetros
+              {confirmados.superficie == null && <CampoMetros
                 id={`${camposId}-superficie-cubierta`}
                 label="Superficie cubierta"
                 valor={form.superficie}
                 onChange={(v) => set("superficie", v)}
                 placeholder="120"
                 autoFocus
-              />
-              {esCasa && (
+              />}
+              {esCasa && confirmados.superficieTerreno == null && (
                 <CampoMetros
                   id={`${camposId}-superficie-terreno`}
                   label="Superficie del terreno"
@@ -568,10 +571,10 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
           {/* Paso 4 · Distribución */}
           {actual.id === "ambientes" && (
             <div className="rounded-xl border border-gray-200 px-5">
-              <Stepper label="Dormitorios" valor={form.dormitorios} onChange={(v) => set("dormitorios", v)} min={LIMITES.dormitorios.min} max={LIMITES.dormitorios.max} />
-              <Stepper label="Baños" valor={form.banos} onChange={(v) => set("banos", v)} min={LIMITES.banos.min} max={LIMITES.banos.max} />
-              <Stepper label="Ambientes" ayuda="Contando living y comedor" valor={form.ambientes} onChange={(v) => set("ambientes", v)} min={LIMITES.ambientes.min} max={LIMITES.ambientes.max} />
-              <Stepper label="Cocheras" valor={form.cocheras} onChange={(v) => set("cocheras", v)} min={LIMITES.cocheras.min} max={LIMITES.cocheras.max} />
+              {confirmados.dormitorios == null && <Stepper label="Dormitorios" valor={form.dormitorios} onChange={(v) => set("dormitorios", v)} min={LIMITES.dormitorios.min} max={LIMITES.dormitorios.max} />}
+              {confirmados.banos == null && <Stepper label="Baños" valor={form.banos} onChange={(v) => set("banos", v)} min={LIMITES.banos.min} max={LIMITES.banos.max} />}
+              {confirmados.ambientes == null && <Stepper label="Ambientes" ayuda="Contando living y comedor" valor={form.ambientes} onChange={(v) => set("ambientes", v)} min={LIMITES.ambientes.min} max={LIMITES.ambientes.max} />}
+              {confirmados.cocheras == null && <Stepper label="Cocheras" valor={form.cocheras} onChange={(v) => set("cocheras", v)} min={LIMITES.cocheras.min} max={LIMITES.cocheras.max} />}
             </div>
           )}
 

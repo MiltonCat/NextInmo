@@ -9,6 +9,16 @@ process.env.SUPABASE_SECRET_KEY = "prueba";
 process.env.OPENAI_API_KEY = "prueba";
 const { buildLuciaKnowledge } = await import("../lib/luciaKnowledge.js");
 
+test("la interpretación conserva tasación, objetivo y fecha sin confundir medianas con comparables", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => { throw new Error("Sin red en prueba"); });
+  const tasacion = { tipo: "Casa", barrio: "Centro", objetivo: "Quiero vender", plazo: "En los próximos 3 meses", valorEstimadoUSD: 300000, rangoUSD: { min: 250000, max: 350000 } };
+  const result = await buildLuciaKnowledge("Ayudame a interpretar mi tasación", [], { tasacion });
+  const bloque = JSON.parse(result.context).snippets.find((s) => s.topic === "tasacion_del_visitante");
+  assert.deepEqual(bloque.datos, tasacion);
+  assert.match(bloque.fechaDelContextoDeMercado, /^\d{4}-\d{2}-\d{2}/);
+  assert.match(bloque.alcance, /no comparables individuales/);
+});
+
 test("asesora sobre ahorros con inversiones, mercado, tasador y blog aunque falle el índice", async () => {
   const original = globalThis.fetch;
   globalThis.fetch = async () => { throw new Error("Índice de prueba sin conexión"); };
