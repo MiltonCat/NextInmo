@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import { validarDatosTasacion, pasoYaConfirmado } from "../lib/luciaDatosTasacion.mjs";
-import { pideTasacion } from "../lib/luciaContexto.mjs";
+import { pideTasacion, objetivoTasacionDeclarado } from "../lib/luciaContexto.mjs";
 register("./luciaKnowledge-loader.mjs", import.meta.url);
 const { extraerDatosTasacion } = await import("../lib/luciaExtraerTasacion.js");
 
@@ -23,6 +23,15 @@ test("solo saltea pasos confirmados completos, y siempre permite revisar extras"
 test("abre la tasación al describir una vivienda propia sin capturar búsquedas o alquileres", () => {
   for (const texto of ["Tengo una casa de 120 m² en el Centro", "Mi departamento tiene 80 metros", "Tengo un depto de 50 m2"]) assert.equal(pideTasacion(texto), true, texto);
   for (const texto of ["Busco una casa de 120 m²", "Tengo una casa de 120 m² para alquilar", "No quiero tasar mi casa", "Tengo una casa y quiero saber sobre créditos"]) assert.equal(pideTasacion(texto), false, texto);
+});
+
+test("la venta de una propiedad no entra al recorrido de compra, incluso con errores de escritura", () => {
+  for (const frase of ["tengo una propeidad de 120 m2 que quiero vender", "Tengo una propiedad de 120 m2 que quiero vender", "Hola, quiero vender mi casa", "Mi departamento es de 80 m² y lo quiero vender"]) {
+    assert.equal(pideTasacion(frase), true, frase);
+    assert.equal(objetivoTasacionDeclarado([frase]), "Quiero vender");
+  }
+  assert.equal(objetivoTasacionDeclarado(["quiero vender mi casa", "no quiero vender"]), "");
+  assert.equal(objetivoTasacionDeclarado(["busco una propiedad para comprar"]), "");
 });
 
 test("la extracción pide estructura estricta, no guarda el pedido y valida la salida", async (t) => {

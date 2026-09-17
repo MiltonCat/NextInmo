@@ -5,12 +5,13 @@ import TasadorWizard from "./TasadorWizard";
 import styles from "./LuciaTasador.module.css";
 import { OBJETIVOS_TASACION, PLAZOS_TASACION } from "@/lib/luciaTasacion.mjs";
 import { CAMPOS_TASACION, validarDatosTasacion } from "@/lib/luciaDatosTasacion.mjs";
+import { objetivoTasacionDeclarado } from "@/lib/luciaContexto.mjs";
 
 export default function LuciaTasador({ onResultado, mensajes = null }) {
   const [barrios, setBarrios] = useState(null);
   const [error, setError] = useState(false);
   const [intento, setIntento] = useState(0);
-  const [objetivo, setObjetivo] = useState("");
+  const [objetivo, setObjetivo] = useState(() => objetivoTasacionDeclarado(mensajes || []));
   const [plazo, setPlazo] = useState("");
   const [propuesta, setPropuesta] = useState({});
   const [confirmados, setConfirmados] = useState(null);
@@ -72,7 +73,7 @@ export default function LuciaTasador({ onResultado, mensajes = null }) {
     {lecturaFallida && <p role="status" className="p-3 text-sm">No pude recuperar los datos de la charla. Podés completar la tasación acá.</p>}
     {Object.keys(confirmados || {}).length > 0 && <button type="button" className="px-3 pt-3 text-sm underline" onClick={() => setConfirmados(null)}>Revisar datos confirmados</button>}
     <div className="space-y-3 px-3 pt-3">
-      <label className="block text-sm">¿Qué estás evaluando? <span className="text-xs text-gray-500">Opcional</span>
+      <label className="block text-sm">{objetivoTasacionDeclarado(mensajes || []) ? "Tu objetivo" : "¿Qué estás evaluando?"} <span className="text-xs text-gray-500">Opcional</span>
         <select className="lucia-tool-input mt-1" value={objetivo} onChange={(e) => setObjetivo(e.target.value)}>
           <option value="">Elegir</option>
           {OBJETIVOS_TASACION.map((opcion) => <option key={opcion}>{opcion}</option>)}
