@@ -29,6 +29,8 @@ create table if not exists public.lucia_preguntas (
   respondida  boolean default true,
   error       text,
   fuentes     smallint not null default 0,
+  respuesta   text check (char_length(respuesta) between 20 and 1500),
+  herramientas text[] not null default '{}',
   page_path   text,
   model       text
 );
@@ -58,6 +60,16 @@ create index if not exists lucia_preguntas_ruta_idx
 alter table public.lucia_preguntas add column if not exists interno boolean not null default false;
 create index if not exists lucia_preguntas_interno_idx
   on public.lucia_preguntas (interno, created_at desc);
+
+-- Migración del 17/09/2026: para revisar una respuesta no alcanza con saber
+-- que existió. Se guarda la versión saneada que vio la persona y las
+-- herramientas consultadas para entender de dónde salió.
+alter table public.lucia_preguntas add column if not exists respuesta text;
+alter table public.lucia_preguntas add column if not exists herramientas text[] not null default '{}';
+do $$ begin
+  alter table public.lucia_preguntas add constraint lucia_preguntas_respuesta_check
+    check (respuesta is null or char_length(respuesta) between 20 and 1500);
+exception when duplicate_object then null; end $$;
 `;
 
 const client = new Client({

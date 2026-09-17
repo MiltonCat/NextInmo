@@ -124,7 +124,14 @@ export async function POST(request) {
             result = { respondida: false, error: answer.reason };
             emit({ type: "error", error: answer.reason });
           } else {
-            result = { respondida: true, answerId, fuentes: knowledge.sources.length, model: answer.model };
+            result = {
+              respondida: true,
+              answerId,
+              respuesta: answer.text,
+              fuentes: knowledge.sources.length,
+              herramientas: answer.herramientas,
+              model: answer.model,
+            };
             emit({ type: "done", ok: true, answer: answer.text, answerId, model: answer.model, sources: knowledge.sources, grafico: graficoParaRespuesta(question) });
           }
         } catch {
@@ -169,7 +176,9 @@ export async function POST(request) {
   guardar({
     respondida: true,
     answerId,
+    respuesta: answer.text,
     fuentes: knowledge.sources.length,
+    herramientas: answer.herramientas,
     model: answer.model,
   });
 
