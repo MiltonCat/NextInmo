@@ -47,3 +47,34 @@ meses:
 - `public/icon.png`
 
 Se regeneran del SVG con `cairosvg`. Si se cambia la marca, se cambian los cuatro.
+
+# Los diagramas de `docs/`: internos, no van a `public/`
+
+`docs/tasador-flujo.*` y `docs/web-arquitectura.*` son mapas del sistema generados con
+Archify. **No se mueven, copian ni embeben desde `public/`.** Un archivo en `public/`
+queda servido en una URL abierta apenas se pushea a main, y estos diagramas nombran el
+panel de admin, las tablas de Supabase, los endpoints, la sonda de salud y el límite de
+tasa del tasador con su número exacto. Publicar ese número es publicar a qué velocidad
+hay que ir para no activarlo.
+
+Son material de venta cara a cara, no contenido del sitio. Si hace falta una sección
+pública de "cómo funciona", se escribe una versión aparte para eso; no se recorta esta.
+
+La fuente de cada diagrama es el `.json` (~7 KB, se diffea). El `.html` es la salida
+compilada de ~840 KB: se regenera, no se edita a mano.
+
+## Mantenerlos al día
+
+**Al terminar un cambio estructural** —una ruta de `app/api`, una pantalla de
+`app/admin`, algo de `lib/`, el flujo del tasador— correr:
+
+```bash
+node scripts/verificar-diagramas.mjs
+```
+
+Compara el último commit de cada `.json` contra el de los archivos que describe y dice
+cuál quedó atrás. Si marca alguno viejo, avisarle a Milton para regenerarlo: un diagrama
+desactualizado que se muestra en una reunión es peor que no tenerlo. Si el cambio suma
+un archivo estructural nuevo, agregarlo a la lista `DIAGRAMAS` del script.
+
+Detalle completo en `docs/README.md`.
