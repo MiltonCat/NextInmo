@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useFavorites } from "@/hooks/useFavorites";
 import { getPropertySlug } from "@/data/properties";
+import { esRemota } from "@/lib/photoImages";
 
 // Criterio visual de la tarjeta (estilo Airbnb):
 //
@@ -66,6 +67,7 @@ function PropertyCard({ property }) {
           src={property.image}
           alt={property.title}
           fill
+          unoptimized={esRemota(property.image)}
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={`object-cover transition-transform duration-500 ${isUnavailable ? "brightness-50 grayscale" : "group-hover:scale-[1.03]"} ${property.alquilada ? "brightness-50" : property.reservada ? "brightness-75" : ""}`}
         />

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { esRemota } from "@/lib/photoImages";
 
 export default function Lightbox({ images, title, isOpen, onClose, startIndex = 0 }) {
   if (!isOpen || images.length === 0) return null;
@@ -67,6 +68,7 @@ function LightboxDialog({ images, title, onClose, startIndex }) {
           alt={`${title} - ${currentIndex + 1}`}
           fill
           priority
+          unoptimized={esRemota(images[currentIndex])}
           sizes="(max-width: 896px) 100vw, 896px"
           className="object-contain rounded-lg"
         />

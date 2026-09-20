@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { PHOTO_CATEGORIES, UNCATEGORIZED } from "@/lib/photoImages";
+import { esRemota, PHOTO_CATEGORIES, UNCATEGORIZED } from "@/lib/photoImages";
 
 // El video no es un ambiente más: no se agrupa con las fotos ni se abre en el
 // Lightbox. Tiene su propia sección y va primero, porque es lo que mejor
@@ -92,6 +92,7 @@ export default function PhotoTour({ images, title, isOpen, onClose, onOpenPhoto 
                       src={group.photos[0].url}
                       alt={group.label}
                       fill
+                      unoptimized={esRemota(group.photos[0].url)}
                       sizes="112px"
                       className="rounded-lg object-cover"
                     />
@@ -122,6 +123,7 @@ export default function PhotoTour({ images, title, isOpen, onClose, onOpenPhoto 
                         src={photo.url}
                         alt={`${title} - ${group.label}`}
                         fill
+                        unoptimized={esRemota(photo.url)}
                         sizes="(max-width: 640px) 50vw, 480px"
                         className="cursor-pointer rounded-lg object-cover transition hover:opacity-90"
                         onClick={() => onOpenPhoto(photo.photoIndex)}

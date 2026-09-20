@@ -12,7 +12,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { propertyWhatsappMessage, whatsappUrl } from "@/lib/whatsapp";
 import { splitPropertyDescription } from "@/lib/propertyDescription";
-import { normalizeImages, soloFotos, soloVideos } from "@/lib/photoImages";
+import { esRemota, normalizeImages, soloFotos, soloVideos } from "@/lib/photoImages";
 
 function waLink(property, message = "") {
   return whatsappUrl(message || propertyWhatsappMessage(property));
@@ -256,6 +256,7 @@ export default function PropertyDetailClient({ property }) {
                   alt={property.title}
                   fill
                   priority
+                  unoptimized={esRemota(previewImages[0].url)}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover cursor-pointer hover:opacity-95 transition"
                   onClick={openTour}
@@ -268,6 +269,7 @@ export default function PropertyDetailClient({ property }) {
                   src={image.url}
                   alt={`${property.title} - ${index + 2}`}
                   fill
+                  unoptimized={esRemota(image.url)}
                   sizes="25vw"
                   className="object-cover cursor-pointer hover:opacity-95 transition"
                   onClick={openTour}
@@ -306,6 +308,7 @@ export default function PropertyDetailClient({ property }) {
                     src={img.url}
                     alt={`${property.title} - ${idx + 1}`}
                     fill
+                    unoptimized={esRemota(img.url)}
                     priority={idx === 0}
                     sizes="100vw"
                     className="object-cover rounded-xl cursor-pointer"
