@@ -1419,6 +1419,19 @@ export default function ChatBot() {
       }));
       trackEvent("chatbot_ia_respuesta", { ok: true, fuentes: resources.length });
       yaRespondioIaRef.current = true;
+      // Las propiedades que la IA encontró con buscar_propiedades se muestran
+      // como tarjetas, igual que en el árbol. Se toman del catálogo que carga
+      // el chat, por id: nada que no esté publicado llega a pantalla.
+      let tarjetas = [];
+      if (Array.isArray(body.propiedades) && body.propiedades.length) {
+        const catalogo = dataset.length ? dataset : await cargarCatalogo();
+        if (flowRef.current !== requestFlow) return;
+        tarjetas = body.propiedades
+          .map((id) => (catalogo || []).find((property) => String(property.id) === String(id)))
+          .filter(Boolean)
+          .slice(0, 3);
+        if (tarjetas.length) lastRecommendationsRef.current = tarjetas;
+      }
       const commercialIntent = /\b(compr|alquil|vend|tas|invert|propiedad|casa|departamento|depto|lote|terreno|precio|mercado|credito|hipoteca)\w*/i.test(text);
       const shouldInvite = commercialIntent && !tasacionRef.current && !/\bvend\w*/i.test(text) && !leadSent && !aiLeadInviteShownRef.current;
       if (shouldInvite) {
@@ -1427,6 +1440,7 @@ export default function ChatBot() {
       }
       setMessages((prev) => {
         const completed = { id: streamId, role: "bot", text: body.answer, recursos: resources, grafico: body.grafico || null,
+          results: tarjetas.length ? tarjetas : undefined,
           feedback: body.answerId ? { answerId: body.answerId, model: body.model } : null,
           stepKey: shouldInvite ? undefined : activeStep, aiSuggestions: true, sobreTasacion: Boolean(tasacionRef.current),
           followUp: /barrio|zona/i.test(text) ? "¿Qué diferencias hay entre esas zonas para vivir?" : /invert|renta|mercado/i.test(text) ? "¿Qué aspectos debería comparar para decidir en mi caso?" : "Contame un poco más sobre lo que acabás de explicar" };

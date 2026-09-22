@@ -8,6 +8,7 @@ import {
   parseLuciaText,
   recommendProperties,
   rutaDelTexto,
+  rutaDelTextoAnterior,
 } from "../lib/luciaAdvisor.mjs";
 
 const property = (id, overrides = {}) => ({
@@ -126,9 +127,22 @@ test("un relato personal sin signo de pregunta va a la IA", () => {
   assert.equal(parseLuciaText(relato).filters.minBedrooms, 3);
 });
 
-test("una busqueda corta por filtros sigue en el arbol guiado", () => {
-  assert.equal(rutaDelTexto("busco casa de 3 dormitorios", "welcome"), "guiado");
-  assert.equal(rutaDelTexto("busco un departamento chico", "welcome"), "guiado");
+// Desde el 22/09 lo escrito va a la IA: la búsqueda por filtros también.
+test("una busqueda corta por filtros va a la IA", () => {
+  assert.equal(rutaDelTexto("busco casa de 3 dormitorios", "welcome"), "ia");
+  assert.equal(rutaDelTexto("busco un departamento chico", "welcome"), "ia");
+  assert.equal(rutaDelTexto("de 2 habitaciones", "welcome"), "ia");
+});
+
+test("la respuesta pelada a una pregunta del arbol sigue en el arbol", () => {
+  assert.equal(rutaDelTexto("2", "ask_bedrooms"), "guiado");
+  assert.equal(rutaDelTexto("una casa", "ask_type"), "guiado");
+  assert.equal(rutaDelTexto("hasta 200 mil", "ask_budget"), "guiado");
+});
+
+test("en el arbol, lo que no responde el paso o trae una pregunta va a la IA", () => {
+  assert.equal(rutaDelTexto("cuanto sale el m2 en el centro?", "ask_bedrooms"), "ia");
+  assert.equal(rutaDelTexto("3, y cuanto sale el m2 en el centro?", "ask_bedrooms"), "ia");
 });
 
 test("adentro del embudo el relato sigue leyendose como respuesta al paso", () => {
@@ -155,18 +169,20 @@ test("decir que buscas algo ya no cancela la pregunta", () => {
   assert.equal(rutaDelTexto("quiero comprar, cuanto necesito de entrada", "welcome"), "ia");
 });
 
-test("pero la busqueda pelada sigue en el embudo, aunque traiga signos", () => {
-  // Esta es la razon de ser del veto y no se toca: el signo solo no convierte
-  // una busqueda en una pregunta.
-  assert.equal(rutaDelTexto("busco casa hasta 200 mil??", "welcome"), "guiado");
-  assert.equal(rutaDelTexto("busco departamento 2 dormitorios", "welcome"), "guiado");
-  assert.equal(rutaDelTexto("quiero comprar una casa", "welcome"), "guiado");
+test("la regla anterior mandaba la busqueda pelada al embudo", () => {
+  // Se conserva rutaDelTextoAnterior para el modo sombra y para volver atras.
+  assert.equal(rutaDelTextoAnterior("busco casa hasta 200 mil??", "welcome"), "guiado");
+  assert.equal(rutaDelTextoAnterior("busco departamento 2 dormitorios", "welcome"), "guiado");
+  assert.equal(rutaDelTextoAnterior("quiero comprar una casa", "welcome"), "guiado");
+  for (const frase of ["busco casa hasta 200 mil??", "busco departamento 2 dormitorios", "quiero comprar una casa"]) {
+    assert.equal(rutaDelTexto(frase, "welcome"), "ia", frase);
+  }
 });
 
 test("el interrogativo tiene que abrir la oracion, no ser un relativo", () => {
   // "que" adentro de la frase es un relativo y no la vuelve pregunta; despues de
   // una coma, si. Sin esta distincion volvia el defecto de agosto: media docena
   // de busquedas mandadas a la IA por un "que" suelto.
-  assert.equal(rutaDelTexto("busco casa que tenga jardin", "welcome"), "guiado");
+  assert.equal(rutaDelTextoAnterior("busco casa que tenga jardin", "welcome"), "guiado");
   assert.equal(rutaDelTexto("busco casa, que barrios me recomendas", "welcome"), "ia");
 });

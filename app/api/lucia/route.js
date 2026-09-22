@@ -132,7 +132,7 @@ export async function POST(request) {
               herramientas: answer.herramientas,
               model: answer.model,
             };
-            emit({ type: "done", ok: true, answer: answer.text, answerId, model: answer.model, sources: knowledge.sources, grafico: graficoParaRespuesta(question) });
+            emit({ type: "done", ok: true, answer: answer.text, answerId, model: answer.model, sources: knowledge.sources, grafico: graficoParaRespuesta(question), propiedades: answer.propiedades || [] });
           }
         } catch {
           result = { respondida: false, error: "stream_error" };
@@ -189,5 +189,6 @@ export async function POST(request) {
     model: answer.model,
     sources: knowledge.sources,
     grafico: graficoParaRespuesta(question),
+    propiedades: answer.propiedades || [],
   });
 }

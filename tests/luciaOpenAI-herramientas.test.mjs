@@ -78,3 +78,15 @@ test("si el modelo insiste con herramientas, corta y contesta igual", async (t) 
   assert.equal(respuesta.ok, false);
   assert.equal(respuesta.reason, "empty_response");
 });
+
+test("devuelve los ids de las propiedades que encontró, para mostrarlas como tarjetas", async (t) => {
+  conApiKey(t);
+  let vuelta = 0;
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (String(url).includes("properties?select=")) return new Response(JSON.stringify(PROPIEDADES));
+    vuelta++;
+    return new Response(vuelta === 1 ? RONDA_PIDE : RONDA_CONTESTA);
+  });
+  const respuesta = await askOpenAILucia({ question: "quiero que me muestres alquileres", context: "sin catálogo", onDelta: () => {} });
+  assert.deepEqual(respuesta.propiedades, [1]);
+});

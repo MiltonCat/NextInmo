@@ -8,7 +8,9 @@ test("después de pedir alquileres, '2 habitaciones' sigue en alquiler", () => {
 
   // Lo que hace ChatBot.handleText con esa frase desde welcome.
   const parsed = parseLuciaText("de 2 habitaciones", "welcome");
-  assert.equal(rutaDelTexto("de 2 habitaciones", "welcome", parsed), "guiado");
+  // Desde el 22/09 esta frase va a la IA, que tiene el historial; si igual
+  // cae en el árbol, el árbol tampoco pierde el alquiler.
+  assert.equal(rutaDelTexto("de 2 habitaciones", "welcome", parsed), "ia");
   const merged = { operacion: operacionDeLaCharla(charla), ...parsed.filters };
   const paso = nextLuciaStep(merged, parsed.answered);
   assert.notEqual(paso, "ask_goal");
