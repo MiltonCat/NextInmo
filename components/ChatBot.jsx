@@ -21,6 +21,7 @@ import {
   decorateRecommendations,
   eligibleProperties,
   nextLuciaStep,
+  operacionDeLaCharla,
   parseLuciaText,
   recommendProperties,
   rutaDelTexto,
@@ -1503,7 +1504,12 @@ export default function ChatBot() {
     }
     const parsed = parseLuciaText(text, activeStep);
     const startsFresh = activeStep === "welcome" || activeStep.startsWith("after_results");
-    const base = startsFresh ? {} : filters;
+    // Arrancar de cero no es olvidar la charla: si ya se habló de alquiler, el
+    // árbol sigue por la rama de alquiler en vez de volver a preguntar.
+    const operacionPrevia = startsFresh && !parsed.filters.operacion
+      ? operacionDeLaCharla([...messages.filter((m) => m.role === "user" && m.text).map((m) => m.text), text])
+      : null;
+    const base = startsFresh ? (operacionPrevia ? { operacion: operacionPrevia } : {}) : filters;
 
     // Quien decide es rutaDelTexto (lib/luciaAdvisor.mjs), que es una funcion
     // pura y con pruebas. Antes la regla vivia suelta aca y se apoyaba en que la
