@@ -504,17 +504,11 @@ const STEPS = {
     // Este texto solo se usa cuando se vuelve al inicio desde adentro: la
     // primera vez el saludo lo arma contextualGreeting() según la página.
     text: "¿Con qué otra cosa te ayudo?",
-    options: [
-      // IA primero (22/09): los atajos de entrada le escriben a Lucía en vez
-      // de abrir un cuestionario. Vender/tasar sigue abriendo su guía porque
-      // lleva al tasador, que es un formulario de verdad.
-      { label: "Estoy buscando para comprar", icono: "buscar", preguntar: true },
-      { label: "Busco alquiler permanente", icono: "llave", preguntar: true },
-      { label: "Quiero vender o tasar", icono: "casa", next: "guia_vender" },
-      { label: "Estoy averiguando cómo está el mercado", icono: "grafico", preguntar: true },
-      { label: "Cómo es vivir en San Martín", icono: "montana", preguntar: true },
-      { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
-    ],
+    // Sin botones (22/09, decisión de Milton): la entrada es escribirle a
+    // Lucía, como a cualquier IA. El árbol sigue vivo adentro —tasador,
+    // resultados, alertas—, pero ya no es la puerta. Para volver a los atajos,
+    // ver el commit "Lucía: los atajos de bienvenida le hablan a la IA".
+    options: [],
   },
 
   guia_vender: {
