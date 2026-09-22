@@ -1466,8 +1466,28 @@ export default function ChatBot() {
     } catch {}
   };
 
+  // Modo sombra de Jev (lib/luciaSombra.js): avisa la frase y la ruta que ya
+  // tomó el router para compararla del lado del servidor. Telemetría pura: sin
+  // await, con keepalive, y no cambia nada de lo que ve la persona. Si la
+  // sombra está apagada, el servidor contesta 204 y no hace nada.
+  const registrarSombra = (text, ruta) => {
+    try {
+      const history = messages
+        .filter((message) => message.text && (message.role === "user" || message.role === "bot"))
+        .slice(-8)
+        .map((message) => ({ role: message.role === "bot" ? "assistant" : "user", content: message.text }));
+      fetch("/api/lucia-sombra/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text, history, paso: activeStep, ruta, pagePath: pathname, interno: modoPrueba }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  };
+
   const handleText = (text) => {
     if (pideTasacion(text)) {
+      registrarSombra(text, "tasador");
       cancelPending();
       tasacionRef.current = null;
       setTyping(false);
@@ -1477,6 +1497,7 @@ export default function ChatBot() {
       return;
     }
     if (tasacionRef.current) {
+      registrarSombra(text, "ia_tasacion");
       askLuciaAI(text);
       return;
     }
@@ -1490,6 +1511,7 @@ export default function ChatBot() {
     // a la IA, y "me conviene comprar ahora" —sin signos y sin arrancar con un
     // interrogativo— caia en el arbol, que no sabe responder eso.
     if (rutaDelTexto(text, activeStep, parsed) === "ia") {
+      registrarSombra(text, "ia");
       askLuciaAI(text);
       return;
     }
@@ -1499,6 +1521,7 @@ export default function ChatBot() {
     // escritas con las palabras de una persona, y sirven tanto como las
     // preguntas para saber que falta en el sitio.
     registrarFraseGuiada(text);
+    registrarSombra(text, "guiado");
 
     const merged = { ...base, ...parsed.filters };
     const answers = startsFresh
