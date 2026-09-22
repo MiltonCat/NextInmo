@@ -505,11 +505,14 @@ const STEPS = {
     // primera vez el saludo lo arma contextualGreeting() según la página.
     text: "¿Con qué otra cosa te ayudo?",
     options: [
-      { label: "Estoy buscando para comprar", icono: "buscar", reinicia: true, next: "ask_goal" },
-      { label: "Busco alquiler permanente", icono: "llave", next: "guia_alquilar" },
+      // IA primero (22/09): los atajos de entrada le escriben a Lucía en vez
+      // de abrir un cuestionario. Vender/tasar sigue abriendo su guía porque
+      // lleva al tasador, que es un formulario de verdad.
+      { label: "Estoy buscando para comprar", icono: "buscar", preguntar: true },
+      { label: "Busco alquiler permanente", icono: "llave", preguntar: true },
       { label: "Quiero vender o tasar", icono: "casa", next: "guia_vender" },
-      { label: "Estoy averiguando cómo está el mercado", icono: "grafico", next: "menu_info" },
-      { label: "Cómo es vivir en San Martín", icono: "montana", next: "menu_vivir" },
+      { label: "Estoy averiguando cómo está el mercado", icono: "grafico", preguntar: true },
+      { label: "Cómo es vivir en San Martín", icono: "montana", preguntar: true },
       { label: "Prefiero hablar con Milton", icono: "whatsapp", next: "whatsapp" },
     ],
   },
@@ -1051,6 +1054,13 @@ export default function ChatBot() {
   };
 
   const handleOption = async (opt, currentFilters) => {
+    // Atajo que le habla a la IA: el texto del botón viaja como si la persona
+    // lo hubiera escrito, con el historial de la charla.
+    if (opt.preguntar) {
+      trackEvent("chatbot_paso", { desde: activeStep, paso: "ia", opcion: opt.label });
+      askLuciaAI(opt.pregunta || opt.label);
+      return;
+    }
     if (opt.reinicia) tasacionRef.current = null;
     if (opt.recursos?.includes("tasacion")) {
       handleText("Quiero tasar mi propiedad");
