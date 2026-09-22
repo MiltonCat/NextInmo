@@ -63,3 +63,14 @@ test("tiposDeLaBusqueda reconoce solo tipos reales", () => {
   assert.equal(tiposDeLaBusqueda("alquiler"), undefined);
   assert.equal(tiposDeLaBusqueda(""), undefined);
 });
+
+test("sin dormitorios cargados, los lee del título (caso real id 106)", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => new Response(JSON.stringify([
+    { id: 106, title: "Departamento de 1 habitación en el centro, con una vista que enamora", type: "Departamento", modalidad: "alquiler_permanente", precioAlquilerARS: 1000000, bedrooms: null, alquilada: false, reservada: false, status: "disponible" },
+    { id: 115, title: "Departamento premium en el centro. 80 mts2", type: "Departamento", modalidad: "alquiler_permanente", precioAlquilerARS: 1500000, bedrooms: null, alquilada: false, reservada: false, status: "disponible" },
+  ])));
+  const salida = await ejecutarHerramienta("buscar_propiedades", { operacion: "alquiler", dormitorios_min: 1 });
+  assert.equal(salida.structuredContent.aproximado, false);
+  assert.deepEqual(salida.structuredContent.propiedades.map((p) => p.id), [106]);
+  assert.equal(salida.structuredContent.propiedades[0].dormitorios, 1);
+});

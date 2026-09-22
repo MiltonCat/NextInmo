@@ -28,3 +28,13 @@ test("sin operación en la charla no inventa una", () => {
 test("solo mira los últimos mensajes", () => {
   assert.equal(operacionDeLaCharla(["alquileres", "a", "b", "c", "de 2 habitaciones"]), null);
 });
+
+test("dormitoriosDe: el campo manda, si falta se lee del texto", async () => {
+  const { dormitoriosDe } = await import("../lib/luciaAdvisor.mjs");
+  assert.equal(dormitoriosDe({ bedrooms: 2, title: "1 habitación" }), 2);
+  assert.equal(dormitoriosDe({ bedrooms: null, title: "Departamento de 1 habitación en el centro" }), 1);
+  assert.equal(dormitoriosDe({ title: "Monoambiente luminoso" }), 0);
+  assert.equal(dormitoriosDe({ title: "Casa", description: "tres dormitorios y jardín" }), 3);
+  assert.equal(dormitoriosDe({ title: "Depto 3 ambientes" }), 2);
+  assert.equal(dormitoriosDe({ title: "Departamento premium en el centro. 80 mts2" }), null);
+});
