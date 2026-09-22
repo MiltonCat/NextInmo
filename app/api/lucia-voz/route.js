@@ -69,15 +69,20 @@ export async function POST(request) {
       body: JSON.stringify({
         text: texto,
         reference_id: process.env.FISH_AUDIO_VOZ || VOZ_POR_OMISION,
-        // 0.9 en vez del 0.7 por omisión: con 0.7 todas las frases salen con
-        // la misma curva de entonación y suena a contestador.
-        temperature: 0.9,
+        // Volvió a 0.7 (el valor por omisión de Fish) el 22/09/2026: con 0.9 el
+        // modelo muestreaba de más y en respuestas largas metía palabras que no
+        // estaban en el texto. La monotonía de 0.7 se arregla con la voz, no
+        // subiendo el azar.
+        temperature: 0.7,
+        top_p: 0.7,
         format: "mp3",
         // 64 kbps alcanza de sobra para voz hablada y pesa la mitad que 128.
         // En un celular con datos, la mitad de peso es la mitad de espera.
         mp3_bitrate: 64,
-        // En el chat la espera se siente más que el último 5% de calidad.
-        latency: "balanced",
+        // "normal" y no "balanced": balanced baja la calidad del modelo y, sumado
+        // a la temperatura alta, producía palabras inventadas (22/09/2026).
+        // Cuesta uno o dos segundos más; se prefiere a que diga cualquier cosa.
+        latency: "normal",
         prosody: { speed: 1, normalize_loudness: true },
       }),
     });
