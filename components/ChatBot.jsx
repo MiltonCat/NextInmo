@@ -688,7 +688,7 @@ const AIRBNB = "#FF5A5F";
 
 // Retrato propio de Lucía. Es una copia WebP recortada para conservar nitidez
 // tanto en el encabezado como en el botón flotante de 56 px.
-const LUCIA_AVATAR = "/lucia-avatar.webp";
+const LUCIA_AVATAR = "/lucia-avatar-v2.webp";
 
 // La burbuja de invitación aparece una sola vez por visita. Si la cierran, no
 // vuelve en toda la sesión del navegador.

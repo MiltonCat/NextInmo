@@ -23,7 +23,7 @@ export default function LuciaHomePrompt() {
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:gap-6 lg:px-8">
         <div className="flex shrink-0 items-center gap-3 lg:w-[21rem]">
           <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200">
-            <Image src="/lucia-avatar.webp" alt="Lucía" width={44} height={44} className="h-full w-full object-cover" />
+            <Image src="/lucia-avatar-v2.webp" alt="Lucía" width={44} height={44} className="h-full w-full object-cover" />
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-600">Lucía</p>

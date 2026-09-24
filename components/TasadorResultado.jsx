@@ -210,7 +210,7 @@ function PreguntarleALucia({ resultado, contexto, datos }) {
     <div className="rounded-xl border border-gray-200 p-5">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-gray-200">
-          <Image src="/lucia-avatar.webp" alt="Lucía" width={40} height={40} className="h-full w-full object-cover" />
+          <Image src="/lucia-avatar-v2.webp" alt="Lucía" width={40} height={40} className="h-full w-full object-cover" />
         </div>
         <div>
           <Etiqueta>Lucía</Etiqueta>
