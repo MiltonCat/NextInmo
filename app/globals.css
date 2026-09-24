@@ -632,3 +632,14 @@ a.lucia-content-card:hover { background: var(--color-primary-50); border-color: 
 @media (prefers-reduced-motion: reduce) {
   .lucia-panel, .lucia-invitacion { animation: none; }
 }
+
+/* Botón flotante de Lucía: anillo institucional con un brillo blanco que gira */
+@property --lucia-giro { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.lucia-fab-anillo {
+  background: conic-gradient(from var(--lucia-giro), var(--color-primary-500) 0deg, var(--color-primary-500) 200deg, #ffffff 270deg, var(--color-primary-500) 340deg);
+  animation: lucia-giro 4s linear infinite;
+}
+@keyframes lucia-giro { to { --lucia-giro: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .lucia-fab-anillo { animation: none; }
+}

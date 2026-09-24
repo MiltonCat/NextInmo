@@ -1921,7 +1921,7 @@ export default function ChatBot() {
 
       <button
         onClick={() => (open ? setOpen(false) : abrirChat())}
-        className="fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full bg-white p-1 flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110"
+        className={`fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full ${open ? "bg-white" : "lucia-fab-anillo"} p-[3px] flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110`}
         style={{ boxShadow: "0 10px 30px rgba(255,90,95,.30), 0 2px 8px rgba(0,0,0,.12)" }}
         aria-label={open ? "Cerrar chat" : "Abrir chat"}
       >
