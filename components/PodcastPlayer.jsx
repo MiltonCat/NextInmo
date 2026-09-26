@@ -56,6 +56,11 @@ export default function PodcastPlayer({ slug, transcripcion }) {
             Tu navegador no puede reproducir audio.{" "}
             <a href={src} className="underline">Abrir el audio</a>.
           </audio>
+          {post.audio.sintetico && (
+            <p className="mt-2 text-xs text-gray-500">
+              Lectura con voz generada por inteligencia artificial.
+            </p>
+          )}
         </div>
       </div>
 
