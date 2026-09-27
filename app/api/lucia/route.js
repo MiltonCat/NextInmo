@@ -93,6 +93,9 @@ export async function POST(request) {
   // cualquier otra entrada. Si no pasa, vale null y la charla sigue sin ella:
   // preferible a que Lucía hable de "tu tasación" con datos a medias.
   const tasacion = normalizarTasacion(body?.tasacion);
+  // Agrupa las frases de una misma charla (lib/conversacionLucia.js). Lo valida
+  // registrarPregunta: si no es un UUID, la frase se guarda suelta.
+  const conversacionId = clamp(body?.conversacionId, 40) || null;
   if (body?.stream === true) {
     const encoder = new TextEncoder();
     const abort = new AbortController();
@@ -102,7 +105,7 @@ export async function POST(request) {
     const finished = new Promise((resolve) => { finish = resolve; });
     after(async () => {
       await finished;
-      await registrarPregunta({ pregunta: question, pagePath, interno: body?.interno === true, ...result });
+      await registrarPregunta({ pregunta: question, pagePath, conversacionId, interno: body?.interno === true, ...result });
     });
     const stream = new ReadableStream({
       async start(controller) {
@@ -164,7 +167,7 @@ export async function POST(request) {
   // registrarPregunta además no lanza nunca.
   const interno = body?.interno === true;
   const guardar = (extra) =>
-    after(() => registrarPregunta({ pregunta: question, pagePath, interno, ...extra }));
+    after(() => registrarPregunta({ pregunta: question, pagePath, conversacionId, interno, ...extra }));
 
   if (!answer.ok) {
     guardar({ respondida: false, error: answer.reason });

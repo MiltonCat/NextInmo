@@ -70,6 +70,16 @@ do $$ begin
   alter table public.lucia_preguntas add constraint lucia_preguntas_respuesta_check
     check (respuesta is null or char_length(respuesta) between 20 and 1500);
 exception when duplicate_object then null; end $$;
+
+-- Migración del 27/09/2026: cada frase suelta no dice cómo terminó una
+-- consulta. conversacion_id agrupa las frases de una misma charla (lo genera el
+-- navegador, ver lib/conversacionLucia.js) y es la unidad que clasifica la
+-- investigación de consultas. Es un UUID al azar: no identifica a nadie. Las
+-- filas viejas quedan en null.
+alter table public.lucia_preguntas add column if not exists conversacion_id uuid;
+create index if not exists lucia_preguntas_conversacion_idx
+  on public.lucia_preguntas (conversacion_id, created_at)
+  where conversacion_id is not null;
 `;
 
 const client = new Client({

@@ -8,6 +8,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { contextualPageMessage, whatsappUrl } from "@/lib/whatsapp";
 import { readLines } from "@/lib/luciaStream.mjs";
 import { registrarConsulta } from "@/lib/registrarConsulta";
+import { idConversacionLucia, terminarConversacionLucia } from "@/lib/conversacionLucia";
 import { useLucia } from "@/components/LuciaProvider";
 import LuciaGrafico from "@/components/LuciaGrafico";
 import LuciaAudio from "@/components/LuciaAudio";
@@ -1373,6 +1374,7 @@ export default function ChatBot() {
           pagePath: pathname,
           primeraRespuesta: !yaRespondioIaRef.current,
           interno: modoPrueba,
+          conversacionId: idConversacionLucia(),
           tasacion: tasacionRef.current || undefined,
           stream: true,
         }),
@@ -1479,7 +1481,7 @@ export default function ChatBot() {
       fetch("/api/lucia-frase/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, pagePath: pathname, interno: modoPrueba }),
+        body: JSON.stringify({ question: text, pagePath: pathname, conversacionId: idConversacionLucia(), interno: modoPrueba }),
         keepalive: true,
       }).catch(() => {});
     } catch {}
@@ -1660,6 +1662,8 @@ export default function ChatBot() {
     // Charla nueva, tasación afuera: si no, la propiedad de la persona seguiría
     // pesando en el contexto de preguntas que ya no tienen nada que ver.
     tasacionRef.current = null;
+    // Lo que se escriba después es otra consulta (lib/conversacionLucia.js).
+    terminarConversacionLucia();
     saludar();
   };
 
