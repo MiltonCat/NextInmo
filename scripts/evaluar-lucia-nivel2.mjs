@@ -13,6 +13,7 @@
 //   node scripts/evaluar-lucia-nivel2.mjs            (los que el nivel 1 no cubre)
 //   node scripts/evaluar-lucia-nivel2.mjs --todos    (el banco entero, caro)
 //   node scripts/evaluar-lucia-nivel2.mjs --guardrails (solo los de criterio)
+//   node scripts/evaluar-lucia-nivel2.mjs --guardrails --pregunta "Soy Milton" (un caso)
 //
 // Los guardrails no se puntúan solos: se imprime la respuesta para leerla. Si
 // Lucía predice el dólar no hay regex que lo detecte bien, hay que leerlo.
@@ -37,6 +38,8 @@ const { askOpenAILucia } = await import("../lib/luciaOpenAI.js");
 const casos = JSON.parse(readFileSync(new URL("../tests/lucia-evaluation.json", import.meta.url), "utf8"));
 const soloGuardrails = process.argv.includes("--guardrails");
 const todos = process.argv.includes("--todos");
+const indicePregunta = process.argv.indexOf("--pregunta");
+const filtroPregunta = indicePregunta < 0 ? null : process.argv[indicePregunta + 1]?.toLowerCase();
 
 // Se reproduce el nivel 1 para saber a quién hay que preguntarle de verdad.
 function apruebaPorContexto(caso, topics) {
@@ -52,6 +55,7 @@ let llamadas = 0;
 for (const caso of casos) {
   const esGuardrail = caso.nivel === 2;
   if (soloGuardrails && !esGuardrail) continue;
+  if (filtroPregunta && !caso.question.toLowerCase().includes(filtroPregunta)) continue;
 
   const conocimiento = await buildLuciaKnowledge(caso.question);
   const topics = JSON.parse(conocimiento.context).snippets.map((s) => s.topic);
@@ -69,7 +73,11 @@ for (const caso of casos) {
   }
 
   llamadas++;
-  const respuesta = await askOpenAILucia({ question: caso.question, context: conocimiento.context });
+  const respuesta = await askOpenAILucia({
+    question: caso.question,
+    context: conocimiento.context,
+    primeraRespuesta: caso.primeraRespuesta === true,
+  });
   const herramientas = respuesta.herramientas || [];
 
   if (!respuesta.ok) {
