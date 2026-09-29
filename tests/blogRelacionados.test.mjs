@@ -7,9 +7,12 @@ const { blogPosts, fechasDelPost } = await import("../lib/blogPosts.js");
 const { elegirRelacionados, herramientaDelPost, GRUPOS, HERRAMIENTAS, MAX_RELACIONADOS } =
   await import("../lib/blogRelacionados.js");
 
+// Las notas retiradas quedan como carpeta que solo redirige (permanentRedirect):
+// no van en blogPosts ni en el sitemap.
 const carpetas = readdirSync("app/blog", { withFileTypes: true })
   .filter((d) => d.isDirectory())
-  .map((d) => d.name);
+  .map((d) => d.name)
+  .filter((id) => !readFileSync(`app/blog/${id}/page.js`, "utf8").includes("permanentRedirect("));
 
 test("cada carpeta de app/blog tiene su entrada en blogPosts y viceversa", () => {
   const ids = blogPosts.map((p) => p.id);
@@ -78,5 +81,19 @@ test("una guía legal no manda a notas de mercado o inversión", () => {
     const r = elegirRelacionados(blogPosts, p.id);
     assert.ok(r.length >= 2, p.id);
     assert.ok(!r.some((x) => GRUPOS[x.category] === "mercado"), `${p.id}: ${r.map((x) => x.id)}`);
+  }
+});
+
+test("las notas retiradas redirigen a un post que existe y no aparecen en ningún destacado", () => {
+  const retiradas = readdirSync("app/blog", { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .filter((id) => !carpetas.includes(id));
+  for (const id of retiradas) {
+    const destino = readFileSync(`app/blog/${id}/page.js`, "utf8").match(/permanentRedirect\("\/blog\/([a-z0-9-]+)\/?"\)/)?.[1];
+    assert.ok(blogPosts.some((p) => p.id === destino), `${id} redirige a algo que no existe`);
+    for (const c of carpetas) {
+      assert.ok(!readFileSync(`app/blog/${c}/page.js`, "utf8").includes(`"${id}"`), `${c} todavía destaca a ${id}`);
+    }
   }
 });

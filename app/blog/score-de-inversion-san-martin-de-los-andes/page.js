@@ -611,7 +611,7 @@ export default function ScoreInversionPage() {
             </p>
           </div>
 
-          <SeguirLeyendo slug="score-de-inversion-san-martin-de-los-andes" destacados={["como-tasamos-tu-propiedad-con-datos", "bitcoin-ladrillos-patagonicos"]} />
+          <SeguirLeyendo slug="score-de-inversion-san-martin-de-los-andes" destacados={["como-tasamos-tu-propiedad-con-datos"]} />
         </div>
       </article>
     </>
