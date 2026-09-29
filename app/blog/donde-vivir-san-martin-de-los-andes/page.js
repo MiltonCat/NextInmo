@@ -3,6 +3,10 @@ import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
 import { medianaDeBarrio } from "@/lib/precioZonas";
 import { MERCADO_GENERADO } from "@/lib/mercado";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("donde-vivir-san-martin-de-los-andes");
 
 // "2026-08-06" → "agosto de 2026". Sin new Date(): el parseo por zona horaria
 // puede correr un día entre servidor y cliente.
@@ -26,7 +30,8 @@ export const metadata = {
     description: "Precios del m², internet, transporte, hospital, seguridad y más. El análisis más completo de cada barrio basado en datos reales.",
     url: canonicalUrl("/blog/donde-vivir-san-martin-de-los-andes"),
     type: "article",
-    publishedTime: "2026-06-02T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [{ url: `${SITE_URL}/sanmartin.jpeg`, width: 1200, height: 630, alt: "Barrios de San Martín de los Andes" }],
   },
@@ -47,8 +52,8 @@ const articleJsonLd = {
   headline: "¿Dónde vivir en San Martín de los Andes? Guía completa por barrios 2026",
   description: "Análisis real de los barrios de San Martín de los Andes con precios del m², internet, transporte, hospital, cloacas, seguridad y pet friendly.",
   image: `${SITE_URL}/sanmartin.jpeg`,
-  datePublished: "2026-06-02",
-  dateModified: "2026-06-02",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: {
     "@type": "Organization",
@@ -798,30 +803,7 @@ export default function DondeVivirPage() {
           </Link>
         </section>
 
-        {/* Posts relacionados */}
-        <section className="border-t border-gray-100 pt-10">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <div className="space-y-3">
-            <Link href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/cartel-san-martin-de-los-andes.webp" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                </p>
-              </div>
-            </Link>
-            <Link href="/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/muelle.jpg" alt="Comprar en San Martín de los Andes desde Buenos Aires" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía para Compradores</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  Cómo comprar en San Martín de los Andes desde Buenos Aires
-                </p>
-              </div>
-            </Link>
-          </div>
-        </section>
+        <SeguirLeyendo slug="donde-vivir-san-martin-de-los-andes" destacados={["cuanto-cuesta-una-casa-en-san-martin-de-los-andes", "comprar-en-san-martin-de-los-andes-desde-buenos-aires"]} />
 
       </article>
     </>

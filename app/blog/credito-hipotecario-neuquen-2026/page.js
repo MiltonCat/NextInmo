@@ -2,6 +2,10 @@ import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("credito-hipotecario-neuquen-2026");
 
 export const metadata = {
   title: "Crédito Neuquén Habita 2026: requisitos y montos",
@@ -15,7 +19,8 @@ export const metadata = {
       "Guía del programa para construir, ampliar o refaccionar en San Martín de los Andes y Villa la Angostura.",
     url: canonicalUrl("/blog/credito-hipotecario-neuquen-2026"),
     type: "article",
-    publishedTime: "2026-06-22T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [{ url: `${SITE_URL}/hipotecario.jpeg`, width: 1200, height: 630, alt: "Crédito hipotecario de Neuquén 2026" }],
   },
@@ -38,8 +43,8 @@ const articleJsonLd = {
   description:
     "Guía del crédito hipotecario provincial de Neuquén (plan Neuquén Habita) para construir, ampliar o refaccionar la vivienda única y permanente. Requisitos, montos, tasa y cómo inscribirse. Alcance a San Martín de los Andes y Villa la Angostura.",
   image: `${SITE_URL}/hipotecario.jpeg`,
-  datePublished: "2026-06-22",
-  dateModified: "2026-06-22",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: {
     "@type": "Organization",
@@ -390,30 +395,7 @@ export default function CreditoHipotecarioNeuquenPage() {
           </Link>
         </section>
 
-        {/* Posts relacionados */}
-        <section className="border-t border-gray-100 pt-10">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <div className="space-y-3">
-            <Link href="/blog/creditos-hipotecarios-uva-2026" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/hipotecario.jpeg" alt="Créditos hipotecarios UVA" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Compra</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  Créditos Hipotecarios UVA: la llave para tu casa propia en la Patagonia
-                </p>
-              </div>
-            </Link>
-            <Link href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/cartel-san-martin-de-los-andes.webp" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                </p>
-              </div>
-            </Link>
-          </div>
-        </section>
+        <SeguirLeyendo slug="credito-hipotecario-neuquen-2026" destacados={["creditos-hipotecarios-uva-2026", "cuanto-cuesta-una-casa-en-san-martin-de-los-andes"]} />
 
       </article>
     </>

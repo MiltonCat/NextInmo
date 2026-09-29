@@ -2,6 +2,10 @@ import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("comprar-en-san-martin-de-los-andes-desde-buenos-aires");
 
 export const metadata = {
   title: "Cómo comprar una propiedad en San Martín de los Andes desde Buenos Aires",
@@ -15,7 +19,8 @@ export const metadata = {
       "Cuántas veces viajar, gastos reales de la operación, cómo transferir el dinero y cómo evitar estafas al comprar a distancia en la Patagonia.",
     url: canonicalUrl("/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires"),
     type: "article",
-    publishedTime: "2026-06-12T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [{ url: `${SITE_URL}/muelle.jpg`, width: 1200, height: 630, alt: "Comprar una propiedad en San Martín de los Andes" }],
   },
@@ -38,8 +43,8 @@ const articleJsonLd = {
   description:
     "Guía paso a paso para comprar una propiedad en San Martín de los Andes viviendo en otra provincia: cuántas veces viajar, gastos de la operación, cómo transferir el dinero y cómo evitar estafas.",
   image: `${SITE_URL}/muelle.jpg`,
-  datePublished: "2026-06-12",
-  dateModified: "2026-06-12",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: {
     "@type": "Organization",
@@ -462,30 +467,7 @@ export default function ComprarDesdeBuenosAiresPage() {
           </Link>
         </section>
 
-        {/* Posts relacionados */}
-        <section className="border-t border-gray-100 pt-10">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <div className="space-y-3">
-            <Link href="/blog/creditos-hipotecarios-uva-2026" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/hipotecario.jpeg" alt="Créditos UVA" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Compra</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  Créditos Hipotecarios UVA 2026: La Llave para tu Casa Propia en la Patagonia
-                </p>
-              </div>
-            </Link>
-            <Link href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/cartel-san-martin-de-los-andes.webp" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                </p>
-              </div>
-            </Link>
-          </div>
-        </section>
+        <SeguirLeyendo slug="comprar-en-san-martin-de-los-andes-desde-buenos-aires" destacados={["creditos-hipotecarios-uva-2026", "cuanto-cuesta-una-casa-en-san-martin-de-los-andes"]} />
 
       </article>
     </>

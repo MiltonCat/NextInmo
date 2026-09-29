@@ -1,6 +1,10 @@
 import { SITE_URL, canonicalUrl } from "@/config";
 import Link from "next/link";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("creditos-hipotecarios-uva-2026");
 
 export const metadata = {
   title: "Créditos hipotecarios UVA 2026: tasas y bancos",
@@ -11,7 +15,8 @@ export const metadata = {
     description: "Comparativa y guía para financiar una propiedad en San Martín de los Andes con un crédito hipotecario UVA.",
     url: canonicalUrl("/blog/creditos-hipotecarios-uva-2026"),
     type: "article",
-    publishedTime: "2026-05-26T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [
       {
@@ -39,8 +44,8 @@ const articleJsonLd = {
   headline: "Créditos Hipotecarios UVA: La Llave para tu Casa Propia en la Patagonia",
   description: "Descubrí cómo los créditos hipotecarios UVA te abren la puerta a comprar una propiedad en San Martín de los Andes. Requisitos, bancos, simulaciones y guía paso a paso.",
   image: `${SITE_URL}/hipotecario.jpeg`,
-  datePublished: "2026-05-26",
-  dateModified: "2026-05-26",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Milton Catalán",
@@ -529,39 +534,7 @@ export default function CreditosHipotecariosUVAPage() {
           </p>
         </div>
 
-        {/* Posts relacionados */}
-        <section className="not-prose border-t border-gray-100 pt-10 mt-12">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <div className="space-y-3">
-            <a href="/blog/credito-hipotecario-neuquen-2026" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/hipotecario.jpeg" alt="Crédito hipotecario de Neuquén 2026" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Crédito</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  Crédito hipotecario de Neuquén 2026: cómo construir o refaccionar tu casa
-                </p>
-              </div>
-            </a>
-            <a href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/cartel-san-martin-de-los-andes.webp" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                </p>
-              </div>
-            </a>
-            <a href="/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/muelle.jpg" alt="Comprar en San Martín de los Andes desde Buenos Aires" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía para Compradores</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  Cómo comprar en San Martín de los Andes desde Buenos Aires
-                </p>
-              </div>
-            </a>
-          </div>
-        </section>
+        <SeguirLeyendo slug="creditos-hipotecarios-uva-2026" destacados={["credito-hipotecario-neuquen-2026", "cuanto-cuesta-una-casa-en-san-martin-de-los-andes", "comprar-en-san-martin-de-los-andes-desde-buenos-aires"]} />
 
       </div>
     </article>

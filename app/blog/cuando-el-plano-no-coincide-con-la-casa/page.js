@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("cuando-el-plano-no-coincide-con-la-casa");
 
 const ARTICLE_PATH = "/blog/cuando-el-plano-no-coincide-con-la-casa";
 const ARTICLE_URL = canonicalUrl(ARTICLE_PATH);
@@ -28,8 +32,8 @@ export const metadata = {
       "Certificado catastral, Ley 26.209, Ley provincial 2217 y los tres tipos de discrepancia entre lo construido y lo declarado, explicados antes de que frenen tu venta.",
     url: ARTICLE_URL,
     type: "article",
-    publishedTime: "2026-07-24T00:00:00-03:00",
-    modifiedTime: "2026-07-24T00:00:00-03:00",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Carolina Godoy"],
     images: [
       {
@@ -58,8 +62,8 @@ const articleJsonLd = {
   description:
     "Guía jurídica sobre construcciones no declaradas, el certificado catastral y su efecto en la escrituración, con la Ley 26.209 y la Ley provincial 2217 de Neuquén.",
   image: ARTICLE_IMAGE,
-  datePublished: "2026-07-24",
-  dateModified: "2026-07-24",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Carolina Godoy",
@@ -427,33 +431,7 @@ export default function CuandoElPlanoNoCoincideConLaCasaPage() {
             </p>
           </div>
 
-          <section className="mt-12 border-t border-gray-100 pt-10">
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">
-              También te puede interesar
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Link
-                href="/blog/alquileres-san-martin-de-los-andes-2026"
-                className="rounded-2xl border border-gray-200 p-5 transition-shadow hover:shadow-md"
-              >
-                <p className="text-xs font-bold uppercase tracking-wide text-rose-600">Guía legal</p>
-                <p className="mt-2 font-bold text-gray-900">
-                  Alquileres en San Martín de los Andes 2026: qué revisar antes de firmar
-                </p>
-              </Link>
-              <Link
-                href="/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires"
-                className="rounded-2xl border border-gray-200 p-5 transition-shadow hover:shadow-md"
-              >
-                <p className="text-xs font-bold uppercase tracking-wide text-rose-600">
-                  Guía para compradores
-                </p>
-                <p className="mt-2 font-bold text-gray-900">
-                  Cómo comprar en San Martín de los Andes desde Buenos Aires
-                </p>
-              </Link>
-            </div>
-          </section>
+          <SeguirLeyendo slug="cuando-el-plano-no-coincide-con-la-casa" destacados={["alquileres-san-martin-de-los-andes-2026", "comprar-en-san-martin-de-los-andes-desde-buenos-aires"]} />
         </div>
       </article>
     </>

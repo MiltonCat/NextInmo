@@ -3,6 +3,10 @@ import mercado, { RELEVADAS_PUBLICO } from "@/lib/mercado";
 import { barriosConMediana } from "@/lib/precioZonas";
 import TrackedLink from "@/components/TrackedLink";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("score-de-inversion-san-martin-de-los-andes");
 
 const WA_SCORE_URL = `${WA_URL}?text=${encodeURIComponent(
   "Hola Milton, leí la guía sobre el Score de Inversión y quisiera analizar una propiedad o una oportunidad según mi presupuesto."
@@ -21,7 +25,8 @@ export const metadata = {
       "El marco que usamos para evaluar una propiedad patagónica como inversión: ubicación, revalorización, rentabilidad, liquidez y riesgo, con datos reales.",
     url: canonicalUrl("/blog/score-de-inversion-san-martin-de-los-andes"),
     type: "article",
-    publishedTime: "2026-06-23T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [
       {
@@ -52,8 +57,8 @@ const articleJsonLd = {
   description:
     "Qué variables componen el score de inversión de una propiedad en San Martín de los Andes y cómo interpretarlo con datos reales del mercado patagónico.",
   image: `${SITE_URL}/patagonia-activo.jpg`,
-  datePublished: "2026-06-23",
-  dateModified: "2026-06-23",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Milton Catalán",
@@ -606,54 +611,7 @@ export default function ScoreInversionPage() {
             </p>
           </div>
 
-          {/* Posts relacionados */}
-          <section className="not-prose border-t border-gray-100 pt-10 mt-12">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-              También te puede interesar
-            </p>
-            <div className="space-y-3">
-              <a
-                href="/blog/como-tasamos-tu-propiedad-con-datos"
-                className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
-              >
-                <img
-                  src="/portada.jpg"
-                  alt="Cómo tasamos tu propiedad con datos"
-                  className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">
-                    Tasación con Datos
-                  </p>
-                  <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                    Cómo tasamos tu propiedad con datos (y por qué te damos un rango)
-                  </p>
-                </div>
-              </a>
-              <a
-                href="/blog/bitcoin-ladrillos-patagonicos"
-                className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
-              >
-                <img
-                  src="/fintech.jpeg"
-                  alt="El Bitcoin de los Ladrillos Patagónicos"
-                  className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">
-                    Inversión
-                  </p>
-                  <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                    El Bitcoin de los Ladrillos Patagónicos
-                  </p>
-                </div>
-              </a>
-            </div>
-          </section>
+          <SeguirLeyendo slug="score-de-inversion-san-martin-de-los-andes" destacados={["como-tasamos-tu-propiedad-con-datos", "bitcoin-ladrillos-patagonicos"]} />
         </div>
       </article>
     </>

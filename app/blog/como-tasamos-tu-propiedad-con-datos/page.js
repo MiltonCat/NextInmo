@@ -3,6 +3,10 @@ import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl, TASADOR_PATH } from "@/config";
 import { RELEVADAS_PUBLICO } from "@/lib/mercado";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("como-tasamos-tu-propiedad-con-datos");
 
 export const metadata = {
   title: "Cómo tasamos tu propiedad con datos en San Martín de los Andes",
@@ -16,7 +20,8 @@ export const metadata = {
       `El modelo predictivo detrás de nuestro tasador: ${RELEVADAS_PUBLICO} propiedades reales de San Martín de los Andes, qué mira y por qué un rango es más honesto que un número exacto.`,
     url: canonicalUrl("/blog/como-tasamos-tu-propiedad-con-datos"),
     type: "article",
-    publishedTime: "2026-06-16T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [{ url: `${SITE_URL}/portada.jpg`, width: 1200, height: 630, alt: "Cómo tasamos tu propiedad con datos en San Martín de los Andes" }],
   },
@@ -39,8 +44,8 @@ const articleJsonLd = {
   description:
     `Cómo funciona el tasador de Catalán Propiedades: un modelo predictivo apoyado en ${RELEVADAS_PUBLICO} propiedades reales de San Martín de los Andes. Qué mira, por qué da un rango y no un número exacto, y qué cosas un modelo no puede ver.`,
   image: `${SITE_URL}/portada.jpg`,
-  datePublished: "2026-06-16",
-  dateModified: "2026-06-22",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: {
     "@type": "Organization",
@@ -458,30 +463,7 @@ export default function ComoTasamosConDatosPage() {
           </Link>
         </section>
 
-        {/* Posts relacionados */}
-        <section className="border-t border-gray-100 pt-10">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <div className="space-y-3">
-            <Link href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/cartel-san-martin-de-los-andes.webp" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                </p>
-              </div>
-            </Link>
-            <Link href="/blog/donde-vivir-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/sanmartin.jpeg" alt="Barrios de San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Barrios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026
-                </p>
-              </div>
-            </Link>
-          </div>
-        </section>
+        <SeguirLeyendo slug="como-tasamos-tu-propiedad-con-datos" destacados={["cuanto-cuesta-una-casa-en-san-martin-de-los-andes", "donde-vivir-san-martin-de-los-andes"]} />
 
       </article>
     </>

@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import PodcastPlayer from "@/components/PodcastPlayer";
 import { SITE_URL, canonicalUrl } from "@/config";
-import { blogPosts } from "@/lib/blogPosts";
+import { blogPosts, fechasDelPost } from "@/lib/blogPosts";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+
+const fechas = fechasDelPost("dolar-construccion-comprar-o-construir");
 
 const post = blogPosts.find((entry) => entry.id === "dolar-construccion-comprar-o-construir");
 const url = canonicalUrl(`/blog/${post.id}`);
-const published = `${post.dateTime}T00:00:00-03:00`;
 const sources = [
   {
     title: "INDEC: costo de la construcción, agosto de 2026",
@@ -34,8 +36,8 @@ export const metadata = {
     description: post.excerpt,
     url,
     type: "article",
-    publishedTime: published,
-    modifiedTime: published,
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [{ url: `${SITE_URL}${post.image}`, alt: "Una pareja revisa el presupuesto para su vivienda" }],
   },
@@ -60,8 +62,8 @@ const structuredData = [
     headline: post.title,
     description: post.excerpt,
     image: `${SITE_URL}${post.image}`,
-    datePublished: published,
-    dateModified: published,
+    datePublished: fechas.publicado,
+    dateModified: fechas.modificado,
     author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
     publisher: { "@type": "Organization", name: "Catalán Propiedades", url: SITE_URL },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
@@ -207,6 +209,7 @@ export default function ComprarOConstruirPage() {
             <li><Link href="/blog/creditos-uva-autos-viviendas">Créditos UVA para autos y casas: qué cambia en la cuota y en la deuda</Link></li>
           </ul>
         </div>
+        <SeguirLeyendo slug="dolar-construccion-comprar-o-construir" />
       </article>
     </>
   );

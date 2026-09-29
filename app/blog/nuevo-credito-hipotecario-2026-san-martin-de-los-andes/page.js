@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("nuevo-credito-hipotecario-2026-san-martin-de-los-andes");
 import mercado, {
   VALOR_M2_CASA,
   VALOR_M2_DEPTO,
@@ -124,8 +128,8 @@ export const metadata = {
       "El anuncio de $2 billones está calibrado sobre una propiedad de USD 106.667. Qué significa ese número en el mercado de San Martín de los Andes, con datos del relevamiento propio.",
     url,
     type: "article",
-    publishedTime: "2026-08-29T00:00:00-03:00",
-    modifiedTime: "2026-08-29T00:00:00-03:00",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [
       {
@@ -153,8 +157,8 @@ const articleJsonLd = {
   description:
     "Análisis del programa de licitación de plazos fijos con destino a crédito hipotecario anunciado el 26 de agosto de 2026, aplicado al mercado de San Martín de los Andes.",
   image: coverImage,
-  datePublished: "2026-08-29",
-  dateModified: "2026-08-29",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: {
     "@type": "Organization",
@@ -598,29 +602,7 @@ export default function NuevoCreditoHipotecarioPage() {
             </p>
           </div>
 
-          <section className="not-prose mt-12 border-t border-gray-100 pt-10">
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">
-              También te puede interesar
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Link href="/blog/creditos-hipotecarios-uva-2026" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md">
-                <p className="text-xs font-bold uppercase text-rose-600">Guía de compra</p>
-                <p className="mt-2 font-bold text-gray-900">Cómo funciona un crédito UVA, paso a paso</p>
-              </Link>
-              <Link href="/blog/credito-hipotecario-neuquen-2026" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md">
-                <p className="text-xs font-bold uppercase text-rose-600">Guía de crédito</p>
-                <p className="mt-2 font-bold text-gray-900">El crédito propio de la Provincia del Neuquén</p>
-              </Link>
-              <Link href="/blog/cuando-el-plano-no-coincide-con-la-casa" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md">
-                <p className="text-xs font-bold uppercase text-rose-600">Guía legal</p>
-                <p className="mt-2 font-bold text-gray-900">Por qué una casa no llega a ser apta crédito</p>
-              </Link>
-              <Link href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md">
-                <p className="text-xs font-bold uppercase text-rose-600">Precios</p>
-                <p className="mt-2 font-bold text-gray-900">¿Cuánto cuesta una casa en San Martín?</p>
-              </Link>
-            </div>
-          </section>
+          <SeguirLeyendo slug="nuevo-credito-hipotecario-2026-san-martin-de-los-andes" destacados={["creditos-hipotecarios-uva-2026", "credito-hipotecario-neuquen-2026", "cuando-el-plano-no-coincide-con-la-casa", "cuanto-cuesta-una-casa-en-san-martin-de-los-andes"]} />
         </div>
       </article>
     </>

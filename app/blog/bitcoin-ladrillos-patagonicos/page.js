@@ -1,6 +1,10 @@
 import { SITE_URL, canonicalUrl } from "@/config";
 import Link from "next/link";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("bitcoin-ladrillos-patagonicos");
 
 export const metadata = {
   title: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes",
@@ -11,7 +15,8 @@ export const metadata = {
     description: "¿Por qué invertir en San Martín de los Andes es como comprar Bitcoin en sus inicios?",
     url: canonicalUrl("/blog/bitcoin-ladrillos-patagonicos"),
     type: "article",
-    publishedTime: "2026-05-26T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [
       {
@@ -39,8 +44,8 @@ const articleJsonLd = {
   headline: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes",
   description: "Descubrí por qué invertir en propiedades en San Martín de los Andes es como comprar Bitcoin en 2013. Análisis de tokenización inmobiliaria, ROI proyectado y oportunidades de inversión en la Patagonia.",
   image: `${SITE_URL}/fintech.jpeg`,
-  datePublished: "2026-05-26",
-  dateModified: "2026-05-26",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Milton Catalán",
@@ -454,30 +459,7 @@ export default function BitcoinLadrillosPage() {
           </p>
         </div>
 
-        {/* Posts relacionados */}
-        <section className="not-prose border-t border-gray-100 pt-10 mt-12">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">También te puede interesar</p>
-          <div className="space-y-3">
-            <a href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/cartel-san-martin-de-los-andes.webp" alt="Cuánto cuesta una casa en San Martín de los Andes" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Precios</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                </p>
-              </div>
-            </a>
-            <a href="/blog/creditos-hipotecarios-uva-2026" className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group">
-              <img src="/hipotecario.jpeg" alt="Créditos hipotecarios UVA" className="w-20 h-16 object-cover rounded-xl flex-shrink-0" loading="lazy" decoding="async" />
-              <div>
-                <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">Guía de Compra</p>
-                <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                  Créditos Hipotecarios UVA 2026: La Llave para tu Casa Propia en la Patagonia
-                </p>
-              </div>
-            </a>
-          </div>
-        </section>
+        <SeguirLeyendo slug="bitcoin-ladrillos-patagonicos" destacados={["cuanto-cuesta-una-casa-en-san-martin-de-los-andes", "creditos-hipotecarios-uva-2026"]} />
 
       </div>
     </article>

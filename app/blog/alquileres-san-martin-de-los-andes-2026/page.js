@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("alquileres-san-martin-de-los-andes-2026");
 
 const ARTICLE_PATH = "/blog/alquileres-san-martin-de-los-andes-2026";
 const ARTICLE_URL = canonicalUrl(ARTICLE_PATH);
@@ -28,8 +32,8 @@ export const metadata = {
       "Plazo, actualización, reparaciones, gastos, llaves y garantías, explicados con el Código Civil y Comercial y fallos reales de la Justicia de Neuquén.",
     url: ARTICLE_URL,
     type: "article",
-    publishedTime: "2026-07-17T00:00:00-03:00",
-    modifiedTime: "2026-07-17T00:00:00-03:00",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Carolina Godoy"],
     images: [
       {
@@ -58,8 +62,8 @@ const articleJsonLd = {
   description:
     "Guía jurídica sobre contratos de alquiler permanente y temporario, con artículos del Código Civil y Comercial y jurisprudencia de la Provincia del Neuquén.",
   image: ARTICLE_IMAGE,
-  datePublished: "2026-07-17",
-  dateModified: "2026-07-17",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Carolina Godoy",
@@ -619,35 +623,7 @@ export default function AlquileresGuiaLegalPage() {
             </p>
           </div>
 
-          <section className="mt-12 border-t border-gray-100 pt-10">
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">
-              También te puede interesar
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Link
-                href="/blog/cuanto-rinde-alquiler-temporario-san-martin-de-los-andes"
-                className="rounded-2xl border border-gray-200 p-5 transition-shadow hover:shadow-md"
-              >
-                <p className="text-xs font-bold uppercase tracking-wide text-rose-600">
-                  Inversión
-                </p>
-                <p className="mt-2 font-bold text-gray-900">
-                  Cuánto rinde un alquiler temporario en San Martín de los Andes
-                </p>
-              </Link>
-              <Link
-                href="/blog/comprar-en-san-martin-de-los-andes-desde-buenos-aires"
-                className="rounded-2xl border border-gray-200 p-5 transition-shadow hover:shadow-md"
-              >
-                <p className="text-xs font-bold uppercase tracking-wide text-rose-600">
-                  Guía para compradores
-                </p>
-                <p className="mt-2 font-bold text-gray-900">
-                  Cómo comprar en San Martín de los Andes desde Buenos Aires
-                </p>
-              </Link>
-            </div>
-          </section>
+          <SeguirLeyendo slug="alquileres-san-martin-de-los-andes-2026" destacados={["cuanto-rinde-alquiler-temporario-san-martin-de-los-andes", "comprar-en-san-martin-de-los-andes-desde-buenos-aires"]} />
         </div>
       </article>
     </>

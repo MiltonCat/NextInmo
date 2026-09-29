@@ -3,6 +3,10 @@ import Link from "next/link";
 import TrackedLink from "@/components/TrackedLink";
 import { SITE_URL, WA_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("airbnb-facil-san-martin-de-los-andes-2026");
 
 const slug = "/blog/airbnb-facil-san-martin-de-los-andes-2026";
 const coverImage = SITE_URL + "/chapelco-invierno-sma-2026.webp";
@@ -19,8 +23,8 @@ export const metadata = {
       "La oferta crece, las tarifas bajan y el Municipio suma controles basados en datos. El nuevo escenario del alquiler temporario en SMA.",
     url: canonicalUrl(slug),
     type: "article",
-    publishedTime: "2026-07-14T00:00:00-03:00",
-    modifiedTime: "2026-07-14T00:00:00-03:00",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [
       {
@@ -48,8 +52,8 @@ const articleJsonLd = {
   description:
     "Análisis del mercado de alquiler temporario de San Martín de los Andes en 2026: oferta, ocupación, tarifas, ingresos y nuevas herramientas de fiscalización.",
   image: coverImage,
-  datePublished: "2026-07-14",
-  dateModified: "2026-07-14",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Milton Catalán",
@@ -458,6 +462,7 @@ export default function AirbnbFacilPage() {
             </p>
           </div>
         </div>
+        <SeguirLeyendo slug="airbnb-facil-san-martin-de-los-andes-2026" />
       </article>
     </>
   );

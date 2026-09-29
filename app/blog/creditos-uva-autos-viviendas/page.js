@@ -2,7 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import PodcastPlayer from "@/components/PodcastPlayer";
 import { SITE_URL, canonicalUrl } from "@/config";
-import { blogPosts } from "@/lib/blogPosts";
+import { blogPosts, fechasDelPost } from "@/lib/blogPosts";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+
+const fechas = fechasDelPost("creditos-uva-autos-viviendas");
 
 const post = blogPosts.find((entry) => entry.id === "creditos-uva-autos-viviendas");
 const url = canonicalUrl(`/blog/${post.id}`);
@@ -33,8 +36,8 @@ export const metadata = {
     description: post.excerpt,
     url,
     type: "article",
-    publishedTime: "2026-09-08T00:00:00-03:00",
-    modifiedTime: "2026-09-08T00:00:00-03:00",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [{ url: `${SITE_URL}${post.image}`, alt: "Créditos para vivienda" }],
   },
@@ -52,8 +55,8 @@ const articleJsonLd = {
   headline: post.title,
   description: post.excerpt,
   image: `${SITE_URL}${post.image}`,
-  datePublished: "2026-09-08T00:00:00-03:00",
-  dateModified: "2026-09-08T00:00:00-03:00",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
   publisher: { "@type": "Organization", name: "Catalán Propiedades", url: SITE_URL },
   mainEntityOfPage: { "@type": "WebPage", "@id": url },
@@ -241,16 +244,7 @@ export default function CreditosUvaAutosViviendasPage() {
             <h2 className="mb-7 text-2xl font-black text-gray-900 sm:text-3xl">Preguntas frecuentes</h2>
             <div className="space-y-6">{faqs.map(([question, answer]) => <div key={question}><h3 className="text-lg font-bold text-gray-900">{question}</h3><p className="mt-2 !mb-0">{answer}</p></div>)}</div>
           </section>
-          <section className="mt-12 border-t border-gray-100 pt-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">También te puede interesar</p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Link href="/blog/creditos-hipotecarios-uva-2026" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md"><p className="text-xs font-bold uppercase text-rose-600">Guía de compra</p><p className="!mb-0 font-bold text-gray-900">Cómo funciona un crédito UVA, paso a paso</p></Link>
-              <Link href="/blog/cuando-el-plano-no-coincide-con-la-casa" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md"><p className="text-xs font-bold uppercase text-rose-600">Guía legal</p><p className="!mb-0 font-bold text-gray-900">Cuando el plano no coincide con la casa</p></Link>
-            </div>
-          </section>
-          <footer className="mt-10 border-t border-gray-200 pt-6">
-            <Link href="/blog" className="font-semibold text-rose-700 hover:underline">Ver más artículos del blog</Link>
-          </footer>
+          <SeguirLeyendo slug="creditos-uva-autos-viviendas" destacados={["creditos-hipotecarios-uva-2026", "cuando-el-plano-no-coincide-con-la-casa"]} />
         </div>
       </article>
     </>

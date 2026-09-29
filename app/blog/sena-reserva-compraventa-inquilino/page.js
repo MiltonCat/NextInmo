@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("sena-reserva-compraventa-inquilino");
 
 const path = "/blog/sena-reserva-compraventa-inquilino";
 const url = canonicalUrl(path);
@@ -20,8 +24,8 @@ export const metadata = {
     description: "Cómo se ordenan la reserva, la seña, el boleto, el alquiler y el depósito cuando un inquilino compra la propiedad que ocupa.",
     url,
     type: "article",
-    publishedTime: "2026-08-12T00:00:00-03:00",
-    modifiedTime: "2026-08-12T00:00:00-03:00",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Carolina Godoy"],
     images: [{ url: image, width: 1200, height: 630, alt: "Guía legal sobre seña, reserva y compraventa inmobiliaria" }],
   },
@@ -39,9 +43,9 @@ const faqs = [
 
 const articleJsonLd = {
   "@context": "https://schema.org", "@type": "Article",
-  headline: "Seña, reserva: qué firma cada quién y qué pasa cuando el que compra ya vive adentro",
+  headline: "Seña o reserva: qué firmás y qué pasa si el comprador ya vive adentro",
   description: "Guía legal sobre reserva, seña, boleto de compraventa y locación cuando el inquilino compra la propiedad que ocupa.",
-  image, datePublished: "2026-08-12", dateModified: "2026-08-12",
+  image, datePublished: fechas.publicado, dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Carolina Godoy", image: `${SITE_URL}${carolinaImage}`, telephone: "2944-630649", sameAs: [linkedin] },
   publisher: { "@type": "Organization", name: "Catalán Propiedades", logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-catalan.png` } },
   mainEntityOfPage: { "@type": "WebPage", "@id": url },
@@ -64,7 +68,7 @@ export default function SenaReservaPage() {
       <article className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <header className="mb-10 sm:mb-12">
           <p className="mb-3 text-sm font-bold uppercase tracking-widest text-rose-600">Guía legal · Contratos</p>
-          <h1 className="max-w-3xl text-[2rem] font-black leading-[1.08] text-gray-900 sm:text-4xl md:text-5xl">Seña, reserva: qué firma cada quién y qué pasa cuando el que compra ya vive adentro</h1>
+          <h1 className="max-w-3xl text-[2rem] font-black leading-[1.08] text-gray-900 sm:text-4xl md:text-5xl">Seña o reserva: qué firmás y qué pasa si el comprador ya vive adentro</h1>
           <p className="mt-5 max-w-3xl text-base leading-relaxed text-gray-600 sm:text-xl">Hay un caso que en San Martín de los Andes aparece seguido: el inquilino que termina comprando la casa que alquila. Ahí se cruzan dos contratos y conviene tener claro cómo se ordenan.</p>
           <div className="mt-8 flex items-center gap-4 border-t border-gray-200 pt-7">
             <div className="relative h-12 w-12 overflow-hidden rounded-full bg-rose-100"><Image src={carolinaImage} alt="Carolina Godoy" fill sizes="48px" className="object-cover" /></div>
@@ -116,7 +120,7 @@ export default function SenaReservaPage() {
 
           <div className="not-prose mt-12 rounded-xl bg-amber-50 p-6 text-sm leading-relaxed text-amber-950"><p className="font-bold">Aviso legal</p><p className="mt-2">Este contenido es informativo y no reemplaza el asesoramiento profesional. Cada operación requiere análisis particular por escribano o abogado, y la redacción concreta de la reserva, la seña y el boleto define en gran medida sus efectos.</p></div>
 
-          <section className="not-prose mt-12 border-t border-gray-100 pt-10"><p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">También te puede interesar</p><div className="grid gap-4 sm:grid-cols-2"><Link href="/blog/alquileres-san-martin-de-los-andes-2026" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md"><p className="text-xs font-bold uppercase text-rose-600">Guía legal</p><p className="mt-2 font-bold text-gray-900">Alquileres: qué revisar antes de firmar</p></Link><Link href="/blog/cuando-el-plano-no-coincide-con-la-casa" className="rounded-2xl border border-gray-200 p-5 hover:shadow-md"><p className="text-xs font-bold uppercase text-rose-600">Guía legal</p><p className="mt-2 font-bold text-gray-900">Cuando el plano no coincide con la casa</p></Link></div></section>
+          <SeguirLeyendo slug="sena-reserva-compraventa-inquilino" destacados={["alquileres-san-martin-de-los-andes-2026", "cuando-el-plano-no-coincide-con-la-casa"]} />
         </div>
       </article>
     </>

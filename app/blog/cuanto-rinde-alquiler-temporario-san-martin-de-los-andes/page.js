@@ -2,6 +2,10 @@ import { SITE_URL, canonicalUrl, TASADOR_PATH, WA_URL } from "@/config";
 import mercado, { RELEVADAS_PUBLICO } from "@/lib/mercado";
 import TrackedLink from "@/components/TrackedLink";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import SeguirLeyendo from "@/components/SeguirLeyendo";
+import { fechasDelPost } from "@/lib/blogPosts";
+
+const fechas = fechasDelPost("cuanto-rinde-alquiler-temporario-san-martin-de-los-andes");
 
 const WA_TEMPORARIO_URL = `${WA_URL}?text=${encodeURIComponent(
   "Hola Milton, leí el análisis sobre alquiler temporario y quisiera evaluar una propiedad según mi presupuesto, costos y rentabilidad esperada."
@@ -22,7 +26,8 @@ export const metadata = {
       "/blog/cuanto-rinde-alquiler-temporario-san-martin-de-los-andes"
     ),
     type: "article",
-    publishedTime: "2026-06-28T00:00:00Z",
+    publishedTime: fechas.publicado,
+    modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
     images: [
       {
@@ -55,8 +60,8 @@ const articleJsonLd = {
   description:
     "Rentabilidad real de un alquiler temporario en San Martín de los Andes: ocupación por temporada, precio por noche, costos de gestión y comparación con el alquiler permanente.",
   image: `${SITE_URL}/patagon.jpg`,
-  datePublished: "2026-06-28",
-  dateModified: "2026-06-28",
+  datePublished: fechas.publicado,
+  dateModified: fechas.modificado,
   author: {
     "@type": "Person",
     name: "Milton Catalán",
@@ -629,74 +634,7 @@ export default function AlquilerTemporarioPage() {
             </p>
           </div>
 
-          {/* Posts relacionados */}
-          <section className="not-prose border-t border-gray-100 pt-10 mt-12">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-              También te puede interesar
-            </p>
-            <div className="space-y-3">
-              <a
-                href="/blog/airbnb-facil-san-martin-de-los-andes-2026"
-                className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
-              >
-                <img
-                  src="/chapelco-invierno-sma-2026.webp"
-                  alt="¿Se terminó el Airbnb fácil en San Martín de los Andes?"
-                  className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">
-                    Mercado
-                  </p>
-                  <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                    ¿Se terminó el Airbnb fácil en San Martín de los Andes?
-                  </p>
-                </div>
-              </a>
-              <a
-                href="/blog/score-de-inversion-san-martin-de-los-andes"
-                className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
-              >
-                <img
-                  src="/inversion.jpg"
-                  alt="Score de inversión inmobiliaria"
-                  className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">
-                    Inversión
-                  </p>
-                  <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                    Score de inversión: cómo leer una propiedad como un activo
-                  </p>
-                </div>
-              </a>
-              <a
-                href="/blog/cuanto-cuesta-una-casa-en-san-martin-de-los-andes"
-                className="flex items-center gap-4 p-5 border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group"
-              >
-                <img
-                  src="/cartel-san-martin-de-los-andes.webp"
-                  alt="Cuánto cuesta una casa en San Martín de los Andes"
-                  className="w-20 h-16 object-cover rounded-xl flex-shrink-0"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <p className="text-xs text-rose-600 font-bold uppercase tracking-wide mb-1">
-                    Precios
-                  </p>
-                  <p className="font-bold text-gray-900 text-sm group-hover:text-rose-600 transition-colors">
-                    ¿Cuánto cuesta una casa en San Martín de los Andes? (2026)
-                  </p>
-                </div>
-              </a>
-            </div>
-          </section>
+          <SeguirLeyendo slug="cuanto-rinde-alquiler-temporario-san-martin-de-los-andes" destacados={["airbnb-facil-san-martin-de-los-andes-2026", "score-de-inversion-san-martin-de-los-andes", "cuanto-cuesta-una-casa-en-san-martin-de-los-andes"]} />
         </div>
       </article>
     </>
