@@ -97,3 +97,14 @@ test("las notas retiradas redirigen a un post que existe y no aparecen en ningú
     }
   }
 });
+
+test("el bloque Seguí leyendo no entra al índice de Lucía", async () => {
+  const { textoDeHtml } = await import("../lib/indexadorSitio.mjs");
+  const src = readFileSync("components/SeguirLeyendo.jsx", "utf8");
+  assert.match(src, /<nav aria-label="Seguí leyendo"/);
+  const html = `<main><article><p>${"Texto propio de la nota. ".repeat(20)}</p>
+    <nav aria-label="Seguí leyendo"><a href="/tasacion">Tasá tu propiedad online</a><p>Otra nota</p></nav></article></main>`;
+  const texto = textoDeHtml(html);
+  assert.ok(texto.includes("Texto propio"));
+  assert.ok(!texto.includes("Tasá tu propiedad") && !texto.includes("Otra nota"));
+});

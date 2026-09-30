@@ -14,7 +14,11 @@ export default function SeguirLeyendo({ slug, destacados = [] }) {
   if (!relacionados.length && !herramienta) return null;
 
   return (
-    <section aria-label="Seguí leyendo" className="not-prose mt-14 border-t border-gray-100 pt-10">
+    // <nav> y no <section>: el indexador de Lucía (lib/indexadorSitio.mjs,
+    // textoDeHtml) descarta nav/header/footer. Como <section>, estos títulos de
+    // OTRAS notas entraban al último fragmento de cada post y Lucía podía
+    // atribuirle a una nota lo que dice otra.
+    <nav aria-label="Seguí leyendo" className="not-prose mt-14 border-t border-gray-100 pt-10">
       {herramienta && (
         <Link
           href={herramienta.href}
@@ -57,6 +61,6 @@ export default function SeguirLeyendo({ slug, destacados = [] }) {
           </Link>
         </>
       )}
-    </section>
+    </nav>
   );
 }
