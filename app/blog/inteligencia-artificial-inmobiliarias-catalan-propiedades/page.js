@@ -4,6 +4,7 @@ import { SITE_URL, canonicalUrl } from "@/config";
 import { blogPosts, fechasDelPost } from "@/lib/blogPosts";
 import { RELEVADAS_MODELO_FMT, RELEVADAS_TOTAL_FMT, MERCADO_GENERADO } from "@/lib/mercado";
 import SeguirLeyendo from "@/components/SeguirLeyendo";
+import PodcastPlayer from "@/components/PodcastPlayer";
 
 const ID = "inteligencia-artificial-inmobiliarias-catalan-propiedades";
 const fechas = fechasDelPost(ID);
@@ -110,6 +111,14 @@ const structuredData = [
     author: { "@type": "Person", name: "Milton Catalán", url: canonicalUrl("/nosotros") },
     publisher: { "@type": "Organization", name: "Catalán Propiedades", url: SITE_URL },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    audio: {
+      "@type": "AudioObject",
+      name: `${post.title} — versión en audio`,
+      contentUrl: `${SITE_URL}/podcast/${post.id}.mp3`,
+      encodingFormat: "audio/mpeg",
+      duration: "PT15M12S",
+      inLanguage: "es-AR",
+    },
   },
   {
     "@context": "https://schema.org",
@@ -183,6 +192,8 @@ export default function IAInmobiliariasPage() {
             <Image src={post.image} alt="Una mano robótica y una mano humana a punto de tocarse con la punta de los dedos" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" />
           </div>
         </header>
+
+        <PodcastPlayer slug={ID} />
 
         <div className="text-base leading-relaxed text-gray-700 sm:text-lg [&_p]:mb-5">
           <aside className="rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
