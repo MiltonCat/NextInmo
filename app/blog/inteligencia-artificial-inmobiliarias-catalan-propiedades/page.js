@@ -81,7 +81,7 @@ export const metadata = {
     publishedTime: fechas.publicado,
     modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
-    images: [{ url: `${SITE_URL}${post.image}`, alt: "Personas analizando gráficos y datos de mercado sobre una mesa" }],
+    images: [{ url: `${SITE_URL}${post.image}`, alt: "Una mano robótica y una mano humana a punto de tocarse con la punta de los dedos" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -180,7 +180,7 @@ export default function IAInmobiliariasPage() {
             </div>
           </div>
           <div className="relative mt-8 aspect-[16/8.43] overflow-hidden rounded-2xl bg-gray-100">
-            <Image src={post.image} alt="Personas analizando gráficos y datos de mercado sobre una mesa" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" />
+            <Image src={post.image} alt="Una mano robótica y una mano humana a punto de tocarse con la punta de los dedos" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" />
           </div>
         </header>
 
@@ -237,7 +237,7 @@ export default function IAInmobiliariasPage() {
           <p>Lo de las fotos ya llegó a la ley. En California, desde el 1 de enero de 2026, toda foto de una publicación alterada digitalmente, incluido el amueblamiento virtual, tiene que decirlo y dar acceso a la imagen original. <Fuente id="ab723">Ver el resumen de la norma.</Fuente> En la Argentina no hay una regla así, pero el problema es el mismo: la foto crea una expectativa que la visita confirma o destruye.</p>
 
           <Heading id="catalan">Cómo la usamos en Catalán Propiedades</Heading>
-          <p>Nuestro punto de partida fue el opuesto al del patrón general. No empezamos por pedirle a la IA que escriba, empezamos por los <strong>datos</strong>. Relevamos el mercado de San Martín de los Andes y construimos herramientas que responden con números propios. Después sumamos a la IA para que converse sobre esos números sin inventar los suyos.</p>
+          <p>Para nosotros la IA es una herramienta al servicio de quien compra o vende, no un atajo para producir más texto. La usamos donde aporta claridad: entender un precio, comparar barrios o resolver una duda a cualquier hora. Siempre con información de San Martín de los Andes que se puede verificar.</p>
           <div className="my-8 grid gap-4 sm:grid-cols-2">
             {herramientas.map((h) => (
               <div key={h.href} className="rounded-2xl border border-gray-200 p-6">
@@ -248,7 +248,7 @@ export default function IAInmobiliariasPage() {
               </div>
             ))}
           </div>
-          <p><strong>El tasador</strong> es el mejor ejemplo de cómo pensamos la IA. No te da un número suelto: te da un rango, y junto al resultado muestra cuánto se equivoca en promedio. Es la diferencia entre un número que parece exacto y uno que te dice cuánto confiar en él. Lo que el modelo no puede ver, como el estado o las terminaciones, lo completa una persona. <A href="/tasacion">Probá el tasador</A>.</p>
+          <p><strong>El tasador</strong> te da una primera referencia de valor en minutos, como un rango y no como un número cerrado, para que sepas desde dónde partir. Lo que solo se ve en persona, como el estado o las terminaciones, lo completamos nosotros en la visita. <A href="/tasacion">Probá el tasador</A>.</p>
           <p>El <strong>precio del m² por barrio</strong> y la sección <strong>Inversiones</strong> salen del mismo relevamiento, y siempre aclaran que son precios publicados, no precios de cierre. Con eso se pueden responder preguntas concretas: cuánto cuesta una casa, cuánto rinde un alquiler o si <A href="/blog/dolar-construccion-comprar-o-construir">conviene comprar o construir</A>, con un método y no con una intuición.</p>
 
           <Heading id="lucia">Lucía: qué hace y qué no hace</Heading>
