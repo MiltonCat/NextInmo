@@ -92,10 +92,9 @@ export const metadata = {
 };
 
 const faqs = [
-  ["¿Lucía es ChatGPT?", "Lucía redacta sus respuestas con modelos de OpenAI, la empresa que hace ChatGPT. La diferencia es de qué habla: los datos los busca en el catálogo en vivo, en el relevamiento de precios y en las páginas del sitio, y responde con los criterios que escribió Milton. Si un dato no está, lo dice en vez de completarlo."],
+  ["¿Lucía es ChatGPT?", "No. Lucía usa inteligencia artificial para conversar, pero responde con los datos de Catalán Propiedades: las propiedades publicadas, el relevamiento de precios y lo que está en el sitio, con los criterios de la casa. Si un dato no está, lo dice en vez de completarlo."],
   ["¿El tasador reemplaza una tasación profesional?", "No. Da un rango con datos reales de la zona y muestra su error promedio. No ve el estado de la propiedad, las terminaciones, la humedad ni la documentación: eso lo revisa una persona."],
   ["¿Lucía puede equivocarse?", "Sí, como cualquier sistema de IA. Por eso tiene reglas: no inventa datos, cita la página de donde saca cada dato, no pide ni confirma pagos por el chat y deriva a Milton lo que requiere criterio profesional."],
-  ["¿Qué es Jev?", "Una capa de interpretación de TypeSafe AI que estamos probando en modo sombra: interpreta qué busca cada persona (comprar, vender, alquilar, tasar, una consulta legal o de inversión) en paralelo al sistema actual, sin cambiar lo que ve el visitante. Sirve para medir si entiende mejor antes de darle un rol en la conversación."],
   ["¿Qué pasa si una foto está modificada con IA?", "Si publicamos una imagen amueblada o modificada digitalmente, la identificamos como tal. La foto tiene que mostrar la propiedad que vas a visitar."],
 ];
 
@@ -137,7 +136,7 @@ const herramientas = [
     nombre: "Tasador online",
     href: "/tasacion",
     que: "Un rango de valor para casas y departamentos, con su error promedio a la vista.",
-    como: `Modelo propio en Python, entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos de San Martín de los Andes.`,
+    como: `Modelo propio, entrenado con ${RELEVADAS_MODELO_FMT} casas y departamentos de San Martín de los Andes.`,
     nota: ["/blog/como-tasamos-tu-propiedad-con-datos", "Cómo tasamos tu propiedad con datos"],
   },
   {
@@ -158,7 +157,7 @@ const herramientas = [
     nombre: "Guía de barrios",
     href: "/barrios",
     que: "La ficha de cada barrio: servicios, distancias y qué lo caracteriza.",
-    como: "Conocimiento de la zona ordenado en datos que Lucía también puede consultar.",
+    como: "Conocimiento de la zona, ordenado para que sea fácil de comparar.",
     nota: ["/blog/donde-vivir-san-martin-de-los-andes", "¿Dónde vivir en San Martín de los Andes?"],
   },
 ];
@@ -249,20 +248,19 @@ export default function IAInmobiliariasPage() {
               </div>
             ))}
           </div>
-          <p><strong>El tasador</strong> es el mejor ejemplo de cómo pensamos la IA. Cada vez que se entrena, compiten varios algoritmos: Random Forest, Gradient Boosting, XGBoost, CatBoost, LightGBM y una combinación de ellos. Gana el que menos se equivoca en una validación cruzada, que prueba al modelo con propiedades que no vio. El rango que te damos no es “el valor más o menos un porcentaje”. Sale de dos modelos entrenados para estimar el piso y el techo del precio. El valor puede ajustarse además con propiedades comparables del mismo barrio y tipo, y junto al resultado mostramos el error promedio del modelo. Es la diferencia entre un número que parece exacto y uno que te dice cuánto confiar en él. <A href="/tasacion">Probá el tasador</A>.</p>
+          <p><strong>El tasador</strong> es el mejor ejemplo de cómo pensamos la IA. No te da un número suelto: te da un rango, y junto al resultado muestra cuánto se equivoca en promedio. Es la diferencia entre un número que parece exacto y uno que te dice cuánto confiar en él. Lo que el modelo no puede ver, como el estado o las terminaciones, lo completa una persona. <A href="/tasacion">Probá el tasador</A>.</p>
           <p>El <strong>precio del m² por barrio</strong> y la sección <strong>Inversiones</strong> salen del mismo relevamiento, y siempre aclaran que son precios publicados, no precios de cierre. Con eso se pueden responder preguntas concretas: cuánto cuesta una casa, cuánto rinde un alquiler o si <A href="/blog/dolar-construccion-comprar-o-construir">conviene comprar o construir</A>, con un método y no con una intuición.</p>
 
           <Heading id="lucia">Lucía: qué hace y qué no hace</Heading>
-          <p>Lucía es la asistente del sitio. Redacta con modelos de OpenAI, la empresa de ChatGPT, pero la diferencia no está en el modelo sino en todo lo que la rodea.</p>
+          <p>Lucía es la asistente del sitio. Usa inteligencia artificial para conversar, pero lo que la distingue no es el modelo sino los datos y las reglas con los que trabaja.</p>
           <ul className="mb-6 list-disc space-y-3 pl-6">
-            <li><strong>Consulta los datos antes de responder.</strong> Busca en el catálogo en vivo, en el precio del m² por barrio y en las fichas de barrio. Si una propiedad ya no está publicada, no la ofrece.</li>
-            <li><strong>Lee todo el sitio y cita la fuente.</strong> Todos los días se actualiza un índice con cada nota del blog y cada sección. Cuando usa un dato, nombra la nota de donde sale y deja el link, así la persona puede ir a verificarlo.</li>
-            <li><strong>Habla con el criterio de la casa.</strong> Hay respuestas escritas por mí que tienen prioridad sobre cualquier otra fuente, y un texto con nuestros principios: somos una empresa familiar, y la medida de una operación no es firmarla, es la vida que la persona hace después en esa propiedad.</li>
+            <li><strong>Responde con datos propios.</strong> Habla de las propiedades que están publicadas hoy y de los precios relevados en la zona. Si una propiedad ya no está publicada, no la ofrece.</li>
+            <li><strong>Cita la fuente.</strong> Cuando usa un dato, nombra la nota o la sección de donde sale y deja el link, así podés ir a verificarlo.</li>
+            <li><strong>Habla con el criterio de la casa.</strong> Somos una empresa familiar, y la medida de una operación no es firmarla, es la vida que la persona hace después en esa propiedad.</li>
             <li><strong>Tiene límites escritos.</strong> No inventa datos, no pide ni confirma pagos por el chat, y lo que requiere criterio profesional lo deriva a una persona.</li>
             <li><strong>Explica tu tasación.</strong> Dentro del tasador, podés preguntarle por qué te dio ese rango o cómo se compara tu m² con la mediana del barrio.</li>
           </ul>
-          <p>Estamos probando además una segunda capa, <strong>Jev</strong>, de la empresa TypeSafe AI. Jev no escribe respuestas: interpreta qué busca la persona, si quiere comprar, vender, alquilar, tasar o tiene una duda legal o de inversión, y detecta cuándo hace falta una aclaración antes de responder. Hoy funciona en <strong>modo sombra</strong>: analiza cada consulta en paralelo, sin cambiar lo que ve el visitante, y guarda su interpretación para compararla con la del sistema actual. Solo le vamos a dar un rol en la conversación cuando los números muestren que entiende mejor.</p>
-          <p>Las preguntas que le hacen a Lucía quedan en un panel interno. Las que no puede responder bien marcan qué notas tiene que tener este blog.</p>
+          <p>Cuando Lucía no puede responder bien una pregunta, eso nos marca qué nota falta en este blog.</p>
 
           <Heading id="desarrollo">Cómo lo desarrollamos</Heading>
           <p>Todo esto lo construimos nosotros. Trabajo en la venta de propiedades y también soy programador, y eso nos permitió diseñar cada herramienta desde las preguntas reales de quienes compran y venden acá, en vez de adaptar un producto genérico. El sitio, el modelo del tasador y Lucía se escribieron y se ajustan en casa, con cuatro reglas:</p>
@@ -270,9 +268,9 @@ export default function IAInmobiliariasPage() {
             <li><strong>Nunca inventar un dato.</strong> Si una información no está confirmada, queda vacía. Una ficha incompleta es mejor que una ficha falsa.</li>
             <li><strong>Primero los datos, después la IA.</strong> El modelo conversa sobre el relevamiento; no lo reemplaza.</li>
             <li><strong>Mostrar la incertidumbre.</strong> Rangos en vez de números mágicos, errores promedio a la vista y fechas en cada dato.</li>
-            <li><strong>Probar en silencio antes de publicar.</strong> Por eso Jev empezó en modo sombra, y por eso cada cambio en Lucía pasa por pruebas antes de llegar al sitio.</li>
+            <li><strong>Probar antes de publicar.</strong> Cada cambio en las herramientas pasa por pruebas antes de llegar al sitio.</li>
           </ol>
-          <p>Pensamos el sitio también para los asistentes de IA, no solo para las personas. Un servidor MCP, el estándar con el que ChatGPT y otros asistentes consultan fuentes externas, expone el catálogo, el precio del m² y el perfil de cada barrio, siempre con fecha y link. Cada propiedad nueva se avisa en el momento a los buscadores que usan esos asistentes. Si un comprador le pregunta a una IA por San Martín de los Andes, queremos que la respuesta salga de datos verificados.</p>
+          <p>Pensamos el sitio también para los asistentes de IA, no solo para las personas. Si un comprador le pregunta a una IA por San Martín de los Andes, queremos que la respuesta salga de datos verificados, con fecha y link.</p>
 
           <Heading id="humano">Lo que no delegamos</Heading>
           <p>Hay tres cosas que ninguna herramienta resuelve y que siguen siendo nuestro trabajo:</p>
