@@ -209,7 +209,7 @@ function PreguntarleALucia({ resultado, contexto, datos }) {
   return (
     <div className="rounded-xl border border-gray-200 p-5">
       <div className="flex items-center gap-3">
-        <LuciaDot size={40} label="Lucía" />
+        <LuciaDot size={30} label="Lucía" />
         <div>
           <Etiqueta>Lucía</Etiqueta>
           <p className="mt-0.5 text-sm font-semibold text-gray-900">Te ayudo a interpretar este resultado</p>

@@ -18,12 +18,10 @@
 .medio { transform-origin: right center; }
 .cuarto { transform-origin: center; }
 
-/* Reposo: el lunar respira y cada ~7 s parpadea (se aplasta un instante). */
+/* Reposo: el lunar respira despacio. */
 .lunar {
   transform-origin: center;
-  animation:
-    lucia-dot-respira 4.2s ease-in-out infinite,
-    lucia-dot-parpadeo 7s ease-in-out 2s infinite;
+  animation: lucia-dot-respira 4.2s ease-in-out infinite;
 }
 
 /* Pensando: el lunar rebota, el cuarto gira de a cuartos y el medio late. */
@@ -40,11 +38,6 @@
 @keyframes lucia-dot-respira {
   0%, 100% { scale: 1; }
   50% { scale: 1.07; }
-}
-
-@keyframes lucia-dot-parpadeo {
-  0%, 94%, 100% { transform: scaleY(1); }
-  97% { transform: scaleY(0.15); }
 }
 
 @keyframes lucia-dot-rebota {

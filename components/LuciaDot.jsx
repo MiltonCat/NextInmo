@@ -7,7 +7,7 @@ import styles from "./LuciaDot.module.css";
 // cuarto de círculo y lunar), dibujado en SVG para que sea nítido a cualquier
 // tamaño y para poder animar cada forma por separado.
 //
-// estado="reposo"   → el lunar respira y cada tanto parpadea.
+// estado="reposo"   → el lunar respira despacio.
 // estado="pensando" → el lunar rebota, el cuarto de círculo gira y el medio
 //                     círculo late, mientras Lucía prepara la respuesta.
 //
