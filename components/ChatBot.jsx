@@ -1692,7 +1692,7 @@ export default function ChatBot() {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <LuciaDot size={30} estado={typing ? "pensando" : "reposo"} label="Lucía" />
+                <LuciaDot size={30} label="Lucía" />
                 {atencion?.abierto && (
                   <span
                     className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
@@ -2164,7 +2164,7 @@ function LuciaComparison({ rows, onConsult, disabled }) {
 function LuciaThinking({ text = "Lucía está preparando tu respuesta" }) {
   return (
     <div className="flex items-center gap-3 px-1 py-2" role="status" aria-live="polite" aria-atomic="true">
-      <LuciaDot size={26} estado="pensando" />
+      <LuciaDot size={26} />
       <p className="text-xs leading-relaxed text-gray-600">{text}</p>
     </div>
   );
