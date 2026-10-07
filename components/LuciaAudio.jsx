@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 // Botón de altavoz debajo de una respuesta de Lucía. Pide el MP3 a
 // /api/lucia-voz/ recién cuando lo tocan: generar el audio de cada respuesta
@@ -16,7 +16,7 @@ const AIRBNB = "#FF5A5F";
 // botones.
 const MINIMO_PARA_ESCUCHAR = 60;
 
-export default function LuciaAudio({ texto, origen = "arbol", onPlay }) {
+export default function LuciaAudio({ texto, origen = "arbol", onPlay, onSonando }) {
   const [estado, setEstado] = useState("listo"); // listo | cargando | sonando | error
   const [mensajeError, setMensajeError] = useState("");
   const audioRef = useRef(null);
@@ -29,6 +29,20 @@ export default function LuciaAudio({ texto, origen = "arbol", onPlay }) {
       audioRef.current?.pause();
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     };
+  }, []);
+
+  // Avisa solo cuando cambia (empieza o deja de sonar), así un mensaje nuevo
+  // que se monta mientras suena otro no le cierra la boca a Lucía.
+  const avisarSonando = useEffectEvent((sonando) => onSonando?.(sonando));
+  const sonabaRef = useRef(false);
+  useEffect(() => {
+    const sonando = estado === "sonando";
+    if (sonando === sonabaRef.current) return;
+    sonabaRef.current = sonando;
+    avisarSonando(sonando);
+  }, [estado]);
+  useEffect(() => () => {
+    if (sonabaRef.current) avisarSonando(false);
   }, []);
 
   if (!texto || texto.trim().length < MINIMO_PARA_ESCUCHAR) return null;

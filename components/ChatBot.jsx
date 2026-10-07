@@ -763,6 +763,35 @@ export default function ChatBot() {
   const [invitacion, setInvitacion] = useState(null);
   const [invitacionCerrada, setInvitacionCerrada] = useState(false);
   const [composerDraft, setComposerDraft] = useState(null);
+  // Cara de Lucía. Prioridad: pensando (mientras responde) > una reacción breve
+  // (sorpresa, apenada, guiño) > escuchando (la persona escribe) > reposo.
+  // La boca se mueve aparte cuando suena su voz.
+  const [reaccion, setReaccion] = useState(null);
+  const reaccionTimerRef = useRef(null);
+  const [escribiendo, setEscribiendo] = useState(false);
+  const [hablando, setHablando] = useState(false);
+  const reaccionar = (gesto, ms = 3200) => {
+    clearTimeout(reaccionTimerRef.current);
+    setReaccion(gesto);
+    reaccionTimerRef.current = setTimeout(() => setReaccion(null), ms);
+  };
+  useEffect(() => () => clearTimeout(reaccionTimerRef.current), []);
+  const estadoCara = typing ? "pensando" : reaccion || (escribiendo ? "escuchando" : "reposo");
+  // La primera vez que se abre el chat en la sesión, Lucía guiña.
+  const guinar = useEffectEvent(() => reaccionar("guino", 1500));
+  useEffect(() => {
+    if (!open) return;
+    let visto = false;
+    try {
+      visto = sessionStorage.getItem("lucia_guino") === "1";
+      sessionStorage.setItem("lucia_guino", "1");
+    } catch {
+      // Sin sessionStorage (modo privado estricto) guiña cada vez que se abre.
+    }
+    if (visto) return;
+    const t = setTimeout(guinar, 400);
+    return () => clearTimeout(t);
+  }, [open]);
   const messagesEndRef = useRef(null);
   // El contenedor scrolleable y el arranque de la última tanda de Lucía. Ver el
   // efecto de scroll: no siempre conviene bajar hasta el fondo.
@@ -1187,6 +1216,7 @@ export default function ChatBot() {
       setLastSearchFilters(merged);
 
       if (found.length === 0) {
+        reaccionar("apenada");
         trackEvent("chatbot_sin_resultados", { operacion: "venta", busqueda: describeFilters(merged).join(" · ") });
         setActiveStep("after_results");
         setFilters({});
@@ -1240,6 +1270,7 @@ export default function ChatBot() {
 
       const mostradas = recommendProperties(merged, catalog, 3);
       lastRecommendationsRef.current = mostradas;
+      reaccionar("sorpresa");
       trackEvent("chatbot_resultados", { operacion: "venta", cantidad: found.length, refina: false });
       sendBot(
         [{
@@ -1284,6 +1315,7 @@ export default function ChatBot() {
       setFilters({});
 
       if (found.length === 0) {
+        reaccionar("apenada");
         trackEvent("chatbot_sin_resultados", { operacion: "alquiler", busqueda: describeFilters(busqueda).join(" · ") });
 
         // Mismo criterio que en venta, con la otra cartera. Acá el aflojado
@@ -1327,6 +1359,7 @@ export default function ChatBot() {
 
       const mostrados = recommendProperties(busqueda, catalog, 3);
       lastRecommendationsRef.current = mostrados;
+      reaccionar("sorpresa");
       trackEvent("chatbot_resultados", { operacion: "alquiler", cantidad: found.length });
       sendBot(
         [{
@@ -1452,6 +1485,7 @@ export default function ChatBot() {
           followUp: /barrio|zona/i.test(text) ? "¿Qué diferencias hay entre esas zonas para vivir?" : /invert|renta|mercado/i.test(text) ? "¿Qué aspectos debería comparar para decidir en mi caso?" : "Contame un poco más sobre lo que acabás de explicar" };
         return prev.some((msg) => msg.id === streamId) ? prev.map((msg) => msg.id === streamId ? completed : msg) : [...prev, completed];
       });
+      if (tarjetas.length) reaccionar("sorpresa");
       if (shouldInvite) sendBot(
         [
           ...(shouldInvite
@@ -1692,7 +1726,7 @@ export default function ChatBot() {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <LuciaDot size={30} label="Lucía" />
+                <LuciaDot size={30} estado={estadoCara} hablando={hablando} label="Lucía" />
                 {atencion?.abierto && (
                   <span
                     className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
@@ -1756,6 +1790,7 @@ export default function ChatBot() {
                       texto={msg.text}
                       origen={msg.feedback ? "ia" : "arbol"}
                       onPlay={({ origen, largo }) => trackEvent("lucia_audio_play", { origen, largo })}
+                      onSonando={setHablando}
                     />
                   )}
 
@@ -1896,6 +1931,7 @@ export default function ChatBot() {
             onSubmit={handleText}
             disabled={typing}
             initialText={composerDraft?.text || ""}
+            onEscribiendo={setEscribiendo}
           />
         </div>
       )}
@@ -1968,7 +2004,7 @@ export default function ChatBot() {
   );
 }
 
-function LuciaComposer({ onSubmit, disabled, initialText }) {
+function LuciaComposer({ onSubmit, disabled, initialText, onEscribiendo }) {
   const [text, setText] = useState(initialText);
 
   const submit = (event) => {
@@ -1976,6 +2012,7 @@ function LuciaComposer({ onSubmit, disabled, initialText }) {
     const value = text.trim();
     if (!value || disabled) return;
     setText("");
+    onEscribiendo?.(false);
     onSubmit(value);
   };
 
@@ -1984,7 +2021,12 @@ function LuciaComposer({ onSubmit, disabled, initialText }) {
       <input
         autoFocus={Boolean(initialText)}
         value={text}
-        onChange={(event) => setText(event.target.value)}
+        onChange={(event) => {
+          setText(event.target.value);
+          onEscribiendo?.(Boolean(event.target.value.trim()));
+        }}
+        onFocus={(event) => onEscribiendo?.(Boolean(event.target.value.trim()))}
+        onBlur={() => onEscribiendo?.(false)}
         placeholder="Escribile a Lucía..."
         aria-label="Mensaje para Lucía"
         maxLength={300}
@@ -2164,7 +2206,7 @@ function LuciaComparison({ rows, onConsult, disabled }) {
 function LuciaThinking({ text = "Lucía está preparando tu respuesta" }) {
   return (
     <div className="flex items-center gap-3 px-1 py-2" role="status" aria-live="polite" aria-atomic="true">
-      <LuciaDot size={26} />
+      <LuciaDot size={26} estado="pensando" />
       <p className="text-xs leading-relaxed text-gray-600">{text}</p>
     </div>
   );
