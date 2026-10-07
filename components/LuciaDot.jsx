@@ -3,13 +3,13 @@
 import { useId } from "react";
 import styles from "./LuciaDot.module.css";
 
-// La cara de Lucía: el isotipo de Catalán (globo de diálogo con medio círculo,
-// cuarto de círculo y lunar), dibujado en SVG para que sea nítido a cualquier
-// tamaño y para poder animar cada forma por separado.
+// La cara de Lucía: un círculo con las formas del isotipo de Catalán puestas de
+// frente (dos lunares iguales como ojos y el medio círculo como sonrisa), en SVG
+// para que sea nítido a cualquier tamaño y para animar cada forma por separado.
 //
-// estado="reposo"   → el lunar respira despacio.
-// estado="pensando" → el lunar rebota, el cuarto de círculo gira y el medio
-//                     círculo late, mientras Lucía prepara la respuesta.
+// estado="reposo"   → los ojos respiran despacio.
+// estado="pensando" → los ojos rebotan uno detrás del otro y la sonrisa late,
+//                     mientras Lucía prepara la respuesta.
 //
 // Sin `label` es decorativo (aria-hidden); con `label` se anuncia como imagen.
 export default function LuciaDot({ size = 36, estado = "reposo", label, className = "" }) {
@@ -47,19 +47,12 @@ export default function LuciaDot({ size = 36, estado = "reposo", label, classNam
         </linearGradient>
       </defs>
 
-      <path
-        d="M243 957V470A227 227 0 0 1 470 243H730A227 227 0 0 1 957 470V730A227 227 0 0 1 730 957Z"
-        fill={`url(#${globo})`}
-      />
-      <path
-        d="M243 957V470A227 227 0 0 1 470 243H730A227 227 0 0 1 957 470V730A227 227 0 0 1 730 957Z"
-        fill={`url(#${brillo})`}
-      />
-      {/* Las formas van giradas 90° respecto del isotipo original para que se lea
-          como una cara de frente: cuarto y lunar arriba (ojos), medio círculo abajo. */}
+      <circle cx="600" cy="600" r="357" fill={`url(#${globo})`} />
+      <circle cx="600" cy="600" r="357" fill={`url(#${brillo})`} />
+      {/* Ojos arriba, sonrisa abajo. */}
       <path className={styles.medio} d="M369 624A231 231 0 0 0 831 624Z" fill={`url(#${forma})`} />
-      <path className={styles.cuarto} d="M369 391A160 160 0 0 0 528 551V391Z" fill={`url(#${forma})`} />
-      <circle className={styles.lunar} cx="741" cy="481" r="89" fill={`url(#${forma})`} />
+      <circle className={styles.ojo} cx="459" cy="481" r="89" fill={`url(#${forma})`} />
+      <circle className={`${styles.ojo} ${styles.ojoDerecho}`} cx="741" cy="481" r="89" fill={`url(#${forma})`} />
     </svg>
   );
 }
