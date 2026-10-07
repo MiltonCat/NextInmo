@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useEffectEvent } from "react";
 import Link from "next/link";
+import LuciaDot from "@/components/LuciaDot";
 import { usePathname } from "next/navigation";
 import { getPropertySlug } from "@/data/properties";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
@@ -689,7 +690,6 @@ const AIRBNB = "#FF5A5F";
 
 // Retrato propio de Lucía. Es una copia WebP recortada para conservar nitidez
 // tanto en el encabezado como en el botón flotante de 56 px.
-const LUCIA_AVATAR = "/lucia-avatar-v2.webp";
 
 // La burbuja de invitación aparece una sola vez por visita. Si la cierran, no
 // vuelve en toda la sesión del navegador.
@@ -1692,9 +1692,7 @@ export default function ChatBot() {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <div className="lucia-header-avatar w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
-                  <img src={LUCIA_AVATAR} alt="Lucía" className="h-full w-full object-cover" />
-                </div>
+                <LuciaDot size={40} estado={typing ? "pensando" : "reposo"} label="Lucía" />
                 {atencion?.abierto && (
                   <span
                     className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
@@ -1923,20 +1921,49 @@ export default function ChatBot() {
         </div>
       )}
 
-      <button
-        onClick={() => (open ? setOpen(false) : abrirChat())}
-        className={`fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full ${open ? "bg-white" : "lucia-fab-anillo"} p-[3px] flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110`}
-        style={{ boxShadow: "0 10px 30px rgba(255,90,95,.30), 0 2px 8px rgba(0,0,0,.12)" }}
-        aria-label={open ? "Cerrar chat" : "Abrir chat"}
-      >
-        {open ? <CloseIcon /> : <img src={LUCIA_AVATAR} alt="" className="h-full w-full rounded-full object-cover" />}
-        {!open && invitacion && (
-          <span
-            className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white"
-            style={{ backgroundColor: AIRBNB }}
-          />
-        )}
-      </button>
+      {open ? (
+        <button
+          onClick={() => setOpen(false)}
+          className="fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full bg-white flex items-center justify-center text-gray-500 transition-transform duration-200 hover:scale-110"
+          style={{ boxShadow: "0 10px 30px rgba(255,90,95,.30), 0 2px 8px rgba(0,0,0,.12)" }}
+          aria-label="Cerrar chat"
+        >
+          <CloseIcon />
+        </button>
+      ) : (
+        // Cerrado, el botón es la misma cabecera del chat: logo, nombre y estado.
+        <button
+          onClick={abrirChat}
+          className="lucia-fab fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-3 rounded-full py-2 pl-2 pr-5 text-left transition-transform duration-200 hover:-translate-y-0.5"
+          aria-label="Abrir chat con Lucía"
+        >
+          <span className="relative flex-shrink-0">
+            <LuciaDot size={40} />
+            {atencion?.abierto && (
+              <span
+                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
+                style={{ borderColor: "var(--color-primary-50)" }}
+              />
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block font-semibold text-sm leading-tight">Lucía</span>
+            <span className="lucia-header-subtitle block text-xs leading-tight truncate max-w-[11rem] sm:max-w-[15rem]">
+              {atencion === null
+                ? "Catalán Propiedades"
+                : atencion.abierto
+                  ? `En línea · Milton atiende hasta las ${atencion.cierra}`
+                  : `Milton atiende ${atencion.proximo}`}
+            </span>
+          </span>
+          {invitacion && (
+            <span
+              className="absolute top-0 right-1 w-3.5 h-3.5 rounded-full border-2 border-white"
+              style={{ backgroundColor: AIRBNB }}
+            />
+          )}
+        </button>
+      )}
     </>
   );
 }
@@ -2137,10 +2164,7 @@ function LuciaComparison({ rows, onConsult, disabled }) {
 function LuciaThinking({ text = "Lucía está preparando tu respuesta" }) {
   return (
     <div className="flex items-center gap-3 px-1 py-2" role="status" aria-live="polite" aria-atomic="true">
-      <div className="relative h-9 w-9 shrink-0" aria-hidden="true">
-        <span className="lucia-thinking-ring absolute -inset-1 rounded-full" />
-        <img src={LUCIA_AVATAR} alt="" className="h-full w-full rounded-full object-cover" />
-      </div>
+      <LuciaDot size={36} estado="pensando" />
       <p className="text-xs leading-relaxed text-gray-600">{text}</p>
     </div>
   );

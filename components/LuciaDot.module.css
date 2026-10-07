@@ -1,0 +1,75 @@
+.dot {
+  display: block;
+  flex-shrink: 0;
+  overflow: visible;
+  transition: transform 220ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* Al pasar el mouse por un botón que contiene a Lucía, el globo se inclina apenas. */
+:global(button:hover) > .dot,
+:global(a:hover) > .dot { transform: rotate(-6deg) scale(1.04); }
+
+.medio,
+.cuarto,
+.lunar {
+  transform-box: fill-box;
+}
+
+.medio { transform-origin: right center; }
+.cuarto { transform-origin: center; }
+
+/* Reposo: el lunar respira y cada ~7 s parpadea (se aplasta un instante). */
+.lunar {
+  transform-origin: center;
+  animation:
+    lucia-dot-respira 4.2s ease-in-out infinite,
+    lucia-dot-parpadeo 7s ease-in-out 2s infinite;
+}
+
+/* Pensando: el lunar rebota, el cuarto gira de a cuartos y el medio late. */
+.pensando .lunar {
+  animation: lucia-dot-rebota 0.8s cubic-bezier(.5, 0, .5, 1) infinite;
+}
+.pensando .cuarto {
+  animation: lucia-dot-gira 3.2s cubic-bezier(.7, 0, .3, 1) infinite;
+}
+.pensando .medio {
+  animation: lucia-dot-late 1.6s ease-in-out infinite;
+}
+
+@keyframes lucia-dot-respira {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.07; }
+}
+
+@keyframes lucia-dot-parpadeo {
+  0%, 94%, 100% { transform: scaleY(1); }
+  97% { transform: scaleY(0.15); }
+}
+
+@keyframes lucia-dot-rebota {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  45% { transform: translateY(-22%) scale(0.94, 1.06); }
+  90% { transform: translateY(0) scale(1.08, 0.9); }
+}
+
+@keyframes lucia-dot-gira {
+  0%, 12% { transform: rotate(0deg); }
+  25%, 37% { transform: rotate(-90deg); }
+  50%, 62% { transform: rotate(-180deg); }
+  75%, 87% { transform: rotate(-270deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes lucia-dot-late {
+  0%, 100% { opacity: 1; transform: scaleX(1); }
+  50% { opacity: 0.82; transform: scaleX(0.94); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot { transition: none; }
+  .lunar,
+  .pensando .lunar,
+  .pensando .cuarto,
+  .pensando .medio { animation: none; }
+}

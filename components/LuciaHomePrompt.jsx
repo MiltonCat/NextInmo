@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import LuciaDot from "@/components/LuciaDot";
 import { useLucia } from "@/components/LuciaProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -22,9 +22,7 @@ export default function LuciaHomePrompt() {
     <section className="border-b border-slate-100 bg-white" aria-labelledby="lucia-home-title">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:gap-6 lg:px-8">
         <div className="flex shrink-0 items-center gap-3 lg:w-[21rem]">
-          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200">
-            <Image src="/lucia-avatar-v2.webp" alt="Lucía" width={44} height={44} className="h-full w-full object-cover" />
-          </div>
+          <LuciaDot size={44} label="Lucía" />
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-600">Lucía</p>
             <h2 id="lucia-home-title" className="mt-0.5 text-base font-bold leading-tight text-slate-900">

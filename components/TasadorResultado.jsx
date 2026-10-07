@@ -8,7 +8,7 @@
 // consulte a un segundo tasador. El rango dice la verdad y encima es más útil
 // para decidir a cuánto publicar.
 import { useState } from "react";
-import Image from "next/image";
+import LuciaDot from "@/components/LuciaDot";
 import Link from "next/link";
 import { WA_NUMBER } from "@/config";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -209,9 +209,7 @@ function PreguntarleALucia({ resultado, contexto, datos }) {
   return (
     <div className="rounded-xl border border-gray-200 p-5">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-gray-200">
-          <Image src="/lucia-avatar-v2.webp" alt="Lucía" width={40} height={40} className="h-full w-full object-cover" />
-        </div>
+        <LuciaDot size={40} label="Lucía" />
         <div>
           <Etiqueta>Lucía</Etiqueta>
           <p className="mt-0.5 text-sm font-semibold text-gray-900">Te ayudo a interpretar este resultado</p>
