@@ -15,7 +15,7 @@
   transform-box: fill-box;
 }
 
-.medio { transform-origin: right center; }
+.medio { transform-origin: center top; }
 .cuarto { transform-origin: center; }
 
 /* Reposo: el lunar respira despacio. */
@@ -55,8 +55,8 @@
 }
 
 @keyframes lucia-dot-late {
-  0%, 100% { opacity: 1; transform: scaleX(1); }
-  50% { opacity: 0.82; transform: scaleX(0.94); }
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.82; transform: scaleY(0.9); }
 }
 
 @media (prefers-reduced-motion: reduce) {

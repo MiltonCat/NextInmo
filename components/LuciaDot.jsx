@@ -55,9 +55,11 @@ export default function LuciaDot({ size = 36, estado = "reposo", label, classNam
         d="M243 957V470A227 227 0 0 1 470 243H730A227 227 0 0 1 957 470V730A227 227 0 0 1 730 957Z"
         fill={`url(#${brillo})`}
       />
-      <path className={styles.medio} d="M576 369A231 231 0 0 0 576 831Z" fill={`url(#${forma})`} />
-      <path className={styles.cuarto} d="M809 369A160 160 0 0 0 649 528H809Z" fill={`url(#${forma})`} />
-      <circle className={styles.lunar} cx="719" cy="741" r="89" fill={`url(#${forma})`} />
+      {/* Las formas van giradas 90° respecto del isotipo original para que se lea
+          como una cara de frente: cuarto y lunar arriba (ojos), medio círculo abajo. */}
+      <path className={styles.medio} d="M369 624A231 231 0 0 0 831 624Z" fill={`url(#${forma})`} />
+      <path className={styles.cuarto} d="M369 391A160 160 0 0 0 528 551V391Z" fill={`url(#${forma})`} />
+      <circle className={styles.lunar} cx="741" cy="481" r="89" fill={`url(#${forma})`} />
     </svg>
   );
 }
