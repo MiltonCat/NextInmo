@@ -1934,21 +1934,21 @@ export default function ChatBot() {
         // Cerrado, el botón es la misma cabecera del chat: logo, nombre y estado.
         <button
           onClick={abrirChat}
-          className="lucia-fab fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-3 rounded-full py-2 pl-2 pr-5 text-left transition-transform duration-200 hover:-translate-y-0.5"
+          className="lucia-fab fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 text-left transition-transform duration-200 hover:-translate-y-0.5"
           aria-label="Abrir chat con Lucía"
         >
           <span className="relative flex-shrink-0">
-            <LuciaDot size={40} />
+            <LuciaDot size={30} />
             {atencion?.abierto && (
               <span
-                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
+                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2"
                 style={{ borderColor: "var(--color-primary-50)" }}
               />
             )}
           </span>
           <span className="min-w-0">
-            <span className="block font-semibold text-sm leading-tight">Lucía</span>
-            <span className="lucia-header-subtitle block text-xs leading-tight truncate max-w-[11rem] sm:max-w-[15rem]">
+            <span className="block font-semibold text-[13px] leading-tight">Lucía</span>
+            <span className="lucia-header-subtitle block text-[11px] leading-tight truncate max-w-[9.5rem] sm:max-w-[13rem]">
               {atencion === null
                 ? "Catalán Propiedades"
                 : atencion.abierto
@@ -1958,7 +1958,7 @@ export default function ChatBot() {
           </span>
           {invitacion && (
             <span
-              className="absolute top-0 right-1 w-3.5 h-3.5 rounded-full border-2 border-white"
+              className="absolute -top-0.5 right-1 w-3 h-3 rounded-full border-2 border-white"
               style={{ backgroundColor: AIRBNB }}
             />
           )}
