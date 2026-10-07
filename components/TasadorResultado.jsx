@@ -240,6 +240,82 @@ function PreguntarleALucia({ resultado, contexto, datos }) {
 // Muro del correo. La persona ya ve la ficha completa —barrio, comparables,
 // estructura del informe— con los números tapados. No es una pantalla en
 // blanco pidiendo datos: es el resultado, a un campo de distancia.
+// "Seguí el valor de tu propiedad": la persona se anota y le escribimos una vez
+// por mes cuánto vale y cómo se movió su barrio. Si ya conocemos su correo (lo
+// dejó en el muro o tiene sesión), es un solo botón.
+function SeguirValor({ pedido, ciudad, emailConocido, datos }) {
+  const { trackEvent } = useAnalytics();
+  const [email, setEmail] = useState("");
+  const [trampa, setTrampa] = useState("");
+  const [estado, setEstado] = useState("listo"); // listo | enviando | hecho
+  const [aviso, setAviso] = useState("");
+
+  if (!pedido) return null;
+
+  async function anotar(e) {
+    e.preventDefault();
+    if (!emailConocido && !EMAIL_RE.test(email.trim())) {
+      setAviso("Revisá el correo: parece que falta algo.");
+      return;
+    }
+    setEstado("enviando");
+    setAviso("");
+    try {
+      const res = await fetch("/api/seguimiento/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pedido, ciudad, email: email.trim() || undefined, consentimiento: true, trampa }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "error");
+      setEstado("hecho");
+      trackEvent("seguimiento_alta", { barrio: datos?.barrio, tipo: datos?.tipo, ya_existia: Boolean(data.yaExistia) });
+    } catch (err) {
+      setEstado("listo");
+      setAviso(err.message === "email_requerido" ? "Necesitamos un correo para escribirte." : "No se pudo anotar. Probá de nuevo en un momento.");
+    }
+  }
+
+  if (estado === "hecho") {
+    return (
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900" role="status">
+        <p className="font-semibold">Listo, te escribimos una vez por mes.</p>
+        <p className="mt-1 text-emerald-800">Te va a llegar cuánto vale tu propiedad y cómo se movió tu barrio. Te das de baja con un clic desde el mismo correo.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={anotar} className="rounded-xl border border-gray-200 p-5">
+      <Etiqueta>Seguí el valor de tu propiedad</Etiqueta>
+      <p className="mt-1 text-sm font-semibold text-gray-900">Te avisamos cada mes cuánto vale y cómo se mueve tu barrio</p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        {!emailConocido && (
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tucorreo@ejemplo.com"
+            autoComplete="email"
+            aria-label="Tu correo"
+            className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3.5 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+          />
+        )}
+        <CampoTrampa valor={trampa} onChange={setTrampa} />
+        <button
+          type="submit"
+          disabled={estado === "enviando"}
+          className="rounded-lg bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {estado === "enviando" ? "Anotando…" : "Avisame cada mes"}
+        </button>
+      </div>
+      {aviso && <p className="mt-2 text-sm text-rose-600" role="alert">{aviso}</p>}
+      <p className="mt-2 text-xs text-gray-500">Un correo por mes, nada más. Te das de baja con un clic.</p>
+    </form>
+  );
+}
+
 function MuroCorreo({ contexto, onEnviar, enviando, error }) {
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
@@ -349,6 +425,9 @@ export default function TasadorResultado({
   bloqueado,
   libresRestantes,
   guardadaEnCuenta,
+  pedido,
+  ciudad = "sma",
+  emailConocido = false,
   enviando,
   error,
   onDesbloquear,
@@ -543,6 +622,8 @@ export default function TasadorResultado({
         )}
         </div>
       </div>
+
+      <SeguirValor pedido={pedido} ciudad={ciudad} emailConocido={emailConocido} datos={datos} />
 
       {guardadaEnCuenta && (
         <p className="text-center text-sm text-gray-600">

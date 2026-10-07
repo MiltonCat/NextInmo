@@ -170,6 +170,10 @@ export async function POST(request) {
       // avisarlo con tiempo en vez de sorprenderla.
       libresRestantes: identificado ? null : Math.max(0, TASACIONES_LIBRES - (conteo + 1)),
       guardadaEnCuenta,
+      // Para "Seguí el valor": si ya tenemos su correo (cookie del muro, el que
+      // dejó en este pedido o la sesión), la UI no se lo vuelve a pedir. Va
+      // solo el sí/no, nunca el correo.
+      emailConocido: Boolean(emailGuardado || emailValido || usuario?.email),
     });
 
     res.cookies.set(COOKIE_CONTEO, String(conteo + 1), cookieBase);

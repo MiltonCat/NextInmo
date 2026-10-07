@@ -426,6 +426,21 @@ export default function TasadorWizard({ barrios = [], compacto = false, onResult
           bloqueado={respuesta.bloqueado}
           libresRestantes={respuesta.libresRestantes}
           guardadaEnCuenta={respuesta.guardadaEnCuenta}
+          emailConocido={Boolean(respuesta.emailConocido)}
+          ciudad={ciudad}
+          // Lo mismo que se le mandó a /api/tasar: el alta del seguimiento lo
+          // normaliza con la misma función del servidor.
+          pedido={{
+            tipo: form.tipo,
+            barrio: form.barrio,
+            superficie: superficieNum,
+            superficieTerreno: esCasa ? parseFloat(form.superficieTerreno) || null : null,
+            dormitorios: form.dormitorios,
+            banos: form.banos,
+            ambientes: form.ambientes,
+            cocheras: form.cocheras,
+            extras: form.extras,
+          }}
           enviando={cargando}
           error={error}
           datos={{
