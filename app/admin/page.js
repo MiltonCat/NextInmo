@@ -63,6 +63,12 @@ export default async function AdminPage() {
               Barrios
             </Link>
             <Link
+              href="/admin/cierres"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              Cierres
+            </Link>
+            <Link
               href="/admin/propiedades/nueva"
               className="rounded-lg bg-gray-900 text-white px-4 py-2 text-sm font-medium hover:bg-gray-800"
             >
