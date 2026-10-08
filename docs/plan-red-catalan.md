@@ -81,8 +81,9 @@ Se resolvió en el sitio, no en la API del modelo: la tabla vive en la Supabase 
 - `precio_cierre` = monto real acordado por la propiedad (no el valor escriturado, si difiere). Milton confirmó el 08/10/2026 que tiene anotado el monto real de sus 15 operaciones.
 
 **3a · Tus cierres (09/11 → 22/11)**
-- [ ] Tabla `cierres`: barrio, tipo, m² cubiertos, m² de terreno, precio publicado, precio de cierre, fecha, días publicada, fuente (`propia` / `corredor` / `escribano`).
-- [ ] Formulario en `/admin` y carga del histórico propio.
+- [x] Tabla `cierres`: barrio, tipo, m² cubiertos, m² de terreno, precio publicado, precio de cierre, fecha, días publicada, fuente (`propia` / `corredor` / `escribano`).
+- [x] Formulario en `/admin/cierres` (commit `f73441d`, tabla creada el 08/10/2026).
+- [ ] Carga del histórico propio: el 08/10 Milton empezó por los 8 del Centro; quedan pendientes Vega San Martín (5), Caleuche (1) y Vega Maipú (1).
 
 **3b · Informe público (23/11 → 06/12)**
 - [ ] En `/precio-m2`: diferencia entre precio publicado y de cierre, y días de venta por barrio.

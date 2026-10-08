@@ -35,8 +35,9 @@ import {
   VALOR_M2_DEPTO,
 } from "@/lib/mercado";
 import { barriosConMediana, medianaDeBarrio, medianaDeBarrioPorTipo } from "@/lib/precioZonas";
-import { barriosConPerfil, barrioDePropiedad } from "@/lib/barrios";
+import { barriosConPerfil, barrioDePropiedad, nombreDeBarrio } from "@/lib/barrios";
 import { getProperties } from "@/lib/properties";
+import { getInformePublicoCierres } from "@/lib/cierres";
 import { getPropertySlug } from "@/data/properties";
 
 // Dos reglas para las fotos de esta página:
@@ -830,9 +831,70 @@ function SeccionPorQue() {
   );
 }
 
+// El bloque de cierres lee Supabase: se revalida cada hora para que un cierre
+// recién cargado en /admin/cierres aparezca sin redeploy.
+export const revalidate = 3600;
+
+const pctAr = (n) => `${Number(n).toLocaleString("es-AR", { maximumFractionDigits: 1 })} %`;
+
+// Cuánto se paga de verdad. Sale de la tabla `cierres` (precio real acordado,
+// no el escriturado) y solo muestra barrios con el mínimo de cierres de
+// lib/cierres.js. Si no hay ninguno publicable, la sección no se dibuja.
+//
+// El rango de gastos de escritura (5 a 10 %) es la referencia que dio Milton
+// el 08/10/2026 (docs/plan-red-catalan.md, etapa 3): por eso va con el badge
+// de "Referencia de mercado" y no como dato calculado.
+function SeccionCierres({ informe }) {
+  if (!informe) return null;
+  const periodo = informe.desde === informe.hasta ? `${informe.desde}` : `${informe.desde}–${informe.hasta}`;
+  return (
+    <section aria-labelledby="cierres" className="mx-auto max-w-3xl px-4 pb-14 sm:px-6 md:pb-20 lg:px-8">
+      <Antetitulo>Precio de cierre</Antetitulo>
+      <TituloSeccion id="cierres">Cuánto se paga de verdad</TituloSeccion>
+      <p className="mt-4 text-[15px] leading-relaxed text-gray-600 md:text-base">
+        Todo lo anterior es precio publicado. Esto es lo que se terminó pagando: operaciones
+        cerradas por Catalán Propiedades entre {periodo}, con el monto real acordado. Solo se
+        muestra un barrio cuando tiene al menos 5 cierres, para que ninguna operación se pueda
+        reconocer.
+      </p>
+
+      <div className="mt-7 divide-y divide-gray-100 border-y border-gray-100">
+        {informe.barrios.map((b) => (
+          <div key={b.barrio} className="flex items-baseline justify-between gap-4 py-4">
+            <div>
+              <p className="text-[15px] font-medium text-gray-900">{nombreDeBarrio(b.barrio)}</p>
+              <p className="mt-0.5 text-xs text-gray-400">
+                {b.n} cierres{b.diasMediana != null ? ` · se vendió en ${Math.round(b.diasMediana)} días (mediana)` : ""}
+              </p>
+            </div>
+            <p className="text-right">
+              <span className="block text-lg font-semibold text-gray-900 tabular-nums">
+                {pctAr(b.diferenciaMediana)}
+              </span>
+              <span className="block text-[11px] text-gray-400">debajo del publicado</span>
+            </p>
+          </div>
+        ))}
+      </div>
+      <Badge tipo="calculado" className="mt-4" />
+
+      <h3 className="mt-10 text-[18px] font-semibold tracking-[-0.01em] text-gray-900">
+        Lo que no está en el precio
+      </h3>
+      <p className="mt-2 text-[15px] leading-relaxed text-gray-600">
+        Los gastos de escritura suelen rondar entre el 5 % y el 10 % del valor, y casi nunca
+        están contemplados en la oferta del comprador. Para saber cuánto te cuesta de verdad una
+        propiedad, sumale ese rango al precio que termines pagando.
+      </p>
+      <Badge tipo="referencia" className="mt-4" />
+    </section>
+  );
+}
+
 export default async function PrecioM2Page() {
   // Se resuelve en build (output: "export"), igual que en las fichas de barrio.
   const propiedades = await propiedadesConM2();
+  const informeCierres = await getInformePublicoCierres();
 
   return (
     <div className="min-h-screen bg-white">
@@ -938,6 +1000,8 @@ export default async function PrecioM2Page() {
           </span>
         </p>
       </section>
+
+      <SeccionCierres informe={informeCierres} />
 
       <SeccionBarrios />
       <SeccionLimites />
