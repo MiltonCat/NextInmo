@@ -3,6 +3,13 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import PropertyCard from "@/components/PropertyCard";
 
+// Una alquilada que además quedó tildada como reservada cuenta como alquilada.
+function rangoDisponibilidad(p) {
+  if (p.alquilada) return 2;
+  if (p.reservada) return 1;
+  return 0;
+}
+
 function AlquileresContent({ properties = [] }) {
   const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState("default");
@@ -16,6 +23,10 @@ function AlquileresContent({ properties = [] }) {
       return p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.type.toLowerCase().includes(q);
     })
     .sort((a, b) => {
+      // Disponibles arriba, después reservadas, alquiladas al final.
+      // Vale para cualquier orden elegido: el precio ordena dentro de cada grupo.
+      const porEstado = rangoDisponibilidad(a) - rangoDisponibilidad(b);
+      if (porEstado !== 0) return porEstado;
       if (sortBy === "price-asc") return (a.precioAlquilerARS || 0) - (b.precioAlquilerARS || 0);
       if (sortBy === "price-desc") return (b.precioAlquilerARS || 0) - (a.precioAlquilerARS || 0);
       return 0;
