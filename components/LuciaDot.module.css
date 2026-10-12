@@ -2,136 +2,178 @@
   display: block;
   flex-shrink: 0;
   overflow: visible;
-  transition: transform 220ms cubic-bezier(.34, 1.56, .64, 1);
 }
 
-/* Al pasar el mouse por un botón que contiene a Lucía, la cara se inclina apenas. */
-:global(button:hover) > .dot,
-:global(a:hover) > .dot { transform: rotate(-6deg) scale(1.04); }
+/* ── Luz y cuerpo ─────────────────────────────────────────────────────── */
 
-.ojo,
-.parpado,
-.boca {
+.resplandor {
+  filter: blur(5px);
+  opacity: 0.5;
   transform-box: fill-box;
   transform-origin: center;
+  animation: halo 3s ease-in-out infinite;
 }
+
+.cuerpo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: respira 3.6s ease-in-out infinite;
+}
+
+.reflejo { opacity: 0.35; }
 
 /* ── Ojos ─────────────────────────────────────────────────────────────── */
 
-/* Respiran con la propiedad `scale` y cambian de expresión con `transform`:
-   son dos propiedades distintas y no se pisan. */
+.ojos {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: parpadeo 5s ease-in-out 1.5s infinite;
+}
+
 .ojo {
-  animation: lucia-dot-respira 4.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
   transition: transform 300ms ease, opacity 120ms ease;
 }
 
-/* Parpadeo: cada 5 s cierra y abre los dos ojos juntos, rápido. */
-.parpado {
-  animation: lucia-dot-parpadeo 5s ease-in-out 1.5s infinite;
-  transition: transform 150ms ease;
-}
-
 .pupila {
-  transition: transform 350ms cubic-bezier(.34, 1.4, .64, 1);
+  transition: transform 350ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-/* ── Bocas: todas escondidas salvo la de la expresión actual ─────────── */
+.ojosCerrados {
+  display: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+/* ── Lentes: solo al pensar ───────────────────────────────────────────── */
+
+.lentes {
+  opacity: 0;
+  transform: translateY(-16px);
+  transition: opacity 220ms ease, transform 420ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.pensando .lentes {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Bocas: escondidas salvo la de la expresión actual ───────────────── */
 
 .boca {
-  opacity: 0;
-  transform: scale(0.6);
-  transition: transform 250ms ease, opacity 200ms ease;
+  display: none;
 }
 
-/* Reposo: en un ciclo de 14 s pasa unos 9 con la boca tranquila y unos 4
-   sonriendo. Las dos animaciones son espejo una de otra. */
-.reposo .bocaTranquila { animation: lucia-dot-tranquila 14s ease-in-out infinite; }
-.reposo .sonrisa { animation: lucia-dot-sonrie 14s ease-in-out infinite; }
+.reposo .bocaSonrisa,
+.escuchando .bocaSonrisa,
+.guino .bocaSonrisa {
+  display: inline;
+}
+
+.sorpresa .bocaO { display: inline; }
+.apenada .bocaTriste { display: inline; }
 
 /* ── Expresiones ──────────────────────────────────────────────────────── */
 
 /* Escuchando: mira hacia abajo, al campo donde la persona escribe. */
-.dot.escuchando .pupila { transform: translate(0, 36px); }
-.dot.escuchando .bocaTranquila { opacity: 1; transform: none; }
+.escuchando .pupila { transform: translate(0px, 3px); }
 
-/* Pensando: entrecierra los ojos, mira arriba al costado, boca "mmm…". */
-.dot.pensando .ojo { transform: scaleY(0.8); }
-.dot.pensando .pupila { transform: translate(22px, -26px); }
-.dot.pensando .bocaPensando { opacity: 1; transform: rotate(-10deg); }
+/* Pensando: sin boca; las pupilas barren de costado a costado. */
+.pensando .cuerpo { animation: respira 3.2s ease-in-out infinite; }
+.pensando .resplandor { animation: halo 3s ease-in-out infinite; }
+.pensando .pupila { animation: barrido 3.2s ease-in-out infinite; }
 
-/* Sorpresa: ojos grandes y boca en "o". */
-.dot.sorpresa .ojo { transform: scale(1.12); }
-.dot.sorpresa .bocaO { opacity: 1; transform: none; }
+/* Sorpresa: ojos grandes. */
+.sorpresa .cuerpo { animation: pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 1; }
+.sorpresa .ojo { transform: scale(1.12); }
 
-/* Apenada: mirada baja y boca triste. */
-.dot.apenada .ojo { transform: scaleY(0.86); }
-.dot.apenada .pupila { transform: translate(0, 20px); }
-.dot.apenada .bocaTriste { opacity: 1; transform: none; }
+/* Apenada: ojos entrecerrados y mirada baja. */
+.apenada .cuerpo { animation: none; filter: saturate(0.5); }
+.apenada .ojo { transform: scaleY(0.72); }
+.apenada .pupila { transform: translate(0px, 2px); }
 
 /* Guiño: cierra el ojo izquierdo y sonríe. */
-.ojoCerrado {
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-.dot.guino .ojoIzq { opacity: 0; }
-.dot.guino .ojoCerrado { opacity: 1; }
-.dot.guino .sonrisa { opacity: 1; transform: none; }
+.guino .ojoIzq { opacity: 0; }
+.guino .ojosCerrados { display: inline; opacity: 1; }
 
 /* Hablando: gana sobre cualquier expresión; solo se mueve la boca. */
-.dot.hablando .boca { animation: none; opacity: 0; }
-.dot.hablando .bocaHabla {
-  opacity: 1;
-  transform: none;
-  animation: lucia-dot-habla 0.26s ease-in-out infinite alternate;
+.hablando .bocaSonrisa,
+.hablando .bocaO,
+.hablando .bocaTriste {
+  display: none;
+}
+.hablando .bocaHabla {
+  display: inline;
+  animation: habla 260ms ease-in-out infinite alternate;
+}
+
+/* Saludo: salta y da una vuelta completa. Lo dispara el botón flotante. */
+.saludando {
+  transform-origin: 50% 50%;
+  animation: saludo 900ms cubic-bezier(0.34, 1.3, 0.64, 1) 1;
 }
 
 /* ── Versión compacta (32 px o menos) ────────────────────────────────── */
 
-.compacto .lentes { stroke-width: 34; }
-.compacto .cristal { fill-opacity: 0; }
-.compacto .brilloCara,
-.compacto .brilloPupila { display: none; }
-.compacto .bocaTranquila,
-.compacto .bocaTriste { stroke-width: 40; }
+.compacto .resplandor { display: none; }
+.compacto .lentes { stroke-width: 3.4; }
+.compacto .reflejo { display: none; }
+.compacto .bocaSonrisa,
+.compacto .bocaTriste { stroke-width: 4; }
 
 /* ── Animaciones ──────────────────────────────────────────────────────── */
 
-@keyframes lucia-dot-respira {
-  0%, 100% { scale: 1; }
-  50% { scale: 1.05; }
+@keyframes respira {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
-@keyframes lucia-dot-parpadeo {
+@keyframes halo {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes parpadeo {
   0%, 92%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.08); }
+  95% { transform: scaleY(0.1); }
 }
 
-@keyframes lucia-dot-sonrie {
-  0%, 62% { opacity: 0; transform: scale(0.6); }
-  67%, 93% { opacity: 1; transform: scale(1); }
-  98%, 100% { opacity: 0; transform: scale(0.6); }
+@keyframes barrido {
+  0%, 100% { transform: translate(-2.5px, -2px); }
+  50% { transform: translate(2.5px, -2px); }
 }
 
-@keyframes lucia-dot-tranquila {
-  0%, 62% { opacity: 1; transform: scale(1); }
-  67%, 93% { opacity: 0; transform: scale(0.8); }
-  98%, 100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes lucia-dot-habla {
-  from { transform: scaleY(0.25); }
+@keyframes habla {
+  from { transform: scaleY(0.4); }
   to { transform: scaleY(1); }
 }
 
+@keyframes saludo {
+  0% { transform: translateY(0) rotate(0deg); }
+  35% { transform: translateY(-12px) rotate(200deg); }
+  70% { transform: translateY(0) rotate(360deg); }
+  85% { transform: translateY(-4px) rotate(360deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .dot,
-  .ojo,
-  .parpado,
-  .pupila,
-  .boca { transition: none; }
-  .ojo,
-  .parpado,
-  .reposo .sonrisa,
-  .dot.hablando .bocaHabla { animation: none; }
-  .reposo .bocaTranquila { animation: none; opacity: 1; transform: none; }
+  .resplandor,
+  .cuerpo,
+  .ojos,
+  .pensando .cuerpo,
+  .pensando .resplandor,
+  .pensando .pupila,
+  .sorpresa .cuerpo,
+  .apenada .cuerpo,
+  .hablando .bocaHabla,
+  .saludando {
+    animation: none;
+  }
+  .lentes { transition: opacity 150ms ease; }
 }

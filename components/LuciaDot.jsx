@@ -3,38 +3,33 @@
 import { useId } from "react";
 import styles from "./LuciaDot.module.css";
 
-// La cara de Lucía: un círculo con las formas del isotipo de Catalán puestas de
-// frente (dos lunares iguales como ojos y el medio círculo como sonrisa), con
-// lentes redondos, en SVG para que sea nítido a cualquier tamaño y para animar
-// cada parte por separado.
+// La cara de Lucía: orbe rosa con luz suave, ojos y boca. Un SVG por instancia.
 //
 // estado:
-//   "reposo"     → los ojos respiran y parpadean; la boca está tranquila y cada
-//                  tanto sonríe.
-//   "escuchando" → mira hacia abajo, al campo de texto, mientras la persona escribe.
-//   "pensando"   → mira hacia arriba al costado, entrecierra los ojos, boca "mmm…".
-//   "sorpresa"   → ojos grandes y boca en "o" (encontró propiedades).
-//   "apenada"    → mirada baja y boca triste (no hubo resultados).
+//   "reposo"     → ojos que parpadean cada tanto, sonrisa suave.
+//   "escuchando" → mira hacia abajo, al campo de texto, sonríe.
+//   "pensando"   → se pone lentes para leer: sin boca, las pupilas barren de
+//                  costado a costado detrás de los cristales.
+//   "sorpresa"   → ojos más grandes y boca en "o".
+//   "apenada"    → ojos entrecerrados, mirada baja y boca triste.
 //   "guino"      → guiña el ojo izquierdo y sonríe (saludo).
-// hablando → la boca se abre y se cierra mientras suena la voz de Lucía.
-//
-// A 32 px o menos usa una versión simplificada (trazos más gruesos, sin brillos)
-// para que no se empaste.
+// hablando → la boca se abre y cierra mientras suena la voz de Lucía.
+// saludando → da un salto con una vuelta completa (botón flotante cerrado).
 //
 // Sin `label` es decorativo (aria-hidden); con `label` se anuncia como imagen.
 const ESTADOS = new Set(["reposo", "escuchando", "pensando", "sorpresa", "apenada", "guino"]);
 
-export default function LuciaDot({ size = 36, estado = "reposo", hablando = false, label, className = "" }) {
+export default function LuciaDot({ size = 36, estado = "reposo", hablando = false, saludando = false, label, className = "" }) {
   // Los degradados de SVG se referencian por id: cada instancia necesita el suyo.
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  const globo = `lucia-globo-${uid}`;
-  const brillo = `lucia-brillo-${uid}`;
-  const forma = `lucia-forma-${uid}`;
+  const cuerpoGrad = `lucia-cuerpo-${uid}`;
+  const resplandorGrad = `lucia-resplandor-${uid}`;
   const actual = ESTADOS.has(estado) ? estado : "reposo";
   const clases = [
     styles.dot,
     styles[actual],
     hablando ? styles.hablando : "",
+    saludando ? styles.saludando : "",
     size <= 32 ? styles.compacto : "",
     className,
   ].filter(Boolean).join(" ");
@@ -44,86 +39,65 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
       className={clases}
       width={size}
       height={size}
-      viewBox="243 243 714 714"
+      viewBox="0 0 100 100"
       role={label ? "img" : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}
       focusable="false"
     >
       <defs>
-        <linearGradient id={globo} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f7637a" />
-          <stop offset="0.55" stopColor="#e5445f" />
+        <radialGradient id={cuerpoGrad} cx="0.36" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#ffd6de" />
+          <stop offset="0.35" stopColor="#f7637a" />
+          <stop offset="0.75" stopColor="#e5445f" />
           <stop offset="1" stopColor="#c92a4b" />
-        </linearGradient>
-        <radialGradient id={brillo} cx="0.3" cy="0.12" r="0.75">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.38" />
-          <stop offset="0.6" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id={forma} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffffff" />
-          <stop offset="1" stopColor="#ffe8ee" />
-        </linearGradient>
+        <radialGradient id={resplandorGrad} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#f7637a" stopOpacity="0.8" />
+          <stop offset="1" stopColor="#f7637a" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
-      <circle cx="600" cy="600" r="357" fill={`url(#${globo})`} />
-      <circle className={styles.brilloCara} cx="600" cy="600" r="357" fill={`url(#${brillo})`} />
+      <circle className={styles.resplandor} cx="50" cy="52" r="46" fill={`url(#${resplandorGrad})`} />
 
-      {/* Bocas: una por expresión. El CSS muestra la que corresponde. */}
-      <path
-        className={`${styles.boca} ${styles.bocaTranquila}`}
-        d="M530 688Q600 728 670 688"
-        fill="none"
-        stroke="#ffffff"
-        strokeWidth="26"
-        strokeLinecap="round"
-      />
-      <path className={`${styles.boca} ${styles.sonrisa}`} d="M445 640A155 155 0 0 0 755 640Z" fill={`url(#${forma})`} />
-      <rect className={`${styles.boca} ${styles.bocaPensando}`} x="560" y="690" width="150" height="38" rx="19" fill={`url(#${forma})`} />
-      <circle className={`${styles.boca} ${styles.bocaO}`} cx="600" cy="712" r="56" fill={`url(#${forma})`} />
-      <path
-        className={`${styles.boca} ${styles.bocaTriste}`}
-        d="M540 718Q600 680 660 718"
-        fill="none"
-        stroke="#ffffff"
-        strokeWidth="26"
-        strokeLinecap="round"
-      />
-      <ellipse className={`${styles.boca} ${styles.bocaHabla}`} cx="600" cy="700" rx="72" ry="46" fill={`url(#${forma})`} />
+      <g className={styles.cuerpo}>
+        <circle cx="50" cy="50" r="36" fill={`url(#${cuerpoGrad})`} />
+        <ellipse className={styles.reflejo} cx="38" cy="30" rx="10" ry="6" fill="#ffffff" transform="rotate(-25 38 30)" />
 
-      {/* Ojos: tres capas para que cada animación tenga su propio transform —
-          .ojo respira y cambia con la expresión, .parpado parpadea (o guiña) y
-          .pupila mira hacia donde corresponde. */}
-      {[459, 741].map((cx, i) => (
-        <g key={cx} className={i === 0 ? `${styles.ojo} ${styles.ojoIzq}` : styles.ojo}>
-          <g className={styles.parpado}>
-            <circle cx={cx} cy="481" r="89" fill={`url(#${forma})`} />
+        <g className={styles.ojos}>
+          <g className={`${styles.ojo} ${styles.ojoIzq}`}>
+            <ellipse cx="39" cy="45" rx="4.6" ry="6.4" fill="#2a1d22" />
             <g className={styles.pupila}>
-              <circle cx={cx + 6} cy="490" r="44" fill="#1d1418" />
-              <circle className={styles.brilloPupila} cx={cx - 8} cy="474" r="13" fill="#ffffff" />
+              <circle cx="40.2" cy="43.5" r="1.6" fill="#ffffff" />
+            </g>
+          </g>
+          <g className={styles.ojo}>
+            <ellipse cx="61" cy="45" rx="4.6" ry="6.4" fill="#2a1d22" />
+            <g className={styles.pupila}>
+              <circle cx="62.2" cy="43.5" r="1.6" fill="#ffffff" />
             </g>
           </g>
         </g>
-      ))}
 
-      {/* Ojo izquierdo cerrado: una curvita que solo se ve al guiñar. */}
-      <path
-        className={styles.ojoCerrado}
-        d="M398 486Q459 528 520 486"
-        fill="none"
-        stroke="#1d1418"
-        strokeWidth="24"
-        strokeLinecap="round"
-      />
+        {/* Lentes para leer: bajan y se acomodan cuando piensa, y se van al responder. */}
+        <g className={styles.lentes} fill="none" stroke="#2a1d22" strokeWidth="2.4" strokeLinecap="round">
+          <circle cx="39" cy="45" r="9.5" fill="#ffffff" fillOpacity="0.14" />
+          <circle cx="61" cy="45" r="9.5" fill="#ffffff" fillOpacity="0.14" />
+          <path d="M48.5 44 Q50 42 51.5 44" />
+          <path d="M29.5 43 L22 40" />
+          <path d="M70.5 43 L78 40" />
+        </g>
 
-      {/* Lentes redondos: marcos, puente y patillas. Quedan quietos aunque los
-          ojos parpadeen o cambien de expresión. */}
-      <g className={styles.lentes} fill="none" stroke="#1d1418" strokeWidth="22" strokeLinecap="round">
-        <circle className={styles.cristal} cx="459" cy="481" r="114" fill="#ffffff" fillOpacity="0.1" />
-        <circle className={styles.cristal} cx="741" cy="481" r="114" fill="#ffffff" fillOpacity="0.1" />
-        <path d="M573 468Q600 448 627 468" />
-        <path d="M345 470L276 452" />
-        <path d="M855 470L924 452" />
+        {/* Ojo izquierdo cerrado: solo se ve al guiñar. */}
+        <g className={styles.ojosCerrados}>
+          <path d="M34 46 Q39 41 44 46" fill="none" stroke="#2a1d22" strokeWidth="2.6" strokeLinecap="round" />
+        </g>
+
+        {/* Bocas: una por expresión. El CSS muestra la que corresponde. */}
+        <path className={`${styles.boca} ${styles.bocaSonrisa}`} d="M43 60 Q50 67 57 60" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+        <ellipse className={`${styles.boca} ${styles.bocaO}`} cx="50" cy="62" rx="3.4" ry="4.2" fill="#2a1d22" />
+        <path className={`${styles.boca} ${styles.bocaTriste}`} d="M43 65 Q50 58 57 65" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+        <ellipse className={`${styles.boca} ${styles.bocaHabla}`} cx="50" cy="62" rx="5.5" ry="4" fill="#2a1d22" />
       </g>
     </svg>
   );

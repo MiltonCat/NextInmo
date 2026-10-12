@@ -792,6 +792,27 @@ export default function ChatBot() {
     const t = setTimeout(guinar, 400);
     return () => clearTimeout(t);
   }, [open]);
+  // Saludo del botón cerrado: salta, da una vuelta y guiña al aterrizar. La
+  // primera vez a los 5 s y después cada 25 s; una vez que abren el chat no
+  // vuelve a moverse en toda la visita (se mueve para invitar, no para molestar).
+  const [saludo, setSaludo] = useState(null); // null | "gira" | "guina"
+  const [yaAbrio, setYaAbrio] = useState(false);
+  useEffect(() => {
+    if (open || yaAbrio) return;
+    const timers = [];
+    const saludar = () => {
+      setSaludo("gira");
+      timers.push(setTimeout(() => setSaludo("guina"), 650));
+      timers.push(setTimeout(() => setSaludo(null), 1700));
+    };
+    timers.push(setTimeout(saludar, 5000));
+    const intervalo = setInterval(saludar, 25000);
+    return () => {
+      clearInterval(intervalo);
+      timers.forEach(clearTimeout);
+    };
+  }, [open, yaAbrio]);
+  const saludoVisible = !open && !yaAbrio ? saludo : null;
   const messagesEndRef = useRef(null);
   // El contenedor scrolleable y el arranque de la última tanda de Lucía. Ver el
   // efecto de scroll: no siempre conviene bajar hasta el fondo.
@@ -1062,6 +1083,7 @@ export default function ChatBot() {
   // los que ya habían abierto, y no se puede saber si la burbuja suma o molesta.
   const abrirChat = (origen = "boton") => {
     setOpen(true);
+    setYaAbrio(true);
     cargarCatalogo();
     pedirClima();
     trackEvent("chatbot_open", { origen, page_path: pathname });
@@ -1726,7 +1748,7 @@ export default function ChatBot() {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
-                <LuciaDot size={30} estado={estadoCara} hablando={hablando} label="Lucía" />
+                <LuciaDot size={44} estado={estadoCara} hablando={hablando} label="Lucía" />
                 {atencion?.abierto && (
                   <span
                     className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2"
@@ -1937,7 +1959,7 @@ export default function ChatBot() {
       )}
 
       {!open && invitacion && (
-        <div className="lucia-invitacion fixed bottom-24 right-4 sm:right-6 z-50 flex items-start gap-2" style={{ maxWidth: "18rem" }}>
+        <div className="lucia-invitacion fixed bottom-36 right-4 sm:right-6 z-50 flex items-start gap-2" style={{ maxWidth: "18rem" }}>
           <button
             onClick={() => abrirChat("invitacion")}
             className="text-left bg-white text-gray-800 rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-3.5 py-3 hover:shadow-2xl transition"
@@ -1970,27 +1992,27 @@ export default function ChatBot() {
         // Cerrado, el botón es la misma cabecera del chat: logo, nombre y estado.
         <button
           onClick={abrirChat}
-          className="lucia-fab fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 text-left transition-transform duration-200 hover:-translate-y-0.5"
+          className="fixed bottom-6 right-4 sm:right-6 z-50 flex flex-col items-center gap-1 transition-transform duration-200 hover:-translate-y-0.5"
           aria-label="Abrir chat con Lucía"
         >
-          <span className="relative flex-shrink-0">
-            <LuciaDot size={26} />
+          <span
+            className="relative flex items-center justify-center w-20 h-20 rounded-full bg-white/60 border-[1.5px]"
+            style={{ borderColor: "rgba(229,68,95,.35)", boxShadow: "0 10px 30px rgba(229,68,95,.18)" }}
+          >
+            <LuciaDot
+              size={62}
+              estado={saludoVisible === "guina" ? "guino" : "reposo"}
+              saludando={Boolean(saludoVisible)}
+            />
             {atencion?.abierto && (
               <span
-                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2"
+                className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-green-400 border-2"
                 style={{ borderColor: "var(--color-primary-50)" }}
               />
             )}
           </span>
-          <span className="min-w-0">
-            <span className="block font-semibold text-[13px] leading-tight">Lucía</span>
-            <span className="lucia-header-subtitle block text-[11px] leading-tight truncate max-w-[9.5rem] sm:max-w-[13rem]">
-              {atencion === null
-                ? "Catalán Propiedades"
-                : atencion.abierto
-                  ? `En línea · Milton atiende hasta las ${atencion.cierra}`
-                  : `Milton atiende ${atencion.proximo}`}
-            </span>
+          <span className="text-[12px] leading-tight text-gray-600 whitespace-nowrap">
+            {atencion?.abierto ? "Lucía · en línea" : "Lucía"}
           </span>
           {invitacion && (
             <span
@@ -2206,7 +2228,7 @@ function LuciaComparison({ rows, onConsult, disabled }) {
 function LuciaThinking({ text = "Lucía está preparando tu respuesta" }) {
   return (
     <div className="flex items-center gap-3 px-1 py-2" role="status" aria-live="polite" aria-atomic="true">
-      <LuciaDot size={26} estado="pensando" />
+      <LuciaDot size={40} estado="pensando" />
       <p className="text-xs leading-relaxed text-gray-600">{text}</p>
     </div>
   );
