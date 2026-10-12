@@ -3,7 +3,8 @@ import TasacionProfesionalClient from "@/components/TasacionProfesionalClient";
 import { canonicalUrl } from "@/config";
 import { getBarrios } from "@/lib/tasador";
 
-export const revalidate = 3600;
+// La lista de barrios tiene su propia caché; no esperar a la API en el build.
+export const revalidate = 0;
 
 export const metadata = {
   title: "Tasación profesional con datos de mercado | Catalán Propiedades",

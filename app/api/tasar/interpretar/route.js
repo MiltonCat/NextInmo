@@ -17,7 +17,7 @@ export async function POST(request) {
     || body.mensajes.some((m) => typeof m !== "string" || m.length > 1000)) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
-  const barrios = await getBarrios("sma");
+  const barrios = await getBarrios("sma", { sinCache: true });
   const resultado = await extraerDatosTasacion(body.mensajes, barrios, request.signal);
   return NextResponse.json({ ok: true, barrios, ...resultado }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request) {
   const ciudad = new URL(request.url).searchParams.get("ciudad") || "sma";
   return NextResponse.json(
-    { ciudad, barrios: await getBarrios(ciudad) },
+    { ciudad, barrios: await getBarrios(ciudad, { sinCache: true }) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

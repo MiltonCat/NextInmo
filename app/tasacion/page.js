@@ -76,21 +76,10 @@ const DECORACION = [
   },
 ];
 
-// Una hora, no un día — y el motivo importa, porque acá había una caché de más.
-//
-// Quien protege a la API dormida es el `next: { revalidate: 86_400 }` del fetch
-// de `getBarrios` en `lib/tasador.js`: esa lista se pide una vez por día y el
-// resto del tiempo sale de caché, esté el contenedor despierto o no. Esta
-// constante es otra cosa: gobierna cada cuánto se regenera el HTML de la página.
-//
-// Tenerla también en un día no agregaba protección —la llamada a la API no
-// depende de ella— y sí agregaba una consecuencia fea: cuando el fetch falla no
-// se cachea nada, la página se genera con la lista de respaldo, y con 86400 esa
-// versión degradada quedaba servida 24 horas antes de reintentar. Con 3600 se
-// reintenta a la hora. La cantidad de llamadas a la API es la misma, porque el
-// fetch sigue cacheado un día; lo único que cambia es cuánto dura el daño
-// cuando algo sale mal.
-export const revalidate = 3600;
+// El HTML se genera por solicitud para que el build no espere a la API externa
+// ni conserve una lista de respaldo tras una falla. `getBarrios` cachea la
+// consulta exitosa durante diez minutos de forma independiente.
+export const revalidate = 0;
 
 export const metadata = {
   title: "Tasación online de propiedades en San Martín de los Andes",
