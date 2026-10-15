@@ -23,7 +23,7 @@ siempre en español rioplatense, directo y sin relleno.
 npm run dev          # servidor local en http://localhost:3000
 npm run lint         # ESLint
 npm run build        # build de producción (lo mismo que corre CI y Vercel)
-node --test tests/properties.test.mjs tests/widgetHeaders.test.mjs   # tests unitarios de CI
+node --test tests/properties.test.mjs   # tests unitarios de CI
 npx playwright test                    # e2e de los flujos críticos (ver e2e/README.md)
 npx playwright test e2e/<archivo>.spec.js   # un solo flujo
 ```

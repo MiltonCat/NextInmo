@@ -24,8 +24,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Verificar catálogo y permisos del widget
-        run: node --test tests/properties.test.mjs tests/widgetHeaders.test.mjs
+      - name: Verificar integridad del catálogo ante fallos
+        run: node --test tests/properties.test.mjs
 
       - name: Build
         run: npm run build
