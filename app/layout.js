@@ -1,6 +1,6 @@
 import "./globals.css";
 import Script from "next/script";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/Navbar";
@@ -17,10 +17,9 @@ import {
   canonicalUrl,
 } from "@/config";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -205,7 +204,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
-      <body className={`flex flex-col min-h-screen antialiased ${plusJakarta.variable}`}>
+      <body className={`flex flex-col min-h-screen antialiased ${dmSans.variable}`}>
         <Navbar />
         <LuciaProvider>
           <main className="flex-grow pt-[104px] pb-20 md:pt-[120px] md:pb-0">

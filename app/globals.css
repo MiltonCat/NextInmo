@@ -1,11 +1,25 @@
 @import "tailwindcss";
+
 @import "leaflet/dist/leaflet.css";
+
+/* Demo white-label: cubre el marco del sitio para que el enlace y el iframe
+   se vean como producto independiente, no como una sección de Catalán. */
+.wd-shell { position: fixed; z-index: 100; inset: 0; overflow: auto; background: #f8fafc; color: #172033; font-family: Arial, sans-serif; padding: 24px; }
+.wd-card { max-width: 920px; margin: 0 auto; background: white; border: 1px solid #e5e7eb; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px rgba(15, 23, 42, .12); }
+.wd-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #edf0f4; }
+.wd-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; }.wd-brand span { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; color:white; background:var(--wd-color); font-size:11px; font-weight:800; }.wd-header small { color:#64748b; }
+.wd-intro { padding: 46px 48px 28px; background: linear-gradient(135deg, var(--wd-soft), white 68%); }.wd-kicker { margin:0 0 8px; color:var(--wd-color); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; }.wd-intro h1 { margin:0; max-width:620px; font-size:clamp(31px,5vw,52px); line-height:1.02; letter-spacing:-.045em; }.wd-intro > p:last-child { max-width:570px; color:#526174; line-height:1.55; }
+.wd-tool { margin: 0 48px 48px; padding: 25px; border: 1px solid #dfe5ed; border-radius: 18px; }.wd-tool-heading p,.wd-tool-heading h2,.wd-tool-heading small { margin:0; }.wd-tool-heading p { color:var(--wd-color); font-size:12px; font-weight:700; }.wd-tool-heading h2 { margin-top:6px; font-size:24px; }.wd-tool-heading small { display:block; margin-top:7px; color:#78869a; font-size:12px; }
+.wd-step { display:flex; gap:13px; margin-top:23px; padding-top:22px; border-top:1px solid #edf0f4; }.wd-step > span { flex:none; display:grid; place-items:center; width:25px; height:25px; border-radius:50%; background:var(--wd-soft); color:var(--wd-color); font-size:12px; font-weight:800; }.wd-step h2,.wd-step p { margin:0; }.wd-step h2 { font-size:15px; }.wd-step p { margin-top:4px; color:#718096; font-size:13px; }.wd-options { display:flex; gap:8px; margin-top:12px; }.wd-options button { border:1px solid #d6dde7; border-radius:9px; background:white; padding:10px 15px; cursor:pointer; }.wd-options button.selected { border-color:var(--wd-color); background:var(--wd-soft); color:var(--wd-color); font-weight:700; }.wd-metros { display:flex; align-items:center; gap:8px; width:150px; margin-top:12px; border:1px solid #d6dde7; border-radius:9px; padding:0 11px; }.wd-metros input { width:100%; border:0; padding:11px 0; outline:0; font-size:15px; }.wd-metros span { color:#718096; font-size:13px; }
+.wd-result { margin-top:25px; border-radius:13px; background:#172033; color:white; padding:18px; }.wd-result p,.wd-result strong,.wd-result small { display:block; margin:0; }.wd-result p { color:#cbd5e1; font-size:12px; }.wd-result strong { margin-top:6px; font-size:27px; letter-spacing:-.03em; }.wd-result small { margin-top:7px; color:#aab7c8; font-size:11px; }.wd-lead { display:flex; align-items:end; gap:10px; margin-top:17px; }.wd-lead label { flex:1; font-size:12px; font-weight:700; }.wd-lead input { box-sizing:border-box; display:block; width:100%; margin-top:6px; padding:11px; border:1px solid #d6dde7; border-radius:9px; font:inherit; }.wd-lead button,.wd-integrar button { border:0; border-radius:9px; padding:12px 16px; background:var(--wd-color); color:white; font-weight:700; cursor:pointer; }.wd-success { margin-top:16px; padding:14px; border-radius:10px; background:#ecfdf5; color:#166534; }.wd-success p { margin:4px 0 0; font-size:13px; }
+.wd-integrar { display:flex; align-items:center; justify-content:space-between; gap:22px; padding:28px 48px; background:#f8fafc; border-top:1px solid #edf0f4; }.wd-integrar h2,.wd-integrar p { margin:0; }.wd-integrar h2 { font-size:22px; }.wd-integrar > div > p:last-child { margin-top:6px; color:#64748b; font-size:14px; }.wd-origin { display:none; }.wd-widget { position:absolute; padding:0; min-height:100%; }.wd-widget .wd-card { min-height:100%; border-radius:0; box-shadow:none; }.wd-widget .wd-tool { margin:0; border:0; border-radius:0; }.wd-widget .wd-header { padding:14px 18px; }.wd-widget .wd-result strong { font-size:23px; }
+@media (max-width: 640px) { .wd-shell { padding:0; }.wd-card { border-radius:0; border:0; }.wd-intro { padding:32px 22px 22px; }.wd-tool { margin:0; border:0; border-radius:0; padding:22px; }.wd-integrar { align-items:flex-start; flex-direction:column; padding:24px 22px; }.wd-lead { align-items:stretch; flex-direction:column; } }
 
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    /* Plus Jakarta tiene proporciones muy cercanas a Airbnb Cereal y está
-       disponible legalmente desde Google Fonts. Todos los títulos pasan por
-       esta variable para que ninguna sección cambie de familia por accidente. */
+    /* DM Sans es la alternativa libre más cercana al ritmo amable de Airbnb
+       Cereal. Todos los títulos pasan por esta variable para que ninguna
+       sección cambie de familia por accidente. */
     font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
     letter-spacing: -0.02em;
     overflow-wrap: break-word;
@@ -13,10 +27,15 @@
     text-wrap: balance;
   }
   body {
-    font-family: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     color: #222222;
+  }
+  /* El marcado histórico usa `tracking-*` en muchos componentes. La marca
+     pidió texto de ritmo normal: se neutralizan esos overrides globalmente. */
+  body * {
+    letter-spacing: normal !important;
   }
   ::selection {
     background-color: var(--color-primary-100);
@@ -35,7 +54,11 @@
 }
 
 @theme {
-  --font-heading: var(--font-plus-jakarta);
+  --font-heading: var(--font-dm-sans);
+  /* Alias de las utilidades históricas: no dejan ninguna sección apuntando a
+     una familia anterior mientras se conserva su marcado existente. */
+  --font-dm: var(--font-dm-sans);
+  --font-jakarta: var(--font-dm-sans);
   --color-airbnb-red: #FF5A5F;
   --color-airbnb-pink: #FF385C;
   --color-primary-50: #FFF0F4;
