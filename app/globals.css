@@ -46,6 +46,41 @@
      una familia anterior mientras se conserva su marcado existente. */
   --font-dm: var(--font-figtree);
   --font-jakarta: var(--font-figtree);
+  /* Pesos al estilo Airbnb: títulos en semibold, firmes pero no pesados. El sitio
+     usa font-black y font-extrabold en más de 200 lugares; en vez de tocar
+     cada uno, se redefine lo que significan. */
+  --font-weight-black: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-bold: 600;
+  /* Grises neutros como los de Airbnb (los de Tailwind tiran a azul). El
+     500, que es el de casi todos los subtítulos, se oscurece para que el
+     texto secundario se lea como texto y no como algo apagado. */
+  /* Escala de tamaños al estilo Airbnb: los títulos le llevan poco al
+     texto (22 px contra 16 px en una sección) en vez de duplicarlo. Se
+     achican los tamaños grandes y se dejan iguales los de texto (xs a xl). */
+  --text-2xl: 1.375rem;
+  --text-2xl--line-height: 1.3;
+  --text-3xl: 1.5rem;
+  --text-3xl--line-height: 1.25;
+  --text-4xl: 2rem;
+  --text-4xl--line-height: 1.2;
+  --text-5xl: 2.5rem;
+  --text-5xl--line-height: 1.15;
+  --text-6xl: 3rem;
+  --text-6xl--line-height: 1.1;
+  --text-7xl: 3.5rem;
+  --text-7xl--line-height: 1.1;
+  --color-gray-50: #f7f7f7;
+  --color-gray-100: #ebebeb;
+  --color-gray-200: #dddddd;
+  --color-gray-300: #c4c4c4;
+  --color-gray-400: #929292;
+  --color-gray-500: #5e5e5e;
+  --color-gray-600: #4a4a4a;
+  --color-gray-700: #3b3b3b;
+  --color-gray-800: #2b2b2b;
+  --color-gray-900: #222222;
+  --color-gray-950: #161616;
   --color-airbnb-red: #FF5A5F;
   --color-airbnb-pink: #FF385C;
   --color-primary-50: #FFF0F4;
