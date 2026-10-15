@@ -24,7 +24,10 @@ export default function WidgetTasadorDemo({ inmobiliaria, widget = false }) {
 
   const copiar = async () => {
     const base = origen || window.location.origin;
-    const codigo = `<iframe src="${base}/tasador-demo/widget/" width="100%" height="690" style="border:0;border-radius:20px" loading="lazy" title="Tasador online"></iframe>`;
+    const ruta = window.location.pathname.startsWith("/demo/")
+      ? `/demo/${encodeURIComponent(inmobiliaria.slug)}/widget/`
+      : "/tasador-demo/widget/";
+    const codigo = `<iframe src="${base}${ruta}" width="100%" height="690" style="border:0;border-radius:20px" loading="lazy" title="Tasador online"></iframe>`;
     await navigator.clipboard.writeText(codigo);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2200);

@@ -22,7 +22,7 @@ const nextConfig = {
   },
   // Headers de seguridad para todo el sitio. Vercel ya agrega HSTS solo.
   // La CSP es deliberadamente conservadora: solo bloquea lo que ninguna parte
-  // del sitio usa (embeberse en iframes ajenos, <base> inyectado, forms a
+  // del sitio usa (<base> inyectado, forms a
   // dominios externos, plugins object/embed). No restringe scripts/imágenes/
   // conexiones, así GA4, Vercel Analytics, Supabase, Leaflet y EmailJS siguen
   // funcionando sin riesgo de romper producción. Endurecerla (script-src con
@@ -72,8 +72,6 @@ const nextConfig = {
         headers: [
           // El navegador no debe "adivinar" tipos de contenido (mitiga XSS por MIME sniffing).
           { key: "X-Content-Type-Options", value: "nosniff" },
-          // Nadie puede meter el sitio en un iframe (clickjacking sobre el /admin).
-          { key: "X-Frame-Options", value: "DENY" },
           // No filtrar URLs completas propias a sitios externos.
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // APIs del navegador que el sitio no usa: negadas explícitamente.
@@ -84,6 +82,20 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Solo estas dos rutas completas son embebibles. Los sufijos y las
+        // páginas de presentación siguen bloqueados, igual que el panel.
+        source: "/:path((?!(?:tasador-demo/widget|demo/[^/]+/widget)/?$).*)",
+        headers: [{ key: "X-Frame-Options", value: "DENY" }],
+      },
+      ...["/tasador-demo/widget", "/demo/:inmobiliaria/widget"].map((source) => ({
+        source,
+        headers: [{
+          key: "Content-Security-Policy",
+          // Se ofrece para cualquier web HTTP(S). Conservar el resto de la CSP.
+          value: "frame-ancestors 'self' https: http:; base-uri 'self'; form-action 'self'; object-src 'none'",
+        }],
+      })),
     ];
   },
   experimental: {
