@@ -49,7 +49,7 @@ Se resolvió en el sitio, no en la API del modelo: la tabla vive en la Supabase 
 - [x] Bloque "Seguí el valor de tu propiedad" en el resultado del tasador; alta en `POST /api/seguimiento` con consentimiento.
 - [x] Cron diario `/api/cron/seguimiento-valor`: vuelve a tasar a los 30 días, suma el movimiento del barrio (`/mercado/historia`) y manda el mail.
 - [x] Botón "Quiero vender" → consulta en el panel + aviso por mail. Baja con un clic.
-- [ ] Probarlo en producción: tasar, tocar "Avisame cada mes" y ver que la fila aparezca en la tabla.
+- [x] Probarlo en producción: tasar, tocar "Avisame cada mes" y ver que la fila aparezca en la tabla. **Probado el 08/10/2026:** fila 1 (Departamento en Centro, 57 m², valor de partida USD 172.069), primer mail programado para el 07/11/2026.
 - [ ] Medir: altas por semana (`seguimiento_alta` en GA4), aperturas y clics en "Quiero vender". El primer mail real sale a los 30 días de la primera alta.
 
 **Métricas:** propiedades seguidas, tasa de apertura, captaciones por mes.

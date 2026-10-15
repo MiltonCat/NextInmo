@@ -4,6 +4,59 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Cómo trabajar en este repo
+
+Sitio de Catalán Propiedades (catalanpropiedades.com.ar), inmobiliaria de San Martín
+de los Andes. Lo mantiene Milton, que es el dueño y también programa. Respondele
+siempre en español rioplatense, directo y sin relleno.
+
+## Stack
+
+- Next.js 16 con App Router, React 19, **JavaScript (no TypeScript)**, Tailwind 4.
+- Datos en Supabase (`@supabase/ssr`, `@supabase/supabase-js`). Mapas con Leaflet.
+- Deploy en Vercel; los crons están en `vercel.json`.
+- Alias de imports en `jsconfig.json`. Seguí el estilo de los archivos vecinos.
+
+## Comandos
+
+```bash
+npm run dev          # servidor local en http://localhost:3000
+npm run lint         # ESLint
+npm run build        # build de producción (lo mismo que corre CI y Vercel)
+node --test tests/properties.test.mjs tests/widgetHeaders.test.mjs   # tests unitarios de CI
+npx playwright test                    # e2e de los flujos críticos (ver e2e/README.md)
+npx playwright test e2e/<archivo>.spec.js   # un solo flujo
+```
+
+## Antes de dar algo por terminado
+
+1. `npm run lint` sin errores.
+2. Los tests unitarios de arriba en verde.
+3. Si tocaste una página, un formulario o un flujo de `e2e/`, correr ese spec.
+4. Si el cambio es grande o toca configuración, `npm run build`.
+5. Contarle a Milton qué verificaste y qué no pudiste verificar.
+
+## Git y deploy: cuidado
+
+- **Todo push a `main` sale a producción en Vercel.** No hagas `git push` ni merges a
+  `main` sin que Milton lo pida. Commitear localmente está bien si lo pide.
+- CI (`.github/workflows/ci.yml`) corre lint, tests unitarios y build en cada push/PR.
+
+## Secretos
+
+- `.env.local` tiene claves reales: no lo leas en voz alta, no copies valores a la
+  respuesta, a logs ni a archivos versionados.
+- Solo lo que empieza con `NEXT_PUBLIC_` llega al navegador. Nunca le pongas ese
+  prefijo a una clave secreta (por ejemplo `OPENAI_API_KEY`).
+- Los tests nunca mandan datos reales (ver `e2e/README.md`).
+
+## Entorno
+
+- Windows 11 con PowerShell 7. Usá comandos compatibles con PowerShell
+  (`Remove-Item`, `Get-ChildItem`, rutas con `\`), no bash.
+- No crees archivos `.md` sueltos en la raíz (notas, planes, análisis) salvo que
+  Milton lo pida; ya hay demasiados.
+
 # Fotos del catálogo: leer antes de tocar cualquier galería
 
 ## Qué pasó una vez
