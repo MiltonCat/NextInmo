@@ -4,7 +4,7 @@
 
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    /* DM Sans es la alternativa libre más cercana al ritmo amable de Airbnb
+    /* Figtree es la alternativa libre más cercana al ritmo amable de Airbnb
        Cereal. Todos los títulos pasan por esta variable para que ninguna
        sección cambie de familia por accidente. */
     font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
@@ -14,7 +14,7 @@
     text-wrap: balance;
   }
   body {
-    font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     color: #222222;
@@ -41,11 +41,11 @@
 }
 
 @theme {
-  --font-heading: var(--font-dm-sans);
+  --font-heading: var(--font-figtree);
   /* Alias de las utilidades históricas: no dejan ninguna sección apuntando a
      una familia anterior mientras se conserva su marcado existente. */
-  --font-dm: var(--font-dm-sans);
-  --font-jakarta: var(--font-dm-sans);
+  --font-dm: var(--font-figtree);
+  --font-jakarta: var(--font-figtree);
   --color-airbnb-red: #FF5A5F;
   --color-airbnb-pink: #FF385C;
   --color-primary-50: #FFF0F4;
