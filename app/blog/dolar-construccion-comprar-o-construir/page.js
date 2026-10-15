@@ -28,7 +28,7 @@ const sources = [
 ];
 
 export const metadata = {
-  title: post.title,
+  title: { absolute: "Dólar quieto y construcción cara: ¿comprar o construir?" },
   description: post.excerpt,
   alternates: { canonical: url },
   openGraph: {

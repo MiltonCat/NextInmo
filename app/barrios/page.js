@@ -10,7 +10,7 @@ import { BARRIOS, barriosConPerfil } from "@/lib/barrios";
 import { getPerfilBarrio } from "@/lib/barriosPerfil";
 
 export const metadata = {
-  title: "Barrios de San Martín de los Andes: guía para elegir dónde comprar",
+  title: { absolute: "Barrios de San Martín de los Andes: guía para comprar" },
   description:
     "Ficha por barrio de San Martín de los Andes: precio del m², internet, transporte, acceso en invierno, distancia al hospital, cloacas y seguridad. Datos reales, ventajas y desventajas.",
   keywords:

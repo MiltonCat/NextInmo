@@ -14,7 +14,7 @@ import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 // /blog/donde-vivir-san-martin-de-los-andes y competir con la propia página
 // por la misma consulta reparte la fuerza en vez de sumarla.
 export const metadata = {
-  title: "Barrios de San Martín de los Andes: opiniones de vecinos",
+  title: { absolute: "Barrios de San Martín de los Andes: opiniones de vecinos" },
   description: "¿Cómo es vivir en Centro, Chapelco o Costanera? Vecinos cuentan cómo es el acceso en invierno, el ruido, los servicios y la señal de cada barrio.",
   // Al compartir por WhatsApp conviene el gancho más fuerte y más corto: en el
   // teléfono se ven pocas líneas y el invierno es la preocupación que más

@@ -8,7 +8,7 @@ import { fechasDelPost } from "@/lib/blogPosts";
 const fechas = fechasDelPost("credito-hipotecario-neuquen-2026");
 
 export const metadata = {
-  title: "Crédito Neuquén Habita 2026: requisitos y montos",
+  title: { absolute: "Crédito Neuquén Habita 2026: requisitos y montos" },
   description:
     "Conocé los requisitos, montos, tasa e inscripción de Neuquén Habita 2026 para construir o refaccionar en San Martín de los Andes y Villa la Angostura.",
   keywords:

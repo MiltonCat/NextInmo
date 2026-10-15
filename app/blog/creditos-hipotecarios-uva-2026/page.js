@@ -7,7 +7,7 @@ import { fechasDelPost } from "@/lib/blogPosts";
 const fechas = fechasDelPost("creditos-hipotecarios-uva-2026");
 
 export const metadata = {
-  title: "Créditos hipotecarios UVA 2026: tasas y bancos",
+  title: { absolute: "Créditos hipotecarios UVA 2026: tasas y bancos" },
   description: "Compará bancos, tasas referenciales, requisitos y financiación de créditos hipotecarios UVA 2026 para comprar una propiedad en San Martín de los Andes.",
   keywords: "credito hipotecario uva 2026, hipoteca uva argentina, comprar casa san martin andes, credito para propiedad patagonia, banco nacion hipoteca, primera vivienda argentina",
   openGraph: {

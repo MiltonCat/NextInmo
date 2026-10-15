@@ -4,7 +4,7 @@ import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
 import { faqInversionesJsonLd } from "@/lib/inversionesFaq";
 
 export const metadata = {
-  title: "Inversión inmobiliaria en San Martín de los Andes 2026",
+  title: { absolute: "Inversión inmobiliaria en San Martín de los Andes 2026" },
   description: "Analizá el mercado inmobiliario de San Martín de los Andes con datos reales. Precio del m², rentabilidad por zona, calculadora de ROI y comparativa de activos para inversores.",
   openGraph: {
     title: "Invertí en San Martín de los Andes — Análisis de mercado 2026",

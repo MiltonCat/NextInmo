@@ -12,8 +12,7 @@ const WA_TEMPORARIO_URL = `${WA_URL}?text=${encodeURIComponent(
 )}`;
 
 export const metadata = {
-  title:
-    "Cuánto rinde un alquiler temporario en San Martín de los Andes (números reales 2026)",
+  title: { absolute: "Cuánto rinde un alquiler temporario en San Martín de los Andes" },
   description:
     "Qué rentabilidad real deja un alquiler temporario en San Martín de los Andes: ocupación por temporada, precio por noche, costos de gestión y comparación con el alquiler permanente, con datos del mercado patagónico.",
   keywords:

@@ -7,7 +7,7 @@ import { getBarrios } from "@/lib/tasador";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Tasación profesional con datos de mercado | Catalán Propiedades",
+  title: { absolute: "Tasación profesional en San Martín de los Andes" },
   description:
     "Herramienta profesional de tasación para inmobiliarias: valor estimado, rango, comparables y señales de confianza del mercado de San Martín de los Andes.",
   alternates: { canonical: canonicalUrl("/tasacion-profesional") },

@@ -117,7 +117,7 @@ const faqs = [
 ];
 
 export const metadata = {
-  title: "Nuevo crédito hipotecario 2026: alcanza para 17.000 familias",
+  title: { absolute: "Nuevo crédito hipotecario 2026: alcanza para 17.000 familias" },
   description:
     "El Gobierno anunció $2 billones para crédito hipotecario con tope de UVA + 7,5%. Qué superficie compra ese crédito en San Martín de los Andes, cómo se compara la cuota con el alquiler y qué falta para que se note en el mercado local.",
   keywords:

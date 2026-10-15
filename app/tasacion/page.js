@@ -82,7 +82,7 @@ const DECORACION = [
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Tasación online de propiedades en San Martín de los Andes",
+  title: { absolute: "Tasación online de propiedades en San Martín de los Andes" },
   description:
     "Tasá tu casa o departamento en San Martín de los Andes en menos de un minuto, gratis y sin dejar datos la primera vez. Rango de valor, precio por m² y comparación con tu barrio.",
   openGraph: {

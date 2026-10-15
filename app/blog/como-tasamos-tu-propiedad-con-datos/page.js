@@ -9,7 +9,7 @@ import { fechasDelPost } from "@/lib/blogPosts";
 const fechas = fechasDelPost("como-tasamos-tu-propiedad-con-datos");
 
 export const metadata = {
-  title: "Cómo tasamos tu propiedad con datos en San Martín de los Andes",
+  title: { absolute: "Cómo tasamos tu propiedad con datos en San Martín de los Andes" },
   description:
     `Te explicamos cómo funciona nuestro tasador: un modelo predictivo apoyado en ${RELEVADAS_PUBLICO} propiedades reales de San Martín de los Andes. Qué mira, por qué te da un rango y no un número mágico, y qué cosas un modelo nunca puede ver.`,
   keywords:

@@ -126,7 +126,7 @@ export const metadata = {
   // 57 caracteres: entra entero en el resultado de Google, que corta cerca de
   // los 60. Con "barrio por barrio" se pasaba y quedaba truncado con puntos
   // suspensivos justo en la parte que diferencia la página.
-  title: "Precio del m² en San Martín de los Andes 2026, por barrio",
+  title: { absolute: "Precio del m² en San Martín de los Andes 2026, por barrio" },
   // Sin "terrenos": la página ya no publica su m². Y el total sale de la
   // constante, no escrito a mano — decía "más de 1.500" fijo.
   description: `¿Cuánto vale el m² en tu barrio? Mediana por zona, evolución 2021–2026 y una calculadora para estimar tu propiedad, sobre un relevamiento propio de ${RELEVADAS_PUBLICO} propiedades en San Martín de los Andes.`,

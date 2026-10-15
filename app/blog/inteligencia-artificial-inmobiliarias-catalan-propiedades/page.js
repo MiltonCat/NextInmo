@@ -71,7 +71,7 @@ const fuentes = [
 const fuente = (id) => fuentes.find((f) => f.id === id);
 
 export const metadata = {
-  title: post.title,
+  title: { absolute: "Inteligencia artificial en inmobiliarias: cómo la usamos" },
   description: post.excerpt,
   alternates: { canonical: url },
   openGraph: {

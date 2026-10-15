@@ -20,8 +20,7 @@ const CAROLINA_PHONE_HREF = "tel:2944630649";
 const CAROLINA_LINKEDIN_URL = "https://www.linkedin.com/in/cjgodoy/";
 
 export const metadata = {
-  title:
-    "Cuando el plano no coincide con la casa: qué pasa al vender en Neuquén | Catalán Propiedades",
+  title: { absolute: "Cuando el plano no coincide con la casa al vender" },
   description:
     "Guía legal de Carolina Godoy sobre construcciones no declaradas y su efecto en la venta: certificado catastral, Ley 26.209, Ley provincial 2217, tipos de discrepancia y cómo resolverla antes de firmar el boleto.",
   keywords:

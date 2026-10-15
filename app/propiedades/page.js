@@ -6,7 +6,7 @@ import PropertiesClient from "./PropertiesClient";
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Propiedades en venta en San Martín de los Andes",
+  title: { absolute: "Propiedades en venta en San Martín de los Andes" },
   description: "Casas, departamentos, cabañas y lotes en venta en San Martín de los Andes, Patagonia. Más de 10 propiedades disponibles con asesoría personalizada y datos reales del mercado.",
   openGraph: {
     title: "Propiedades en San Martín de los Andes — Catalán Propiedades",

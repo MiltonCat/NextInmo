@@ -28,7 +28,7 @@ const sources = {
 };
 
 export const metadata = {
-  title: post.title,
+  title: { absolute: "Créditos UVA para autos y casas: qué cambia en la cuota" },
   description: post.excerpt,
   alternates: { canonical: url },
   openGraph: {

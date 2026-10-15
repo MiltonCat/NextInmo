@@ -20,8 +20,7 @@ const CAROLINA_PHONE_HREF = "tel:2944630649";
 const CAROLINA_LINKEDIN_URL = "https://www.linkedin.com/in/cjgodoy/";
 
 export const metadata = {
-  title:
-    "Alquileres en San Martín de los Andes 2026: guía legal antes de firmar | Catalán Propiedades",
+  title: { absolute: "Alquileres en San Martín de los Andes: qué revisar al firmar" },
   description:
     "Guía jurídica de Carolina Godoy sobre contratos de alquiler permanente y temporario en San Martín de los Andes: Código Civil y Comercial, cláusulas esenciales y jurisprudencia real de Neuquén.",
   keywords:

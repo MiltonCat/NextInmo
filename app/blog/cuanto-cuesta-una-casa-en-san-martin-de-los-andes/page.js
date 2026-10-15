@@ -8,7 +8,7 @@ import { fechasDelPost } from "@/lib/blogPosts";
 const fechas = fechasDelPost("cuanto-cuesta-una-casa-en-san-martin-de-los-andes");
 
 export const metadata = {
-  title: "¿Cuánto cuesta una casa en San Martín de los Andes? Precios 2026",
+  title: { absolute: "¿Cuánto cuesta una casa en San Martín de los Andes? (2026)" },
   description:
     "Qué define el precio de una casa en San Martín de los Andes: zona, superficie, estado y vista. Cómo estimarlo con datos reales del m² por zona, por qué el precio publicado no es el valor real y cómo saber el precio justo de una propiedad puntual.",
   keywords:

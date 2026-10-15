@@ -10,7 +10,7 @@ const DevelopmentsClient = dynamic(() => import("./DevelopmentsClient"));
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Desarrollos inmobiliarios en San Martín de los Andes",
+  title: { absolute: "Desarrollos inmobiliarios en San Martín de los Andes" },
   description:
     "Emprendimientos en pozo, en construcción y terminados en San Martín de los Andes. Departamentos, loteos y complejos con plan de pago en cuotas y avance de obra verificable.",
   keywords: [

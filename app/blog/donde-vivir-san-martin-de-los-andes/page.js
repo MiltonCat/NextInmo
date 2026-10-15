@@ -22,7 +22,7 @@ const M2_CENTRO = medianaDeBarrio("centro");
 const usdM2 = (m) => (m ? `USD ${m.medianaM2.toLocaleString("es-AR")}/m²` : null);
 
 export const metadata = {
-  title: "¿Dónde vivir en San Martín de los Andes? Guía por barrios 2026",
+  title: { absolute: "¿Dónde vivir en San Martín de los Andes? Guía por barrios" },
   description: "Análisis real de los barrios de San Martín de los Andes: precios del m², internet, transporte, hospital, cloacas, seguridad y pet friendly. Guía basada en datos reales del mercado local.",
   keywords: "donde vivir san martin de los andes, barrios san martin de los andes, centro san martin andes, chapelco golf, barrio la cascada, vega maipu san martin",
   openGraph: {

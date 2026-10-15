@@ -12,7 +12,7 @@ const slug = "/blog/airbnb-facil-san-martin-de-los-andes-2026";
 const coverImage = SITE_URL + "/chapelco-invierno-sma-2026.webp";
 
 export const metadata = {
-  title: "¿Se terminó el Airbnb fácil en San Martín de los Andes?",
+  title: { absolute: "¿Se terminó el Airbnb fácil en San Martín de los Andes?" },
   description:
     "Más alquileres temporarios, tarifas en baja y nuevos controles con datos: qué cambia en 2026 para propietarios e inversores en San Martín de los Andes.",
   keywords:

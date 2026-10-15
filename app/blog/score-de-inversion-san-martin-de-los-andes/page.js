@@ -13,8 +13,7 @@ const WA_SCORE_URL = `${WA_URL}?text=${encodeURIComponent(
 )}`;
 
 export const metadata = {
-  title:
-    "Score de inversión inmobiliaria: cómo leer una propiedad como un activo en San Martín de los Andes",
+  title: { absolute: "Score de inversión: cómo leer una propiedad como un activo" },
   description:
     "Qué variables componen el score de inversión de una propiedad en San Martín de los Andes (ubicación, revalorización, rentabilidad, liquidez y riesgo) y cómo interpretarlo con datos reales del mercado patagónico.",
   keywords:

@@ -16,7 +16,7 @@ const ccyc = "https://www.argentina.gob.ar/normativa/nacional/ley-26994-235975/a
 const dnu = "https://www.argentina.gob.ar/normativa/nacional/decreto-70-2023-395521/texto";
 
 export const metadata = {
-  title: "Seña o reserva: diferencias y qué pasa si compra el inquilino",
+  title: { absolute: "Seña o reserva: diferencias y qué pasa si compra el inquilino" },
   description: "Guía legal sobre reserva, seña confirmatoria y penitencial, boleto de compraventa y alquiler cuando el inquilino compra la propiedad que ocupa.",
   keywords: "seña reserva compraventa inmueble, seña confirmatoria, seña penitencial, boleto compraventa, inquilino compra propiedad",
   openGraph: {

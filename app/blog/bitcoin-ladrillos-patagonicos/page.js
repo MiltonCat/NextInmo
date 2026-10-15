@@ -7,7 +7,7 @@ import { fechasDelPost } from "@/lib/blogPosts";
 const fechas = fechasDelPost("bitcoin-ladrillos-patagonicos");
 
 export const metadata = {
-  title: "El Bitcoin de los Ladrillos Patagónicos: Inversión Inmobiliaria en San Martín de los Andes",
+  title: { absolute: "Invertir en San Martín de los Andes: el Bitcoin del ladrillo" },
   description: "Descubrí por qué invertir en propiedades en San Martín de los Andes es como comprar Bitcoin en 2013. Análisis de tokenización inmobiliaria, ROI proyectado y oportunidades de inversión en la Patagonia.",
   keywords: "invertir san martin andes, inversion inmobiliaria patagonia, propiedades san martin andes, roi inmobiliario, tokenizacion inmobiliaria",
   openGraph: {
