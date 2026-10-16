@@ -37,7 +37,9 @@ export const BING_SITE_VERIFICATION =
   process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "76D90350937BA5499E9B26BCA8CCF203";
 
 // URL absoluta de la imagen por defecto para Open Graph / Twitter (1200x630).
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/hero-montana.webp`;
+// Lago y montañas de San Martín de los Andes (la misma de /inversiones). Antes era
+// hero-montana.webp, el Fitz Roy de El Chaltén (a 1.500 km): no es de acá.
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/hero-lago.webp`;
 
 // Helper para construir URLs canónicas con trailing slash (coincide con next.config trailingSlash:true).
 // Acepta paths absolutos ("/propiedades") o relativos ("propiedades"). La raíz devuelve SITE_URL + "/".
