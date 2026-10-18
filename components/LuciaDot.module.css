@@ -40,6 +40,26 @@
   transition: transform 350ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
+/* Sigue el cursor: --mx y --my las escribe LuciaDot.jsx (máximo 3px). */
+.mira {
+  transform: translate(var(--mx, 0px), var(--my, 0px));
+  transition: transform 180ms ease-out;
+}
+
+/* El brillo se queda un poco atrás del ojo y le da profundidad. */
+.brillo {
+  transform: translate(calc(var(--mx, 0px) * -0.4), calc(var(--my, 0px) * -0.4));
+  transition: transform 180ms ease-out;
+}
+
+/* Cuando piensa o está apenada no sigue al cursor: manda el gesto. */
+.pensando .mira,
+.apenada .mira,
+.pensando .brillo,
+.apenada .brillo {
+  transform: none;
+}
+
 .ojosCerrados {
   display: none;
   opacity: 0;
@@ -85,11 +105,11 @@
 
 /* Sorpresa: ojos grandes. */
 .sorpresa .cuerpo { animation: pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 1; }
-.sorpresa .ojo { transform: scale(1.12); }
+.sorpresa .ojo { transform: scale(1.15); }
 
 /* Apenada: ojos entrecerrados y mirada baja. */
 .apenada .cuerpo { animation: none; filter: saturate(0.5); }
-.apenada .ojo { transform: scaleY(0.72); }
+.apenada .ojo { transform: scaleY(0.7); }
 .apenada .pupila { transform: translate(0px, 2px); }
 
 /* Guiño: cierra el ojo izquierdo y sonríe. */
@@ -176,4 +196,6 @@
     animation: none;
   }
   .lentes { transition: opacity 150ms ease; }
+  .mira,
+  .brillo { transition: none; }
 }

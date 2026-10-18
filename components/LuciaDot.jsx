@@ -1,12 +1,12 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import styles from "./LuciaDot.module.css";
 
 // La cara de Lucía: orbe rosa con luz suave, ojos y boca. Un SVG por instancia.
 //
 // estado:
-//   "reposo"     → ojos que parpadean cada tanto, sonrisa suave.
+//   "reposo"     → ojos que parpadean cada tanto y siguen el cursor, sonrisa suave.
 //   "escuchando" → mira hacia abajo, al campo de texto, sonríe.
 //   "pensando"   → se pone lentes para leer: sin boca, las pupilas barren de
 //                  costado a costado detrás de los cristales.
@@ -25,6 +25,46 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
   const cuerpoGrad = `lucia-cuerpo-${uid}`;
   const resplandorGrad = `lucia-resplandor-${uid}`;
   const actual = ESTADOS.has(estado) ? estado : "reposo";
+  const svgRef = useRef(null);
+
+  // Los ojos siguen el cursor: se escriben dos variables CSS (--mx, --my) en el
+  // SVG y el CSS mueve el ojo entero. Solo con mouse y sin "reducir movimiento".
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || typeof window === "undefined") return;
+    const mq = window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)");
+    if (!mq.matches) return;
+    let frame = 0;
+    let ultimo = null;
+    const aplicar = () => {
+      frame = 0;
+      if (!ultimo) return;
+      const r = svg.getBoundingClientRect();
+      if (!r.width) return;
+      let x = (ultimo.x - (r.left + r.width / 2)) / 120;
+      let y = (ultimo.y - (r.top + r.height * 0.45)) / 120;
+      const d = Math.hypot(x, y) || 1;
+      const k = Math.min(1, d) / d;
+      svg.style.setProperty("--mx", `${(x * k * 3).toFixed(2)}px`);
+      svg.style.setProperty("--my", `${(y * k * 3).toFixed(2)}px`);
+    };
+    const mover = (e) => {
+      ultimo = { x: e.clientX, y: e.clientY };
+      if (!frame) frame = requestAnimationFrame(aplicar);
+    };
+    const soltar = () => {
+      ultimo = null;
+      svg.style.setProperty("--mx", "0px");
+      svg.style.setProperty("--my", "0px");
+    };
+    window.addEventListener("pointermove", mover, { passive: true });
+    document.addEventListener("pointerleave", soltar);
+    return () => {
+      window.removeEventListener("pointermove", mover);
+      document.removeEventListener("pointerleave", soltar);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
   const clases = [
     styles.dot,
     styles[actual],
@@ -36,6 +76,7 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
 
   return (
     <svg
+      ref={svgRef}
       className={clases}
       width={size}
       height={size}
@@ -65,16 +106,28 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
         <ellipse className={styles.reflejo} cx="38" cy="30" rx="10" ry="6" fill="#ffffff" transform="rotate(-25 38 30)" />
 
         <g className={styles.ojos}>
+          {/* Ojos negros en forma de píldora con dos brillos. `mira` sigue el
+              cursor; `pupila` lleva los gestos de cada estado (mirar abajo, barrer). */}
           <g className={`${styles.ojo} ${styles.ojoIzq}`}>
-            <ellipse cx="39" cy="45" rx="4.6" ry="6.4" fill="#2a1d22" />
-            <g className={styles.pupila}>
-              <circle cx="40.2" cy="43.5" r="1.6" fill="#ffffff" />
+            <g className={styles.mira}>
+              <g className={styles.pupila}>
+                <rect x="33.5" y="37" width="11" height="16" rx="5.5" fill="#2a1d22" />
+                <g className={styles.brillo}>
+                  <circle cx="41.4" cy="41.3" r="1.9" fill="#ffffff" />
+                  <circle cx="36.4" cy="48.6" r="0.9" fill="#ffffff" fillOpacity="0.7" />
+                </g>
+              </g>
             </g>
           </g>
           <g className={styles.ojo}>
-            <ellipse cx="61" cy="45" rx="4.6" ry="6.4" fill="#2a1d22" />
-            <g className={styles.pupila}>
-              <circle cx="62.2" cy="43.5" r="1.6" fill="#ffffff" />
+            <g className={styles.mira}>
+              <g className={styles.pupila}>
+                <rect x="55.5" y="37" width="11" height="16" rx="5.5" fill="#2a1d22" />
+                <g className={styles.brillo}>
+                  <circle cx="63.4" cy="41.3" r="1.9" fill="#ffffff" />
+                  <circle cx="58.4" cy="48.6" r="0.9" fill="#ffffff" fillOpacity="0.7" />
+                </g>
+              </g>
             </g>
           </g>
         </g>
