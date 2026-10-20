@@ -101,7 +101,7 @@ export const metadata = {
     publishedTime: fechas.publicado,
     modifiedTime: fechas.modificado,
     authors: ["Milton Catalán"],
-    images: [{ url: image, width: 1200, height: 630, alt: "Una pareja revisa documentos y cuentas antes de comprar una propiedad" }],
+    images: [{ url: image, width: 1200, height: 630, alt: "Billetes de cien dólares con un candado junto a una casa de metal" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -138,8 +138,9 @@ export default function DolaresColchonPropiedadPage() {
             </div>
           </div>
           <div className="relative mt-8 aspect-[16/8.43] overflow-hidden rounded-2xl bg-gray-100">
-            <Image src={post.image} alt="Una pareja revisa documentos y cuentas antes de comprar una propiedad" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" />
+            <Image src={post.image} alt="Billetes de cien dólares con un candado junto a una casa de metal" fill priority sizes="(max-width: 896px) 100vw, 896px" className="object-cover" />
           </div>
+          <p className="mt-2 text-right text-xs text-gray-400">Foto: Freepik</p>
         </header>
 
         <PodcastPlayer slug={SLUG} />
