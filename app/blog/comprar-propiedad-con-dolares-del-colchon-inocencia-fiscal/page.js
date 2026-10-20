@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import PodcastPlayer from "@/components/PodcastPlayer";
 import SeguirLeyendo from "@/components/SeguirLeyendo";
 import { SITE_URL, canonicalUrl } from "@/config";
 import { blogPosts, fechasDelPost } from "@/lib/blogPosts";
@@ -12,11 +11,25 @@ const url = canonicalUrl(`/blog/${SLUG}`);
 const image = `${SITE_URL}${post.image}`;
 const carolinaImage = "/carolina-godoy.jpeg";
 
-// Fuentes consultadas el 19/10/2026. La norma es la Ley 27.826 (Boletín Oficial
-// del 09/10/2026), que incorpora el art. 40 bis a la Ley 27.799. Las citas del
-// articulado salen del texto transcripto por Tristán y Asociados; el resto, de
-// notas periodísticas que lo resumen. No hay cifras propias del mercado local.
+// Fuentes verificadas el 20/10/2026. La Ley 27.826 incorpora el art. 40 bis
+// a la Ley 27.799. Se enlazan los textos oficiales y la normativa de la UIF.
+// No hay cifras propias del mercado local.
 const sources = [
+  {
+    title: "Ley 27.799, texto actualizado: artículos 38 a 41",
+    href: "https://www.argentina.gob.ar/normativa/nacional/norma-422008/actualizacion",
+    detail: "Texto vigente del régimen simplificado, sus condiciones, la presunción de exactitud y la regla para pagos en efectivo al escriturar.",
+  },
+  {
+    title: "Ley 27.826: reforma de Inocencia Fiscal",
+    href: "https://www.argentina.gob.ar/normativa/nacional/norma-431078/texto",
+    detail: "Incorpora el artículo 40 bis a la Ley 27.799 y modifica los requisitos y efectos del régimen.",
+  },
+  {
+    title: "UIF: Resolución 242/2023 para escribanos públicos",
+    href: "https://www.argentina.gob.ar/normativa/nacional/norma-394081/actualizacion",
+    detail: "Reglas de identificación, declaración de licitud y origen de fondos, y debida diligencia según el riesgo.",
+  },
   {
     title: "Tristán y Asociados: principales cambios que introduce la Ley 27.826",
     href: "https://tristanyasociados.com/2026/10/inocencia-fiscal-ii-principales-cambios-que-introduce-la-ley-27826/",
@@ -47,7 +60,7 @@ const sources = [
 const faqs = [
   [
     "¿Puedo pagar una propiedad en efectivo con dólares no declarados?",
-    "Si adheriste al régimen simplificado de Ganancias, la ley considera cumplida la exigencia de bancarización para los pagos en efectivo hechos al otorgar una escritura pública sobre un inmueble. La protección rige para los fondos usados hasta el 31 de diciembre de 2027.",
+    "Si cumplís las condiciones del régimen simplificado de Ganancias, la ley considera cumplida su exigencia de canalización financiera para los pagos en efectivo hechos al otorgar una escritura pública sobre derechos reales de un inmueble. No extiende expresamente esa excepción a una seña o un boleto separados de la escritura. Para esos fondos, el efecto liberatorio especial previsto en el artículo 40 bis se aplica hasta el 31 de diciembre de 2027. El escribano conserva sus controles sobre el origen de los fondos.",
   ],
   [
     "¿ARCA me puede reclamar Bienes Personales de años anteriores por esos dólares?",
@@ -55,7 +68,7 @@ const faqs = [
   ],
   [
     "¿Cualquier comprador puede usarlo?",
-    "No. Es para personas humanas y sucesiones indivisas residentes en el país que optaron por el régimen simplificado de Ganancias y cumplen sus condiciones. Un monotributista que no está inscripto en Ganancias no puede usarlo sin pasar al régimen general. Los Grandes Contribuyentes y ciertos funcionarios pueden adherir con efectos limitados.",
+    "No. Es para personas humanas y sucesiones indivisas residentes en el país que optaron por la declaración simplificada de Ganancias y cumplen sus condiciones. Si solo pagás monotributo, consultá con tu contador si podés optar por esa modalidad y qué cambios de inscripción corresponderían en tu caso; la ley no exige a todos los monotributistas abandonar ese régimen. Los Grandes Contribuyentes y ciertos funcionarios pueden adherir solo para presentar y pagar, sin los beneficios protectores.",
   ],
   [
     "¿El escribano igual me va a pedir justificar el origen de los fondos?",
@@ -63,7 +76,7 @@ const faqs = [
   ],
   [
     "¿Hasta cuándo tengo tiempo?",
-    "El tratamiento especial para Bienes Personales y para los pagos en escrituras rige hasta el 31 de diciembre de 2027. Los fondos que no se usen hasta esa fecha no quedan alcanzados por esta regla.",
+    "Hasta el 31 de diciembre de 2027 se aplica el efecto liberatorio especial del artículo 40 bis a los fondos utilizados al otorgar la escritura, sujeto a sus condiciones. La norma también establece cómo se consideran incorporados esos fondos al patrimonio a efectos de Bienes Personales. Esa fecha no marca el fin de todo el régimen simplificado de Ganancias.",
   ],
 ];
 
@@ -90,12 +103,12 @@ const structuredData = [
 export const metadata = {
   title: { absolute: "Comprar una propiedad con dólares del colchón: qué cambia con Inocencia Fiscal II" },
   description:
-    "La Ley 27.826 considera los dólares usados para comprar un inmueble incorporados al patrimonio el día de la operación y evita reclamos retroactivos de Bienes Personales. Requisitos, plazo y qué sigue controlando el escribano.",
+    "La Ley 27.826 establece un tratamiento especial para los fondos usados al escriturar un inmueble. Condiciones para adherir, alcance del plazo y controles del escribano.",
   keywords:
     "dólares del colchón comprar propiedad, inocencia fiscal II, ley 27826, bienes personales retroactivo, pago en efectivo escritura, régimen simplificado ganancias inmueble",
   openGraph: {
     title: post.title,
-    description: "Los dólares que usás para comprar un inmueble cuentan como incorporados a tu patrimonio el día de la escritura. Quién puede usarlo y hasta cuándo.",
+    description: "La Ley 27.826 establece cuándo los fondos usados al escriturar se consideran incorporados al patrimonio. Condiciones y plazo del beneficio.",
     url,
     type: "article",
     publishedTime: fechas.publicado,
@@ -106,7 +119,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Dólares del colchón y compra de propiedades: qué cambió",
-    description: "Bienes Personales sin reclamos de años anteriores, efectivo en la escritura y plazo hasta 2027.",
+    description: "Dólares en efectivo al escriturar: condiciones, tratamiento en Bienes Personales y alcance del plazo hasta 2027.",
     images: [image],
   },
   alternates: { canonical: url },
@@ -143,13 +156,11 @@ export default function DolaresColchonPropiedadPage() {
           <p className="mt-2 text-right text-xs text-gray-400">Foto: Freepik</p>
         </header>
 
-        <PodcastPlayer slug={SLUG} />
-
         <div className="text-base leading-relaxed text-gray-700 sm:text-lg [&_p]:mb-5">
           <aside className="rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
             <p className="text-xs font-black uppercase tracking-widest text-rose-700">La idea central</p>
             <p className="!mb-0 font-semibold text-gray-900">
-              Si adheriste al régimen simplificado de Ganancias, los dólares que uses para comprar un inmueble hasta el 31 de diciembre de 2027 se consideran incorporados a tu patrimonio el día de la operación. Eso es lo que evita que el uso de esos dólares se lea como una tenencia oculta en años anteriores y te reclamen Bienes Personales por esos períodos.
+              Si cumplís las condiciones del régimen simplificado de Ganancias y pagás en efectivo al otorgar la escritura, la ley establece un tratamiento especial para esos fondos. A efectos de Bienes Personales, se consideran incorporados a tu patrimonio el día de la operación. Hasta el 31 de diciembre de 2027 también puede aplicarse el efecto liberatorio previsto para ese pago. El escribano conserva sus controles sobre el origen de los fondos.
             </p>
           </aside>
 
@@ -165,12 +176,12 @@ export default function DolaresColchonPropiedadPage() {
           <div className="my-8 space-y-4">
             {[
               [
-                "El efectivo en la escritura cuenta como bancarizado",
-                "Los adheridos al régimen simplificado tienen que canalizar sus operaciones por el sistema financiero. La ley da esa exigencia por cumplida para los pagos en efectivo hechos al otorgar escrituras públicas que constituyan, modifiquen, declaren o extingan derechos reales sobre inmuebles.",
+              "El pago en efectivo al escriturar cumple la exigencia de canalización",
+              "Los adheridos al régimen simplificado deben canalizar sus operaciones por los medios previstos en la ley. Esta considera cumplida esa exigencia para los pagos en efectivo hechos al otorgar escrituras públicas que constituyan, modifiquen, declaren o extingan derechos reales sobre inmuebles. Es una excepción legal para ese acto, no una bancarización real ni una dispensa de controles.",
               ],
               [
                 "Para Bienes Personales, los fondos aparecen el día de la operación",
-                "Hasta el 31 de diciembre de 2027, esos fondos “se considerarán como bienes incorporados al patrimonio del contribuyente en el día en que se efectúe la operación”. No se presume que los tenías el año pasado ni el anterior.",
+              "Para los fondos utilizados en las condiciones del artículo 40 bis, la ley dispone que, a efectos de Bienes Personales, “se considerarán como bienes incorporados al patrimonio del contribuyente en el día en que se efectúe la operación”. Esta regla apunta a evitar que se atribuya esa tenencia a períodos anteriores.",
               ],
               [
                 "Se limitan las presunciones de ARCA",
@@ -193,7 +204,7 @@ export default function DolaresColchonPropiedadPage() {
           </p>
           <ul className="mb-6 list-disc space-y-2 pl-6">
             <li><strong>Empleados, jubilados, autónomos</strong> y quienes combinan monotributo con Ganancias pueden adherir.</li>
-            <li><strong>Un monotributista que no está inscripto en Ganancias</strong> no puede usarlo sin dejar el monotributo e inscribirse en el régimen general.</li>
+            <li><strong>Si solo pagás monotributo,</strong> consultá con tu contador si podés optar por la declaración simplificada de Ganancias y qué inscripción corresponde en tu caso. La ley no dispone que todos deban abandonar el monotributo.</li>
             <li><strong>Grandes Contribuyentes Nacionales y ciertos funcionarios públicos</strong> pueden adherir solo para presentar y pagar la declaración, sin el resto de los efectos.</li>
             <li>Hay que ser <strong>residente fiscal durante todo el período</strong> declarado, salvo para quienes optan por el período 2025.</li>
           </ul>
@@ -206,10 +217,10 @@ export default function DolaresColchonPropiedadPage() {
             <strong>El escribano sigue controlando.</strong> La ley dice que la adhesión al régimen es un “antecedente favorable” para quienes deben prevenir el lavado de activos, pero deja expresamente vigentes sus deberes de debida diligencia. Le dio a la UIF 15 días hábiles desde la publicación para emitir la norma que define cómo se aplica. El alcance concreto de ese “antecedente favorable” depende de esa norma.
           </p>
           <p>
-            <strong>ARCA puede revisar si hay una discrepancia significativa.</strong> La presunción de exactitud no es un cheque en blanco: cae si un ajuste aumenta el impuesto determinado en un 15% o más y supera el 5% del monto de la evasión simple, hoy $5.000.000, o ante facturas apócrifas. La reforma pone la carga de la prueba en ARCA.
+            <strong>ARCA puede revisar si hay una discrepancia significativa.</strong> La ley contempla tres vías: un ajuste de al menos 15% que además supere el mínimo de $5.000.000; un ajuste que supere el umbral de evasión simple, hoy $100.000.000; o un ajuste originado en facturas o documentos apócrifos o en ingresos directos computados improcedentemente. La carga de demostrar la discrepancia recae en ARCA.
           </p>
           <p>
-            <strong>Hay fecha de vencimiento.</strong> Todo esto rige para los fondos usados hasta el 31 de diciembre de 2027.
+            <strong>El beneficio especial tiene plazo.</strong> Hasta el 31 de diciembre de 2027, los fondos utilizados al otorgar la escritura pueden acceder, bajo las condiciones del artículo 40 bis, al efecto liberatorio allí previsto. La norma también fija su tratamiento a efectos de Bienes Personales. El régimen simplificado de Ganancias tiene reglas y plazos propios.
           </p>
 
           <Heading>Cómo ordenar la compra</Heading>
@@ -250,7 +261,7 @@ export default function DolaresColchonPropiedadPage() {
 
           <Heading>Fuentes y alcance de la nota</Heading>
           <p>
-            Fuentes consultadas el 19 de octubre de 2026. La norma es la Ley 27.826, publicada en el Boletín Oficial el 9 de octubre de 2026, que incorpora el artículo 40 bis a la Ley 27.799. Esta nota explica la regla general; no analiza situaciones particulares ni reemplaza el asesoramiento de un contador o escribano.
+            Fuentes verificadas el 20 de octubre de 2026. La Ley 27.826, publicada en el Boletín Oficial el 9 de octubre, incorporó el artículo 40 bis a la Ley 27.799. Esta nota explica la regla general; no analiza situaciones particulares ni reemplaza el asesoramiento de un contador o escribano.
           </p>
           <ul className="mb-6 space-y-4 text-sm">
             {sources.map((source) => (
