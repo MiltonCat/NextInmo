@@ -107,6 +107,101 @@ export const DISTANCIAS_BARRIO = {
     alCentro: { auto: null, aPie: null },
     alLago: { nombre: null, auto: null, aPie: null },
   },
+  // Altos del Sol
+  "altos-del-sol": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Altos del Chapelco
+  "altos-del-chapelco": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Camino Lolog
+  "camino-lolog": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Alihuen
+  "alihuen": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Meliquina
+  "meliquina": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // El Arenal
+  "el-arenal": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Valle de Chapelco
+  "valle-de-chapelco": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Chacra 28
+  "chacra-28": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // La Balconada
+  "la-balconada": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Los Coirones
+  "los-coirones": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Los Faldeos de Chapelco
+  "faldeos-de-chapelco": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Los Robles
+  "los-robles": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Tierra de Sol
+  "tierra-de-sol": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Tiro Federal
+  "tiro-federal": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Callejón de Gin Gins
+  "callejon-de-gingins": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // El Desafío
+  "el-desafio": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // El Oasis
+  "el-oasis": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Lago Lolog
+  "lago-lolog": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
+  // Río Hermoso
+  "rio-hermoso": {
+    alCentro: { auto: null, aPie: null },
+    alLago: { nombre: null, auto: null, aPie: null },
+  },
 };
 
 const vacio = { alCentro: { auto: null, aPie: null }, alLago: { nombre: null, auto: null, aPie: null } };

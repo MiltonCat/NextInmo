@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SITE_URL, canonicalUrl } from "@/config";
 import PodcastPlayer from "@/components/PodcastPlayer";
-import { medianaDeBarrio } from "@/lib/precioZonas";
+import { medianaDeBarrio, barriosConMediana } from "@/lib/precioZonas";
 import { MERCADO_GENERADO } from "@/lib/mercado";
 import SeguirLeyendo from "@/components/SeguirLeyendo";
 import { fechasDelPost } from "@/lib/blogPosts";
@@ -18,8 +18,15 @@ const FECHA_DATOS = MES_DATOS ? `${MESES[MES_DATOS - 1]} de ${ANIO_DATOS}` : "el
 // interpolan en las respuestas: si el modelo cambia, cambia el JSON-LD.
 const M2_CALEUCHE = medianaDeBarrio("caleuche");
 const M2_CHAPELCO = medianaDeBarrio("chapelco-golf");
-const M2_CENTRO = medianaDeBarrio("centro");
 const usdM2 = (m) => (m ? `USD ${m.medianaM2.toLocaleString("es-AR")}/m²` : null);
+
+// Los extremos de la ciudad, calculados (2026-10-15). Antes el FAQ decía que
+// Caleuche era "el más accesible de los que tienen datos" y que Chapelco Golf era
+// "la zona de mayor valor": con 27 barrios medidos, ninguna de las dos es cierta.
+const POR_PRECIO = [...barriosConMediana()].sort((a, b) => a.medianaM2 - b.medianaM2);
+const listaM2 = (xs) => xs.map((b) => `${b.nombre} (${usdM2(b)})`).join(", ");
+const MAS_BARATOS = listaM2(POR_PRECIO.slice(0, 2));
+const MAS_CAROS = listaM2(POR_PRECIO.slice(-3).reverse());
 
 export const metadata = {
   title: { absolute: "¿Dónde vivir en San Martín de los Andes? Guía por barrios" },
@@ -78,7 +85,7 @@ const faqJsonLd = {
         // barrios, o sea que ya no es una opción económica y decir que lo es
         // manda a la persona a mirar un barrio que no le entra en el
         // presupuesto. Ahora sale del modelo.
-        text: `Caleuche es el barrio más accesible de los que tienen datos suficientes: mediana de ${usdM2(M2_CALEUCHE)} sobre ${M2_CALEUCHE?.n} propiedades relevadas. Es una zona consolidada, con comunidad local y buena conexión al centro. Tené en cuenta que la mediana es el punto medio del barrio, no el piso: hay propiedades por debajo y por encima de ese valor.`,
+        text: `De los barrios de esta guía, Caleuche es el más accesible: mediana de ${usdM2(M2_CALEUCHE)} sobre ${M2_CALEUCHE?.n} propiedades relevadas. Es una zona consolidada, con comunidad local y buena conexión al centro. En toda la ciudad, las medianas más bajas son las de ${MAS_BARATOS}. Tené en cuenta que la mediana es el punto medio del barrio, no el piso: hay propiedades por debajo y por encima de ese valor.`,
       },
     },
     {
@@ -91,7 +98,7 @@ const faqJsonLd = {
         // Lolog no puede decir nada: 3 propiedades relevadas, marcado
         // `en_observacion`. Publicar un precio de un barrio con n=3 es lo que
         // el resto del sitio decidió no hacer.
-        text: `Chapelco Golf & Resort es la zona privada de mayor valor con datos suficientes: mediana de ${usdM2(M2_CHAPELCO)} sobre ${M2_CHAPELCO?.n} propiedades relevadas, con seguridad privada 24 h, vistas panorámicas y la mayor demanda de compradores internacionales. El Centro es la otra zona cara de la ciudad (${usdM2(M2_CENTRO)}, sobre ${M2_CENTRO?.n} propiedades). Peñón de Lolog es igual de buscado, pero el relevamiento tiene muy pocas propiedades publicadas ahí y preferimos no dar un valor que no podemos respaldar.`,
+        text: `Por precio del m², las zonas más caras con datos suficientes son ${MAS_CAROS}. De esta guía, Chapelco Golf & Resort es el barrio privado de alta gama: mediana de ${usdM2(M2_CHAPELCO)} sobre ${M2_CHAPELCO?.n} propiedades relevadas, con seguridad privada 24 h y vistas panorámicas. Peñón de Lolog es igual de buscado, pero el relevamiento tiene muy pocas propiedades publicadas ahí y preferimos no dar un valor que no podemos respaldar.`,
       },
     },
     {
@@ -164,7 +171,7 @@ const BARRIOS_PERFIL = [
     inversion: 4,
     acceso: 5,
     internet: { nivel: 5, detalle: "Fibra óptica COTESMA hasta 2.000 Mbps" },
-    transporte: { nivel: 5, detalle: "9 líneas urbanas con colectivo" },
+    transporte: { nivel: 5, detalle: "Pasa el colectivo urbano" },
     hospital: {
       nivel: 5,
       items: [
@@ -187,7 +194,7 @@ const BARRIOS_PERFIL = [
       "Hospital y servicios a metros",
     ],
     desventajas: [
-      "Precio del m² más alto",
+      "Uno de los m² más caros de la ciudad",
       "Más ruido y movimiento en temporada alta",
     ],
     tags: ["Alquiler permanente", "Turístico", "Sin auto"],
@@ -195,7 +202,7 @@ const BARRIOS_PERFIL = [
   {
     nombre: "Chapelco Golf",
     emoji: "⛳",
-    descripcion: "Barrio privado de alta gama con vistas a la montaña y al campo de golf. El más exclusivo de la ciudad. Seguridad privada 24h, baja densidad y mucho verde. Requiere auto para absolutamente todo.",
+    descripcion: "Barrio privado de alta gama con vistas a la montaña y al campo de golf. Seguridad privada 24h, baja densidad y mucho verde. Requiere auto para absolutamente todo.",
     perfil: ["Inversores premium", "Familias de alto poder adquisitivo", "Segunda residencia"],
     slug: "chapelco-golf",
     tranquilidad: 5,
@@ -220,7 +227,6 @@ const BARRIOS_PERFIL = [
     ventajas: [
       "Seguridad privada 24h",
       "Vistas panorámicas únicas",
-      "Mayor valorización histórica",
       "Entorno exclusivo con espacios verdes",
     ],
     desventajas: [
@@ -234,7 +240,7 @@ const BARRIOS_PERFIL = [
   {
     nombre: "Barrio La Cascada",
     emoji: "🌊",
-    descripcion: "Zona residencial tranquila sobre la ruta a la Cascada del Chachín. Muy buscada por familias y profesionales remotos que quieren naturaleza sin sacrificar la cercanía al centro. Accesos de ripio en sectores internos.",
+    descripcion: "Barrio residencial tranquilo sobre la Ruta 40, también conocido como Villa La Cascada, a unos 2 a 3 km del centro. El nombre viene de la cascada que se ve y se escucha desde las laderas del barrio. Muy buscado por familias y profesionales remotos que quieren naturaleza sin alejarse del centro. Accesos de ripio en sectores internos.",
     perfil: ["Familias", "Trabajadores remotos", "Quienes buscan tranquilidad"],
     slug: "la-cascada",
     tranquilidad: 5,
@@ -284,7 +290,7 @@ const BARRIOS_PERFIL = [
     inversion: 5,
     acceso: 4,
     internet: { nivel: 4, detalle: "Fibra óptica COTESMA disponible en la mayor parte del barrio" },
-    transporte: { nivel: 4, detalle: "Líneas urbanas pasan por la zona" },
+    transporte: { nivel: 4, detalle: "El colectivo urbano pasa por la zona" },
     hospital: {
       nivel: 4,
       items: [
@@ -299,7 +305,6 @@ const BARRIOS_PERFIL = [
     petFriendly: true,
     autoObligatorio: false,
     ventajas: [
-      "Precio del m² más bajo entre zonas residenciales",
       "Mayor potencial de valorización a futuro",
       "Colectivo disponible",
       "Lotes amplios",
@@ -314,7 +319,7 @@ const BARRIOS_PERFIL = [
   {
     nombre: "Peñón de Lolog",
     emoji: "🏔️",
-    descripcion: "Zona exclusiva sobre el lago Lolog con vistas de primer nivel. Para quienes priorizan entorno natural de elite sobre la accesibilidad urbana. El más alejado del centro — 30 a 40 minutos al hospital.",
+    descripcion: "Zona exclusiva sobre el lago Lolog con vistas de primer nivel. Para quienes priorizan entorno natural de elite sobre la accesibilidad urbana. Lejos del centro: 30 a 40 minutos al hospital.",
     perfil: ["Inversores de alto patrimonio", "Segunda residencia premium", "Amantes de la naturaleza extrema"],
     slug: "penon-de-lolog",
     tranquilidad: 5,
@@ -339,7 +344,6 @@ const BARRIOS_PERFIL = [
     ventajas: [
       "Vistas al lago Lolog incomparables",
       "Privacidad y exclusividad real",
-      "Alta valorización histórica",
       "Naturaleza virgen",
     ],
     desventajas: [
@@ -362,7 +366,7 @@ const BARRIOS_PERFIL = [
     inversion: 3,
     acceso: 4,
     internet: { nivel: 4, detalle: "Fibra óptica COTESMA disponible — red en expansión activa" },
-    transporte: { nivel: 4, detalle: "Varias líneas urbanas con frecuencia razonable" },
+    transporte: { nivel: 4, detalle: "El colectivo urbano pasa por el barrio" },
     hospital: {
       nivel: 3,
       items: [
@@ -377,7 +381,7 @@ const BARRIOS_PERFIL = [
     petFriendly: true,
     autoObligatorio: false,
     ventajas: [
-      "Precio más accesible de la ciudad",
+      "Uno de los m² más accesibles de la ciudad",
       "Comunidad local consolidada",
       "Colectivo disponible",
       "Inversión provincial en mejoras 2025",
@@ -719,10 +723,10 @@ export default function DondeVivirPage() {
               // 2.508/m², por encima de La Cascada. Mandar ahí a alguien con
               // presupuesto limitado, en la tabla que existe justamente para
               // eso, era el mismo error que tenía el FAQ.
-              { perfil: "Primera vivienda con presupuesto limitado", recomendacion: "Caleuche", razon: "El m² más accesible de los barrios con datos suficientes, y buena conexión con el centro." },
+              { perfil: "Primera vivienda con presupuesto limitado", recomendacion: "Caleuche", razon: "El m² más accesible de los barrios de esta guía, y buena conexión con el centro." },
               { perfil: "Invertir para alquiler turístico", recomendacion: "Centro", razon: "Mayor demanda turística y mejor rentabilidad por noche durante todo el año." },
-              { perfil: "Inversión premium a largo plazo", recomendacion: "Chapelco Golf", razon: "Mayor valorización histórica, seguridad privada y perfil de comprador internacional." },
-              { perfil: "Exclusividad total y no te importa el aislamiento", recomendacion: "Peñón de Lolog", razon: "Vistas al lago Lolog únicas, pero distante 30–40 min del hospital y sin cloacas." },
+              { perfil: "Inversión premium a largo plazo", recomendacion: "Chapelco Golf", razon: "Seguridad privada 24 h, baja densidad y perfil de comprador internacional." },
+              { perfil: "Naturaleza y barrio cerrado sin alejarte de la ciudad", recomendacion: "Peñón de Lolog", razon: "Club de campo sobre la Ruta 62, a unos 10 minutos del centro y 5 del lago Lolog. Necesitás auto y no hay cloacas." },
             ].map((item) => (
               <div key={item.perfil} className="flex gap-4 items-start">
                 <div className="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 mt-2" />

@@ -6,7 +6,8 @@
 
 import Link from "next/link";
 import { canonicalUrl, DEFAULT_OG_IMAGE } from "@/config";
-import { BARRIOS, barriosConPerfil } from "@/lib/barrios";
+import { barriosConPerfil, barriosSinPerfil } from "@/lib/barrios";
+import { relevadasEnBarrio } from "@/lib/precioZonas";
 import { getPerfilBarrio } from "@/lib/barriosPerfil";
 
 export const metadata = {
@@ -34,7 +35,15 @@ export const metadata = {
 
 export default function BarriosIndexPage() {
   const conFicha = barriosConPerfil();
-  const sinFicha = BARRIOS.filter((b) => !b.perfilCompleto);
+  // Las que tienen ficha pero pocos datos (`destacado: false`) no ocupan tarjeta:
+  // se nombran con link abajo, para no perder la página.
+  const tarjetas = conFicha.filter((b) => b.destacado !== false);
+  const fichasChicas = conFicha.filter((b) => b.destacado === false);
+  // Ordenados por cuántas propiedades relevó el modelo en cada uno: primero los
+  // que más información tienen, que son los próximos en tener ficha.
+  const sinFicha = barriosSinPerfil()
+    .map((b) => ({ ...b, n: relevadasEnBarrio(b.slug) }))
+    .sort((a, b) => b.n - a.n || a.nombre.localeCompare(b.nombre, "es"));
 
   const itemListJsonLd = {
     "@context": "https://schema.org",
@@ -78,7 +87,7 @@ export default function BarriosIndexPage() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <ul className="grid gap-5 sm:grid-cols-2">
-          {conFicha.map((b) => {
+          {tarjetas.map((b) => {
             const perfil = getPerfilBarrio(b.slug);
             return (
               <li key={b.slug}>
@@ -92,6 +101,13 @@ export default function BarriosIndexPage() {
                     </h2>
                     <span className="shrink-0 text-sm font-bold text-rose-600">{perfil.precioM2}</span>
                   </div>
+                  {perfil.precioPorTipo.length > 1 && (
+                    <p className="-mt-1 mb-2 text-xs text-gray-500">
+                      {perfil.precioPorTipo
+                        .map((t) => `${t.tipo === "Casa" ? "Casas" : "Deptos"} USD ${t.medianaM2.toLocaleString("es-AR")}`)
+                        .join(" · ")}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-600 mb-4 line-clamp-3">{perfil.descripcion}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {perfil.tags.map((t) => (
@@ -105,6 +121,21 @@ export default function BarriosIndexPage() {
             );
           })}
         </ul>
+
+        {fichasChicas.length > 0 && (
+          <p className="mt-8 text-sm text-gray-600">
+            También tenemos ficha de{" "}
+            {fichasChicas.map((b, i) => (
+              <span key={b.slug}>
+                {i > 0 && ", "}
+                <Link href={`/barrios/${b.slug}`} className="font-semibold text-rose-600 hover:underline">
+                  {b.nombre}
+                </Link>
+              </span>
+            ))}
+            , con todavía pocas propiedades relevadas para publicar un precio del m².
+          </p>
+        )}
 
         {sinFicha.length > 0 && (
           <section className="mt-12 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6 sm:p-8">

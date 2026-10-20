@@ -211,6 +211,29 @@ export default async function BarrioPage({ params }) {
                   relevadas. La mediana es el valor del medio: la mitad se publica por encima y
                   la mitad por debajo.
                 </p>
+                {perfil.precioPorTipo.length > 0 && (
+                  <div className="mt-5 border-t border-gray-100 pt-5">
+                    <p className="text-sm font-bold text-gray-900 mb-3">
+                      {perfil.precioPorTipo.length > 1
+                        ? "Ese número mezcla casas y departamentos. Separados:"
+                        : "Por tipo de propiedad:"}
+                    </p>
+                    <dl className="grid gap-3 sm:grid-cols-2">
+                      {perfil.precioPorTipo.map((t) => (
+                        <div key={t.tipo} className="rounded-xl bg-gray-50 px-4 py-3">
+                          <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            {t.tipo === "Casa" ? "Casas" : "Departamentos"}
+                          </dt>
+                          <dd className="text-xl font-black text-gray-900">
+                            USD {t.medianaM2.toLocaleString("es-AR")}
+                            <span className="text-sm font-bold text-gray-400"> /m²</span>
+                          </dd>
+                          <dd className="text-xs text-gray-500">sobre {t.n} propiedades</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                )}
               </>
             ) : (
               <>
