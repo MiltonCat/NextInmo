@@ -8,8 +8,8 @@ import styles from "./LuciaDot.module.css";
 // estado:
 //   "reposo"     → ojos que parpadean cada tanto y siguen el cursor, sonrisa suave.
 //   "escuchando" → mira hacia abajo, al campo de texto, sonríe.
-//   "pensando"   → se pone lentes para leer: sin boca, las pupilas barren de
-//                  costado a costado detrás de los cristales.
+//   "pensando"   → ojos redondos que miran hacia arriba, sin boca, como quien
+//                  se queda pensando.
 //   "sorpresa"   → ojos más grandes y boca en "o".
 //   "apenada"    → ojos entrecerrados, mirada baja y boca triste.
 //   "guino"      → guiña el ojo izquierdo y sonríe (saludo).
@@ -106,12 +106,14 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
         <ellipse className={styles.reflejo} cx="38" cy="30" rx="10" ry="6" fill="#ffffff" transform="rotate(-25 38 30)" />
 
         <g className={styles.ojos}>
-          {/* Ojos negros en forma de píldora con dos brillos. `mira` sigue el
-              cursor; `pupila` lleva los gestos de cada estado (mirar abajo, barrer). */}
+          {/* Ojos negros en forma de píldora con dos brillos; al pensar se vuelven
+              redondos. `mira` sigue el cursor; `pupila` lleva los gestos de cada
+              estado (mirar abajo, mirar arriba pensando). */}
           <g className={`${styles.ojo} ${styles.ojoIzq}`}>
             <g className={styles.mira}>
               <g className={styles.pupila}>
-                <rect x="33.5" y="37" width="11" height="16" rx="5.5" fill="#2a1d22" />
+                <rect className={styles.pildora} x="33.5" y="37" width="11" height="16" rx="5.5" fill="#2a1d22" />
+                <circle className={styles.redondo} cx="39" cy="45" r="5.8" fill="#2a1d22" />
                 <g className={styles.brillo}>
                   <circle cx="41.4" cy="41.3" r="1.9" fill="#ffffff" />
                   <circle cx="36.4" cy="48.6" r="0.9" fill="#ffffff" fillOpacity="0.7" />
@@ -122,7 +124,8 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
           <g className={styles.ojo}>
             <g className={styles.mira}>
               <g className={styles.pupila}>
-                <rect x="55.5" y="37" width="11" height="16" rx="5.5" fill="#2a1d22" />
+                <rect className={styles.pildora} x="55.5" y="37" width="11" height="16" rx="5.5" fill="#2a1d22" />
+                <circle className={styles.redondo} cx="61" cy="45" r="5.8" fill="#2a1d22" />
                 <g className={styles.brillo}>
                   <circle cx="63.4" cy="41.3" r="1.9" fill="#ffffff" />
                   <circle cx="58.4" cy="48.6" r="0.9" fill="#ffffff" fillOpacity="0.7" />
@@ -130,15 +133,6 @@ export default function LuciaDot({ size = 36, estado = "reposo", hablando = fals
               </g>
             </g>
           </g>
-        </g>
-
-        {/* Lentes para leer: bajan y se acomodan cuando piensa, y se van al responder. */}
-        <g className={styles.lentes} fill="none" stroke="#2a1d22" strokeWidth="2.4" strokeLinecap="round">
-          <circle cx="39" cy="45" r="9.5" fill="#ffffff" fillOpacity="0.14" />
-          <circle cx="61" cy="45" r="9.5" fill="#ffffff" fillOpacity="0.14" />
-          <path d="M48.5 44 Q50 42 51.5 44" />
-          <path d="M29.5 43 L22 40" />
-          <path d="M70.5 43 L78 40" />
         </g>
 
         {/* Ojo izquierdo cerrado: solo se ve al guiñar. */}

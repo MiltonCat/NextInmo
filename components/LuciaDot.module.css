@@ -66,17 +66,11 @@
   transition: opacity 120ms ease;
 }
 
-/* ── Lentes: solo al pensar ───────────────────────────────────────────── */
+/* ── Forma de los ojos: píldora siempre, redondos al pensar ────────── */
 
-.lentes {
-  opacity: 0;
-  transform: translateY(-16px);
-  transition: opacity 220ms ease, transform 420ms cubic-bezier(0.34, 1.4, 0.64, 1);
-}
-.pensando .lentes {
-  opacity: 1;
-  transform: none;
-}
+.redondo { display: none; }
+.pensando .pildora { display: none; }
+.pensando .redondo { display: inline; }
 
 /* ── Bocas: escondidas salvo la de la expresión actual ───────────────── */
 
@@ -98,10 +92,10 @@
 /* Escuchando: mira hacia abajo, al campo donde la persona escribe. */
 .escuchando .pupila { transform: translate(0px, 3px); }
 
-/* Pensando: sin boca; las pupilas barren de costado a costado. */
+/* Pensando: sin boca; ojos redondos que miran hacia arriba y se mueven despacio. */
 .pensando .cuerpo { animation: respira 3.2s ease-in-out infinite; }
 .pensando .resplandor { animation: halo 3s ease-in-out infinite; }
-.pensando .pupila { animation: barrido 3.2s ease-in-out infinite; }
+.pensando .pupila { animation: pensativa 4s ease-in-out infinite; }
 
 /* Sorpresa: ojos grandes. */
 .sorpresa .cuerpo { animation: pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 1; }
@@ -136,7 +130,6 @@
 /* ── Versión compacta (32 px o menos) ────────────────────────────────── */
 
 .compacto .resplandor { display: none; }
-.compacto .lentes { stroke-width: 3.4; }
 .compacto .reflejo { display: none; }
 .compacto .bocaSonrisa,
 .compacto .bocaTriste { stroke-width: 4; }
@@ -158,9 +151,9 @@
   95% { transform: scaleY(0.1); }
 }
 
-@keyframes barrido {
-  0%, 100% { transform: translate(-2.5px, -2px); }
-  50% { transform: translate(2.5px, -2px); }
+@keyframes pensativa {
+  0%, 100% { transform: translate(2px, -3px); }
+  50% { transform: translate(-1.5px, -3.5px); }
 }
 
 @keyframes habla {
@@ -195,7 +188,6 @@
   .saludando {
     animation: none;
   }
-  .lentes { transition: opacity 150ms ease; }
   .mira,
   .brillo { transition: none; }
 }
