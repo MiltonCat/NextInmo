@@ -1,12 +1,22 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import PropertyCard from "@/components/PropertyCard";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { getPropertySlug } from "@/data/properties";
+import { SITE_URL } from "@/config";
+import { propertyWhatsappMessage, whatsappUrl } from "@/lib/whatsapp";
+
+function isAvailable(property) {
+  return !property.alquilada && !property.reservada && !property.vendida &&
+    !property.noDisponible && property.status !== "no_disponible";
+}
 
 // Una alquilada que además quedó tildada como reservada cuenta como alquilada.
 function rangoDisponibilidad(p) {
   if (p.alquilada) return 2;
   if (p.reservada) return 1;
+  if (!isAvailable(p)) return 2;
   return 0;
 }
 
@@ -14,6 +24,7 @@ function AlquileresContent({ properties = [] }) {
   const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState("default");
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const { trackPropertyInquiry, trackWhatsAppClick } = useAnalytics();
 
   const filteredProperties = properties
     .filter((p) => {
@@ -31,6 +42,7 @@ function AlquileresContent({ properties = [] }) {
       if (sortBy === "price-desc") return (b.precioAlquilerARS || 0) - (a.precioAlquilerARS || 0);
       return 0;
     });
+  const availableCount = filteredProperties.filter(isAvailable).length;
 
   return (
     <div className="min-h-screen bg-white">
@@ -40,8 +52,8 @@ function AlquileresContent({ properties = [] }) {
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
             <span className="text-primary-500 text-xs font-semibold tracking-widest uppercase">Alquileres</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 font-jakarta leading-tight">Alquileres permanentes</h1>
-          <p className="text-gray-500 text-sm mt-2">San Martín de los Andes · Patagonia Argentina</p>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 font-jakarta leading-tight">Alquileres permanentes en San Martín de los Andes</h1>
+          <p className="text-gray-500 text-sm mt-2">Precios, ubicaciones y condiciones para encontrar tu próximo hogar.</p>
         </div>
       </section>
 
@@ -49,7 +61,9 @@ function AlquileresContent({ properties = [] }) {
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight">
             Propiedades en alquiler
-            <span className="block text-sm font-normal text-gray-500 sm:ml-2 sm:inline sm:text-lg">({filteredProperties.length})</span>
+            <span className="block text-sm font-normal text-gray-500 sm:ml-2 sm:inline sm:text-lg">
+              ({availableCount} disponibles de {filteredProperties.length})
+            </span>
           </h2>
           <select
             value={sortBy}
@@ -74,8 +88,34 @@ function AlquileresContent({ properties = [] }) {
 
         {filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+            {filteredProperties.map((property, index) => (
+              <Fragment key={property.id}>
+                {index === availableCount && (
+                  <div className="col-span-full border-t border-gray-200 pt-8">
+                    <h3 className="text-xl font-bold text-gray-800">Reservadas y alquiladas</h3>
+                    <p className="mt-1 text-sm text-gray-500">Estas propiedades no están disponibles actualmente.</p>
+                  </div>
+                )}
+                <div className="flex flex-col">
+                  <PropertyCard property={property} />
+                  {isAvailable(property) && (
+                    <a
+                      href={whatsappUrl(propertyWhatsappMessage(property, {
+                        url: `${SITE_URL}/propiedades/${getPropertySlug(property)}/`,
+                      }))}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        trackPropertyInquiry(property, "whatsapp");
+                        trackWhatsAppClick(property, "rental_card");
+                      }}
+                      className="mt-3 inline-flex min-h-11 items-center justify-center rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+                    >
+                      Consultar por WhatsApp
+                    </a>
+                  )}
+                </div>
+              </Fragment>
             ))}
           </div>
         ) : (

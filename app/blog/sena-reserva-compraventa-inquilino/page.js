@@ -16,11 +16,11 @@ const ccyc = "https://www.argentina.gob.ar/normativa/nacional/ley-26994-235975/a
 const dnu = "https://www.argentina.gob.ar/normativa/nacional/decreto-70-2023-395521/texto";
 
 export const metadata = {
-  title: { absolute: "Seña o reserva: diferencias y qué pasa si compra el inquilino" },
-  description: "Guía legal sobre reserva, seña confirmatoria y penitencial, boleto de compraventa y alquiler cuando el inquilino compra la propiedad que ocupa.",
+  title: { absolute: "Diferencia entre seña y reserva inmobiliaria" },
+  description: "Qué cambia entre seña y reserva al comprar una propiedad, cuándo se puede pactar el arrepentimiento y qué pasa si quien compra es el inquilino.",
   keywords: "seña reserva compraventa inmueble, seña confirmatoria, seña penitencial, boleto compraventa, inquilino compra propiedad",
   openGraph: {
-    title: "Seña o reserva: qué firmás y qué pasa si el comprador ya vive adentro",
+    title: "Diferencia entre seña y reserva inmobiliaria",
     description: "Cómo se ordenan la reserva, la seña, el boleto, el alquiler y el depósito cuando un inquilino compra la propiedad que ocupa.",
     url,
     type: "article",
@@ -43,7 +43,7 @@ const faqs = [
 
 const articleJsonLd = {
   "@context": "https://schema.org", "@type": "Article",
-  headline: "Seña o reserva: qué firmás y qué pasa si el comprador ya vive adentro",
+  headline: "Diferencia entre seña y reserva inmobiliaria",
   description: "Guía legal sobre reserva, seña, boleto de compraventa y locación cuando el inquilino compra la propiedad que ocupa.",
   image, datePublished: fechas.publicado, dateModified: fechas.modificado,
   author: { "@type": "Person", name: "Carolina Godoy", image: `${SITE_URL}${carolinaImage}`, telephone: "2944-630649", sameAs: [linkedin] },
@@ -68,8 +68,9 @@ export default function SenaReservaPage() {
       <article className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <header className="mb-10 sm:mb-12">
           <p className="mb-3 text-sm font-bold uppercase tracking-widest text-rose-600">Guía legal · Contratos</p>
-          <h1 className="max-w-3xl text-[2rem] font-black leading-[1.08] text-gray-900 sm:text-4xl md:text-5xl">Seña o reserva: qué firmás y qué pasa si el comprador ya vive adentro</h1>
-          <p className="mt-5 max-w-3xl text-base leading-relaxed text-gray-600 sm:text-xl">Hay un caso que en San Martín de los Andes aparece seguido: el inquilino que termina comprando la casa que alquila. Ahí se cruzan dos contratos y conviene tener claro cómo se ordenan.</p>
+          <h1 className="max-w-3xl text-[2rem] font-black leading-[1.08] text-gray-900 sm:text-4xl md:text-5xl">Diferencia entre seña y reserva inmobiliaria</h1>
+          <p className="mt-5 max-w-3xl text-base leading-relaxed text-gray-600 sm:text-xl">Si estás por comprar o vender una propiedad, esta guía te ayuda a entender qué cambia entre una reserva y una seña antes de firmar.</p>
+          <p className="mt-3 max-w-3xl text-base leading-relaxed text-gray-600 sm:text-lg">También aborda un caso frecuente en San Martín de los Andes: el inquilino que termina comprando la casa que alquila.</p>
           <div className="mt-8 flex items-center gap-4 border-t border-gray-200 pt-7">
             <div className="relative h-12 w-12 overflow-hidden rounded-full bg-rose-100"><Image src={carolinaImage} alt="Carolina Godoy" fill sizes="48px" className="object-cover" /></div>
             <div><p className="font-bold text-gray-900">Carolina Godoy</p><p className="text-sm text-gray-500">Autora · 12 de agosto de 2026 · 8 min de lectura</p></div>

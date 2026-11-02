@@ -20,13 +20,13 @@ const CAROLINA_PHONE_HREF = "tel:2944630649";
 const CAROLINA_LINKEDIN_URL = "https://www.linkedin.com/in/cjgodoy/";
 
 export const metadata = {
-  title: { absolute: "Cuando el plano no coincide con la casa al vender" },
+  title: { absolute: "¿Se puede vender una casa sin planos al día?" },
   description:
-    "Guía legal de Carolina Godoy sobre construcciones no declaradas y su efecto en la venta: certificado catastral, Ley 26.209, Ley provincial 2217, tipos de discrepancia y cómo resolverla antes de firmar el boleto.",
+    "Qué revisar antes de vender una casa que no coincide con los planos en Neuquén: certificado catastral, mejoras no declaradas y pasos para regularizar.",
   keywords:
     "certificado catastral neuquen, ley 26209, ley 2217 neuquen, construccion no declarada, mensura san martin de los andes, regularizar plano vivienda, escrituracion neuquen, carolina godoy",
   openGraph: {
-    title: "Cuando el plano no coincide con la casa: el problema que aparece siempre al vender",
+    title: "¿Se puede vender una casa sin planos al día en Neuquén?",
     description:
       "Certificado catastral, Ley 26.209, Ley provincial 2217 y los tres tipos de discrepancia entre lo construido y lo declarado, explicados antes de que frenen tu venta.",
     url: ARTICLE_URL,
@@ -57,7 +57,7 @@ const articleJsonLd = {
   "@context": "https://schema.org",
   "@type": "Article",
   headline:
-    "Cuando el plano no coincide con la casa: el problema que aparece siempre al vender",
+    "¿Se puede vender una casa sin planos al día en Neuquén?",
   description:
     "Guía jurídica sobre construcciones no declaradas, el certificado catastral y su efecto en la escrituración, con la Ley 26.209 y la Ley provincial 2217 de Neuquén.",
   image: ARTICLE_IMAGE,
@@ -190,12 +190,12 @@ export default function CuandoElPlanoNoCoincideConLaCasaPage() {
               Guía legal · Catastro
             </p>
             <h1 className="mb-6 text-4xl font-black leading-tight text-gray-900 md:text-6xl">
-              Cuando el plano no coincide con la casa: el problema que aparece siempre al vender
+              ¿Se puede vender una casa sin planos al día en Neuquén?
             </h1>
             <p className="max-w-3xl text-xl leading-relaxed text-gray-600">
-              Es una de las situaciones más frecuentes en operaciones inmobiliarias en Neuquén, y casi
-              siempre aparece tarde: con el boleto firmado, la seña cobrada y una fecha de escrituración
-              pactada.
+              Si lo construido no coincide con los planos, conviene revisar la documentación antes de
+              publicar o firmar. Esta guía explica qué puede frenar una venta en Neuquén y qué mirar a
+              tiempo con los profesionales que correspondan.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-gray-200 pt-7">
               <div className="relative h-12 w-12 overflow-hidden rounded-full bg-rose-100">
@@ -429,6 +429,12 @@ export default function CuandoElPlanoNoCoincideConLaCasaPage() {
               requiere análisis particular por escribano, agrimensor o abogado según corresponda.
             </p>
           </div>
+
+          <section className="mt-12 rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8">
+            <h2 className="text-2xl font-black text-gray-900">¿Estás pensando en vender tu propiedad?</h2>
+            <p className="mt-3 leading-relaxed text-gray-700">Conocer el estado de los planos antes de publicar ayuda a organizar los próximos pasos. Contanos sobre tu propiedad y te orientamos.</p>
+            <Link href="/vender" className="mt-5 inline-flex rounded-xl bg-rose-600 px-5 py-3 font-bold text-white transition-colors hover:bg-rose-700">Ver cómo vendemos tu propiedad</Link>
+          </section>
 
           <SeguirLeyendo slug="cuando-el-plano-no-coincide-con-la-casa" destacados={["alquileres-san-martin-de-los-andes-2026", "comprar-en-san-martin-de-los-andes-desde-buenos-aires"]} />
         </div>
